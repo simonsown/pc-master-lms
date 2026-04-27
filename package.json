@@ -1,0 +1,28 @@
+{
+  "name": "pc-master-builder",
+  "description": "Educational PC building platform with Computer Vision",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@mediapipe/tasks-vision": "^0.10.32",
+    "canvas-confetti": "^1.9.4",
+    "framer-motion": "^12.34.3",
+    "lucide-react": "^0.575.0",
+    "next": "16.1.6",
+    "puppeteer": "^24.42.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-markdown": "^10.1.0"
+  },
+  "devDependencies": {
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6"
+  }
+}

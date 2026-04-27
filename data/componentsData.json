@@ -1,0 +1,270 @@
+[
+  {
+    "id": "cpu_pentium_g6400",
+    "name": "Intel Pentium G6400",
+    "type": "CPU",
+    "price": 800000,
+    "socket": "LGA1200",
+    "power": 58,
+    "desc": "Siêu rẻ, 2 nhân 4 luồng, lý tưởng cho văn phòng và học online."
+  },
+  {
+    "id": "cpu_celeron_g5905",
+    "name": "Intel Celeron G5905",
+    "type": "CPU",
+    "price": 500000,
+    "socket": "LGA1200",
+    "power": 58,
+    "desc": "Chip 2 nhân siêu tiết kiệm, phù hợp cho máy văn phòng ngân sách cực thấp."
+  },
+  {
+    "id": "cpu_i3_12100",
+    "name": "Intel Core i3-12100F",
+    "type": "CPU",
+    "price": 2250000,
+    "socket": "LGA1700",
+    "power": 58,
+    "desc": "4 nhân 8 luồng. Lựa chọn ngân sách tốt nhất trên LGA1700."
+  },
+  {
+    "id": "cpu_i5_13600k",
+    "name": "Intel Core i5-13600K",
+    "type": "CPU",
+    "price": 7000000,
+    "socket": "LGA1700",
+    "power": 125,
+    "desc": "14 nhân hiệu năng cao, cân bằng hoàn hảo giữa chơi game và dựng đồ họa."
+  },
+  {
+    "id": "cpu_i9_14900k",
+    "name": "Intel Core i9-14900K",
+    "type": "CPU",
+    "price": 13750000,
+    "socket": "LGA1700",
+    "power": 253,
+    "desc": "24 nhân đỉnh cao của Intel, dành cho render 3D và đa nhiệm siêu nặng."
+  },
+  {
+    "id": "cpu_r5_5600",
+    "name": "AMD Ryzen 5 5600",
+    "type": "CPU",
+    "price": 1800000,
+    "socket": "AM4",
+    "power": 65,
+    "desc": "6 nhân siêu tầm giá trên nền AM4, chơi game ngon lành ở 1080p."
+  },
+  {
+    "id": "cpu_r5_7600",
+    "name": "AMD Ryzen 5 7600",
+    "type": "CPU",
+    "price": 5750000,
+    "socket": "AM5",
+    "power": 65,
+    "desc": "6 nhân hiệu năng mạnh mẽ trên nền tảng AM5 thế hệ mới."
+  },
+  {
+    "id": "cpu_r9_7950x",
+    "name": "AMD Ryzen 9 7950X",
+    "type": "CPU",
+    "price": 14975000,
+    "socket": "AM5",
+    "power": 170,
+    "desc": "16 nhân khổng lồ dành cho sáng tạo nội dung, AI và xử lý dữ liệu lớn."
+  },
+  {
+    "id": "mb_h510m_intel1200",
+    "name": "H510M K (Intel LGA1200)",
+    "type": "Mainboard",
+    "price": 1200000,
+    "socket": "LGA1200",
+    "ramType": "DDR4",
+    "size": "Micro-ATX",
+    "desc": "Bo mạch siêu rẻ dành cho Celeron/Pentium/Core i thế hệ 10-11 (LGA1200)."
+  },
+  {
+    "id": "mb_b660m",
+    "name": "B660M Pro (Intel LGA1700)",
+    "type": "Mainboard",
+    "price": 3000000,
+    "socket": "LGA1700",
+    "ramType": "DDR4",
+    "size": "Micro-ATX",
+    "desc": "Bo mạch compact tiết kiệm cho Intel thế hệ 12-13, hỗ trợ DDR4."
+  },
+  {
+    "id": "mb_z790",
+    "name": "Z790 Aorus Master (LGA1700)",
+    "type": "Mainboard",
+    "price": 9500000,
+    "socket": "LGA1700",
+    "ramType": "DDR5",
+    "size": "ATX",
+    "desc": "Bo mạch cao cấp cho Intel, hỗ trợ ép xung mạnh mẽ và DDR5 tốc độ cao."
+  },
+  {
+    "id": "mb_b450_amd",
+    "name": "B450M DS3H (AMD AM4)",
+    "type": "Mainboard",
+    "price": 1000000,
+    "socket": "AM4",
+    "ramType": "DDR4",
+    "size": "Micro-ATX",
+    "desc": "Bo mạch ngân sách phổ biến nhất cho AMD Ryzen 3000/5000 series (AM4)."
+  },
+  {
+    "id": "mb_b650_amd",
+    "name": "B650 Tomahawk WiFi (AM5)",
+    "type": "Mainboard",
+    "price": 5000000,
+    "socket": "AM5",
+    "ramType": "DDR5",
+    "size": "ATX",
+    "desc": "Bo mạch tầm trung của AMD thế hệ mới, tích hợp WiFi 6E và DDR5."
+  },
+  {
+    "id": "ram_d4_8G_budget",
+    "name": "8GB DDR4-2666",
+    "type": "RAM",
+    "price": 350000,
+    "ramType": "DDR4",
+    "desc": "Thanh RAM rẻ nhất thị trường. Đủ dùng cho văn phòng và học trực tuyến."
+  },
+  {
+    "id": "ram_d4_16G",
+    "name": "16GB (2x8GB) DDR4-3200",
+    "type": "RAM",
+    "price": 1000000,
+    "ramType": "DDR4",
+    "desc": "Bộ Kit 16GB DDR4 tiêu chuẩn, phù hợp văn phòng và chiến game nhẹ ở 1080p."
+  },
+  {
+    "id": "ram_d5_32G",
+    "name": "32GB (2x16GB) DDR5-6000",
+    "type": "RAM",
+    "price": 2750000,
+    "ramType": "DDR5",
+    "desc": "Bộ Kit 32GB DDR5 cân bằng hoàn hảo giữa dung lượng và tốc độ cho build hiện đại."
+  },
+  {
+    "id": "ram_d5_64G",
+    "name": "64GB (2x32GB) DDR5-6400",
+    "type": "RAM",
+    "price": 5500000,
+    "ramType": "DDR5",
+    "desc": "RAM dung lượng khủng dành cho Deep Learning, render 3D và đa nhiệm siêu nặng."
+  },
+  {
+    "id": "gpu_gt_1030",
+    "name": "NVIDIA GeForce GT 1030 2GB",
+    "type": "GPU",
+    "price": 900000,
+    "power": 30,
+    "desc": "Card rời siêu tiết kiệm điện, chỉ để xuất hình ảnh và video nhẹ. Không phù hợp chơi game."
+  },
+  {
+    "id": "gpu_gtx_1650",
+    "name": "NVIDIA GTX 1650 4GB",
+    "type": "GPU",
+    "price": 2800000,
+    "power": 75,
+    "desc": "Card tầm thấp không cần cắm nguồn phụ. Chiến game nhẹ ở 1080p ổn định."
+  },
+  {
+    "id": "gpu_rtx_3060",
+    "name": "NVIDIA RTX 3060 12GB",
+    "type": "GPU",
+    "price": 7000000,
+    "power": 170,
+    "desc": "Card tầm trung 12GB VRAM, cân game 1080p siêu mượt và đủ cho AI nhẹ."
+  },
+  {
+    "id": "gpu_rx_7800xt",
+    "name": "AMD Radeon RX 7800 XT 16GB",
+    "type": "GPU",
+    "price": 12500000,
+    "power": 263,
+    "desc": "Hiệu năng game 1440p xuất sắc với giá thành cạnh tranh bậc nhất phân khúc."
+  },
+  {
+    "id": "gpu_rtx_4090",
+    "name": "NVIDIA RTX 4090 24GB",
+    "type": "GPU",
+    "price": 40000000,
+    "power": 450,
+    "desc": "GPU mạnh nhất thị trường dành cho Deep Learning, chơi game 4K và render phim."
+  },
+  {
+    "id": "psu_350w",
+    "name": "350W Power Supply",
+    "type": "PSU",
+    "price": 350000,
+    "wattage": 350,
+    "desc": "Nguồn điện siêu tiết kiệm, phù hợp máy không có card rời hoặc dùng GT 1030."
+  },
+  {
+    "id": "psu_500w",
+    "name": "500W 80+ Bronze",
+    "type": "PSU",
+    "price": 900000,
+    "wattage": 500,
+    "desc": "Nguồn điện cơ bản chuẩn 80+ Bronze, đủ dùng cho các cấu hình văn phòng nhẹ."
+  },
+  {
+    "id": "psu_750w",
+    "name": "750W 80+ Gold Fully Modular",
+    "type": "PSU",
+    "price": 2500000,
+    "wattage": 750,
+    "desc": "Nguồn 80+ Gold full-modular đáng tin cậy, phù hợp các cấu hình gaming tầm trung."
+  },
+  {
+    "id": "psu_1000w",
+    "name": "1000W 80+ Platinum",
+    "type": "PSU",
+    "price": 4500000,
+    "wattage": 1000,
+    "desc": "Nguồn 80+ Platinum hiệu suất cao dành cho cấu hình RTX 4090 và CPU khủng."
+  },
+  {
+    "id": "storage_240_ssd",
+    "name": "240GB SATA SSD",
+    "type": "Storage",
+    "price": 350000,
+    "desc": "Ổ SSD giá rẻ nhất. Đủ để cài Windows và một vài phần mềm văn phòng cơ bản."
+  },
+  {
+    "id": "storage_500_ssd",
+    "name": "500GB NVMe Gen3",
+    "type": "Storage",
+    "price": 700000,
+    "desc": "Ổ SSD NVMe tốc độ cao mức ngân sách, cài hệ điều hành và ứng dụng mượt mà."
+  },
+  {
+    "id": "storage_2tb_ssd",
+    "name": "2TB NVMe Gen4",
+    "type": "Storage",
+    "price": 3250000,
+    "desc": "Ổ NVMe Gen4 siêu nhanh dung lượng lớn, phù hợp game thủ và nhà sáng tạo nội dung."
+  },
+  {
+    "id": "cooler_stock",
+    "name": "Box Cooler (Theo hộp CPU)",
+    "type": "Cooler",
+    "price": 0,
+    "desc": "Quạt tản nhiệt đi kèm theo hộp CPU. Miễn phí nhưng hiệu năng làm mát hạn chế."
+  },
+  {
+    "id": "cooler_air",
+    "name": "Tản Nhiệt Khí Tiêu Chuẩn",
+    "type": "Cooler",
+    "price": 350000,
+    "desc": "Tản nhiệt khí tầm trung, đủ mát cho các CPU 65W đến 120W phổ biến."
+  },
+  {
+    "id": "cooler_aio",
+    "name": "Tản Nhiệt Nước AIO 360mm",
+    "type": "Cooler",
+    "price": 3500000,
+    "desc": "Tản nhiệt nước AIO 3 quạt 120mm, hiệu năng tối đa dành cho CPU nóng cao cấp."
+  }
+]
