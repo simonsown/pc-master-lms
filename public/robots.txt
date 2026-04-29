@@ -1,0 +1,17 @@
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: *
+Allow: /
+
+# Prevent indexing of API and internal routes if necessary
+Disallow: /api/

@@ -71,45 +71,75 @@ const LoadingScreen = ({ onComplete }) => {
                 left: 0,
                 width: '100vw',
                 height: '100vh',
-                backgroundColor: '#000',
-                color: '#10b981', // Emerald green for terminal look
-                fontFamily: 'var(--font-mono)',
+                backgroundColor: 'var(--bg-base)',
                 zIndex: 9999,
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
-                padding: '40px',
-                fontSize: '16px',
-                lineHeight: '1.8',
+                alignItems: 'center',
                 cursor: 'pointer',
-                animation: 'fadeOut 0.3s ease-out forwards',
+                animation: 'fadeOut 0.4s ease-out forwards',
                 animationPlayState: visible ? 'paused' : 'running'
             }}
         >
+            <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '30px'
+            }}>
+                <img 
+                    src="/logo.png" 
+                    alt="Logo" 
+                    style={{ 
+                        width: '100px', 
+                        filter: 'drop-shadow(0 0 15px rgba(0, 243, 255, 0.4))',
+                        animation: 'pulseLogo 2s infinite ease-in-out'
+                    }} 
+                />
+                
+                <h1 style={{ 
+                    color: 'var(--text-primary)', 
+                    fontSize: '24px', 
+                    fontWeight: 800,
+                    letterSpacing: '2px',
+                    margin: 0
+                }}>
+                    PC MASTER <span style={{ color: 'var(--brand-primary)' }}>BUILDER</span>
+                </h1>
 
-            
-            <div style={{ maxWidth: '800px', margin: '0 auto', width: '100%' }}>
-                <div style={{ marginBottom: '20px' }}>
-                    {step >= 0 && <div>{'>'} Initializing PC Master Builder...</div>}
-                    {step >= 1 && (
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span>{'>'} Loading hardware database...</span>
-                            <span>[{getBar(step === 1 ? progress : 100)}] {step === 1 ? progress : 100}%</span>
-                        </div>
-                    )}
-                    {step >= 2 && (
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span>{'>'} Connecting AI engine...</span>
-                            <span>[{getBar(step === 2 ? progress : 100)}] {step === 2 ? progress : 100}%</span>
-                        </div>
-                    )}
-                    {step >= 3 && <div>{'>'} Ready.</div>}
-                    <div className="blinking-cursor" style={{ marginTop: '10px' }}>{'>'} </div>
-                </div>
-                <div style={{ position: 'absolute', bottom: '40px', left: '0', width: '100%', textAlign: 'center', color: '#475569', fontSize: '12px' }}>
-                    Click anywhere to skip
+                {/* Smooth Progress Bar */}
+                <div style={{ 
+                    width: '240px', 
+                    height: '4px', 
+                    background: 'rgba(255,255,255,0.1)', 
+                    borderRadius: '4px',
+                    overflow: 'hidden'
+                }}>
+                    <div style={{
+                        width: `${progress}%`,
+                        height: '100%',
+                        background: 'var(--brand-primary)',
+                        transition: 'width 0.1s linear',
+                        boxShadow: '0 0 10px var(--brand-primary)'
+                    }} />
                 </div>
             </div>
+
+            <div style={{ position: 'absolute', bottom: '40px', color: 'var(--text-muted)', fontSize: '12px' }}>
+                Click anywhere to skip
+            </div>
+
+            <style jsx>{`
+                @keyframes fadeOut {
+                    to { opacity: 0; visibility: hidden; }
+                }
+                @keyframes pulseLogo {
+                    0% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(0, 243, 255, 0.4)); }
+                    50% { transform: scale(1.05); filter: drop-shadow(0 0 25px rgba(0, 243, 255, 0.7)); }
+                    100% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(0, 243, 255, 0.4)); }
+                }
+            `}</style>
         </div>
     );
 };

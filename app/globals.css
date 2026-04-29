@@ -2,15 +2,15 @@
 
 :root {
   /* Backgrounds — layered depth */
-  --bg-base:       #0c0f14;   /* Nền ngoài cùng — đen xanh đậm */
-  --bg-surface:    #131720;   /* Sidebar, panels */
-  --bg-elevated:   #1c2230;   /* Cards, modals */
-  --bg-hover:      #222b3a;   /* Hover state */
+  --bg-base:       #111827;   /* Mềm hơn, chuẩn giáo dục */
+  --bg-surface:    #1f2937;   /* Sidebar, panels */
+  --bg-elevated:   #374151;   /* Cards, modals */
+  --bg-hover:      #4b5563;   /* Hover state */
 
-  /* Brand — electric indigo */
-  --brand-primary:  #6366f1;  
-  --brand-light:    #818cf8;  
-  --brand-subtle:   rgba(99, 102, 241, 0.12); 
+  /* Brand — teal mềm (giảm tương phản quá cao) */
+  --brand-primary:  #00c6ae;  
+  --brand-light:    #2dd4bf;  
+  --brand-subtle:   rgba(0, 198, 174, 0.12); 
 
   /* Semantic */
   --success:       #10b981;   
@@ -19,9 +19,9 @@
   --info:          #3b82f6;   
 
   /* Text */
-  --text-primary:  #f1f5f9;   
-  --text-secondary:#94a3b8;   
-  --text-muted:    #475569;   
+  --text-primary:  #f3f4f6;   
+  --text-secondary:#9ca3af;   
+  --text-muted:    #6b7280;   
 
   /* Borders */
   --border-subtle: rgba(148, 163, 184, 0.08);  
