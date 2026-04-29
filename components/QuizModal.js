@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '@/lib/supabase';
 
 const QuizModal = ({ onClose, lang, topic, level, onSuccess }) => {
     const [questions, setQuestions] = useState([]);
@@ -13,6 +14,25 @@ const QuizModal = ({ onClose, lang, topic, level, onSuccess }) => {
     const [selectedOption, setSelectedOption] = useState(null);
     const [result, setResult] = useState(null); // 'correct' | 'incorrect'
     const [view, setView] = useState('quiz'); // 'quiz' | 'score'
+
+    // Lưu kết quả vào DB khi hoàn thành
+    useEffect(() => {
+        if (view === 'score') {
+            const saveResult = async () => {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    await supabase.from('quiz_results').insert({
+                        user_id: user.id,
+                        topic: topic,
+                        score: score,
+                        total: 10,
+                        lang: lang
+                    });
+                }
+            };
+            saveResult();
+        }
+    }, [view]);
 
     const fetchBatch = async (isInitial = false) => {
         if (isInitial) setLoading(true);
