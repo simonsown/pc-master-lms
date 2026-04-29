@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { BookOpen, Cpu, ShoppingCart, Users, ArrowRight, Info } from 'lucide-react';
+import AuthButton from './AuthButton';
 
 const MainMenu = ({ onStart, lang }) => {
     const modes = [
@@ -53,25 +54,30 @@ const MainMenu = ({ onStart, lang }) => {
                         filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.5))'
                     }}
                 />
-                <h1 style={{
-                    fontSize: '52px',
-                    fontWeight: 800,
-                    color: 'var(--text-primary)',
-                    letterSpacing: '-0.03em',
-                    lineHeight: 1.1,
-                    margin: 0
-                }}>
-                    PC Master Builder
-                </h1>
-                <p style={{
-                    fontSize: '18px',
-                    color: 'var(--text-secondary)',
-                    fontWeight: 400,
-                    marginTop: '12px',
-                    marginBottom: 0
-                }}>
-                    {lang === 'en' ? 'Advanced 2D PC Assembly Simulator with AI' : 'Mô phỏng lắp ráp PC 2D tích hợp trí tuệ nhân tạo'}
-                </p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                        <h1 style={{
+                            fontSize: '52px',
+                            fontWeight: 800,
+                            color: 'var(--text-primary)',
+                            letterSpacing: '-0.03em',
+                            lineHeight: 1.1,
+                            margin: 0
+                        }}>
+                            PC Master Builder
+                        </h1>
+                        <p style={{
+                            fontSize: '18px',
+                            color: 'var(--text-secondary)',
+                            fontWeight: 400,
+                            marginTop: '12px',
+                            marginBottom: 0
+                        }}>
+                            {lang === 'en' ? 'Advanced 2D PC Assembly Simulator with AI' : 'Mô phỏng lắp ráp PC 2D tích hợp trí tuệ nhân tạo'}
+                        </p>
+                    </div>
+                    <AuthButton />
+                </div>
 
                 <div style={{
                     borderBottom: '1px solid var(--border-subtle)',
@@ -85,35 +91,6 @@ const MainMenu = ({ onStart, lang }) => {
                 gridTemplateColumns: '1fr 1fr',
                 gap: '16px'
             }}>
-                <div 
-                    key="course" 
-                    className="mode-card"
-                    style={{ 
-                        border: '1px solid rgba(99, 102, 241, 0.2)',
-                        background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%)',
-                        position: 'relative', overflow: 'hidden'
-                    }}
-                    onClick={() => onStart('course')}
-                >
-                    <div style={{
-                        position: 'absolute', top: '12px', right: '12px',
-                        background: 'var(--brand-primary)', color: 'white',
-                        fontSize: '10px', fontWeight: 800, padding: '4px 8px',
-                        borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '1px'
-                    }}>Premium</div>
-                    
-                    <div className="card-icon" style={{ background: 'rgba(99, 102, 241, 0.1)', color: 'var(--brand-light)' }}>
-                        <BookOpen size={32} />
-                    </div>
-                    <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
-                        {lang === 'en' ? 'Computer Science & Hardware' : 'Bài Giảng Tin Học & Phần Cứng'}
-                    </h2>
-                    <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>
-                        {lang === 'en' 
-                            ? 'Comprehensive curriculum from basics of information to advanced hardware assembly.' 
-                            : 'Chương trình chuẩn từ lý thuyết Tin học cơ bản đến kỹ thuật lắp ráp phần cứng chuyên sâu.'}
-                    </p>
-                </div>
                 {modes.map((mode) => (
                     <button
                         key={mode.id}

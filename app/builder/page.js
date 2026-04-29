@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import confetti from 'canvas-confetti';
+import { supabase } from '@/lib/supabase';
 import HandTracker from '../../components/HandTracker';
 import GameEngine from '../../components/GameEngine';
 import MultiplayerEngine from '../../components/MultiplayerEngine';
@@ -104,6 +105,20 @@ export default function Home() {
       setPlacedItemsList(prev => [...prev, type]);
       setGuruMessage(messages.placed(type));
     } else if (event === 'COMPLETE') {
+      // Lưu vào Database
+      const saveSession = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await supabase.from('assembly_sessions').insert({
+            user_id: user.id,
+            mode: appMode,
+            completed: true,
+            time_taken: 0 // Có thể nâng cấp đếm thời gian sau
+          });
+        }
+      };
+      saveSession();
+
       if (appMode === 'mission_assembly' && missionData) {
         let totalTDP = 0, psuWattage = 0;
         missionData.purchasedItems.forEach(item => {
@@ -207,7 +222,12 @@ export default function Home() {
                 onStart={(mode) => setAppMode(mode)}
             />
         ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%', padding: '24px' }}>
+            <div style={{
+                display: 'flex', flexDirection: 'column', width: '100%',
+                height: 'calc(100vh - 60px)',
+                padding: ['course','market'].includes(appMode) ? '0' : '24px',
+                overflow: ['course','market'].includes(appMode) ? 'hidden' : 'auto'
+            }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '12px 24px', background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-subtle)', borderRadius: '12px', marginBottom: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ color: 'var(--text-muted)', fontSize: '14px', cursor: 'pointer' }} onClick={() => setAppMode('menu')}>
@@ -299,8 +319,8 @@ export default function Home() {
                 )}
 
                 {/* Main View Port */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%', alignItems: 'center', justifyContent: 'center' }}>
-                    <div style={{ width: '100%', minWidth: 'min(100%, 800px)', maxWidth: '1400px', position: 'relative' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, alignItems: 'center', justifyContent: ['course','market'].includes(appMode) ? 'flex-start' : 'center', overflow: 'auto' }}>
+                    <div style={{ width: '100%', maxWidth: ['course','market'].includes(appMode) ? '100%' : '1400px', position: 'relative', height: ['course','market'].includes(appMode) ? '100%' : 'auto', padding: ['course','market'].includes(appMode) ? '0' : '0' }}>
                         {appMode === 'assembly' ? (
                             <div style={{ width: '100%', position: 'relative' }}>
                                 <h2 style={{ color: 'var(--success)', marginTop: 0 }}>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import componentsData from '../data/componentsData.json';
+import WindowsSimulator from './WindowsSimulator';
 
 // Danh sách các nhiệm vụ ngẫu nhiên
 const MISSIONS_LIST = [
@@ -56,6 +57,7 @@ const Marketplace = ({ lang = 'en', onCheckout, onCancel }) => {
     const [budget, setBudget] = useState(mission.budget);
     const [activeTab, setActiveTab] = useState('CPU');
     const [errorMsg, setErrorMsg] = useState("");
+    const [showWindows, setShowWindows] = useState(false);
 
     const categories = ['CPU', 'Mainboard', 'RAM', 'GPU', 'PSU', 'Storage', 'Cooler'];
     const categoryLabels = {
@@ -145,18 +147,17 @@ const Marketplace = ({ lang = 'en', onCheckout, onCancel }) => {
 
         // Chuyển sang Giai đoạn 3: Lắp ráp (Truyền giỏ hàng ra ngoài)
         if (onCheckout) {
-            onCheckout({
-                purchasedItems: cart,
-                remainingBudget: budget,
-                missionId: mission.title
-            });
+            onCheckout({ purchasedItems: cart, remainingBudget: budget, missionId: mission.title });
+        } else {
+            // Show Windows simulation if no onCheckout handler
+            setShowWindows(true);
         }
     };
 
+    if (showWindows) return <WindowsSimulator cart={cart} onExit={() => setShowWindows(false)} />;
+
     return (
-        <div style={{
-            display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '1300px', margin: '0 auto', gap: '1.5rem', padding: '0 16px'
-        }}>
+        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '1300px', margin: '0 auto', gap: '1rem', padding: '0 16px', height: 'calc(100vh - 120px)' }}>
             {/* Mission Header */}
             <div className="glass-panel" style={{ padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderColor: 'var(--accent-purple)' }}>
                 <div>
@@ -183,9 +184,9 @@ const Marketplace = ({ lang = 'en', onCheckout, onCancel }) => {
                 </motion.div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '1.5rem', alignItems: 'start' }}>
+            <div style={{ display: 'flex', gap: '1.5rem', flex: 1, overflow: 'hidden', alignItems: 'start', minHeight: 0 }}>
                 {/* Product Catalog */}
-                <div className="glass-panel" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className="glass-panel" style={{ flex: 1, padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem', overflow: 'hidden', minHeight: 0 }}>
                     <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px' }}>
                         {categories.map(cat => (
                             <button key={cat} onClick={() => setActiveTab(cat)} style={{
@@ -205,7 +206,7 @@ const Marketplace = ({ lang = 'en', onCheckout, onCancel }) => {
                         ))}
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem', marginTop: '1rem', maxHeight: '550px', overflowY: 'auto', paddingRight: '10px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', marginTop: '1rem', flex: 1, overflowY: 'auto', paddingRight: '10px' }}>
                         {filteredProducts.map(prod => {
                             const inCart = cart.some(c => c.id === prod.id);
                             return (
@@ -247,7 +248,7 @@ const Marketplace = ({ lang = 'en', onCheckout, onCancel }) => {
                 </div>
 
                 {/* Right Panel: CART */}
-                <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(2, 6, 23, 0.8)', position: 'sticky', top: '1rem' }}>
+                <div className="glass-panel" style={{ width: '300px', flexShrink: 0, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(2, 6, 23, 0.8)', overflowY: 'auto' }}>
                     <h3 className="neon-text-blue" style={{ margin: 0, borderBottom: '1px solid #334155', paddingBottom: '1rem' }}>
                         {lang === 'en' ? 'INVENTORY CARD' : 'GIỎ HÀNG'} ({cart.length})
                     </h3>
