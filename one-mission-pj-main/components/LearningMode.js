@@ -5,7 +5,19 @@ import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import GameEngine from './GameEngine';
 import LearningRoadmap from './LearningRoadmap';
-import HandTracker from './HandTracker';
+import dynamic from 'next/dynamic';
+const HandTracker = dynamic(
+  () => import('./HandTracker'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center gap-2 text-sm text-[#5a5d72]">
+        <div className="w-4 h-4 border-2 border-[#00d4aa] border-t-transparent rounded-full animate-spin" />
+        Đang tải Hand Tracking...
+      </div>
+    )
+  }
+);
 
 const HARDWARE_DATA = {
 // ... existing data ...

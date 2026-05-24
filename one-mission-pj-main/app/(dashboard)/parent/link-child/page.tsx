@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { linkChildAction } from '@/lib/parent-actions'
+import { findStudentByCode, requestLinkToStudent } from '@/lib/parent-actions'
 import { Search, ShieldCheck, Heart, User, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react'
 
 export default function LinkChildPage() {
@@ -23,18 +23,12 @@ export default function LinkChildPage() {
     setError(null)
 
     try {
-      const res = await fetch('/api/parent/find-student', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: code.trim().toUpperCase() })
-      })
-
-      const data = await res.json()
-      if (data.student) {
-        setFoundStudent(data.student)
+      const res = await findStudentByCode(code.trim().toUpperCase())
+      if (res.student) {
+        setFoundStudent(res.student)
         setStep('confirm')
       } else {
-        setError(data.error || 'Không tìm thấy học sinh với mã này')
+        setError(res.error || 'Không tìm thấy học sinh với mã này')
       }
     } catch (err: any) {
       setError('Lỗi kết nối máy chủ')
@@ -51,9 +45,11 @@ export default function LinkChildPage() {
     setError(null)
 
     try {
-      const res = await linkChildAction(foundStudent.id, relationship)
+      const res = await requestLinkToStudent(foundStudent.id, relationship)
       if (res.success) {
         setStep('success')
+      } else {
+        setError(res.error || 'Lỗi khi thực hiện liên kết')
       }
     } catch (err: any) {
       setError(err.message || 'Lỗi khi thực hiện liên kết')

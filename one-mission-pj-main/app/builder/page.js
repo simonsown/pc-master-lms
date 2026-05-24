@@ -4,7 +4,19 @@ import { useState, useCallback, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { supabase } from '@/lib/supabase';
 import { startBuilderSession, endBuilderSession } from '@/lib/learning-actions';
-import HandTracker from '../../components/HandTracker';
+import dynamic from 'next/dynamic';
+const HandTracker = dynamic(
+  () => import('../../components/HandTracker'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center gap-2 text-sm text-[#5a5d72]">
+        <div className="w-4 h-4 border-2 border-[#00d4aa] border-t-transparent rounded-full animate-spin" />
+        Đang tải Hand Tracking...
+      </div>
+    )
+  }
+);
 import GameEngine from '../../components/GameEngine';
 import MultiplayerEngine from '../../components/MultiplayerEngine';
 import MainMenu from '../../components/MainMenu';
