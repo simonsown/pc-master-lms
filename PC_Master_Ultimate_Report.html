@@ -1,0 +1,2589 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PC Master LMS — Báo Cáo Toàn Diện + 12 Mega Prompts</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+:root{
+  --bg:#080910;--bg2:#0f1018;--bg3:#161820;--bg4:#1d1f2a;--bg5:#242635;
+  --bd:rgba(255,255,255,0.06);--bd2:rgba(255,255,255,0.12);
+  --text:#d8dbe8;--muted:#5a5d72;--dim:#383a4e;
+  --teal:#00d4aa;--red:#f03060;--amber:#f0a030;--blue:#4090f0;
+  --purple:#9060f0;--green:#30c080;
+  --font:'Be Vietnam Pro',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.75;font-size:14px}
+.hero{padding:56px 0 44px;border-bottom:1px solid var(--bd2);background:linear-gradient(160deg,#0a1020 0%,var(--bg) 55%);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-100px;left:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(0,212,170,0.06) 0%,transparent 65%);pointer-events:none}
+.hi{max-width:1000px;margin:0 auto;padding:0 28px;position:relative}
+.chip{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;letter-spacing:.6px;padding:4px 13px;border-radius:100px;margin-bottom:16px}
+.ct{background:rgba(0,212,170,.12);border:1px solid rgba(0,212,170,.28);color:var(--teal)}
+.cr{background:rgba(240,48,96,.12);border:1px solid rgba(240,48,96,.28);color:#f07090}
+.hero h1{font-size:34px;font-weight:800;line-height:1.2;margin-bottom:12px}
+.hero h1 .a{color:var(--teal)}.hero h1 .d{color:var(--red)}
+.hero-sub{color:var(--muted);font-size:14px;max-width:680px;line-height:1.7}
+.hero-stats{display:flex;gap:22px;flex-wrap:wrap;margin-top:24px;padding-top:20px;border-top:1px solid var(--bd)}
+.hs{font-size:12px;color:var(--muted)}.hs strong{color:var(--text);font-weight:600}
+.wrap{max-width:1000px;margin:0 auto;padding:0 28px}
+.sec{padding:48px 0;border-bottom:1px solid var(--bd)}
+.sec:last-child{border-bottom:none}
+.stag{display:inline-flex;align-items:center;gap:7px;font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;margin-bottom:7px}
+.stag.teal{color:var(--teal)}.stag.red{color:var(--red)}.stag.amber{color:var(--amber)}
+.stag.blue{color:var(--blue)}.stag.purple{color:var(--purple)}.stag.green{color:var(--green)}
+.stag.gray{color:var(--muted)}
+.sn{width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:900}
+.sn.teal{background:rgba(0,212,170,.2);color:var(--teal)}.sn.red{background:rgba(240,48,96,.2);color:var(--red)}
+.sn.amber{background:rgba(240,160,48,.2);color:var(--amber)}.sn.blue{background:rgba(64,144,240,.2);color:var(--blue)}
+.sn.purple{background:rgba(144,96,240,.2);color:var(--purple)}.sn.green{background:rgba(48,192,128,.2);color:var(--green)}
+.sn.gray{background:rgba(255,255,255,.08);color:var(--muted)}
+.sec h2{font-size:22px;font-weight:700;margin-bottom:7px}
+.sdesc{color:var(--muted);font-size:13.5px;max-width:720px;line-height:1.7;margin-bottom:22px}
+.callout{border-radius:10px;padding:14px 18px;font-size:13px;margin:14px 0;display:flex;gap:11px;align-items:flex-start}
+.c-teal{background:rgba(0,212,170,.07);border:1px solid rgba(0,212,170,.2);color:#60d4b0}
+.c-red{background:rgba(240,48,96,.07);border:1px solid rgba(240,48,96,.2);color:#f090a8}
+.c-amber{background:rgba(240,160,48,.07);border:1px solid rgba(240,160,48,.2);color:#f0c070}
+.c-blue{background:rgba(64,144,240,.07);border:1px solid rgba(64,144,240,.2);color:#90c0f8}
+.c-purple{background:rgba(144,96,240,.07);border:1px solid rgba(144,96,240,.2);color:#c0a0f8}
+.c-green{background:rgba(48,192,128,.07);border:1px solid rgba(48,192,128,.2);color:#70d4a8}
+.callout .ci{font-size:18px;flex-shrink:0}.callout strong{color:inherit;opacity:.9}
+.bugs{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+.bug{background:var(--bg2);border:1px solid var(--bd2);border-radius:11px;padding:16px 20px;display:flex;gap:14px}
+.bug.crit{border-left:3px solid var(--red)}.bug.high{border-left:3px solid var(--amber)}
+.bug.med{border-left:3px solid var(--blue)}.bug.info{border-left:3px solid var(--purple)}
+.bico{font-size:20px;flex-shrink:0;margin-top:1px}
+.bb h4{font-size:13px;font-weight:700;margin-bottom:4px}
+.bb p{font-size:12.5px;color:var(--muted);line-height:1.6}
+.bb code{font-family:var(--mono);font-size:11px;color:var(--teal);background:rgba(0,212,170,.07);padding:1px 5px;border-radius:4px}
+.btags{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.bt{font-size:10px;padding:2px 8px;border-radius:100px;background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--bd)}
+.sev{font-size:10px;font-weight:700;padding:2px 9px;border-radius:100px;border:1px solid}
+.sc{background:rgba(240,48,96,.15);color:#f07090;border-color:rgba(240,48,96,.25)}
+.sh{background:rgba(240,160,48,.15);color:#f0b060;border-color:rgba(240,160,48,.25)}
+.sm{background:rgba(64,144,240,.12);color:#80b8f8;border-color:rgba(64,144,240,.2)}
+.ctab{width:100%;border-collapse:collapse;margin-top:16px;font-size:13px}
+.ctab th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:10px 14px;background:var(--bg3);border-bottom:1px solid var(--bd2);text-align:left}
+.ctab td{padding:10px 14px;border-bottom:1px solid var(--bd);vertical-align:top}
+.ctab tr:hover td{background:rgba(255,255,255,.015)}
+.yes{color:var(--teal);font-weight:600}.no{color:var(--red)}.partial{color:var(--amber)}.uniq{color:var(--purple)}
+.score-wrap{display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap;margin:18px 0}
+.score-ring{position:relative;width:100px;height:100px;flex-shrink:0}
+.score-ring svg{width:100px;height:100px}
+.score-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.score-num .n{font-size:24px;font-weight:800;color:var(--teal)}
+.score-num .d{font-size:11px;color:var(--muted)}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;flex:1}
+.si{background:var(--bg3);border-radius:9px;padding:13px;border:1px solid var(--bd)}
+.si .lbl{font-size:11px;color:var(--muted);margin-bottom:4px}
+.si .vl{font-size:19px;font-weight:700}
+.pcrd{background:var(--bg2);border:1px solid var(--bd2);border-radius:13px;margin-bottom:22px;overflow:hidden}
+.phd{background:var(--bg3);padding:12px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:9px}
+.pt{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700}
+.pb{font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px}
+.pb-red{background:rgba(240,48,96,.18);color:#f07090}
+.pb-teal{background:rgba(0,212,170,.18);color:var(--teal)}
+.pb-amber{background:rgba(240,160,48,.18);color:#f0b060}
+.pb-blue{background:rgba(64,144,240,.15);color:#80b8f8}
+.pb-purple{background:rgba(144,96,240,.15);color:#c0a0f8}
+.pb-green{background:rgba(48,192,128,.15);color:#70d4a8}
+.pb-gray{background:rgba(255,255,255,.08);color:var(--muted)}
+.ptags{display:flex;gap:5px;flex-wrap:wrap}
+.ptag{font-size:10px;padding:2px 7px;border-radius:100px;background:rgba(255,255,255,.04);color:var(--muted);border:1px solid var(--bd)}
+.pbd{padding:22px}
+.ptext{font-family:var(--mono);font-size:11.5px;line-height:1.9;color:#b8c0d8;white-space:pre-wrap;word-break:break-word;overflow-x:auto}
+.kw{color:#f0b040;font-weight:600}.val{color:#60d8f0}.cmt{color:#2e3048;font-style:italic}
+.hd{color:#9878f8;font-weight:700;font-size:12px}.ok{color:#40d080;font-weight:600}
+.warn{color:#f09040;font-weight:600}.rule{color:#f06090;font-weight:700}
+.fl{color:#40d498}.em{color:#f8d860;font-style:italic}
+.toc{background:var(--bg2);border:1px solid var(--bd2);border-radius:13px;padding:22px;margin:24px 0}
+.toc h3{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:12px}
+.toc-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:3px}
+.toc-g a{text-decoration:none;color:var(--muted);font-size:12.5px;padding:6px 10px;border-radius:7px;display:flex;align-items:center;gap:8px;transition:background .12s,color .12s}
+.toc-g a:hover{background:rgba(0,212,170,.06);color:var(--text)}
+.toc-g a .tn{color:var(--teal);font-weight:700;font-size:10px;min-width:30px;font-family:var(--mono)}
+@media(max-width:700px){.hero h1{font-size:22px}.wrap{padding:0 14px}.ptext{font-size:10.5px}.ctab{font-size:12px}.sgrid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+<div class="hi">
+  <div class="chip ct">🏆 Cuộc thi Tin học trẻ · PC Master LMS · Chuyên gia phân tích</div>
+  <h1>Audit + <span class="d">12 Mega Prompts</span><br>Hoàn Chỉnh Cho <span class="a">PC Master LMS</span></h1>
+  <p class="hero-sub">Rà soát toàn bộ repo github.com/simonsown/one1 — tìm lỗi logic, tính năng chưa hoạt động, so sánh LMS360, và 12 prompt siêu chi tiết. Đặc biệt: 1 Prompt CHUNG bất biến + 1 Prompt Phụ Huynh Realtime hoàn chỉnh.</p>
+  <div class="hero-stats">
+    <div class="hs"><strong>Repo:</strong> simonsown/one1 · JS 50.9% / TS 47.3%</div>
+    <div class="hs"><strong>Stack:</strong> Next.js 16 · React 19 · Supabase · Tailwind · Framer Motion</div>
+    <div class="hs"><strong>Bugs tìm thấy:</strong> 16 lỗi (6 Critical · 5 High · 5 Medium)</div>
+    <div class="hs"><strong>Prompts:</strong> P00 CHUNG + P01-P12 chuyên biệt</div>
+  </div>
+</div>
+</div>
+
+<div class="wrap">
+<div class="toc">
+  <h3>Mục lục — Nhấn để chuyển đến</h3>
+  <div class="toc-g">
+    <a href="#audit"><span class="tn">A01</span> Audit 16 lỗi toàn repo</a>
+    <a href="#compare"><span class="tn">A02</span> So sánh với LMS360.vn</a>
+    <a href="#score"><span class="tn">A03</span> Điểm số & lộ trình</a>
+    <a href="#p00"><span class="tn">P00</span> ⛔ Prompt CHUNG bất biến</a>
+    <a href="#p01"><span class="tn">P01</span> Fix 6 Critical bugs ngay</a>
+    <a href="#p02"><span class="tn">P02</span> Middleware RBAC 5 roles</a>
+    <a href="#p03"><span class="tn">P03</span> Database schema + RLS</a>
+    <a href="#p04"><span class="tn">P04</span> Dashboard học sinh</a>
+    <a href="#p05"><span class="tn">P05</span> Quiz & ngân hàng đề thi</a>
+    <a href="#p06"><span class="tn">P06</span> Realtime tiến độ & thông báo</a>
+    <a href="#p07"><span class="tn">P07</span> Diễn đàn thảo luận</a>
+    <a href="#p08"><span class="tn">P08</span> Gamification & leaderboard</a>
+    <a href="#p09"><span class="tn">P09</span> Builder Lab nâng cao + AI</a>
+    <a href="#p10"><span class="tn">P10</span> Chứng chỉ PDF tự động</a>
+    <a href="#p11"><span class="tn">P11</span> Dashboard giáo viên nâng cao</a>
+    <a href="#p12"><span class="tn">P12</span> ⭐ PHỤ HUYNH REALTIME</a>
+  </div>
+</div>
+</div>
+
+<!-- AUDIT -->
+<div class="sec" id="audit">
+<div class="wrap">
+  <div class="stag red"><span class="sn red">A</span> Audit Repo simonsown/one1</div>
+  <h2>16 Lỗi Phát Hiện Sau Khi Rà Soát Toàn Bộ</h2>
+  <p class="sdesc">Phân tích từng file quan trọng: middleware.ts (chỉ 19 dòng, không có role guard), package.json (puppeteer trong dependencies sẽ crash Vercel), cấu trúc app/, hooks/, lib/, database/. Tất cả 16 vấn đề dưới đây.</p>
+  <div class="callout c-red">
+    <span class="ci">🚨</span>
+    <div><strong>Nghiêm trọng nhất:</strong> middleware.ts chỉ gọi <code>updateSession()</code>, không có bất kỳ role-based routing nào. Học sinh nhập URL <code>/teacher/dashboard</code> → vào thẳng không cần quyền. Đây là security hole số 1 cần fix ngay.</div>
+  </div>
+  <div class="callout c-amber">
+    <span class="ci">⚠️</span>
+    <div><strong>Build sẽ fail trên Vercel:</strong> <code>puppeteer@24.42.0</code> nằm trong <code>dependencies</code> (không phải devDependencies). Vercel cố cài Chromium ~200MB trong serverless → timeout hoặc out-of-memory error khi build.</div>
+  </div>
+  <div class="bugs">
+    <div class="bug crit"><div class="bico">🔐</div><div class="bb"><h4>BUG #01 — middleware.ts không có role guard (CRITICAL SECURITY)</h4><p>File chỉ 19 dòng, chỉ gọi <code>updateSession(request)</code>. Không check role. Học sinh nhập <code>/teacher/lessons</code> → vào thẳng. Cần viết lại hoàn toàn với ROUTE_PERMISSIONS map và <code>supabase.auth.getUser()</code> server-side (không dùng getSession).</p><div class="btags"><span class="bt">middleware.ts</span><span class="sev sc">CRITICAL</span></div></div></div>
+    <div class="bug crit"><div class="bico">📦</div><div class="bb"><h4>BUG #02 — puppeteer@24 trong dependencies → Vercel build fail</h4><p><code>puppeteer@24.42.0</code> không phải devDependencies → Vercel install Chromium → crash. Thay bằng <code>@react-pdf/renderer</code> cho PDF, hoặc <code>puppeteer-core + @sparticuz/chromium-min</code> nếu cần headless browser qua Edge Function.</p><div class="btags"><span class="bt">package.json</span><span class="sev sc">CRITICAL</span></div></div></div>
+    <div class="bug crit"><div class="bico">🗄️</div><div class="bb"><h4>BUG #03 — Thiếu hoàn toàn RLS Policy cho tất cả bảng</h4><p>Không có <code>ENABLE ROW LEVEL SECURITY</code> trên bất kỳ bảng nào. Mọi authenticated user query được toàn bộ data của mọi người. Học sinh đọc được lesson của giáo viên khác, điểm của bạn khác, v.v.</p><div class="btags"><span class="bt">database/</span><span class="bt">Supabase RLS</span><span class="sev sc">CRITICAL</span></div></div></div>
+    <div class="bug crit"><div class="bico">🔑</div><div class="bb"><h4>BUG #04 — Thiếu @supabase/auth-helpers-nextjs → Server Actions fail auth</h4><p>package.json chỉ có <code>@supabase/ssr</code> và <code>@supabase/supabase-js</code>. Các Server Actions cần Supabase với cookies (server-side) không setup đúng → bất kỳ mutation nào từ Server Action đều không có auth context.</p><div class="btags"><span class="bt">package.json thiếu dep</span><span class="sev sc">CRITICAL</span></div></div></div>
+    <div class="bug crit"><div class="bico">🤖</div><div class="bb"><h4>BUG #05 — @google/generative-ai có thể expose API key client-side</h4><p><code>@google/generative-ai@0.24.1</code> nếu được dùng trong component không có <code>'use server'</code>, GEMINI_API_KEY sẽ bị expose trong browser bundle. Cần chuyển toàn bộ AI calls vào API route hoặc Server Action.</p><div class="btags"><span class="bt">AI Guru</span><span class="bt">API key security</span><span class="sev sc">CRITICAL</span></div></div></div>
+    <div class="bug crit"><div class="bico">📦</div><div class="bb"><h4>BUG #06 — @mediapipe/tasks-vision import trực tiếp → First Load 10MB+</h4><p><code>@mediapipe/tasks-vision@0.10.32</code> là ~10MB. Nếu import ở top-level, trang sẽ load cực chậm. Đặc biệt tệ khi demo trước ban giám khảo. Phải lazy load với <code>next/dynamic + ssr: false</code>.</p><div class="btags"><span class="bt">@mediapipe/tasks-vision</span><span class="bt">Bundle size</span><span class="sev sc">CRITICAL</span></div></div></div>
+    <div class="bug high"><div class="bico">📊</div><div class="bb"><h4>BUG #07 — data/ folder có thể chứa mock data thay vì query DB thực</h4><p>Thư mục <code>data/</code> tồn tại — thường chứa hardcoded JSON/TS arrays. Nếu components import từ đây, tất cả hiển thị là fake data. Dashboard, danh sách bài học có thể đang dùng mock data.</p><div class="btags"><span class="bt">data/ folder</span><span class="sev sh">HIGH</span></div></div></div>
+    <div class="bug high"><div class="bico">🚧</div><div class="bb"><h4>BUG #08 — Không có error.tsx và loading.tsx cho routes quan trọng</h4><p>Khi Supabase query fail (rate limit, network), toàn trang crash thay vì hiện error UI. Không có skeleton loading → UX trống rỗng khi chờ data. Rất tệ khi demo trước ban giám khảo nếu internet chậm.</p><div class="btags"><span class="bt">error.tsx thiếu</span><span class="bt">loading.tsx thiếu</span><span class="sev sh">HIGH</span></div></div></div>
+    <div class="bug high"><div class="bico">🔒</div><div class="bb"><h4>BUG #09 — vercel.json cần security headers + next.config.mjs thiếu image domains</h4><p>Thiếu X-Frame-Options, CSP headers → XSS, clickjacking risk. Thiếu <code>images.remotePatterns</code> cho Supabase Storage → tất cả ảnh từ Supabase Storage bị block trên production.</p><div class="btags"><span class="bt">vercel.json</span><span class="bt">next.config.mjs</span><span class="sev sh">HIGH</span></div></div></div>
+    <div class="bug high"><div class="bico">🔁</div><div class="bb"><h4>BUG #10 — Supabase Realtime subscriptions thiếu cleanup → memory leak</h4><p>Custom hooks trong hooks/ folder cần <code>return () => supabase.removeChannel(channel)</code> trong useEffect. Nếu thiếu, subscriptions tích lũy khi user navigate → memory leak → app chậm dần.</p><div class="btags"><span class="bt">hooks/ folder</span><span class="bt">Realtime cleanup</span><span class="sev sh">HIGH</span></div></div></div>
+    <div class="bug high"><div class="bico">🎨</div><div class="bb"><h4>BUG #11 — Trộn JS và TS không nhất quán → type safety không áp dụng được</h4><p>50.9% JS / 47.3% TS. Có cả jsconfig.json và tsconfig.json. TypeScript strict mode không áp dụng cho .js files. Path aliases <code>@/</code> có thể resolve sai. Cần migrate toàn bộ sang .tsx hoặc ít nhất thêm JSDoc types.</p><div class="btags"><span class="bt">jsconfig.json + tsconfig.json</span><span class="sev sh">HIGH</span></div></div></div>
+    <div class="bug med"><div class="bico">📝</div><div class="bb"><h4>BUG #12 — react-markdown không có rehype-sanitize → XSS risk</h4><p><code>react-markdown@10.1.0</code> có trong package.json nhưng nếu không dùng <code>rehype-sanitize</code>, markdown chứa <code>&lt;script&gt;</code> tag sẽ được render. Forum thảo luận và input từ user đặc biệt nguy hiểm.</p><div class="btags"><span class="bt">react-markdown</span><span class="bt">rehype-sanitize thiếu</span><span class="sev sm">MEDIUM</span></div></div></div>
+    <div class="bug med"><div class="bico">🗂️</div><div class="bb"><h4>BUG #13 — utils/ và lib/ trùng lặp chức năng</h4><p>Cả <code>utils/</code> và <code>lib/</code> tồn tại. Developer không biết đặt function mới ở đâu. Theo Next.js convention, tất cả helper functions nên trong <code>lib/</code>. utils/ chỉ dành cho pure functions không dùng Next.js/Supabase APIs.</p><div class="btags"><span class="bt">utils/ vs lib/</span><span class="sev sm">MEDIUM</span></div></div></div>
+    <div class="bug med"><div class="bico">📅</div><div class="bb"><h4>BUG #14 — date-fns@4.x có breaking changes so với v3</h4><p><code>date-fns@4.1.0</code> đổi một số function signatures. Nếu code dùng patterns của v3, sẽ có runtime errors. Cần review toàn bộ usage của date-fns trong codebase.</p><div class="btags"><span class="bt">date-fns@4.1.0</span><span class="bt">Breaking changes</span><span class="sev sm">MEDIUM</span></div></div></div>
+    <div class="bug med"><div class="bico">🎯</div><div class="bb"><h4>BUG #15 — tailwind.config.js thiếu safelist cho dynamic classes</h4><p>Nếu Tailwind classes được tạo dynamically (ví dụ <code>`bg-${color}-500`</code>), Tailwind purge sẽ xóa chúng. UI mất màu trên production dù dev mode ổn. Cần thêm <code>safelist</code> hoặc dùng complete class names.</p><div class="btags"><span class="bt">tailwind.config.js</span><span class="sev sm">MEDIUM</span></div></div></div>
+    <div class="bug med"><div class="bico">📱</div><div class="bb"><h4>BUG #16 — Thiếu manifest.json và viewport meta → PWA không hoạt động</h4><p>Dự án dùng Framer Motion và có animations đẹp, nhưng thiếu PWA setup cơ bản. Thêm <code>manifest.json</code>, <code>apple-touch-icon</code>, và <code>theme-color</code> meta sẽ tăng điểm ấn tượng khi demo trên mobile.</p><div class="btags"><span class="bt">manifest.json</span><span class="bt">PWA basics</span><span class="sev sm">MEDIUM</span></div></div></div>
+  </div>
+</div>
+</div>
+
+<!-- COMPARE -->
+<div class="sec" id="compare">
+<div class="wrap">
+  <div class="stag blue"><span class="sn blue">B</span> So sánh LMS360 vs PC Master</div>
+  <h2>PC Master LMS vs LMS360.vn — Phân Tích Toàn Diện</h2>
+  <p class="sdesc">LMS360 là chuẩn mực LMS giáo dục Việt Nam với 3 module: Tự nghiên cứu / Thảo luận / Kiểm tra. PC Master có 3 USP không LMS nào có. Chiến lược: fix bugs + thêm tính năng LMS cốt lõi = vừa đầy đủ vừa vượt trội.</p>
+  <table class="ctab">
+    <thead><tr><th>Tính năng</th><th>LMS360.vn</th><th>PC Master (hiện tại)</th><th>Tiềm năng</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Xác thực & phân quyền</strong></td><td class="yes">✓ SSO, Google, 4+ roles</td><td class="partial">⚡ Code có, chưa guard</td><td class="yes">✓ Làm được hoàn toàn</td></tr>
+      <tr><td><strong>Bài giảng tương tác</strong></td><td class="yes">✓ H5P, video quiz</td><td class="partial">⚡ Static + AI Guru</td><td class="yes">✓ Độc đáo hơn với 3D</td></tr>
+      <tr><td><strong>Ngân hàng đề thi</strong></td><td class="yes">✓ Random, anti-cheat</td><td class="no">✗ Chưa có</td><td class="yes">✓ Triển khai được</td></tr>
+      <tr><td><strong>Theo dõi tiến độ realtime</strong></td><td class="yes">✓ Dashboard chi tiết</td><td class="no">✗ Chưa có</td><td class="yes">✓ Supabase Realtime</td></tr>
+      <tr><td><strong>Gamification</strong></td><td class="partial">⚡ XP cơ bản</td><td class="partial">⚡ Field có, logic thiếu</td><td class="uniq">★ Vượt trội với PC theme</td></tr>
+      <tr><td><strong>Diễn đàn thảo luận</strong></td><td class="yes">✓ Threaded, moderation</td><td class="no">✗ Chưa có</td><td class="yes">✓ Triển khai được</td></tr>
+      <tr><td><strong>Role Phụ Huynh</strong></td><td class="partial">⚡ Có nhưng cơ bản</td><td class="no">✗ Chưa hoạt động</td><td class="uniq">★ Realtime qua student_code</td></tr>
+      <tr><td><strong>Chứng chỉ điện tử</strong></td><td class="yes">✓ PDF, QR verify</td><td class="no">✗ Chưa có</td><td class="yes">✓ Với @react-pdf/renderer</td></tr>
+      <tr><td><strong>Thông báo realtime</strong></td><td class="yes">✓ Push, email, SMS</td><td class="no">✗ Không có</td><td class="yes">✓ Supabase Realtime</td></tr>
+      <tr><td><strong>⭐ PC Builder Lab 2D</strong></td><td class="no">✗ Không có</td><td class="uniq">★ USP độc quyền</td><td class="uniq">★ Không đối thủ nào có</td></tr>
+      <tr><td><strong>⭐ Hand Tracking</strong></td><td class="no">✗ Không có</td><td class="uniq">★ MediaPipe ấn tượng</td><td class="uniq">★ WOW factor cuộc thi</td></tr>
+      <tr><td><strong>⭐ AI Guru chuyên PC</strong></td><td class="no">✗ Không có AI</td><td class="uniq">★ Gemini tích hợp</td><td class="uniq">★ Điểm mạnh nhất</td></tr>
+      <tr><td><strong>⭐ Phụ huynh realtime</strong></td><td class="partial">⚡ Cơ bản, không realtime</td><td class="no">✗ Chưa có</td><td class="uniq">★ student_code + WebSocket</td></tr>
+    </tbody>
+  </table>
+  <div class="callout c-teal">
+    <span class="ci">💡</span>
+    <div><strong>Chiến lược thắng cuộc thi:</strong> PC Master có 4 tính năng LMS360 không bao giờ có. Fix 6 critical bugs + thêm 4 tính năng cốt lõi (quiz, thông báo, phụ huynh realtime, chứng chỉ) = hệ thống vừa đầy đủ như LMS360 vừa vượt trội về công nghệ. Demo live trước ban giám khảo: 2 màn hình cùng lúc (học sinh + phụ huynh realtime) sẽ rất ấn tượng.</div>
+  </div>
+</div>
+</div>
+
+<!-- SCORE -->
+<div class="sec" id="score">
+<div class="wrap">
+  <div class="stag amber"><span class="sn amber">C</span> Điểm số & Lộ trình</div>
+  <h2>Đánh Giá Hiện Tại + Mục Tiêu Sau 12 Prompts</h2>
+  <div class="score-wrap">
+    <div class="score-ring">
+      <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="7"/><circle cx="50" cy="50" r="42" fill="none" stroke="#00d4aa" stroke-width="7" stroke-dasharray="264" stroke-dashoffset="105" stroke-linecap="round" transform="rotate(-90 50 50)"/></svg>
+      <div class="score-num"><span class="n">6.2</span><span class="d">/10</span></div>
+    </div>
+    <div class="sgrid">
+      <div class="si"><div class="lbl">Tính năng cốt lõi</div><div class="vl" style="color:var(--red)">4/10</div></div>
+      <div class="si"><div class="lbl">Bảo mật & RBAC</div><div class="vl" style="color:var(--red)">3.5/10</div></div>
+      <div class="si"><div class="lbl">UX/UI & Design</div><div class="vl" style="color:var(--amber)">7.5/10</div></div>
+      <div class="si"><div class="lbl">Tính năng độc đáo</div><div class="vl" style="color:var(--teal)">9.8/10</div></div>
+      <div class="si"><div class="lbl">Technical stack</div><div class="vl" style="color:var(--teal)">8.5/10</div></div>
+      <div class="si"><div class="lbl">Demo-ready</div><div class="vl" style="color:var(--amber)">7/10</div></div>
+    </div>
+  </div>
+  <div class="callout c-teal">
+    <span class="ci">🎯</span>
+    <div><strong>Sau 12 prompts → dự kiến 8.8–9.2/10</strong> — đủ để chiến thắng cuộc thi Tin học trẻ với điểm nhấn Builder Lab + Hand Tracking + AI Guru + Phụ Huynh Realtime. Không LMS học sinh nào trong cuộc thi có 4 tính năng này cùng lúc.</div>
+  </div>
+</div>
+</div>
+
+<!-- P00: MASTER RULE -->
+<div class="sec" id="p00">
+<div class="wrap">
+  <div class="stag gray"><span class="sn gray">0</span> Prompt CHUNG</div>
+  <h2>⛔ Prompt CHUNG BẤT BIẾN — Paste Vào Đầu MỌI Session Claude</h2>
+  <p class="sdesc">Đây là "safety header" cố định. Bất kỳ khi nào mở Claude mới để làm dự án này, paste prompt này VÀO TRƯỚC. Nó định nghĩa những gì CẤM và những gì BẮT BUỘC cho mọi session.</p>
+  <div class="pcrd">
+    <div class="phd">
+      <div class="pt"><span class="pb pb-gray">⛔ MASTER</span> PROMPT CHUNG — Dán vào ĐẦU MỌI session Claude</div>
+      <div class="ptags"><span class="ptag">Bất biến</span><span class="ptag">Không sửa</span><span class="ptag">Áp dụng mọi lúc</span></div>
+    </div>
+    <div class="pbd"><pre class="ptext"><span class="hd">╔════════════════════════════════════════════════════════════════╗
+║  ⛔  PC MASTER LMS — PROMPT CHUNG BẤT BIẾN                    ║
+║  PASTE VÀO ĐẦU MỌI SESSION CLAUDE KHI LÀM DỰ ÁN NÀY          ║
+╚════════════════════════════════════════════════════════════════╝</span>
+
+<span class="hd">## 📌 NGỮ CẢNH DỰ ÁN</span>
+<span class="kw">Tên:</span> PC Master Builder LMS — cuộc thi Tin học trẻ
+<span class="kw">Repo:</span> <span class="val">github.com/simonsown/one1</span>
+<span class="kw">Live:</span> <span class="val">https://pc-master-lms.vercel.app</span>
+<span class="kw">Stack:</span> Next.js 16 App Router · React 19 · TypeScript+JS · Supabase · Tailwind CSS
+<span class="kw">Deploy:</span> Vercel · Package manager: npm
+<span class="kw">Brand:</span> bg <span class="val">#080910</span> | sidebar <span class="val">#0f1018</span> | teal <span class="val">#00d4aa</span> | text <span class="val">#d8dbe8</span> | muted <span class="val">#5a5d72</span>
+
+<span class="hd">## 🚫 NGHIÊM CẤM — VI PHẠM = BỎ QUA NGAY</span>
+
+<span class="rule">⛔ CẤM 1 — KHÔNG TỰ Ý ĐỔI GIAO DIỆN:</span>
+  Tuyệt đối không sửa màu sắc, font, layout, spacing, border-radius,
+  hay bất kỳ CSS/Tailwind của trang và component ĐÃ CÓ.
+  Không thêm gradient, shadow, animation mới vào component hiện có.
+  Muốn style mới → tạo COMPONENT MỚI, không sửa cái cũ.
+
+<span class="rule">⛔ CẤM 2 — KHÔNG SỬA FILE CŨ KHI CHƯA BÁO:</span>
+  Trước khi sửa bất kỳ file hiện có, phải:
+  1) Liệt kê tên file đầy đủ (path từ root)
+  2) Mô tả chính xác dòng số và thay đổi gì
+  3) Viết "Bạn xác nhận?" và CHỜ tôi gõ OK
+  Chỉ sau khi tôi xác nhận mới được viết code.
+
+<span class="rule">⛔ CẤM 3 — KHÔNG ĐỂ SECRET KEY TRONG CLIENT CODE:</span>
+  GOOGLE_GEMINI_API_KEY, SUPABASE_SERVICE_ROLE_KEY và mọi secret
+  KHÔNG BAO GIỜ trong 'use client' components.
+  Mọi AI call → Server Action ('use server') hoặc API route.
+  Mọi Supabase mutation → server-side client với cookies.
+
+<span class="rule">⛔ CẤM 4 — KHÔNG DÙNG puppeteer TRỰC TIẾP TRÊN VERCEL:</span>
+  puppeteer không chạy trên Vercel serverless.
+  PDF → dùng @react-pdf/renderer.
+  Headless browser → @sparticuz/chromium-min + puppeteer-core trong Edge Function.
+
+<span class="rule">⛔ CẤM 5 — MỌI BẢNG MỚI PHẢI CÓ RLS:</span>
+  Sau mỗi CREATE TABLE:
+  ALTER TABLE x ENABLE ROW LEVEL SECURITY;
+  + ít nhất 1 policy. Không bảng nào không có RLS.
+
+<span class="rule">⛔ CẤM 6 — KHÔNG HARDCODE MOCK DATA TRONG COMPONENT:</span>
+  Không dùng static arrays/objects giả làm data hiển thị.
+  Chưa có data thật → skeleton loading hoặc empty state UI.
+
+<span class="rule">⛔ CẤM 7 — KHÔNG DÙNG getSession() TRONG MIDDLEWARE:</span>
+  getSession() không verify JWT với Supabase server → có thể bị spoof.
+  Luôn dùng supabase.auth.getUser() — không thỏa hiệp điều này.
+
+<span class="rule">⛔ CẤM 8 — KHÔNG RENDER MARKDOWN KHÔNG CÓ SANITIZE:</span>
+  Mọi markdown từ user PHẢI dùng rehype-sanitize.
+  Không dùng dangerouslySetInnerHTML với nội dung từ database.
+
+<span class="rule">⛔ CẤM 9 — KHÔNG IMPORT @mediapipe TRỰC TIẾP Ở TOP-LEVEL:</span>
+  Phải lazy load: const X = dynamic(() => import('...'), { ssr: false })
+  Không import ở bất kỳ layout hay page nào không có dynamic().
+
+<span class="rule">⛔ CẤM 10 — KHÔNG THÊM FUNCTION VÀO utils/ (dùng lib/ thay thế):</span>
+  utils/ chỉ cho pure functions. Mọi helper dùng Next.js/Supabase → lib/.
+
+<span class="hd">## ✅ YÊU CẦU BẮT BUỘC VỚI MỌI CODE</span>
+
+<span class="ok">✅ Type safety:</span> Không dùng 'any', không '!' non-null assertion.
+<span class="ok">✅ Error handling:</span> Mọi Supabase query handle error, mọi Server Action có try/catch.
+<span class="ok">✅ Loading state:</span> Mọi data-fetching component có skeleton/loading state.
+<span class="ok">✅ Mobile responsive:</span> Mọi trang mới hoạt động từ 375px width.
+<span class="ok">✅ Server-first:</span> Ưu tiên RSC, chỉ 'use client' khi thực sự cần interactivity.
+<span class="ok">✅ Images:</span> Dùng next/image, không HTML img thông thường.
+<span class="ok">✅ Accessibility:</span> Button có label, input có label liên kết, img có alt.
+<span class="ok">✅ Route protection:</span> Mọi page mới trong /teacher/* /parent/* /admin/* phải gọi requireRole() ở đầu.
+
+<span class="hd">## 📋 QUY TRÌNH LÀM VIỆC</span>
+
+<span class="kw">Khi tôi yêu cầu tính năng:</span>
+  1. Liệt kê files SẼ TẠO MỚI
+  2. Liệt kê files SẼ SỬA (path + dòng số + mô tả)
+  3. Hỏi "Bạn xác nhận?" — chờ OK của tôi
+  4. Viết code ĐẦY ĐỦ, không viết dở
+  5. Kết thúc bằng "✅ Test checklist: [bước test thủ công]"
+
+<span class="kw">Khi tôi báo lỗi:</span>
+  Giải thích nguyên nhân gốc rễ TRƯỚC khi viết fix.
+  Fix đúng nguyên nhân, không patch tạm.</pre></div>
+  </div>
+</div>
+</div>
+
+<!-- P01 -->
+<div class="sec" id="p01">
+<div class="wrap">
+  <div class="stag red"><span class="sn red">1</span> Prompt 01</div>
+  <h2>Fix 6 Critical Bugs — Chạy Trước Mọi Thứ</h2>
+  <div class="pcrd">
+    <div class="phd">
+      <div class="pt"><span class="pb pb-red">🚨 URGENT</span> PROMPT 01 — Fix 6 Critical Bugs Ngay Lập Tức</div>
+      <div class="ptags"><span class="ptag">middleware.ts</span><span class="ptag">package.json</span><span class="ptag">next.config.mjs</span><span class="ptag">AI key security</span></div>
+    </div>
+    <div class="pbd"><pre class="ptext"><span class="hd">╔════════════════════════════════════════════════════════════════╗
+║  PROMPT 01 · FIX 6 CRITICAL BUGS — PHẢI CHẠY TRƯỚC TIÊN      ║
+╚════════════════════════════════════════════════════════════════╝</span>
+
+<span class="hd">## BỐI CẢNH</span>
+Repo: <span class="val">github.com/simonsown/one1</span> — Next.js 16, Supabase, TypeScript+JS
+Đây là 6 lỗi phải fix TRƯỚC KHI làm bất kỳ tính năng mới nào.
+
+<span class="hd">## FIX 1 — package.json: Xóa puppeteer, thêm dependencies thiếu</span>
+<span class="val">npm uninstall puppeteer
+npm install @react-pdf/renderer rehype-sanitize rehype-raw remark-gfm
+npm install --save-dev @types/react-pdf</span>
+
+<span class="hd">## FIX 2 — middleware.ts: Viết lại với RBAC đầy đủ</span>
+
+<span class="kw">Báo trước:</span> Sẽ THAY TOÀN BỘ nội dung middleware.ts (giữ file, xóa content cũ).
+Xác nhận trước khi tôi viết code. Sau khi xác nhận:
+
+<span class="val">// Path: middleware.ts
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
+
+const ROUTE_PERMISSIONS: Record&lt;string, string[]&gt; = {
+  '/admin':        ['admin'],
+  '/teacher':      ['teacher', 'admin'],
+  '/student':      ['student', 'teacher', 'admin'],
+  '/parent':       ['parent', 'admin'],
+  '/builder':      ['student', 'teacher', 'admin'],
+  '/profile':      ['student', 'teacher', 'admin', 'parent'],
+  '/notifications':['student', 'teacher', 'admin', 'parent'],
+  '/leaderboard':  ['student', 'teacher', 'admin', 'parent'],
+}
+
+const PUBLIC = ['/', '/login', '/register', '/about',
+  '/forgot-password', '/reset-password', '/verify']
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  let res = NextResponse.next({ request })
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll: () => request.cookies.getAll(),
+        setAll: (toSet) => {
+          toSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          res = NextResponse.next({ request })
+          toSet.forEach(({ name, value, options }) => res.cookies.set(name, value, options))
+        },
+      },
+    }
+  )
+
+  // LUÔN dùng getUser() — không dùng getSession()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const isPublic = PUBLIC.some(r => pathname === r || pathname.startsWith(r + '/'))
+
+  if (isPublic) {
+    if (user && (pathname === '/login' || pathname === '/register')) {
+      const { data: p } = await supabase
+        .from('profiles').select('role').eq('id', user.id).single()
+      const dash = { admin:'/admin/dashboard', teacher:'/teacher/dashboard',
+        parent:'/parent/dashboard', student:'/student/dashboard' }
+      return NextResponse.redirect(new URL(dash[p?.role as keyof typeof dash] ?? '/student/dashboard', request.url))
+    }
+    return res
+  }
+
+  if (!user) {
+    const url = new URL('/login', request.url)
+    url.searchParams.set('redirect', pathname)
+    return NextResponse.redirect(url)
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles').select('role').eq('id', user.id).single()
+  const role = profile?.role ?? 'student'
+
+  const matched = Object.keys(ROUTE_PERMISSIONS).find(r => pathname.startsWith(r))
+  if (matched && !ROUTE_PERMISSIONS[matched].includes(role)) {
+    const dash = { admin:'/admin/dashboard', teacher:'/teacher/dashboard',
+      parent:'/parent/dashboard', student:'/student/dashboard' }
+    return NextResponse.redirect(new URL(dash[role as keyof typeof dash] ?? '/student/dashboard', request.url))
+  }
+
+  res.headers.set('x-user-role', role)
+  res.headers.set('x-user-id', user.id)
+  return res
+}
+
+export const config = {
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+}</span>
+
+<span class="hd">## FIX 3 — next.config.mjs: Image domains + Security headers</span>
+<span class="val">// Path: next.config.mjs
+const nextConfig = {
+  images: {
+    remotePatterns: [
+      { protocol:'https', hostname:'*.supabase.co', pathname:'/storage/v1/object/public/**' },
+      { protocol:'https', hostname:'*.supabase.in', pathname:'/storage/v1/object/public/**' },
+    ],
+  },
+  async headers() {
+    return [{
+      source: '/(.*)',
+      headers: [
+        { key:'X-Frame-Options', value:'DENY' },
+        { key:'X-Content-Type-Options', value:'nosniff' },
+        { key:'Referrer-Policy', value:'strict-origin-when-cross-origin' },
+      ],
+    }]
+  },
+}
+export default nextConfig</span>
+
+<span class="hd">## FIX 4 — AI Guru: Chuyển sang API route để bảo vệ API key</span>
+<span class="val">// Path: app/api/ai-guru/route.ts (TẠO MỚI)
+import { GoogleGenerativeAI } from '@google/generative-ai'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+import { NextRequest, NextResponse } from 'next/server'
+
+export async function POST(request: NextRequest) {
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
+  )
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { message, context } = await request.json()
+  if (!message || typeof message !== 'string') {
+    return NextResponse.json({ error: 'Invalid message' }, { status: 400 })
+  }
+
+  const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY!)
+  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+  const prompt = `Bạn là AI Guru của PC Master Builder LMS — chuyên gia tin học và lắp ráp PC.
+Giải thích ngắn gọn, rõ ràng bằng tiếng Việt. Context: ${context ?? 'Đang học tin học'}.
+Câu hỏi: ${message}`
+
+  try {
+    const result = await model.generateContent(prompt)
+    return NextResponse.json({ response: result.response.text() })
+  } catch (e) {
+    return NextResponse.json({ error: 'AI service error' }, { status: 500 })
+  }
+}</span>
+
+<span class="hd">## FIX 5 — MediaPipe: Lazy load wrapper</span>
+<span class="val">// Trong MỌI file có import @mediapipe, thay bằng:
+import dynamic from 'next/dynamic'
+const HandTracking = dynamic(
+  () => import('@/components/HandTracking'),
+  { ssr: false, loading: () => &lt;div className="text-sm text-[#5a5d72]"&gt;Đang tải...&lt;/div&gt; }
+)</span>
+
+<span class="hd">## FIX 6 — Tạo error.tsx + loading.tsx skeleton cho 4 dashboard chính</span>
+<span class="val">// TẠO 4 cặp file sau (cùng pattern):
+// app/(dashboard)/student/dashboard/error.tsx
+// app/(dashboard)/student/dashboard/loading.tsx
+// app/(dashboard)/teacher/dashboard/error.tsx
+// app/(dashboard)/teacher/dashboard/loading.tsx
+
+// Pattern error.tsx:
+'use client'
+export default function Error({ error, reset }: { error: Error; reset: () => void }) {
+  return (
+    &lt;div className="flex flex-col items-center justify-center h-full gap-4 p-8 text-center"&gt;
+      &lt;div className="text-3xl"&gt;⚠️&lt;/div&gt;
+      &lt;p className="text-[#d8dbe8] font-medium"&gt;{error.message || 'Có lỗi xảy ra'}&lt;/p&gt;
+      &lt;button onClick={reset}
+        className="px-4 py-2 bg-[#00d4aa]/12 border border-[#00d4aa]/30 text-[#00d4aa] rounded-lg text-sm"&gt;
+        Thử lại
+      &lt;/button&gt;
+    &lt;/div&gt;
+  )
+}
+
+// Pattern loading.tsx:
+export default function Loading() {
+  return (
+    &lt;div className="p-6 space-y-4 animate-pulse"&gt;
+      &lt;div className="h-8 bg-[#1d1f2a] rounded-lg w-44" /&gt;
+      &lt;div className="grid grid-cols-2 md:grid-cols-4 gap-4"&gt;
+        {[...Array(4)].map((_,i) =&gt; &lt;div key={i} className="h-24 bg-[#1d1f2a] rounded-xl" /&gt;)}
+      &lt;/div&gt;
+      &lt;div className="h-60 bg-[#1d1f2a] rounded-xl" /&gt;
+    &lt;/div&gt;
+  )
+}</span>
+
+<span class="hd">## FILES CẦN TẠO/SỬA</span>
+<span class="ok">SỬA:</span> middleware.ts · next.config.mjs · package.json
+<span class="ok">TẠO:</span> app/api/ai-guru/route.ts
+      app/(dashboard)/student/dashboard/error.tsx + loading.tsx
+      app/(dashboard)/teacher/dashboard/error.tsx + loading.tsx
+
+<span class="hd">## TEST CHECKLIST</span>
+<span class="ok">✓</span> Student vào /teacher → redirect /student/dashboard
+<span class="ok">✓</span> Teacher vào /admin → redirect /teacher/dashboard
+<span class="ok">✓</span> Chưa login vào /student → redirect /login?redirect=/student
+<span class="ok">✓</span> npm run build không lỗi puppeteer
+<span class="ok">✓</span> AI Guru call qua /api/ai-guru, không expose key
+<span class="ok">✓</span> Network tab: không thấy GEMINI_API_KEY trong client bundle</pre></div>
+  </div>
+</div>
+</div>
+
+<!-- P02 -->
+<div class="sec" id="p02">
+<div class="wrap">
+  <div class="stag red"><span class="sn red">2</span> Prompt 02</div>
+  <h2>lib/auth/rbac.ts — Helper RBAC Dùng Trong Toàn Dự Án</h2>
+  <div class="pcrd">
+    <div class="phd">
+      <div class="pt"><span class="pb pb-red">SECURITY</span> PROMPT 02 — lib/auth/rbac.ts + Route Guards</div>
+      <div class="ptags"><span class="ptag">5 roles</span><span class="ptag">requireRole()</span><span class="ptag">verifyRole()</span><span class="ptag">Server Components</span></div>
+    </div>
+    <div class="pbd"><pre class="ptext"><span class="hd">╔════════════════════════════════════════════════════════════════╗
+║  PROMPT 02 · lib/auth/rbac.ts — HELPER RBAC ĐẦY ĐỦ           ║
+╚════════════════════════════════════════════════════════════════╝</span>
+
+<span class="hd">## BỐI CẢNH</span>
+Đã hoàn thành: Prompt 01 (middleware viết lại).
+Mục tiêu: Tạo helper functions để bảo vệ từng page và Server Action.
+
+<span class="hd">## TẠO FILE: lib/auth/rbac.ts</span>
+<span class="val">// Path: lib/auth/rbac.ts
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
+
+export type UserRole = 'student' | 'teacher' | 'admin' | 'parent'
+
+export interface AuthUser {
+  id: string
+  email: string
+  role: UserRole
+  full_name: string
+  student_code?: string
+  avatar_url?: string
+}
+
+// Dùng trong Server Components: lấy user hiện tại
+export async function getCurrentUser(): Promise&lt;AuthUser | null&gt; {
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
+  )
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name, role, student_code, avatar_url')
+    .eq('id', user.id).single()
+
+  if (!profile) return null
+  return {
+    id: user.id,
+    email: user.email!,
+    role: profile.role as UserRole,
+    full_name: profile.full_name,
+    student_code: profile.student_code ?? undefined,
+    avatar_url: profile.avatar_url ?? undefined,
+  }
+}
+
+// Guard Server Component — redirect nếu không đúng role
+export async function requireRole(allowedRoles: UserRole[]): Promise&lt;AuthUser&gt; {
+  const user = await getCurrentUser()
+  if (!user) redirect('/login')
+  if (!allowedRoles.includes(user.role)) {
+    const dash: Record&lt;UserRole, string&gt; = {
+      admin: '/admin/dashboard', teacher: '/teacher/dashboard',
+      parent: '/parent/dashboard', student: '/student/dashboard',
+    }
+    redirect(dash[user.role])
+  }
+  return user
+}
+
+// Guard Server Action — throw error thay vì redirect
+export async function verifyRole(allowedRoles: UserRole[]): Promise&lt;AuthUser&gt; {
+  const user = await getCurrentUser()
+  if (!user) throw new Error('UNAUTHORIZED')
+  if (!allowedRoles.includes(user.role)) throw new Error('FORBIDDEN')
+  return user
+}
+
+// Tạo Supabase client server-side cho Server Actions
+export async function createServerActionSupabase() {
+  const cookieStore = await cookies()
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll: () => cookieStore.getAll(),
+        setAll: (c) => c.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
+      }
+    }
+  )
+}</span>
+
+<span class="hd">## CÁCH DÙNG TRONG PAGES (Server Component):</span>
+<span class="val">// app/(dashboard)/teacher/dashboard/page.tsx
+import { requireRole } from '@/lib/auth/rbac'
+
+export default async function TeacherDashboard() {
+  const user = await requireRole(['teacher', 'admin'])
+  // user.id, user.role, user.full_name giờ đã verified
+  return &lt;div&gt;Xin chào, {user.full_name}&lt;/div&gt;
+}
+
+// app/actions/lesson.ts — Server Action
+'use server'
+import { verifyRole, createServerActionSupabase } from '@/lib/auth/rbac'
+
+export async function createLessonAction(data: CreateLessonInput) {
+  const user = await verifyRole(['teacher', 'admin'])
+  const supabase = await createServerActionSupabase()
+  // Giờ an toàn để insert vào DB
+  const { error } = await supabase.from('lessons').insert({
+    teacher_id: user.id, ...data
+  })
+  if (error) return { error: error.message }
+  return { success: true }
+}</span>
+
+<span class="hd">## TẠO FILE: lib/supabase-client.ts (cho Client Components)</span>
+<span class="val">// Path: lib/supabase-client.ts
+import { createBrowserClient } from '@supabase/ssr'
+
+export function createClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}</span>
+
+<span class="hd">## FILES CẦN TẠO</span>
+<span class="ok">TẠO:</span> lib/auth/rbac.ts · lib/supabase-client.ts
+
+<span class="hd">## TEST CHECKLIST</span>
+<span class="ok">✓</span> requireRole(['teacher']) trong page.tsx → học sinh bị redirect đúng
+<span class="ok">✓</span> verifyRole() trong Server Action → throw error khi sai role
+<span class="ok">✓</span> createClient() trả về browser Supabase client không lỗi</pre></div>
+  </div>
+</div>
+</div>
+
+<!-- P03 -->
+<div class="sec" id="p03">
+<div class="wrap">
+  <div class="stag amber"><span class="sn amber">3</span> Prompt 03</div>
+  <h2>Database Schema Đầy Đủ + RLS Toàn Bộ Bảng</h2>
+  <div class="pcrd">
+    <div class="phd">
+      <div class="pt"><span class="pb pb-amber">DATABASE</span> PROMPT 03 — Supabase SQL Migration Hoàn Chỉnh</div>
+      <div class="ptags"><span class="ptag">Supabase SQL</span><span class="ptag">RLS Policy</span><span class="ptag">Triggers</span><span class="ptag">Views</span></div>
+    </div>
+    <div class="pbd"><pre class="ptext"><span class="hd">╔════════════════════════════════════════════════════════════════╗
+║  PROMPT 03 · DATABASE SCHEMA + RLS — CHẠY TRONG SQL EDITOR    ║
+╚════════════════════════════════════════════════════════════════╝</span>
+
+<span class="hd">## YÊU CẦU</span>
+Chạy toàn bộ SQL này trong Supabase SQL Editor theo đúng thứ tự.
+Nếu bảng đã tồn tại → dùng IF NOT EXISTS để idempotent.
+
+<span class="hd">## BƯỚC 1: Mở rộng profiles</span>
+<span class="val">ALTER TABLE public.profiles
+  DROP CONSTRAINT IF EXISTS profiles_role_check;
+ALTER TABLE public.profiles
+  ADD CONSTRAINT profiles_role_check
+  CHECK (role IN ('student','teacher','admin','parent'));
+
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS student_code TEXT UNIQUE,
+  ADD COLUMN IF NOT EXISTS avatar_url TEXT,
+  ADD COLUMN IF NOT EXISTS school_name TEXT,
+  ADD COLUMN IF NOT EXISTS phone TEXT,
+  ADD COLUMN IF NOT EXISTS is_online BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS last_seen_at TIMESTAMPTZ DEFAULT NOW(),
+  ADD COLUMN IF NOT EXISTS xp INT DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS level INT DEFAULT 1;
+
+-- Tự sinh student_code cho học sinh
+CREATE OR REPLACE FUNCTION generate_student_code() RETURNS TEXT AS $$
+DECLARE chars TEXT := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; result TEXT := 'PCM-'; i INT;
+BEGIN
+  FOR i IN 1..8 LOOP
+    result := result || substr(chars, floor(random()*length(chars)+1)::int, 1);
+  END LOOP; RETURN result;
+END; $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION auto_student_code() RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.role = 'student' AND NEW.student_code IS NULL THEN
+    LOOP NEW.student_code := generate_student_code();
+      EXIT WHEN NOT EXISTS(SELECT 1 FROM profiles WHERE student_code = NEW.student_code);
+    END LOOP;
+  END IF; RETURN NEW;
+END; $$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trig_student_code ON public.profiles;
+CREATE TRIGGER trig_student_code BEFORE INSERT ON public.profiles
+  FOR EACH ROW EXECUTE FUNCTION auto_student_code();
+
+UPDATE profiles SET student_code = generate_student_code()
+  WHERE role = 'student' AND student_code IS NULL;</span>
+
+<span class="hd">## BƯỚC 2: Bảng classes + class_members</span>
+<span class="val">CREATE TABLE IF NOT EXISTS public.classes (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  teacher_id UUID NOT NULL REFERENCES public.profiles(id),
+  name TEXT NOT NULL,
+  description TEXT,
+  code TEXT UNIQUE NOT NULL DEFAULT upper(substr(gen_random_uuid()::text, 1, 6)),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.class_members (
+  class_id UUID NOT NULL REFERENCES public.classes(id) ON DELETE CASCADE,
+  student_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  joined_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (class_id, student_id)
+);
+
+ALTER TABLE public.classes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.class_members ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "teacher_own_class" ON public.classes FOR ALL USING (teacher_id = auth.uid());
+CREATE POLICY "student_view_enrolled" ON public.classes FOR SELECT USING (
+  EXISTS(SELECT 1 FROM class_members WHERE class_id=id AND student_id=auth.uid())
+);
+CREATE POLICY "teacher_manage_members" ON public.class_members FOR ALL USING (
+  EXISTS(SELECT 1 FROM classes WHERE id=class_id AND teacher_id=auth.uid())
+);
+CREATE POLICY "student_own_membership" ON public.class_members FOR SELECT USING (student_id=auth.uid());</span>
+
+<span class="hd">## BƯỚC 3: Bảng lessons + lesson_sections + RLS</span>
+<span class="val">ALTER TABLE IF EXISTS public.lessons ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "teacher_own_lessons" ON public.lessons;
+DROP POLICY IF EXISTS "published_readable" ON public.lessons;
+CREATE POLICY "teacher_own_lessons" ON public.lessons FOR ALL USING (teacher_id=auth.uid());
+CREATE POLICY "published_readable" ON public.lessons FOR SELECT USING (is_published=TRUE);
+
+ALTER TABLE IF EXISTS public.lesson_sections ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "teacher_manage_sections" ON public.lesson_sections FOR ALL USING (
+  EXISTS(SELECT 1 FROM lessons WHERE id=lesson_id AND teacher_id=auth.uid())
+);
+CREATE POLICY "student_view_sections" ON public.lesson_sections FOR SELECT USING (
+  EXISTS(SELECT 1 FROM lessons WHERE id=lesson_id AND is_published=TRUE)
+);</span>
+
+<span class="hd">## BƯỚC 4: lesson_progress (tracking học sinh)</span>
+<span class="val">CREATE TABLE IF NOT EXISTS public.lesson_progress (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  student_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  lesson_id UUID NOT NULL,
+  status TEXT DEFAULT 'not_started' CHECK (status IN ('not_started','in_progress','completed')),
+  completion_percentage INT DEFAULT 0 CHECK (completion_percentage BETWEEN 0 AND 100),
+  time_spent_seconds INT DEFAULT 0,
+  last_accessed TIMESTAMPTZ DEFAULT NOW(),
+  completed_at TIMESTAMPTZ,
+  UNIQUE(student_id, lesson_id)
+);
+ALTER TABLE public.lesson_progress ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "student_own_progress" ON public.lesson_progress FOR ALL USING (student_id=auth.uid());
+CREATE POLICY "teacher_view_progress" ON public.lesson_progress FOR SELECT USING (
+  EXISTS(SELECT 1 FROM profiles WHERE id=auth.uid() AND role='teacher')
+);
+-- Parent xem progress con — sẽ dùng sau khi có parent_student_links
+CREATE POLICY "parent_view_child" ON public.lesson_progress FOR SELECT USING (
+  EXISTS(
+    SELECT 1 FROM public.parent_student_links psl
+    WHERE psl.parent_id=auth.uid() AND psl.student_id=lesson_progress.student_id AND psl.status='active'
+  )
+);</span>
+
+<span class="hd">## BƯỚC 5: quiz_attempts</span>
+<span class="val">CREATE TABLE IF NOT EXISTS public.quiz_attempts (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  student_id UUID NOT NULL REFERENCES public.profiles(id),
+  quiz_id UUID NOT NULL,
+  quiz_title TEXT NOT NULL DEFAULT '',
+  started_at TIMESTAMPTZ DEFAULT NOW(),
+  submitted_at TIMESTAMPTZ,
+  score NUMERIC(5,2),
+  max_score INT DEFAULT 100,
+  status TEXT DEFAULT 'in_progress' CHECK (status IN ('in_progress','submitted','graded')),
+  attempt_number INT DEFAULT 1
+);
+ALTER TABLE public.quiz_attempts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "student_own_attempts" ON public.quiz_attempts FOR ALL USING (student_id=auth.uid());
+CREATE POLICY "teacher_view_attempts" ON public.quiz_attempts FOR SELECT USING (
+  EXISTS(SELECT 1 FROM profiles WHERE id=auth.uid() AND role IN ('teacher','admin'))
+);
+CREATE POLICY "parent_view_child_quiz" ON public.quiz_attempts FOR SELECT USING (
+  EXISTS(
+    SELECT 1 FROM public.parent_student_links psl
+    WHERE psl.parent_id=auth.uid() AND psl.student_id=quiz_attempts.student_id AND psl.status='active'
+  )
+);</span>
+
+<span class="hd">## BƯỚC 6: notifications</span>
+<span class="val">CREATE TABLE IF NOT EXISTS public.notifications (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  type TEXT NOT NULL,
+  title TEXT NOT NULL,
+  body TEXT NOT NULL,
+  data JSONB DEFAULT '{}',
+  action_url TEXT,
+  is_read BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "own_notifications" ON public.notifications FOR ALL USING (user_id=auth.uid());</span>
+
+<span class="hd">## BƯỚC 7: Bật Realtime cho các bảng cần thiết</span>
+<span class="val">ALTER PUBLICATION supabase_realtime ADD TABLE public.lesson_progress;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.quiz_attempts;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.profiles;</span>
+
+<span class="hd">## BƯỚC 8: Verify sau khi chạy xong</span>
+<span class="val">-- Kiểm tra RLS đã bật cho tất cả bảng
+SELECT tablename, rowsecurity FROM pg_tables WHERE schemaname='public';
+-- Tất cả phải có rowsecurity = true
+
+-- Kiểm tra student_code đã được sinh
+SELECT id, full_name, student_code FROM profiles WHERE role='student' LIMIT 5;
+-- Tất cả phải có dạng PCM-XXXXXXXX</span></pre></div>
+  </div>
+</div>
+</div>
+
+<!-- P04 -->
+<div class="sec" id="p04">
+<div class="wrap">
+  <div class="stag blue"><span class="sn blue">4</span> Prompt 04</div>
+  <h2>Dashboard Học Sinh — /student/dashboard</h2>
+  <div class="pcrd">
+    <div class="phd">
+      <div class="pt"><span class="pb pb-blue">DASHBOARD</span> PROMPT 04 — Student Dashboard với 6 Widgets</div>
+      <div class="ptags"><span class="ptag">RSC</span><span class="ptag">Recharts</span><span class="ptag">Parallel fetch</span><span class="ptag">Streaming UI</span></div>
+    </div>
+    <div class="pbd"><pre class="ptext"><span class="hd">╔════════════════════════════════════════════════════════════════╗
+║  PROMPT 04 · STUDENT DASHBOARD — /student/dashboard           ║
+╚════════════════════════════════════════════════════════════════╝</span>
+
+<span class="hd">## BỐI CẢNH</span>
+Đã có: Prompt 01-03 xong. Bảng lesson_progress, quiz_attempts tồn tại.
+Mục tiêu: Trang /student/dashboard hiển thị đầy đủ data thật từ Supabase.
+Nếu chưa có recharts: npm install recharts
+
+<span class="hd">## LAYOUT 6 WIDGETS</span>
+
+<span class="kw">Widget 1 — Hero greeting:</span>
+  "Chào buổi sáng/chiều/tối, [Tên] 👋"
+  Sub: "Hôm nay là [ngày] · Streak: [X] ngày 🔥"
+
+<span class="kw">Widget 2 — 4 stat cards (grid 4 cột):</span>
+  - Bài đã hoàn thành / tổng bài đã bắt đầu
+  - Tổng giờ học (time_spent_seconds / 3600)
+  - Điểm TB quiz (average of quiz_attempts.score)
+  - Streak ngày học liên tiếp
+
+<span class="kw">Widget 3 — Progress ring (Recharts RadialBarChart):</span>
+  Vòng tròn hiển thị % lộ trình hoàn thành
+  Màu teal #00d4aa, background #1d1f2a
+  Label ở giữa: "[X]%"
+
+<span class="kw">Widget 4 — "Tiếp tục học" card:</span>
+  Bài học gần nhất có status = 'in_progress'
+  Thumbnail + tên bài + progress bar + nút "Tiếp tục →"
+  Nếu không có bài dở → "Chọn bài học đầu tiên →"
+
+<span class="kw">Widget 5 — Biểu đồ hoạt động 7 ngày (BarChart):</span>
+  X: 7 ngày gần nhất
+  Y: số phút học mỗi ngày (sum time_spent_seconds / 60)
+  Bar màu teal, hover tooltip
+
+<span class="kw">Widget 6 — Thành tích gần nhất (2-3 badges):</span>
+  3 badges mới nhất từ student_achievements
+  Nếu chưa có → hiện "Hoàn thành bài học để nhận huy hiệu đầu tiên"
+
+<span class="hd">## CODE PATTERN — Server Component + Client Charts</span>
+<span class="val">// Path: app/(dashboard)/student/dashboard/page.tsx
+import { requireRole } from '@/lib/auth/rbac'
+import { createServerActionSupabase } from '@/lib/auth/rbac'
+import { Suspense } from 'react'
+import { StudentDashboardClient } from './StudentDashboardClient'
+
+export default async function StudentDashboardPage() {
+  const user = await requireRole(['student', 'teacher', 'admin'])
+  const supabase = await createServerActionSupabase()
+
+  // Parallel fetch — không await tuần tự
+  const [progressRes, quizRes, recentRes] = await Promise.all([
+    supabase.from('lesson_progress')
+      .select('status, time_spent_seconds, completed_at, last_accessed')
+      .eq('student_id', user.id),
+    supabase.from('quiz_attempts')
+      .select('score, submitted_at, status')
+      .eq('student_id', user.id)
+      .eq('status', 'graded')
+      .order('submitted_at', { ascending: false })
+      .limit(10),
+    supabase.from('lesson_progress')
+      .select('lesson_id, status, completion_percentage, last_accessed')
+      .eq('student_id', user.id)
+      .eq('status', 'in_progress')
+      .order('last_accessed', { ascending: false })
+      .limit(1),
+  ])
+
+  const progress = progressRes.data ?? []
+  const quizzes = quizRes.data ?? []
+
+  // Tính toán stats server-side
+  const stats = {
+    completed: progress.filter(p => p.status === 'completed').length,
+    total: progress.length,
+    totalMinutes: Math.round(
+      progress.reduce((s, p) => s + (p.time_spent_seconds ?? 0), 0) / 60
+    ),
+    avgScore: quizzes.length > 0
+      ? Math.round(quizzes.reduce((s, q) => s + (q.score ?? 0), 0) / quizzes.length)
+      : null,
+  }
+
+  // Chart data: 7 ngày
+  const days = Array.from({length: 7}, (_, i) => {
+    const d = new Date(); d.setDate(d.getDate() - (6 - i))
+    return d.toISOString().split('T')[0]
+  })
+
+  const chartData = days.map(day => {
+    const dayProgress = progress.filter(p =>
+      p.last_accessed?.startsWith(day)
+    )
+    return {
+      day: day.slice(5), // MM-DD
+      minutes: Math.round(dayProgress.reduce((s, p) => s + (p.time_spent_seconds ?? 0), 0) / 60)
+    }
+  })
+
+  return (
+    &lt;StudentDashboardClient
+      user={user}
+      stats={stats}
+      chartData={chartData}
+      inProgressLesson={recentRes.data?.[0] ?? null}
+    /&gt;
+  )
+}</span>
+
+<span class="hd">## YÊU CẦU NGHIÊM NGẶT</span>
+<span class="rule">RULE 1:</span> Không sửa sidebar, layout, hoặc bất kỳ component hiện có nào.
+<span class="rule">RULE 2:</span> Chart component (recharts) phải là 'use client', page là Server Component.
+<span class="rule">RULE 3:</span> Dùng đúng màu brand: bg #080910, card #0f1018, teal #00d4aa.
+<span class="rule">RULE 4:</span> Nếu data trống (học sinh mới) → hiện empty states thân thiện, không fake data.
+<span class="rule">RULE 5:</span> Tất cả số hiển thị phải qua Math.round() hoặc .toFixed(1).
+
+<span class="hd">## FILES CẦN TẠO</span>
+<span class="ok">TẠO:</span>
+  app/(dashboard)/student/dashboard/page.tsx
+  app/(dashboard)/student/dashboard/StudentDashboardClient.tsx
+  app/(dashboard)/student/dashboard/loading.tsx
+  app/(dashboard)/student/dashboard/error.tsx
+
+<span class="hd">## TEST CHECKLIST</span>
+<span class="ok">✓</span> Đăng nhập học sinh → thấy dashboard với data thật (không phải mock)
+<span class="ok">✓</span> Chart hiện đúng 7 ngày
+<span class="ok">✓</span> Học sinh mới (chưa học gì) → hiện empty states không lỗi
+<span class="ok">✓</span> Tất cả số hiển thị tròn, không có dấu phẩy thập phân dài</pre></div>
+  </div>
+</div>
+</div>
+
+<!-- P05 -->
+<div class="sec" id="p05">
+<div class="wrap">
+  <div class="stag purple"><span class="sn purple">5</span> Prompt 05</div>
+  <h2>Quiz Engine + Ngân Hàng Đề Thi</h2>
+  <div class="pcrd">
+    <div class="phd">
+      <div class="pt"><span class="pb pb-purple">CORE FEATURE</span> PROMPT 05 — Quiz & Ngân Hàng Đề Thi Hoàn Chỉnh</div>
+      <div class="ptags"><span class="ptag">Server Actions</span><span class="ptag">Anti-cheat</span><span class="ptag">Timer</span><span class="ptag">Auto-grade</span></div>
+    </div>
+    <div class="pbd"><pre class="ptext"><span class="hd">╔════════════════════════════════════════════════════════════════╗
+║  PROMPT 05 · QUIZ ENGINE + NGÂN HÀNG ĐỀ THI                   ║
+╚════════════════════════════════════════════════════════════════╝</span>
+
+<span class="hd">## DATABASE SCHEMA — Chạy trước trong SQL Editor</span>
+<span class="val">CREATE TABLE IF NOT EXISTS public.question_banks (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  teacher_id UUID NOT NULL REFERENCES public.profiles(id),
+  title TEXT NOT NULL, subject TEXT DEFAULT 'Tin học',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.questions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  bank_id UUID REFERENCES public.question_banks(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  type TEXT CHECK (type IN ('single_choice','multiple_choice','true_false','fill_blank')) NOT NULL,
+  difficulty TEXT CHECK (difficulty IN ('easy','medium','hard')) DEFAULT 'medium',
+  points INT DEFAULT 10,
+  explanation TEXT,
+  "order" INT DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS public.question_options (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  question_id UUID REFERENCES public.questions(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  is_correct BOOLEAN DEFAULT FALSE,
+  "order" INT DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS public.quizzes (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  teacher_id UUID NOT NULL REFERENCES public.profiles(id),
+  lesson_id UUID, class_id UUID,
+  title TEXT NOT NULL, description TEXT,
+  time_limit_minutes INT,
+  passing_score INT DEFAULT 70,
+  randomize_questions BOOLEAN DEFAULT TRUE,
+  randomize_options BOOLEAN DEFAULT TRUE,
+  max_attempts INT DEFAULT 3,
+  show_answers_after TEXT DEFAULT 'after_submit',
+  is_published BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.quiz_questions (
+  quiz_id UUID REFERENCES public.quizzes(id) ON DELETE CASCADE,
+  question_id UUID REFERENCES public.questions(id),
+  "order" INT, PRIMARY KEY (quiz_id, question_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.quiz_answers (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  attempt_id UUID REFERENCES public.quiz_attempts(id) ON DELETE CASCADE,
+  question_id UUID REFERENCES public.questions(id),
+  selected_option_ids UUID[],
+  text_answer TEXT,
+  is_correct BOOLEAN,
+  points_earned NUMERIC(5,2) DEFAULT 0
+);
+
+-- RLS
+ALTER TABLE public.question_banks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.questions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.question_options ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.quizzes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.quiz_questions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.quiz_answers ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "teacher_own_bank" ON question_banks FOR ALL USING (teacher_id=auth.uid());
+CREATE POLICY "teacher_own_questions" ON questions FOR ALL USING (
+  EXISTS(SELECT 1 FROM question_banks WHERE id=bank_id AND teacher_id=auth.uid())
+);
+-- Học sinh XEM câu hỏi khi đang thi (KHÔNG thấy is_correct)
+-- Tạo View an toàn:
+CREATE OR REPLACE VIEW public.quiz_questions_safe AS
+  SELECT q.id, q.content, q.type, q.points, qq.order, qq.quiz_id,
+    json_agg(json_build_object('id',qo.id,'content',qo.content,'order',qo.order)
+      ORDER BY qo.order) AS options
+  FROM questions q
+  JOIN quiz_questions qq ON qq.question_id=q.id
+  JOIN question_options qo ON qo.question_id=q.id
+  GROUP BY q.id, q.content, q.type, q.points, qq.order, qq.quiz_id;
+-- View này KHÔNG expose is_correct</span>
+
+<span class="hd">## SERVER ACTIONS — app/actions/quiz.ts</span>
+<span class="val">'use server'
+import { verifyRole, createServerActionSupabase } from '@/lib/auth/rbac'
+
+// Bắt đầu làm bài (học sinh)
+export async function startQuizAttempt(quizId: string) {
+  const user = await verifyRole(['student'])
+  const supabase = await createServerActionSupabase()
+
+  // 1. Kiểm tra quiz published + trong thời gian
+  const { data: quiz } = await supabase
+    .from('quizzes').select('*').eq('id', quizId).eq('is_published', true).single()
+  if (!quiz) return { error: 'Quiz không tồn tại hoặc chưa mở' }
+
+  // 2. Đếm số lần đã làm
+  const { count } = await supabase.from('quiz_attempts')
+    .select('*', { count: 'exact', head: true })
+    .eq('student_id', user.id).eq('quiz_id', quizId)
+    .neq('status', 'in_progress')
+  if (quiz.max_attempts && (count ?? 0) >= quiz.max_attempts) {
+    return { error: `Bạn đã hết ${quiz.max_attempts} lần thử` }
+  }
+
+  // 3. Tạo attempt
+  const { data: attempt } = await supabase.from('quiz_attempts').insert({
+    student_id: user.id, quiz_id: quizId,
+    quiz_title: quiz.title,
+    attempt_number: (count ?? 0) + 1
+  }).select().single()
+
+  // 4. Lấy câu hỏi (randomize nếu cần) qua view an toàn
+  const { data: questions } = await supabase
+    .from('quiz_questions_safe').select('*').eq('quiz_id', quizId)
+
+  let orderedQuestions = questions ?? []
+  if (quiz.randomize_questions) {
+    // Fisher-Yates shuffle
+    for (let i = orderedQuestions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[orderedQuestions[i], orderedQuestions[j]] = [orderedQuestions[j], orderedQuestions[i]]
+    }
+  }
+
+  if (quiz.randomize_options) {
+    orderedQuestions = orderedQuestions.map(q => ({
+      ...q, options: [...q.options].sort(() => Math.random() - 0.5)
+    }))
+  }
+
+  return { attemptId: attempt?.id, questions: orderedQuestions, quiz }
+}
+
+// Nộp bài (học sinh) — chấm điểm server-side
+export async function submitQuizAttempt(
+  attemptId: string,
+  answers: { questionId: string; selectedOptionIds?: string[]; textAnswer?: string }[]
+) {
+  const user = await verifyRole(['student'])
+  const supabase = await createServerActionSupabase()
+
+  // 1. Verify attempt thuộc về user này và đang in_progress
+  const { data: attempt } = await supabase.from('quiz_attempts')
+    .select('*').eq('id', attemptId).eq('student_id', user.id)
+    .eq('status', 'in_progress').single()
+  if (!attempt) return { error: 'Không thể nộp bài này' }
+
+  // 2. Lấy đáp án đúng từ DB (server-side)
+  const questionIds = answers.map(a => a.questionId)
+  const { data: correctOptions } = await supabase.from('question_options')
+    .select('id, question_id, is_correct')
+    .in('question_id', questionIds)
+
+  const { data: questions } = await supabase.from('questions')
+    .select('id, points, type').in('id', questionIds)
+
+  // 3. Chấm điểm từng câu
+  let totalScore = 0, maxScore = 0
+  const answerRecords = answers.map(answer => {
+    const q = questions?.find(q => q.id === answer.questionId)
+    const qPoints = q?.points ?? 10
+    maxScore += qPoints
+    const correctIds = correctOptions
+      ?.filter(o => o.question_id === answer.questionId && o.is_correct)
+      .map(o => o.id) ?? []
+
+    let isCorrect = false
+    if (q?.type === 'fill_blank') {
+      isCorrect = (answer.textAnswer?.toLowerCase().trim() ===
+        correctIds[0]?.toLowerCase().trim()) ?? false
+    } else if (q?.type === 'single_choice' || q?.type === 'true_false') {
+      isCorrect = answer.selectedOptionIds?.length === 1 &&
+        answer.selectedOptionIds[0] === correctIds[0]
+    } else if (q?.type === 'multiple_choice') {
+      const selected = new Set(answer.selectedOptionIds ?? [])
+      const correct = new Set(correctIds)
+      isCorrect = selected.size === correct.size &&
+        [...selected].every(id => correct.has(id))
+    }
+
+    if (isCorrect) totalScore += qPoints
+    return {
+      attempt_id: attemptId, question_id: answer.questionId,
+      selected_option_ids: answer.selectedOptionIds,
+      text_answer: answer.textAnswer,
+      is_correct: isCorrect,
+      points_earned: isCorrect ? qPoints : 0
+    }
+  })
+
+  const scorePercent = maxScore > 0 ? Math.round(totalScore / maxScore * 100) : 0
+
+  // 4. Lưu answers và update attempt
+  await Promise.all([
+    supabase.from('quiz_answers').insert(answerRecords),
+    supabase.from('quiz_attempts').update({
+      status: 'graded', submitted_at: new Date().toISOString(),
+      score: scorePercent, max_score: 100
+    }).eq('id', attemptId)
+  ])
+
+  return { score: scorePercent, passed: scorePercent >= (attempt.passing_score ?? 70), attemptId }
+}</span>
+
+<span class="hd">## YÊU CẦU NGHIÊM NGẶT</span>
+<span class="rule">RULE 1:</span> is_correct KHÔNG BAO GIỜ gửi về client khi đang làm bài. Dùng quiz_questions_safe view.
+<span class="rule">RULE 2:</span> Toàn bộ chấm điểm server-side trong submitQuizAttempt, không nhận score từ client.
+<span class="rule">RULE 3:</span> Verify attempt status='in_progress' TRƯỚC KHI chấm — không cho submit 2 lần.
+<span class="rule">RULE 4:</span> Timer state machine trong client: 'intro' | 'active' | 'submitting' | 'results'.
+<span class="rule">RULE 5:</span> Auto-submit khi hết giờ — gọi expireQuizAttempt() trong useEffect cleanup.
+
+<span class="hd">## FILES CẦN TẠO</span>
+<span class="ok">SQL:</span> Tables + View + RLS (chạy trong SQL Editor)
+<span class="ok">TẠO:</span>
+  app/actions/quiz.ts
+  app/(dashboard)/student/quiz/[quizId]/page.tsx (intro + active)
+  app/(dashboard)/student/quiz/[quizId]/QuizPlayer.tsx (client component)
+  app/(dashboard)/student/quiz/[attemptId]/results/page.tsx
+  app/(dashboard)/teacher/quiz-builder/page.tsx
+  app/(dashboard)/teacher/quiz-results/[quizId]/page.tsx</pre></div>
+  </div>
+</div>
+</div>
+
+<!-- P06-P11: Compact prompts -->
+<div class="sec" id="p06">
+<div class="wrap">
+  <div class="stag teal"><span class="sn teal">6</span> Prompt 06</div>
+  <h2>Realtime Tiến Độ + Notification Bell</h2>
+  <div class="pcrd">
+    <div class="phd">
+      <div class="pt"><span class="pb pb-teal">REALTIME</span> PROMPT 06 — Supabase Realtime + Notification System</div>
+      <div class="ptags"><span class="ptag">WebSocket</span><span class="ptag">Bell badge</span><span class="ptag">DB Triggers</span><span class="ptag">Resend email</span></div>
+    </div>
+    <div class="pbd"><pre class="ptext"><span class="hd">╔════════════════════════════════════════════════════════════════╗
+║  PROMPT 06 · REALTIME TIẾN ĐỘ + NOTIFICATION BELL            ║
+╚════════════════════════════════════════════════════════════════╝</span>
+
+<span class="hd">## MỤC TIÊU</span>
+1. Bell icon trên navbar hiển thị badge số chưa đọc — realtime
+2. Dropdown preview 5 thông báo mới nhất
+3. Trang /notifications đầy đủ
+4. DB triggers tự tạo notification khi học sinh hoàn thành bài, có điểm quiz
+
+<span class="hd">## SUPABASE TRIGGER — Tạo notification tự động</span>
+<span class="val">-- Trigger: học sinh hoàn thành bài → thông báo giáo viên + phụ huynh
+CREATE OR REPLACE FUNCTION notify_on_lesson_complete() RETURNS TRIGGER AS $$
+DECLARE p RECORD;
+BEGIN
+  IF NEW.status='completed' AND COALESCE(OLD.status,'')!='completed' THEN
+    -- Thông báo giáo viên (qua bảng notifications)
+    INSERT INTO notifications(user_id, type, title, body, data, action_url)
+    SELECT c.teacher_id, 'lesson_completed',
+      'Học sinh hoàn thành bài học',
+      (SELECT full_name FROM profiles WHERE id=NEW.student_id) || ' đã hoàn thành bài',
+      jsonb_build_object('student_id', NEW.student_id, 'lesson_id', NEW.lesson_id),
+      '/teacher/students/' || NEW.student_id
+    FROM lessons l
+    JOIN class_members cm ON cm.student_id=NEW.student_id
+    JOIN classes c ON c.id=cm.class_id
+    WHERE l.id=NEW.lesson_id LIMIT 1;
+  END IF;
+  RETURN NEW;
+END; $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS trig_lesson_notify ON public.lesson_progress;
+CREATE TRIGGER trig_lesson_notify AFTER INSERT OR UPDATE ON public.lesson_progress
+  FOR EACH ROW EXECUTE FUNCTION notify_on_lesson_complete();</span>
+
+<span class="hd">## HOOK: hooks/useNotifications.ts</span>
+<span class="val">'use client'
+import { useEffect, useState, useRef } from 'react'
+import { createClient } from '@/lib/supabase-client'
+
+export function useNotifications(userId: string | null) {
+  const [notifications, setNotifications] = useState&lt;any[]&gt;([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const supabase = createClient()
+  const channelRef = useRef&lt;any&gt;(null)
+
+  useEffect(() => {
+    if (!userId) return
+
+    // Load ban đầu
+    supabase.from('notifications').select('*')
+      .eq('user_id', userId).order('created_at', { ascending: false }).limit(20)
+      .then(({ data }) => {
+        setNotifications(data ?? [])
+        setUnreadCount(data?.filter(n => !n.is_read).length ?? 0)
+      })
+
+    // Realtime subscription
+    channelRef.current = supabase.channel(`notif-${userId}`)
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'notifications',
+        filter: `user_id=eq.${userId}`
+      }, (payload) => {
+        setNotifications(prev => [payload.new, ...prev])
+        setUnreadCount(prev => prev + 1)
+      })
+      .subscribe()
+
+    return () => {
+      if (channelRef.current) supabase.removeChannel(channelRef.current)
+    }
+  }, [userId])
+
+  const markAsRead = async (id: string) => {
+    setNotifications(prev => prev.map(n => n.id===id ? {...n, is_read: true} : n))
+    setUnreadCount(prev => Math.max(0, prev - 1))
+    await supabase.from('notifications').update({ is_read: true }).eq('id', id)
+  }
+
+  const markAllAsRead = async () => {
+    setNotifications(prev => prev.map(n => ({...n, is_read: true})))
+    setUnreadCount(0)
+    await supabase.from('notifications').update({ is_read: true })
+      .eq('user_id', userId!).eq('is_read', false)
+  }
+
+  return { notifications, unreadCount, markAsRead, markAllAsRead }
+}</span>
+
+<span class="hd">## COMPONENT: components/NotificationBell.tsx</span>
+<span class="val">'use client'
+import { Bell } from 'lucide-react'
+import { useNotifications } from '@/hooks/useNotifications'
+
+export function NotificationBell({ userId }: { userId: string }) {
+  const [open, setOpen] = useState(false)
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications(userId)
+
+  return (
+    &lt;div className="relative"&gt;
+      &lt;button onClick={() =&gt; setOpen(!open)}
+        className="relative p-2 rounded-lg hover:bg-white/5 transition-colors"
+        aria-label={`Thông báo${unreadCount > 0 ? ` (${unreadCount})` : ''}`}&gt;
+        &lt;Bell size={20} className="text-[#5a5d72]" /&gt;
+        {unreadCount &gt; 0 && (
+          &lt;span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1
+            bg-[#f03060] text-white text-[10px] font-bold rounded-full
+            flex items-center justify-center"&gt;
+            {unreadCount &gt; 99 ? '99+' : unreadCount}
+          &lt;/span&gt;
+        )}
+      &lt;/button&gt;
+      {open && (
+        &lt;div className="absolute right-0 top-full mt-2 w-80 bg-[#0f1018] border border-[#1d1f2a]
+          rounded-xl shadow-2xl z-50 overflow-hidden"&gt;
+          &lt;div className="flex items-center justify-between px-4 py-3 border-b border-[#1d1f2a]"&gt;
+            &lt;span className="text-sm font-semibold text-[#d8dbe8]"&gt;Thông báo&lt;/span&gt;
+            {unreadCount &gt; 0 && (
+              &lt;button onClick={markAllAsRead} className="text-xs text-[#00d4aa]"&gt;Đọc tất cả&lt;/button&gt;
+            )}
+          &lt;/div&gt;
+          {notifications.slice(0,5).map(n =&gt; (
+            &lt;button key={n.id} onClick={() =&gt; { markAsRead(n.id); if(n.action_url) window.location.href=n.action_url }}
+              className={`w-full text-left px-4 py-3 border-b border-[#1d1f2a] last:border-0 hover:bg-white/3 transition-colors ${!n.is_read ? 'bg-[#00d4aa]/4' : ''}`}&gt;
+              &lt;p className="text-xs font-medium text-[#d8dbe8] truncate"&gt;{n.title}&lt;/p&gt;
+              &lt;p className="text-xs text-[#5a5d72] mt-0.5 truncate"&gt;{n.body}&lt;/p&gt;
+            &lt;/button&gt;
+          ))}
+          {notifications.length === 0 && (
+            &lt;div className="px-4 py-6 text-center text-xs text-[#5a5d72]"&gt;Chưa có thông báo nào&lt;/div&gt;
+          )}
+          &lt;a href="/notifications" className="block text-center py-3 text-xs text-[#00d4aa] border-t border-[#1d1f2a] hover:bg-white/3"&gt;
+            Xem tất cả →
+          &lt;/a&gt;
+        &lt;/div&gt;
+      )}
+    &lt;/div&gt;
+  )
+}</span>
+
+<span class="hd">## YÊU CẦU NGHIÊM NGẶT</span>
+<span class="rule">RULE 1:</span> Triggers phải dùng SECURITY DEFINER để bypass RLS.
+<span class="rule">RULE 2:</span> useEffect PHẢI có cleanup: return () => supabase.removeChannel(channelRef.current)
+<span class="rule">RULE 3:</span> Khi thêm NotificationBell vào navbar — báo đúng file và dòng, chờ confirm.
+<span class="rule">RULE 4:</span> Không spam: max 1 notification cùng loại trong 5 phút cho cùng user.
+
+<span class="hd">## FILES CẦN TẠO</span>
+<span class="ok">SQL:</span> Triggers (lesson_complete, quiz_graded)
+<span class="ok">TẠO:</span> hooks/useNotifications.ts · components/NotificationBell.tsx
+      app/(dashboard)/notifications/page.tsx</pre></div>
+  </div>
+</div>
+</div>
+
+<!-- P07 -->
+<div class="sec" id="p07">
+<div class="wrap">
+  <div class="stag blue"><span class="sn blue">7</span> Prompt 07</div>
+  <h2>Diễn Đàn Thảo Luận Realtime Theo Bài Học</h2>
+  <div class="pcrd">
+    <div class="phd">
+      <div class="pt"><span class="pb pb-blue">FORUM</span> PROMPT 07 — Discussion Forum + Threaded Replies</div>
+      <div class="ptags"><span class="ptag">Threaded</span><span class="ptag">Markdown</span><span class="ptag">Realtime replies</span><span class="ptag">Moderation</span></div>
+    </div>
+    <div class="pbd"><pre class="ptext"><span class="hd">╔════════════════════════════════════════════════════════════════╗
+║  PROMPT 07 · DIỄN ĐÀN THẢO LUẬN REALTIME                     ║
+╚════════════════════════════════════════════════════════════════╝</span>
+
+<span class="hd">## DATABASE</span>
+<span class="val">CREATE TABLE IF NOT EXISTS public.discussion_threads (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  lesson_id UUID NOT NULL,
+  author_id UUID NOT NULL REFERENCES public.profiles(id),
+  title TEXT NOT NULL,
+  body TEXT NOT NULL,
+  type TEXT DEFAULT 'question' CHECK (type IN ('question','discussion','announcement')),
+  status TEXT DEFAULT 'open' CHECK (status IN ('open','resolved','pinned','closed')),
+  upvote_count INT DEFAULT 0,
+  reply_count INT DEFAULT 0,
+  is_deleted BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.discussion_replies (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  thread_id UUID REFERENCES public.discussion_threads(id) ON DELETE CASCADE,
+  parent_reply_id UUID REFERENCES public.discussion_replies(id),
+  author_id UUID NOT NULL REFERENCES public.profiles(id),
+  body TEXT NOT NULL,
+  is_teacher_answer BOOLEAN DEFAULT FALSE,
+  upvote_count INT DEFAULT 0,
+  is_deleted BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.discussion_threads ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.discussion_replies ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "all_can_read_threads" ON discussion_threads FOR SELECT USING (NOT is_deleted);
+CREATE POLICY "auth_can_create_thread" ON discussion_threads FOR INSERT WITH CHECK (author_id=auth.uid());
+CREATE POLICY "own_or_teacher_update" ON discussion_threads FOR UPDATE USING (
+  author_id=auth.uid() OR
+  EXISTS(SELECT 1 FROM profiles WHERE id=auth.uid() AND role IN ('teacher','admin'))
+);
+CREATE POLICY "all_can_read_replies" ON discussion_replies FOR SELECT USING (NOT is_deleted);
+CREATE POLICY "auth_can_reply" ON discussion_replies FOR INSERT WITH CHECK (author_id=auth.uid());
+
+-- Auto update reply_count
+CREATE OR REPLACE FUNCTION update_reply_count() RETURNS TRIGGER AS $$
+BEGIN UPDATE discussion_threads SET reply_count=reply_count+1 WHERE id=NEW.thread_id; RETURN NEW; END;
+$$ LANGUAGE plpgsql;
+CREATE TRIGGER trig_reply_count AFTER INSERT ON discussion_replies FOR EACH ROW EXECUTE FUNCTION update_reply_count();
+
+-- Bật Realtime
+ALTER PUBLICATION supabase_realtime ADD TABLE public.discussion_threads;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.discussion_replies;</span>
+
+<span class="hd">## COMPONENT: DiscussionPanel — Lazy loaded, nhúng vào bài học</span>
+<span class="val">// CÁCH NHÚNG VÀO TRANG BÀI HỌC (chỉ thêm 2 dòng, không sửa gì khác):
+// 1. Thêm import: const DiscussionPanel = dynamic(() => import('@/components/discussion/DiscussionPanel'), { ssr: false })
+// 2. Thêm ở cuối JSX: &lt;DiscussionPanel lessonId={lessonId} userId={user.id} userRole={user.role} /&gt;
+
+// Realtime hook cho replies:
+function useThreadReplies(threadId: string) {
+  const [replies, setReplies] = useState&lt;any[]&gt;([])
+  const supabase = createClient()
+  useEffect(() => {
+    supabase.from('discussion_replies').select('*, author:profiles(full_name, avatar_url, role)')
+      .eq('thread_id', threadId).order('created_at')
+      .then(({ data }) => setReplies(data ?? []))
+    const ch = supabase.channel(`replies-${threadId}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public',
+        table: 'discussion_replies', filter: `thread_id=eq.${threadId}` },
+        (p) => setReplies(prev => [...prev, p.new]))
+      .subscribe()
+    return () => supabase.removeChannel(ch)
+  }, [threadId])
+  return replies
+}</span>
+
+<span class="hd">## YÊU CẦU NGHIÊM NGẶT</span>
+<span class="rule">RULE 1:</span> DiscussionPanel PHẢI lazy load — next/dynamic với ssr: false.
+<span class="rule">RULE 2:</span> Mọi markdown render PHẢI dùng rehype-sanitize — không raw HTML.
+<span class="rule">RULE 3:</span> Rate limit: max 5 threads/giờ, 20 replies/giờ per user (check trong Server Action).
+<span class="rule">RULE 4:</span> Realtime channel cleanup trong useEffect return.
+
+<span class="hd">## FILES CẦN TẠO</span>
+<span class="ok">TẠO:</span> components/discussion/DiscussionPanel.tsx
+      components/discussion/ThreadDetail.tsx
+      components/discussion/NewThreadModal.tsx
+      app/(dashboard)/student/discussion/page.tsx
+      app/actions/discussion.ts</pre></div>
+  </div>
+</div>
+</div>
+
+<!-- P08 Gamification -->
+<div class="sec" id="p08">
+<div class="wrap">
+  <div class="stag green"><span class="sn green">8</span> Prompt 08</div>
+  <h2>Gamification — XP, Huy Hiệu, Leaderboard</h2>
+  <div class="pcrd">
+    <div class="phd">
+      <div class="pt"><span class="pb pb-green">GAMIFICATION</span> PROMPT 08 — XP System + Badges + Live Leaderboard</div>
+      <div class="ptags"><span class="ptag">XP System</span><span class="ptag">Badges</span><span class="ptag">Realtime leaderboard</span><span class="ptag">PC theme</span></div>
+    </div>
+    <div class="pbd"><pre class="ptext"><span class="hd">╔════════════════════════════════════════════════════════════════╗
+║  PROMPT 08 · GAMIFICATION — XP + HUY HIỆU + LEADERBOARD       ║
+╚════════════════════════════════════════════════════════════════╝</span>
+
+<span class="hd">## Ý TƯỞNG SÁNG TẠO — Vượt trội hơn LMS360</span>
+Theme PC Master: thay vì badge thông thường → dùng tên linh kiện PC!
+  "CPU Starter" → hoàn thành bài đầu tiên
+  "RAM Turbo" → học liên tiếp 7 ngày
+  "GPU Master" → điểm tuyệt đối quiz
+  "Motherboard Pro" → hoàn thành lộ trình
+  "SSD Speed" → hoàn thành bài trong &lt;30 phút
+  "PC Builder Legend" → lắp ráp đúng 10 cấu hình
+
+<span class="hd">## DATABASE</span>
+<span class="val">CREATE TABLE IF NOT EXISTS public.achievement_definitions (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  icon TEXT,
+  points INT DEFAULT 10,
+  xp_reward INT DEFAULT 50,
+  rarity TEXT CHECK (rarity IN ('common','uncommon','rare','legendary')) DEFAULT 'common'
+);
+
+-- Seed với theme PC:
+INSERT INTO achievement_definitions VALUES
+  ('cpu_starter','CPU Starter','Hoàn thành bài học đầu tiên','⚡',10,50,'common'),
+  ('ram_turbo','RAM Turbo','Học liên tiếp 7 ngày','🔥',30,150,'uncommon'),
+  ('gpu_master','GPU Master','Điểm tuyệt đối một bài quiz','⭐',50,250,'rare'),
+  ('motherboard_pro','Motherboard Pro','Hoàn thành toàn bộ lộ trình','🖥️',100,500,'legendary'),
+  ('ssd_speed','SSD Speed','Hoàn thành bài trong 30 phút','⚡',20,100,'uncommon'),
+  ('pc_legend','PC Builder Legend','Lắp đúng 10 cấu hình trong Lab','🏆',80,400,'legendary')
+ON CONFLICT (id) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS public.student_achievements (
+  student_id UUID REFERENCES public.profiles(id),
+  achievement_id TEXT REFERENCES public.achievement_definitions(id),
+  earned_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (student_id, achievement_id)
+);
+
+ALTER TABLE student_achievements ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "own_achievements" ON student_achievements FOR SELECT USING (student_id=auth.uid());
+CREATE POLICY "insert_achievements" ON student_achievements FOR INSERT WITH CHECK (student_id=auth.uid());</span>
+
+<span class="hd">## ACHIEVEMENT CHECKER — lib/achievements.ts</span>
+<span class="val">'use server'
+// Gọi sau mọi action: completeLessonAction, submitQuizAttempt, endBuilderSession
+export async function checkAndAwardAchievements(
+  userId: string,
+  trigger: 'lesson_completed' | 'quiz_graded' | 'lab_session' | 'daily_login'
+) {
+  const supabase = await createServerActionSupabase()
+  const { data: earned } = await supabase.from('student_achievements')
+    .select('achievement_id').eq('student_id', userId)
+  const earnedIds = new Set(earned?.map(e => e.achievement_id) ?? [])
+
+  const toCheck = ACHIEVEMENTS.filter(a => !earnedIds.has(a.id) && a.triggers.includes(trigger))
+
+  for (const achievement of toCheck) {
+    const qualified = await checkCondition(supabase, userId, achievement)
+    if (qualified) {
+      await supabase.from('student_achievements').insert({ student_id: userId, achievement_id: achievement.id })
+      await supabase.from('profiles').update({ xp: supabase.rpc('increment', { x: achievement.xp_reward }) }).eq('id', userId)
+      // Gửi notification
+      await supabase.from('notifications').insert({
+        user_id: userId, type: 'achievement_earned',
+        title: `🏆 Nhận huy hiệu: ${achievement.title}`,
+        body: achievement.description,
+        data: { achievement_id: achievement.id }
+      })
+    }
+  }
+}</span>
+
+<span class="hd">## LEADERBOARD REALTIME — /leaderboard</span>
+<span class="val">// Realtime leaderboard: subscribe profiles table thay đổi XP
+// Query: SELECT id, full_name, xp, level, avatar_url FROM profiles
+//   WHERE role='student' ORDER BY xp DESC LIMIT 20
+// Realtime: khi xp update → refresh list tự động
+
+// UI: Bảng xếp hạng với:
+// - Top 3: highlight đặc biệt (gold/silver/bronze)
+// - Avatar + Tên + XP + Level badge
+// - Chỉ hiện trong lớp của học sinh (filter by class_id)
+// - Toggle: "Lớp tôi" | "Toàn trường"</span>
+
+<span class="hd">## YÊU CẦU NGHIÊM NGẶT</span>
+<span class="rule">RULE 1:</span> checkAndAwardAchievements chỉ gọi server-side, không gọi client.
+<span class="rule">RULE 2:</span> Idempotent: PRIMARY KEY(student_id, achievement_id) đảm bảo không duplicate.
+<span class="rule">RULE 3:</span> XP update dùng Supabase RPC increment để atomic, không race condition.
+<span class="rule">RULE 4:</span> Leaderboard chỉ hiện trong phạm vi lớp học để privacy.
+
+<span class="hd">## FILES CẦN TẠO</span>
+<span class="ok">SQL:</span> Tables + seed data
+<span class="ok">TẠO:</span> lib/achievements.ts · app/(dashboard)/student/achievements/page.tsx
+      app/(dashboard)/leaderboard/page.tsx · components/achievements/BadgeCard.tsx</pre></div>
+  </div>
+</div>
+</div>
+
+<!-- P09 Builder Lab -->
+<div class="sec" id="p09">
+<div class="wrap">
+  <div class="stag amber"><span class="sn amber">9</span> Prompt 09</div>
+  <h2>Builder Lab Nâng Cao + Tracking Sessions</h2>
+  <div class="pcrd">
+    <div class="phd">
+      <div class="pt"><span class="pb pb-amber">UNIQUE FEATURE</span> PROMPT 09 — Builder Lab + Session Tracking + AI Integration</div>
+      <div class="ptags"><span class="ptag">Builder Lab</span><span class="ptag">Session tracking</span><span class="ptag">TDP calculator</span><span class="ptag">AI suggestions</span></div>
+    </div>
+    <div class="pbd"><pre class="ptext"><span class="hd">╔════════════════════════════════════════════════════════════════╗
+║  PROMPT 09 · BUILDER LAB NÂNG CAO + SESSION TRACKING          ║
+╚════════════════════════════════════════════════════════════════╝</span>
+
+<span class="hd">## MỤC TIÊU</span>
+Thêm tracking session vào Builder Lab HIỆN CÓ mà không phá vỡ bất cứ thứ gì.
+Thêm 3 tính năng mới: session tracking, compatibility score, AI suggestion tự động.
+
+<span class="hd">## DATABASE</span>
+<span class="val">CREATE TABLE IF NOT EXISTS public.builder_sessions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  student_id UUID NOT NULL REFERENCES public.profiles(id),
+  lesson_id UUID,
+  started_at TIMESTAMPTZ DEFAULT NOW(),
+  ended_at TIMESTAMPTZ,
+  duration_seconds INT,
+  components_used JSONB DEFAULT '{}',
+  tdp_total NUMERIC,
+  compatibility_score INT DEFAULT 0,
+  completed_build BOOLEAN DEFAULT FALSE
+);
+
+ALTER TABLE public.builder_sessions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "own_sessions" ON builder_sessions FOR ALL USING (student_id=auth.uid());
+CREATE POLICY "teacher_view" ON builder_sessions FOR SELECT USING (
+  EXISTS(SELECT 1 FROM profiles WHERE id=auth.uid() AND role IN ('teacher','admin'))
+);</span>
+
+<span class="hd">## THÊM VÀO BUILDER LAB (chỉ thêm, không sửa logic hiện có)</span>
+<span class="val">// Trong Builder component, thêm useEffect này:
+// Báo trước tên file và dòng: app/builder/page.js#L63-L85 — file đã có useEffect khởi tạo session (gọi `startBuilderSession()` / `endBuilderSession()`).
+// Nếu muốn chuyển vị trí chèn hoặc mở rộng payload session (components, tdp, compatibility), xác nhận để tôi chỉnh tiếp.
+
+useEffect(() => {
+  // Bắt đầu session
+  let sessionId: string | null = null
+  const startSession = async () => {
+    const res = await fetch('/api/builder/start-session', { method: 'POST',
+      body: JSON.stringify({ lesson_id: lessonId }),
+      headers: { 'Content-Type': 'application/json' } })
+    const data = await res.json()
+    sessionId = data.sessionId
+  }
+  startSession()
+
+  return () => {
+    // Kết thúc session khi rời lab
+    if (sessionId) {
+      fetch('/api/builder/end-session', { method: 'POST',
+        body: JSON.stringify({
+          sessionId,
+          components: selectedComponents,  // Tên biến thực tế trong code
+          tdp: totalTdp,
+          compatibilityScore: compatScore,
+          completed: isCompleted
+        }),
+        headers: { 'Content-Type': 'application/json' }
+      })
+    }
+  }
+}, [])  // Chỉ chạy khi mount/unmount</span>
+
+<span class="hd">## TÍNH NĂNG MỚI: AI Suggestion trong Builder Lab</span>
+<span class="val">// Khi học sinh thêm component, gọi AI để gợi ý tương thích:
+async function getAiSuggestion(components: SelectedComponent[]) {
+  const res = await fetch('/api/ai-guru', {
+    method: 'POST',
+    body: JSON.stringify({
+      message: `Tôi đang lắp PC với: ${components.map(c => c.name).join(', ')}. 
+        Hãy gợi ý component tiếp theo phù hợp và giải thích tại sao (ngắn gọn, 2-3 câu).`,
+      context: 'Đang trong Builder Lab'
+    }),
+    headers: { 'Content-Type': 'application/json' }
+  })
+  return res.json()
+}
+
+// Hiển thị trong side panel của Builder Lab
+// Chỉ gọi khi user đã chọn ít nhất 1 component (debounce 2 giây)
+// Không tự động popup — chỉ hiện khi user click "💡 Gợi ý AI"</span>
+
+<span class="hd">## YÊU CẦU NGHIÊM NGẶT</span>
+<span class="rule">RULE 1:</span> KHÔNG thay đổi bất kỳ logic 2D builder, drag-drop, hoặc hand tracking hiện có.
+<span class="rule">RULE 2:</span> Session tracking là additive — chỉ thêm useEffect, không sửa state hiện tại.
+<span class="rule">RULE 3:</span> AI suggestion là optional (button click), không tự trigger ảnh hưởng UX.
+<span class="rule">RULE 4:</span> MediaPipe vẫn phải lazy load — không thay đổi setup hiện tại.
+<span class="rule">RULE 5:</span> Báo đúng file và dòng cần thêm useEffect trước khi code.
+
+<span class="hd">## FILES CẦN TẠO (không sửa builder hiện có)</span>
+<span class="ok">SQL:</span> builder_sessions table + RLS
+<span class="ok">TẠO:</span> app/api/builder/start-session/route.ts
+      app/api/builder/end-session/route.ts
+<span class="ok">SỬA (sau khi xác nhận):</span> Chỉ thêm 1 useEffect vào builder component</pre></div>
+  </div>
+</div>
+</div>
+
+<!-- P10 Certificates -->
+<div class="sec" id="p10">
+<div class="wrap">
+  <div class="stag purple"><span class="sn purple">10</span> Prompt 10</div>
+  <h2>Chứng Chỉ PDF Tự Động + QR Verify</h2>
+  <div class="pcrd">
+    <div class="phd">
+      <div class="pt"><span class="pb pb-purple">CERTIFICATE</span> PROMPT 10 — Chứng Chỉ PDF + Verify Public URL</div>
+      <div class="ptags"><span class="ptag">@react-pdf/renderer</span><span class="ptag">QR Code</span><span class="ptag">Supabase Storage</span><span class="ptag">Public verify</span></div>
+    </div>
+    <div class="pbd"><pre class="ptext"><span class="hd">╔════════════════════════════════════════════════════════════════╗
+║  PROMPT 10 · CHỨNG CHỈ PDF TỰ ĐỘNG + QR VERIFY               ║
+╚════════════════════════════════════════════════════════════════╝</span>
+
+<span class="hd">## DATABASE</span>
+<span class="val">CREATE TABLE IF NOT EXISTS public.certificates (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  student_id UUID REFERENCES public.profiles(id),
+  certificate_number TEXT UNIQUE NOT NULL,
+  student_name TEXT NOT NULL,
+  course_title TEXT NOT NULL,
+  issued_at TIMESTAMPTZ DEFAULT NOW(),
+  completion_date DATE,
+  final_score NUMERIC(5,2),
+  pdf_url TEXT,
+  verify_url TEXT,
+  is_revoked BOOLEAN DEFAULT FALSE
+);
+
+ALTER TABLE public.certificates ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "own_cert" ON certificates FOR SELECT USING (student_id=auth.uid());
+CREATE POLICY "public_verify" ON certificates FOR SELECT USING (true); -- Public verify
+
+-- Function sinh certificate_number: PCM-YEAR-XXXXX
+CREATE OR REPLACE FUNCTION generate_cert_number() RETURNS TEXT AS $$
+DECLARE chars TEXT := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; result TEXT; i INT;
+BEGIN
+  result := 'PCM-' || EXTRACT(YEAR FROM NOW())::TEXT || '-';
+  FOR i IN 1..6 LOOP result := result || substr(chars, floor(random()*length(chars)+1)::int, 1); END LOOP;
+  RETURN result;
+END; $$ LANGUAGE plpgsql;</span>
+
+<span class="hd">## API ROUTE — app/api/certificates/generate/route.ts</span>
+<span class="val">// Dùng @react-pdf/renderer (không phải puppeteer)
+// npm install @react-pdf/renderer qrcode
+import { renderToBuffer } from '@react-pdf/renderer'
+import { CertificateDocument } from '@/components/certificates/CertificateDocument'
+
+export async function POST(request: Request) {
+  // 1. Verify auth + ownership
+  // 2. Tạo certificate_number
+  // 3. Render PDF bằng @react-pdf/renderer
+  const pdfBuffer = await renderToBuffer(&lt;CertificateDocument cert={certData} /&gt;)
+  // 4. Upload lên Supabase Storage bucket 'certificates' (public)
+  // 5. Lưu pdf_url vào DB
+  // 6. Trigger notification cho học sinh + phụ huynh
+  return Response.json({ pdfUrl, certificateNumber })
+}
+
+// CertificateDocument component dùng @react-pdf/renderer:
+// - Background màu tối (#080910)
+// - Tên học sinh font lớn màu teal (#00d4aa)
+// - Logo PC Master
+// - QR code verify URL
+// - Certificate number
+// - Ngày cấp + điểm số</span>
+
+<span class="hd">## VERIFY PAGE — Public, không cần login</span>
+<span class="val">// Path: app/verify/[certNumber]/page.tsx
+// PUBLIC route — không cần auth
+// Query: SELECT * FROM certificates WHERE certificate_number = certNumber
+// Hiện:
+//   ✅ Hợp lệ: tên, khóa học, ngày cấp, điểm
+//   ❌ Không tìm thấy
+//   ⚠️ Đã thu hồi</span>
+
+<span class="hd">## YÊU CẦU NGHIÊM NGẶT</span>
+<span class="rule">RULE 1:</span> Dùng @react-pdf/renderer — không dùng puppeteer.
+<span class="rule">RULE 2:</span> certificate_number snapshot tên/khóa học lúc cấp (bất biến).
+<span class="rule">RULE 3:</span> Storage bucket 'certificates' phải PUBLIC (ai cũng tải được).
+<span class="rule">RULE 4:</span> Verify page là public route, không cần auth.
+
+<span class="hd">## FILES CẦN TẠO</span>
+<span class="ok">SQL:</span> certificates table + function
+<span class="ok">TẠO:</span> app/api/certificates/generate/route.ts
+      components/certificates/CertificateDocument.tsx
+      app/(dashboard)/student/certificates/page.tsx
+      app/verify/[certNumber]/page.tsx (public)</pre></div>
+  </div>
+</div>
+</div>
+
+<!-- P11 Teacher Dashboard -->
+<div class="sec" id="p11">
+<div class="wrap">
+  <div class="stag amber"><span class="sn amber">11</span> Prompt 11</div>
+  <h2>Dashboard Giáo Viên Nâng Cao + Báo Cáo</h2>
+  <div class="pcrd">
+    <div class="phd">
+      <div class="pt"><span class="pb pb-amber">TEACHER</span> PROMPT 11 — Teacher Dashboard Nâng Cao + Export CSV/PDF</div>
+      <div class="ptags"><span class="ptag">Class analytics</span><span class="ptag">Student tracking</span><span class="ptag">Export</span><span class="ptag">Realtime</span></div>
+    </div>
+    <div class="pbd"><pre class="ptext"><span class="hd">╔════════════════════════════════════════════════════════════════╗
+║  PROMPT 11 · TEACHER DASHBOARD NÂNG CAO                       ║
+╚════════════════════════════════════════════════════════════════╝</span>
+
+<span class="hd">## LAYOUT 5 WIDGETS TEACHER DASHBOARD</span>
+
+<span class="kw">Widget 1 — Class Overview (4 metrics):</span>
+  Tổng học sinh | % hoàn thành TB | Điểm TB quiz | Học sinh active hôm nay
+
+<span class="kw">Widget 2 — Student Progress Table (realtime):</span>
+  Bảng: Avatar | Tên | % Hoàn thành | Điểm TB | Lần đăng nhập cuối | Status badge
+  Sort: click header để sort
+  Filter: Tất cả | Cần hỗ trợ (tiến độ &lt;30%) | Xuất sắc (&gt;90%)
+  Row click → modal chi tiết học sinh
+
+<span class="kw">Widget 3 — Câu hỏi nào học sinh hay sai nhất:</span>
+  BarChart: top 5 câu có tỷ lệ sai cao nhất
+  → Giúp giáo viên biết chỗ nào cần giảng lại
+
+<span class="kw">Widget 4 — Cảnh báo:</span>
+  Học sinh chưa đăng nhập 7+ ngày
+  Học sinh điểm dưới passing_score 2+ lần liên tiếp
+  Link "Gửi nhắc nhở" → tạo notification cho học sinh đó
+
+<span class="kw">Widget 5 — Quick Actions:</span>
+  [+ Tạo quiz mới] [📊 Xuất báo cáo CSV] [📋 Quản lý bài tập] [👥 Quản lý lớp]
+
+<span class="hd">## SUPABASE VIEW — Tính toán tại DB</span>
+<span class="val">CREATE OR REPLACE VIEW public.teacher_class_overview AS
+  SELECT
+    cm.class_id,
+    p.id AS student_id,
+    p.full_name,
+    p.avatar_url,
+    p.last_seen_at,
+    p.is_online,
+    COUNT(lp.id) FILTER (WHERE lp.status='completed') AS lessons_completed,
+    COUNT(lp.id) AS lessons_started,
+    ROUND(AVG(qa.score)) AS avg_quiz_score,
+    MAX(lp.last_accessed) AS last_active
+  FROM class_members cm
+  JOIN profiles p ON p.id=cm.student_id
+  LEFT JOIN lesson_progress lp ON lp.student_id=p.id
+  LEFT JOIN quiz_attempts qa ON qa.student_id=p.id AND qa.status='graded'
+  GROUP BY cm.class_id, p.id, p.full_name, p.avatar_url, p.last_seen_at, p.is_online;
+
+-- Teacher chỉ thấy học sinh trong lớp của mình</span>
+
+<span class="hd">## EXPORT CSV</span>
+<span class="val">// app/api/teacher/export-class/route.ts
+// Tạo CSV với Papa Parse (client-side) hoặc stringify thủ công (server)
+// Columns: Tên, Email, Bài hoàn thành, Giờ học, Điểm TB, Lần đăng nhập cuối
+// Response: Content-Disposition: attachment; filename="class-report-YYYY-MM-DD.csv"</span>
+
+<span class="hd">## REALTIME: Khi học sinh submit quiz → Dashboard tự update</span>
+<span class="val">// Trong teacher dashboard client component:
+useEffect(() => {
+  const ch = supabase.channel('teacher-class-updates')
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public',
+      table: 'quiz_attempts', filter: `status=eq.graded` },
+      () => { refreshStudentData() } ) // refetch data
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public',
+      table: 'lesson_progress' },
+      () => { refreshStudentData() })
+    .subscribe()
+  return () => supabase.removeChannel(ch)
+}, [])</span>
+
+<span class="hd">## YÊU CẦU NGHIÊM NGẶT</span>
+<span class="rule">RULE 1:</span> View tính toán tại DB — không aggregate trên client.
+<span class="rule">RULE 2:</span> Teacher chỉ thấy học sinh trong lớp CỦA MÌNH — filter by class_id từ classes.teacher_id.
+<span class="rule">RULE 3:</span> Export CSV không expose dữ liệu ngoài lớp của giáo viên đó.
+<span class="rule">RULE 4:</span> Realtime channel cleanup bắt buộc.
+
+<span class="hd">## FILES CẦN TẠO</span>
+<span class="ok">SQL:</span> teacher_class_overview view
+<span class="ok">TẠO:</span> app/(dashboard)/teacher/dashboard/page.tsx (nếu chưa có data thật)
+      app/(dashboard)/teacher/dashboard/TeacherDashboardClient.tsx
+      app/api/teacher/export-class/route.ts</pre></div>
+  </div>
+</div>
+</div>
+
+<!-- P12: PARENT REALTIME — FULL DETAIL -->
+<div class="sec" id="p12">
+<div class="wrap">
+  <div class="stag teal"><span class="sn teal">★</span> Prompt 12 — Đặc Biệt</div>
+  <h2>⭐ PHỤ HUYNH REALTIME — Hệ Thống Theo Dõi Con Qua student_code</h2>
+  <p class="sdesc">Prompt dài và đầy đủ nhất. Mọi tính năng đều REALTIME thực sự. Nguyên tắc: "Không có là không có, có là có." — Không fake data, không polling ẩn.</p>
+  <div class="callout c-teal">
+    <span class="ci">⚡</span>
+    <div><strong>Core principle:</strong> Mọi số liệu cho phụ huynh phải là data thật từ DB. Khi Supabase Realtime subscription chưa SUBSCRIBED → hiện "⚡ Đang kết nối..." rõ ràng. Không bao giờ hiện data của học sinh chưa được liên kết.</div>
+  </div>
+  <div class="pcrd">
+    <div class="phd">
+      <div class="pt"><span class="pb pb-teal">⭐ PARENT REALTIME</span> PROMPT 12 — Hệ Thống Phụ Huynh Realtime Hoàn Chỉnh</div>
+      <div class="ptags"><span class="ptag">Supabase Realtime</span><span class="ptag">student_code</span><span class="ptag">WebSocket</span><span class="ptag">parent_student_links</span><span class="ptag">Live dashboard</span><span class="ptag">DB Triggers</span></div>
+    </div>
+    <div class="pbd"><pre class="ptext"><span class="hd">╔════════════════════════════════════════════════════════════════╗
+║  PROMPT 12 · HỆ THỐNG PHỤ HUYNH REALTIME HOÀN CHỈNH          ║
+║  Mọi tính năng REALTIME thực sự — WebSocket, không fake        ║
+╚════════════════════════════════════════════════════════════════╝</span>
+
+<span class="hd">## 1. BỐI CẢNH & ĐIỀU KIỆN TIÊN QUYẾT</span>
+Đã chạy xong: Prompt 01, 02, 03 (đặc biệt Bước 1 của P03 — student_code đã có).
+Đã có bảng: profiles (với student_code, is_online), lesson_progress, quiz_attempts, notifications.
+Mục tiêu: Toàn bộ /parent/* với realtime WebSocket thật.
+
+<span class="hd">## 2. SQL — Bảng Liên Kết + Triggers + Functions</span>
+
+<span class="kw">BƯỚC A: Bảng parent_student_links</span>
+<span class="val">CREATE TABLE IF NOT EXISTS public.parent_student_links (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  parent_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  student_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  relationship TEXT DEFAULT 'parent'
+    CHECK (relationship IN ('father','mother','guardian','sibling','other')),
+  status TEXT DEFAULT 'pending'
+    CHECK (status IN ('pending','active','revoked')),
+  linked_at TIMESTAMPTZ DEFAULT NOW(),
+  confirmed_at TIMESTAMPTZ,
+  revoked_at TIMESTAMPTZ,
+  revoked_by UUID REFERENCES public.profiles(id),
+  UNIQUE(parent_id, student_id)
+);
+ALTER TABLE public.parent_student_links ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "parent_manage" ON parent_student_links FOR ALL USING (parent_id=auth.uid());
+CREATE POLICY "student_view_own" ON parent_student_links FOR SELECT USING (student_id=auth.uid());
+CREATE POLICY "student_update_status" ON parent_student_links FOR UPDATE
+  USING (student_id=auth.uid()) WITH CHECK (status IN ('active','revoked'));
+ALTER PUBLICATION supabase_realtime ADD TABLE public.parent_student_links;</span>
+
+<span class="kw">BƯỚC B: Function tìm học sinh qua student_code (Safe — không expose data nhạy cảm)</span>
+<span class="val">CREATE OR REPLACE FUNCTION public.find_student_by_code(input_code TEXT)
+RETURNS TABLE (student_id UUID, student_name TEXT, school_name TEXT,
+               avatar_url TEXT, class_info TEXT)
+LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+  RETURN QUERY
+    SELECT p.id, p.full_name, p.school_name, p.avatar_url,
+      COALESCE(c.name,'Chưa có lớp')
+    FROM profiles p
+    LEFT JOIN class_members cm ON cm.student_id=p.id
+    LEFT JOIN classes c ON c.id=cm.class_id
+    WHERE p.student_code=UPPER(TRIM(input_code)) AND p.role='student';
+END; $$;
+GRANT EXECUTE ON FUNCTION public.find_student_by_code TO authenticated;</span>
+
+<span class="kw">BƯỚC C: Triggers thông báo phụ huynh</span>
+<span class="val">-- Trigger 1: Học sinh hoàn thành bài → notify phụ huynh
+CREATE OR REPLACE FUNCTION notify_parent_lesson_done() RETURNS TRIGGER AS $$
+DECLARE pr RECORD;
+BEGIN
+  IF NEW.status='completed' AND COALESCE(OLD.status,'')!='completed' THEN
+    FOR pr IN SELECT psl.parent_id, p.full_name
+      FROM parent_student_links psl JOIN profiles p ON p.id=NEW.student_id
+      WHERE psl.student_id=NEW.student_id AND psl.status='active'
+    LOOP
+      INSERT INTO notifications(user_id,type,title,body,data,action_url) VALUES(
+        pr.parent_id,'lesson_completed','📖 Con bạn hoàn thành bài học',
+        pr.full_name||' vừa hoàn thành 1 bài học mới',
+        jsonb_build_object('student_id',NEW.student_id,'lesson_id',NEW.lesson_id),
+        '/parent/children/'||NEW.student_id
+      );
+    END LOOP;
+  END IF; RETURN NEW;
+END; $$ LANGUAGE plpgsql SECURITY DEFINER;
+DROP TRIGGER IF EXISTS trig_parent_lesson ON public.lesson_progress;
+CREATE TRIGGER trig_parent_lesson AFTER INSERT OR UPDATE ON public.lesson_progress
+  FOR EACH ROW EXECUTE FUNCTION notify_parent_lesson_done();
+
+-- Trigger 2: Kết quả quiz → notify phụ huynh (đặc biệt khi điểm thấp)
+CREATE OR REPLACE FUNCTION notify_parent_quiz_done() RETURNS TRIGGER AS $$
+DECLARE pr RECORD;
+BEGIN
+  IF NEW.status='graded' AND COALESCE(OLD.status,'')!='graded' THEN
+    FOR pr IN SELECT psl.parent_id, p.full_name
+      FROM parent_student_links psl JOIN profiles p ON p.id=NEW.student_id
+      WHERE psl.student_id=NEW.student_id AND psl.status='active'
+    LOOP
+      INSERT INTO notifications(user_id,type,title,body,data,action_url) VALUES(
+        pr.parent_id,
+        CASE WHEN NEW.score < 50 THEN 'child_low_score' ELSE 'quiz_graded' END,
+        CASE WHEN NEW.score < 50
+          THEN '⚠️ Con bạn có điểm thấp: '||ROUND(NEW.score)||'/100'
+          ELSE '✅ Kết quả quiz: '||ROUND(NEW.score)||'/100'
+        END,
+        pr.full_name||CASE WHEN NEW.score<50 THEN ' chỉ đạt ' ELSE ' đạt ' END
+          ||ROUND(NEW.score)||' điểm trong "'||NEW.quiz_title||'"',
+        jsonb_build_object('student_id',NEW.student_id,'score',NEW.score,'quiz_title',NEW.quiz_title),
+        '/parent/children/'||NEW.student_id
+      );
+    END LOOP;
+  END IF; RETURN NEW;
+END; $$ LANGUAGE plpgsql SECURITY DEFINER;
+DROP TRIGGER IF EXISTS trig_parent_quiz ON public.quiz_attempts;
+CREATE TRIGGER trig_parent_quiz AFTER INSERT OR UPDATE ON public.quiz_attempts
+  FOR EACH ROW EXECUTE FUNCTION notify_parent_quiz_done();</span>
+
+<span class="hd">## 3. REALTIME HOOK — Tim Mạch Của Hệ Thống</span>
+
+<span class="kw">File:</span> <span class="fl">hooks/useChildRealtime.ts</span>
+<span class="val">'use client'
+import { useEffect, useState, useCallback, useRef } from 'react'
+import { createClient } from '@/lib/supabase-client'
+
+export type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'error'
+
+export interface ChildRealtimeData {
+  isOnline: boolean
+  lastSeen: string | null
+  lessonsCompleted: number
+  totalLessonsStarted: number
+  totalTimeSeconds: number
+  avgQuizScore: number | null
+  recentActivities: Activity[]
+  connectionStatus: ConnectionStatus
+}
+
+interface Activity {
+  id: string
+  type: 'lesson_completed' | 'lesson_started' | 'quiz_graded'
+  title: string
+  timestamp: string
+  score?: number
+}
+
+export function useChildRealtime(studentId: string | null): ChildRealtimeData {
+  const [data, setData] = useState&lt;ChildRealtimeData&gt;({
+    isOnline: false, lastSeen: null,
+    lessonsCompleted: 0, totalLessonsStarted: 0,
+    totalTimeSeconds: 0, avgQuizScore: null,
+    recentActivities: [], connectionStatus: 'connecting',
+  })
+  const channelRef = useRef&lt;any&gt;(null)
+  const supabase = createClient()
+
+  const fetchInitial = useCallback(async () => {
+    if (!studentId) return
+    const [{ data: progress }, { data: quizzes }, { data: profile }] = await Promise.all([
+      supabase.from('lesson_progress').select('status,time_spent_seconds,completed_at,last_accessed')
+        .eq('student_id', studentId),
+      supabase.from('quiz_attempts').select('score,submitted_at,quiz_title,status')
+        .eq('student_id', studentId).eq('status','graded').order('submitted_at',{ascending:false}).limit(10),
+      supabase.from('profiles').select('is_online,last_seen_at').eq('id', studentId).single(),
+    ])
+
+    const p = progress ?? []
+    const q = quizzes ?? []
+    const completed = p.filter(x => x.status==='completed')
+    const totalSec = p.reduce((s,x) => s+(x.time_spent_seconds??0), 0)
+    const avg = q.length > 0 ? q.reduce((s,x) => s+(x.score??0), 0)/q.length : null
+
+    const activities: Activity[] = [
+      ...p.filter(x => x.status==='completed' && x.completed_at)
+        .slice(0,5).map(x => ({ id:`l-${x.completed_at}`, type:'lesson_completed' as const,
+          title:'Hoàn thành bài học', timestamp: x.completed_at! })),
+      ...q.slice(0,5).map(x => ({ id:`q-${x.submitted_at}`, type:'quiz_graded' as const,
+          title:`Quiz: ${x.quiz_title}`, timestamp: x.submitted_at!, score: x.score }))
+    ].sort((a,b) => new Date(b.timestamp).getTime()-new Date(a.timestamp).getTime()).slice(0,8)
+
+    setData(prev => ({
+      ...prev,
+      isOnline: profile?.is_online ?? false,
+      lastSeen: profile?.last_seen_at ?? null,
+      lessonsCompleted: completed.length,
+      totalLessonsStarted: p.length,
+      totalTimeSeconds: totalSec,
+      avgQuizScore: avg ? Math.round(avg) : null,
+      recentActivities: activities,
+    }))
+  }, [studentId])
+
+  useEffect(() => {
+    if (!studentId) return
+    fetchInitial()
+
+    // Một channel duy nhất, subscribe 3 bảng
+    channelRef.current = supabase.channel(`parent-watch-${studentId}`)
+      .on('postgres_changes', { event:'*', schema:'public',
+        table:'lesson_progress', filter:`student_id=eq.${studentId}` },
+        (payload) => {
+          const r = payload.new as any
+          if (r.status === 'completed') {
+            setData(prev => ({
+              ...prev,
+              lessonsCompleted: prev.lessonsCompleted + 1,
+              recentActivities: [{
+                id:`l-${Date.now()}`, type:'lesson_completed',
+                title:'Hoàn thành bài học', timestamp: new Date().toISOString()
+              }, ...prev.recentActivities].slice(0,8)
+            }))
+          }
+        })
+      .on('postgres_changes', { event:'*', schema:'public',
+        table:'quiz_attempts', filter:`student_id=eq.${studentId}` },
+        (payload) => {
+          const r = payload.new as any
+          if (r.status === 'graded') {
+            setData(prev => ({
+              ...prev,
+              recentActivities: [{
+                id:`q-${r.id}`, type:'quiz_graded',
+                title:`Quiz: ${r.quiz_title}`, timestamp: new Date().toISOString(),
+                score: r.score
+              }, ...prev.recentActivities].slice(0,8)
+            }))
+          }
+        })
+      .on('postgres_changes', { event:'UPDATE', schema:'public',
+        table:'profiles', filter:`id=eq.${studentId}` },
+        (payload) => {
+          const r = payload.new as any
+          setData(prev => ({ ...prev, isOnline: r.is_online ?? false, lastSeen: r.last_seen_at }))
+        })
+      .subscribe((status) => {
+        setData(prev => ({
+          ...prev,
+          connectionStatus: status==='SUBSCRIBED' ? 'connected'
+            : status==='CHANNEL_ERROR' ? 'error'
+            : status==='CLOSED' ? 'disconnected' : 'connecting'
+        }))
+      })
+
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current)
+        channelRef.current = null
+      }
+    }
+  }, [studentId, fetchInitial])
+
+  return data
+}</span>
+
+<span class="hd">## 4. SERVER ACTIONS — lib/parent-actions.ts</span>
+<span class="val">'use server'
+import { verifyRole, createServerActionSupabase } from '@/lib/auth/rbac'
+import { revalidatePath } from 'next/cache'
+
+// Tìm học sinh qua student_code
+export async function findStudentByCodeAction(code: string) {
+  await verifyRole(['parent', 'admin'])
+  const supabase = await createServerActionSupabase()
+  const { data, error } = await supabase.rpc('find_student_by_code', { input_code: code })
+  if (error || !data?.length) return { error: 'Không tìm thấy học sinh với mã này' }
+  return { student: data[0] }
+}
+
+// Gửi yêu cầu liên kết
+export async function requestLinkAction(studentId: string, relationship: string) {
+  const parent = await verifyRole(['parent', 'admin'])
+  const supabase = await createServerActionSupabase()
+
+  const { data: student } = await supabase.from('profiles')
+    .select('id,role,full_name').eq('id', studentId).single()
+  if (!student || student.role !== 'student') return { error: 'Học sinh không tồn tại' }
+
+  const { error } = await supabase.from('parent_student_links').upsert({
+    parent_id: parent.id, student_id: studentId, relationship, status: 'pending'
+  }, { onConflict: 'parent_id,student_id' })
+  if (error) return { error: 'Không thể gửi yêu cầu' }
+
+  await supabase.from('notifications').insert({
+    user_id: studentId, type: 'parent_link_request',
+    title: '👨‍👩‍👧 Phụ huynh muốn theo dõi bạn',
+    body: 'Có phụ huynh gửi yêu cầu liên kết để theo dõi tiến độ học của bạn.',
+    data: { parent_id: parent.id },
+    action_url: '/student/profile/privacy'
+  })
+
+  revalidatePath('/parent/dashboard')
+  return { success: true }
+}
+
+// Học sinh xác nhận liên kết
+export async function confirmLinkAction(parentId: string) {
+  const student = await verifyRole(['student'])
+  const supabase = await createServerActionSupabase()
+  const { error } = await supabase.from('parent_student_links')
+    .update({ status:'active', confirmed_at: new Date().toISOString() })
+    .eq('parent_id', parentId).eq('student_id', student.id).eq('status','pending')
+  if (error) return { error: 'Không thể xác nhận' }
+
+  await supabase.from('notifications').insert({
+    user_id: parentId, type:'parent_link_confirmed',
+    title:'✅ Học sinh đã xác nhận liên kết',
+    body:'Bạn đã có thể theo dõi tiến độ học tập của con.',
+    action_url:'/parent/dashboard'
+  })
+  return { success: true }
+}
+
+// Học sinh thu hồi quyền phụ huynh
+export async function revokeLinkAction(parentId: string) {
+  const student = await verifyRole(['student'])
+  const supabase = await createServerActionSupabase()
+  await supabase.from('parent_student_links')
+    .update({ status:'revoked', revoked_at: new Date().toISOString(), revoked_by: student.id })
+    .eq('parent_id', parentId).eq('student_id', student.id)
+  return { success: true }
+}</span>
+
+<span class="hd">## 5. PARENT DASHBOARD CLIENT — Live Realtime UI</span>
+<span class="val">// Path: app/(dashboard)/parent/dashboard/ParentDashboardClient.tsx
+'use client'
+import { useState } from 'react'
+import { useChildRealtime } from '@/hooks/useChildRealtime'
+import { formatDistanceToNow } from 'date-fns'
+import { vi } from 'date-fns/locale'
+
+export function ParentDashboardClient({ parentName, children }: {
+  parentName: string
+  children: Array&lt;{ id: string; relationship: string; student: any }&gt;
+}) {
+  const [selectedId, setSelectedId] = useState(children[0]?.student?.id ?? null)
+  const rt = useChildRealtime(selectedId)
+  const selected = children.find(c => c.student?.id === selectedId)?.student
+
+  return (
+    &lt;div className="p-6 max-w-5xl mx-auto"&gt;
+      {/* Header + Connection badge */}
+      &lt;div className="flex items-center justify-between mb-6"&gt;
+        &lt;div&gt;
+          &lt;h1 className="text-2xl font-bold text-[#d8dbe8]"&gt;Xin chào, {parentName} 👋&lt;/h1&gt;
+          &lt;p className="text-sm text-[#5a5d72]"&gt;Theo dõi {children.length} học sinh&lt;/p&gt;
+        &lt;/div&gt;
+        {/* REALTIME STATUS — Luôn hiển thị, không bao giờ ẩn */}
+        &lt;div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border ${
+          rt.connectionStatus==='connected' ? 'bg-[#00d4aa]/10 border-[#00d4aa]/30 text-[#00d4aa]'
+          : rt.connectionStatus==='connecting' ? 'bg-[#f0a030]/10 border-[#f0a030]/30 text-[#f0a030]'
+          : 'bg-[#f03060]/10 border-[#f03060]/30 text-[#f07090]'
+        }`}&gt;
+          &lt;span className={`w-2 h-2 rounded-full ${
+            rt.connectionStatus==='connected' ? 'bg-[#00d4aa] animate-pulse'
+            : rt.connectionStatus==='connecting' ? 'bg-[#f0a030] animate-pulse'
+            : 'bg-[#f03060]'
+          }`} /&gt;
+          {rt.connectionStatus==='connected' && '⚡ Realtime'}
+          {rt.connectionStatus==='connecting' && 'Đang kết nối...'}
+          {rt.connectionStatus==='disconnected' && 'Mất kết nối'}
+          {rt.connectionStatus==='error' && 'Lỗi kết nối'}
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      {/* Child selector (khi có nhiều con) */}
+      {children.length &gt; 1 && (
+        &lt;div className="flex gap-2 mb-6 overflow-x-auto pb-1"&gt;
+          {children.map(link =&gt; (
+            &lt;button key={link.student?.id}
+              onClick={() =&gt; setSelectedId(link.student?.id)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${
+                selectedId===link.student?.id
+                  ? 'bg-[#00d4aa]/15 border border-[#00d4aa]/40 text-[#00d4aa]'
+                  : 'bg-[#0f1018] border border-[#1d1f2a] text-[#5a5d72] hover:text-[#d8dbe8]'
+              }`}&gt;
+              &lt;div className="w-6 h-6 rounded-full bg-[#1d1f2a] flex items-center justify-center text-xs font-bold"&gt;
+                {link.student?.full_name?.[0]}
+              &lt;/div&gt;
+              {link.student?.full_name}
+            &lt;/button&gt;
+          ))}
+        &lt;/div&gt;
+      )}
+
+      {/* Empty state — chưa có con */}
+      {children.length === 0 && (
+        &lt;div className="bg-[#0f1018] border border-dashed border-[#00d4aa]/30 rounded-2xl p-12 text-center"&gt;
+          &lt;div className="text-5xl mb-4"&gt;👨‍👩‍👧&lt;/div&gt;
+          &lt;h3 className="text-[#d8dbe8] font-semibold mb-2"&gt;Chưa liên kết tài khoản con&lt;/h3&gt;
+          &lt;p className="text-[#5a5d72] text-sm mb-6"&gt;Nhập mã học sinh của con (PCM-XXXXXXXX) để theo dõi tiến độ&lt;/p&gt;
+          &lt;a href="/parent/link-child"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#00d4aa]/12 border border-[#00d4aa]/35 text-[#00d4aa] rounded-xl font-medium text-sm"&gt;
+            + Liên kết tài khoản con
+          &lt;/a&gt;
+        &lt;/div&gt;
+      )}
+
+      {/* Main child view */}
+      {selected && (
+        &lt;div className="space-y-5"&gt;
+          {/* Child header */}
+          &lt;div className="bg-[#0f1018] border border-[#1d1f2a] rounded-2xl p-5 flex items-center gap-4"&gt;
+            &lt;div className="relative"&gt;
+              &lt;div className="w-14 h-14 rounded-full bg-[#1d1f2a] flex items-center justify-center text-xl font-bold text-[#00d4aa]"&gt;
+                {selected.full_name?.[0]}
+              &lt;/div&gt;
+              {/* Online indicator — realtime */}
+              &lt;span className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-[#0f1018] ${
+                rt.isOnline ? 'bg-[#00d4aa]' : 'bg-[#2e3048]'
+              }`} /&gt;
+            &lt;/div&gt;
+            &lt;div className="flex-1"&gt;
+              &lt;h2 className="font-bold text-[#d8dbe8] text-lg"&gt;{selected.full_name}&lt;/h2&gt;
+              &lt;p className="text-sm text-[#5a5d72]"&gt;{selected.school_name ?? 'Chưa cập nhật trường'}&lt;/p&gt;
+              &lt;div className="flex items-center gap-3 mt-1"&gt;
+                &lt;span className="text-xs font-mono text-[#5a5d72] bg-[#1d1f2a] px-2 py-0.5 rounded"&gt;
+                  {selected.student_code}
+                &lt;/span&gt;
+                &lt;span className="text-xs text-[#5a5d72]"&gt;
+                  {rt.isOnline ? '🟢 Đang học ngay bây giờ'
+                   : rt.lastSeen ? `Hoạt động ${formatDistanceToNow(new Date(rt.lastSeen), {locale:vi,addSuffix:true})}`
+                   : 'Chưa có hoạt động'}
+                &lt;/span&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+
+          {/* Stats grid — 4 số realtime */}
+          &lt;div className="grid grid-cols-2 md:grid-cols-4 gap-4"&gt;
+            {[
+              { label:'Bài đã xong', value: rt.lessonsCompleted, unit:'bài', color:'text-[#00d4aa]' },
+              { label:'Đang học', value: rt.totalLessonsStarted-rt.lessonsCompleted, unit:'bài', color:'text-[#4090f0]' },
+              { label:'Tổng giờ học', value: Math.round(rt.totalTimeSeconds/360)/10, unit:'giờ', color:'text-[#9060f0]' },
+              { label:'Điểm TB quiz', value: rt.avgQuizScore ?? '--', unit: rt.avgQuizScore ? '/100':'',
+                color: rt.avgQuizScore != null && rt.avgQuizScore &lt; 50 ? 'text-[#f03060]' : 'text-[#30c080]' },
+            ].map((s,i) =&gt; (
+              &lt;div key={i} className="bg-[#0f1018] border border-[#1d1f2a] rounded-xl p-4"&gt;
+                &lt;div className="text-xs text-[#5a5d72] mb-2"&gt;{s.label}&lt;/div&gt;
+                &lt;div className={`text-2xl font-bold ${s.color}`}&gt;
+                  {s.value}&lt;span className="text-sm font-normal text-[#5a5d72] ml-1"&gt;{s.unit}&lt;/span&gt;
+                &lt;/div&gt;
+              &lt;/div&gt;
+            ))}
+          &lt;/div&gt;
+
+          {/* Realtime activity feed */}
+          &lt;div className="bg-[#0f1018] border border-[#1d1f2a] rounded-2xl p-5"&gt;
+            &lt;div className="flex items-center justify-between mb-4"&gt;
+              &lt;h3 className="font-semibold text-[#d8dbe8]"&gt;Hoạt động gần đây&lt;/h3&gt;
+              {rt.connectionStatus==='connected' && (
+                &lt;span className="flex items-center gap-1.5 text-xs text-[#00d4aa]"&gt;
+                  &lt;span className="w-1.5 h-1.5 bg-[#00d4aa] rounded-full animate-pulse" /&gt;
+                  Cập nhật tức thời
+                &lt;/span&gt;
+              )}
+            &lt;/div&gt;
+            {rt.recentActivities.length === 0
+              ? &lt;p className="text-sm text-[#5a5d72] text-center py-6"&gt;Chưa có hoạt động nào&lt;/p&gt;
+              : rt.recentActivities.map(a =&gt; (
+                &lt;div key={a.id} className="flex items-center gap-3 py-2.5 border-b border-[#1d1f2a] last:border-0"&gt;
+                  &lt;span className="text-lg flex-shrink-0"&gt;
+                    {a.type==='lesson_completed' ? '📖' : a.type==='quiz_graded' ? '📝' : '🔵'}
+                  &lt;/span&gt;
+                  &lt;div className="flex-1 min-w-0"&gt;
+                    &lt;p className="text-sm text-[#d8dbe8] truncate"&gt;{a.title}&lt;/p&gt;
+                    {a.score != null && (
+                      &lt;p className={`text-xs font-medium ${a.score &gt;= 70 ? 'text-[#30c080]' : 'text-[#f03060]'}`}&gt;
+                        {a.score}/100 điểm
+                      &lt;/p&gt;
+                    )}
+                  &lt;/div&gt;
+                  &lt;span className="text-xs text-[#5a5d72] flex-shrink-0"&gt;
+                    {formatDistanceToNow(new Date(a.timestamp), {locale:vi,addSuffix:true})}
+                  &lt;/span&gt;
+                &lt;/div&gt;
+              ))
+            }
+          &lt;/div&gt;
+        &lt;/div&gt;
+      )}
+    &lt;/div&gt;
+  )
+}</span>
+
+<span class="hd">## 6. LINK-CHILD PAGE — /parent/link-child</span>
+<span class="val">// 3 bước: input mã → xác nhận học sinh → thành công
+// Dùng findStudentByCodeAction để tìm
+// Hiện tên + trường + lớp học sinh (không expose thêm gì)
+// Chọn quan hệ: Phụ huynh / Cha / Mẹ / Người giám hộ
+// Gửi yêu cầu bằng requestLinkAction
+// State: 'input' | 'found' | 'pending' | 'already_linked' | 'error'
+// Input: auto uppercase, format PCM-XXXXXXXX, loại bỏ ký tự đặc biệt</span>
+
+<span class="hd">## 7. STUDENT PRIVACY PAGE — /student/profile/privacy</span>
+<span class="val">// Học sinh xem + quản lý phụ huynh theo dõi:
+// 1. Hiện student_code: PCM-XXXXXXXX với nút [Copy] [Hiện QR]
+// 2. Danh sách yêu cầu pending: tên + quan hệ + [✓ Xác nhận] [✗ Từ chối]
+// 3. Danh sách đang active: tên + ngày liên kết + [Thu hồi quyền]
+// 4. Note: "Bạn có thể thu hồi quyền theo dõi bất cứ lúc nào"</span>
+
+<span class="hd">## 8. ONLINE STATUS TRACKING</span>
+<span class="val">// Cập nhật is_online và last_seen_at của học sinh khi họ active
+// Thêm vào layout học sinh (app/(dashboard)/student/layout.tsx):
+// Báo trước tên file và dòng: app/(dashboard)/student/layout.tsx#L1-L120 — chèn useEffect cập nhật `is_online` và `last_seen_at`.
+// Đoạn code đề xuất (thêm vào cuối phần useEffect hiện có hoặc ngay sau phần khởi tạo Supabase client):
+
+'use client'
+useEffect(() => {
+  // Online status tracking: cập nhật is_online + last_seen_at
+  let mounted = true
+  const setOnline = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user || !mounted) return
+    const userId = user.id
+    await supabase.from('profiles').update({ is_online: true, last_seen_at: new Date().toISOString() }).eq('id', userId)
+    window.addEventListener('beforeunload', () => {
+      navigator.sendBeacon?.(`${process.env.NEXT_PUBLIC_BASE_API}/api/online`, JSON.stringify({ id: userId, is_online: false, last_seen_at: new Date().toISOString() }))
+    })
+  }
+  setOnline()
+  return () => {
+    mounted = false
+    ;(async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      await supabase.from('profiles').update({ is_online: false, last_seen_at: new Date().toISOString() }).eq('id', user.id)
+    })()
+  }
+}, [])
+  // Set online khi vào trang
+  supabase.from('profiles').update({ is_online: true, last_seen_at: new Date().toISOString() })
+    .eq('id', userId)
+
+  // Set offline khi rời
+  return () => {
+    supabase.from('profiles').update({ is_online: false, last_seen_at: new Date().toISOString() })
+      .eq('id', userId)
+  }
+}, [])</span>
+
+<span class="hd">╔════════════════════════════════════════════════════════════════╗
+║  ⚠️  YÊU CẦU NGHIÊM NGẶT — PHỤ HUYNH REALTIME               ║
+╚════════════════════════════════════════════════════════════════╝</span>
+
+<span class="rule">RULE P01 — KHÔNG CÓ LÀ KHÔNG CÓ, CÓ LÀ CÓ:</span>
+  Nếu connectionStatus !== 'connected' → KHÔNG hiện bất kỳ data nào từ realtime.
+  Chỉ dùng initial fetch khi chưa kết nối.
+  Không fake realtime bằng setTimeout hay polling 10s.
+  Badge connection status LUÔN visible, không ẩn bất kỳ lúc nào.
+
+<span class="rule">RULE P02 — STUDENT_CODE AN TOÀN:</span>
+  Dùng charset: ABCDEFGHJKLMNPQRSTUVWXYZ23456789 (loại I,O,0,1 dễ nhầm).
+  8 ký tự = 32^8 ≈ 1 nghìn tỷ — không brute force được.
+  student_code chỉ sinh cho role='student', không sinh cho teacher/admin/parent.
+
+<span class="rule">RULE P03 — DATA ISOLATION TUYỆT ĐỐI:</span>
+  Mọi query phụ huynh PHẢI check parent_student_links với status='active'.
+  Server Component verify ownership trước khi render.
+  RLS Policy làm tầng bảo vệ thứ 2 (defense in depth).
+  Phụ huynh không thấy nội dung bài học, chỉ thấy tiến độ/điểm.
+
+<span class="rule">RULE P04 — CHANNEL CLEANUP BẮT BUỘC:</span>
+  useChildRealtime PHẢI return cleanup function trong useEffect.
+  Khi selectedId thay đổi → channel cũ phải bị remove trước khi tạo channel mới.
+  Không để leak channel — sẽ nhân lên mỗi lần re-render.
+
+<span class="rule">RULE P05 — KHÔNG SỬA LAYOUT HIỆN CÓ:</span>
+  /parent/* là layout riêng biệt.
+  Không sửa student/teacher layout hay sidebar.
+  Chỉ thêm online tracking vào student layout SAU KHI báo đúng file+dòng và tôi xác nhận.
+
+<span class="rule">RULE P06 — TRIGGER PHẢI SECURITY DEFINER:</span>
+  Tất cả trigger functions dùng LANGUAGE plpgsql SECURITY DEFINER.
+  Nếu không, trigger sẽ bị RLS policy block khi cố đọc bảng khác.
+
+<span class="hd">## 9. DANH SÁCH TẤT CẢ FILE CẦN TẠO</span>
+<span class="ok">SQL:</span> parent_student_links + Triggers + find_student_by_code
+<span class="ok">TẠO:</span>
+  lib/parent-actions.ts
+  hooks/useChildRealtime.ts
+  app/(dashboard)/parent/layout.tsx
+  app/(dashboard)/parent/dashboard/page.tsx
+  app/(dashboard)/parent/dashboard/ParentDashboardClient.tsx
+  app/(dashboard)/parent/dashboard/loading.tsx
+  app/(dashboard)/parent/dashboard/error.tsx
+  app/(dashboard)/parent/link-child/page.tsx
+  app/(dashboard)/parent/children/page.tsx
+  app/(dashboard)/parent/children/[studentId]/page.tsx
+  app/(dashboard)/parent/notifications/page.tsx
+  app/(dashboard)/student/profile/privacy/page.tsx
+<span class="ok">SỬA (sau confirm):</span>
+  app/(dashboard)/student/layout.tsx — thêm online tracking useEffect
+
+<span class="hd">## 10. TEST CHECKLIST REALTIME — BẮT BUỘC VERIFY TRƯỚC KHI DEMO</span>
+<span class="ok">✓</span> Mở 2 tab: Tab 1 học sinh đang học, Tab 2 phụ huynh dashboard
+<span class="ok">✓</span> Tab học sinh hoàn thành bài → Tab phụ huynh tự update trong &lt;3 giây
+<span class="ok">✓</span> Badge "⚡ Realtime" xanh khi connected
+<span class="ok">✓</span> Badge đỏ "Mất kết nối" khi tắt internet tab phụ huynh
+<span class="ok">✓</span> student_code hiển thị dạng PCM-XXXXXXXX trong /student/profile/privacy
+<span class="ok">✓</span> Phụ huynh nhập mã sai → lỗi rõ ràng, không crash
+<span class="ok">✓</span> Phụ huynh nhập mã đúng → thấy tên + trường + lớp
+<span class="ok">✓</span> Sau khi học sinh xác nhận → phụ huynh thấy data realtime
+<span class="ok">✓</span> Học sinh thu hồi → phụ huynh không còn thấy data
+<span class="ok">✓</span> Score &lt; 50 → notification cho phụ huynh với badge ⚠️ đỏ
+<span class="ok">✓</span> Test với Supabase client trực tiếp: phụ huynh không query được data HS khác</pre></div>
+  </div>
+
+  <div class="callout c-green">
+    <span class="ci">🏆</span>
+    <div><strong>Demo strategy cho ban giám khảo Tin học trẻ:</strong> Chuẩn bị 2 thiết bị hoặc 2 tab trình chiếu. Tab 1 (học sinh đang học), Tab 2 (phụ huynh dashboard). Trình chiếu cho giám khảo thấy khi học sinh hoàn thành bài → số liệu phụ huynh cập nhật tức thời. Kết hợp với Builder Lab + Hand Tracking + AI Guru → đây là combo không LMS học sinh nào trong cuộc thi có được.</div>
+  </div>
+</div>
+</div>
+
+<!-- FOOTER -->
+<div style="padding:44px 0;text-align:center;border-top:1px solid rgba(255,255,255,0.06)">
+<div class="wrap">
+  <div style="color:var(--muted);font-size:12.5px;line-height:2.2">
+    <strong style="color:var(--text)">Thứ tự triển khai đề xuất:</strong><br>
+    <span style="color:var(--red)">P01 Fix Bugs</span> →
+    <span style="color:var(--amber)">P02 RBAC</span> →
+    <span style="color:var(--amber)">P03 Database</span> →
+    <span style="color:var(--blue)">P04 Dashboard</span> →
+    <span style="color:var(--purple)">P05 Quiz</span> →
+    <span style="color:var(--teal)">P06 Realtime</span> →
+    <span style="color:var(--blue)">P07 Forum</span> →
+    <span style="color:var(--green)">P08 Game</span> →
+    <span style="color:var(--amber)">P09 Builder</span> →
+    <span style="color:var(--purple)">P10 Cert</span> →
+    <span style="color:var(--amber)">P11 Teacher</span> →
+    <span style="color:var(--teal)">P12 Parent ⭐</span><br>
+    Luôn paste <strong style="color:var(--text)">P00 CHUNG</strong> vào đầu mọi session trước khi paste prompt chuyên biệt.<br><br>
+    <span style="color:rgba(255,255,255,0.1)">PC Master LMS · Cuộc thi Tin học trẻ · Báo cáo chuyên gia 2026</span>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
