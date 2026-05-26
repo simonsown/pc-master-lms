@@ -1,21 +1,12 @@
 import "./globals.css";
 import { Analytics } from '@vercel/analytics/react';
 import Script from "next/script";
-import { Plus_Jakarta_Sans, Inter, Playfair_Display } from "next/font/google";
+import { Montserrat } from "next/font/google";
 
-const plusJakarta = Plus_Jakarta_Sans({
+const montserrat = Montserrat({
   subsets: ["latin", "vietnamese"],
-  variable: "--font-plus-jakarta",
-});
-
-const inter = Inter({
-  subsets: ["latin", "vietnamese"],
-  variable: "--font-sans",
-});
-
-const playfair = Playfair_Display({
-  subsets: ["latin", "vietnamese"],
-  variable: "--font-serif",
+  variable: "--font-montserrat",
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata = {
@@ -39,7 +30,7 @@ import AIGuru from "@/components/AIGuru";
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${plusJakarta.variable} ${inter.variable} ${playfair.variable}`}>
+    <html lang="vi" className={`${montserrat.variable}`}>
       <head>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css" />
       </head>

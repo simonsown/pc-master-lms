@@ -3,35 +3,9 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BookOpen, Users, FileText, LogOut, LayoutDashboard, Compass, HelpCircle, Award, Laptop, MessageSquare, TrendingUp, ChevronDown, User, Shield } from 'lucide-react'
+import { BookOpen, Users, FileText, LogOut, LayoutDashboard, Compass, HelpCircle, Award, Laptop, MessageSquare, TrendingUp, ChevronDown, User, Shield, GraduationCap } from 'lucide-react'
 import { logout } from '@/lib/auth-actions'
 import { supabase } from '@/lib/supabase'
-import Breadcrumb from '@/components/Breadcrumb'
-
-function NavItem({ href, icon: Icon, label, pathname }: { href: string; icon: any; label: string; pathname: string }) {
-  const isActive = pathname === href || pathname?.startsWith(href + '/')
-  return (
-    <Link href={href} style={{
-      display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px',
-      borderRadius: '10px',
-      background: isActive ? 'rgba(6, 182, 212, 0.1)' : 'transparent',
-      color: isActive ? '#06B6D4' : 'var(--text-secondary)',
-      fontWeight: isActive ? 600 : 500,
-      textDecoration: 'none', transition: 'all 0.2s', fontSize: '14px',
-    }}>
-      <Icon size={18} /> {label}
-    </Link>
-  )
-}
-
-function NavGroup({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <div style={{ padding: '8px 16px 4px', fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>{label}</div>
-      {children}
-    </div>
-  )
-}
 
 export default function TeacherLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -40,44 +14,64 @@ export default function TeacherLayout({ children }: { children: React.ReactNode 
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        supabase.from('profiles').select('*').eq('id', user.id).single().then(({ data }) => {
-          if (data) setProfile(data)
-        })
-      }
+      if (user) supabase.from('profiles').select('*').eq('id', user.id).single().then(({ data }) => { if (data) setProfile(data) })
     })
   }, [])
 
+  const isActive = (href: string) => pathname === href || pathname?.startsWith(href + '/')
+
+  const NavGroup = ({ label, children }: { label: string; children: React.ReactNode }) => (
+    <div>
+      <div style={{ padding: '8px 16px 4px', fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '1px' }}>{label}</div>
+      {children}
+    </div>
+  )
+
+  const NavItem = ({ href, icon: Icon, label }: { href: string; icon: any; label: string }) => {
+    const active = isActive(href)
+    return (
+      <Link href={href} style={{
+        display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', borderRadius: '10px', textDecoration: 'none', fontSize: '14px',
+        background: active ? 'rgba(8,158,96,0.15)' : 'transparent',
+        color: active ? '#fff' : 'rgba(255,255,255,0.6)',
+        fontWeight: active ? 700 : 500,
+        transition: 'all 0.2s'
+      }}>
+        <Icon size={18} /> {label}
+      </Link>
+    )
+  }
+
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-base)' }}>
-      <aside style={{ width: '260px', background: 'var(--bg-surface)', borderRight: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '20px 16px', borderBottom: '1px solid var(--border-subtle)', position: 'relative' }}>
+      <aside style={{ width: '280px', background: 'linear-gradient(180deg, #031f3b 0%, #1a2f53 100%)', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+        <div style={{ padding: '20px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)', position: 'relative' }}>
           <button onClick={() => setShowDropdown(!showDropdown)}
-            style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '4px', borderRadius: '10px' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#06B6D4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '4px', borderRadius: '10px', fontFamily: 'inherit' }}>
+            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--brand-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <User size={18} color="#fff" />
             </div>
             <div style={{ flex: 1, textAlign: 'left', minWidth: 0 }}>
-              <div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile?.full_name || 'Giáo viên'}</div>
-              <div style={{ fontSize: '11px', color: '#06B6D4', fontWeight: 600 }}>Giáo viên <Shield size={10} style={{ display: 'inline', marginLeft: '2px' }} /></div>
+              <div style={{ fontWeight: 700, fontSize: '14px', color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile?.full_name || 'Giáo viên'}</div>
+              <div style={{ fontSize: '11px', color: 'var(--brand-primary)', fontWeight: 600, opacity: 0.9 }}>Giáo viên</div>
             </div>
-            <ChevronDown size={16} style={{ color: 'var(--text-muted)', transform: showDropdown ? 'rotate(180deg)' : 'none', transition: '0.2s' }} />
+            <ChevronDown size={16} style={{ color: 'rgba(255,255,255,0.4)', transform: showDropdown ? 'rotate(180deg)' : 'none', transition: '0.2s' }} />
           </button>
 
           {showDropdown && (
             <>
               <div style={{ position: 'fixed', inset: 0, zIndex: 99 }} onClick={() => setShowDropdown(false)} />
-              <div style={{ position: 'absolute', top: '100%', left: '12px', right: '12px', background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', borderRadius: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.4)', zIndex: 100, padding: '8px' }}>
+              <div style={{ position: 'absolute', top: '100%', left: '12px', right: '12px', background: '#fff', border: '1px solid var(--border-default)', borderRadius: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.15)', zIndex: 100, padding: '8px' }}>
                 <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border-subtle)', marginBottom: '4px' }}>
                   <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>{profile?.full_name || 'Người dùng'}</div>
                   <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{profile?.email || ''}</div>
-                  <div style={{ fontSize: '11px', color: '#06B6D4', fontWeight: 600, marginTop: '4px' }}>Vai trò: Giáo viên</div>
+                  <div style={{ fontSize: '11px', color: 'var(--brand-primary)', fontWeight: 600, marginTop: '4px' }}>Vai trò: Giáo viên</div>
                 </div>
                 <Link href="/teacher" onClick={() => setShowDropdown(false)} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '8px', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '13px' }}>
                   <LayoutDashboard size={16} /> Bảng điều khiển
                 </Link>
-                <button onClick={async () => { setShowDropdown(false); if (confirm('Bạn muốn đăng xuất?')) await logout() }}
-                  style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', borderRadius: '8px', background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px', textAlign: 'left' }}>
+                <button onClick={async () => { setShowDropdown(false); await logout() }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', width: '100%', borderRadius: '8px', background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: '13px', textAlign: 'left', fontFamily: 'inherit' }}>
                   <LogOut size={16} /> Đăng xuất
                 </button>
               </div>
@@ -87,36 +81,38 @@ export default function TeacherLayout({ children }: { children: React.ReactNode 
 
         <nav style={{ padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, overflowY: 'auto' }}>
           <NavGroup label="Tổng quan">
-            <NavItem href="/teacher" icon={LayoutDashboard} label="Bảng điều khiển" pathname={pathname} />
+            <NavItem href="/teacher" icon={LayoutDashboard} label="Bảng điều khiển" />
           </NavGroup>
-
           <NavGroup label="Quản lý">
-            <NavItem href="/teacher/classes" icon={Users} label="Lớp học" pathname={pathname} />
-            <NavItem href="/teacher/lessons" icon={FileText} label="Bài giảng" pathname={pathname} />
-            <NavItem href="/teacher/learning-path" icon={Compass} label="Lộ trình" pathname={pathname} />
-            <NavItem href="/teacher/quiz" icon={HelpCircle} label="Đề thi" pathname={pathname} />
-            <NavItem href="/teacher/certificates" icon={Award} label="Chứng chỉ" pathname={pathname} />
+            <NavItem href="/teacher/classes" icon={Users} label="Lớp học" />
+            <NavItem href="/teacher/lessons" icon={FileText} label="Bài giảng" />
+            <NavItem href="/teacher/learning-path" icon={Compass} label="Lộ trình" />
+            <NavItem href="/teacher/quiz" icon={HelpCircle} label="Đề thi" />
+            <NavItem href="/teacher/certificates" icon={Award} label="Chứng chỉ" />
           </NavGroup>
-
           <NavGroup label="Góc nhìn học sinh">
-            <NavItem href="/builder" icon={Laptop} label="Thực hành PC 3D" pathname={pathname} />
-            <NavItem href="/student/quiz" icon={HelpCircle} label="Ngân hàng đề thi" pathname={pathname} />
-            <NavItem href="/student/learning-path" icon={TrendingUp} label="Lộ trình học tập" pathname={pathname} />
-            <NavItem href="/student/certificates" icon={Award} label="Chứng chỉ học viên" pathname={pathname} />
-            <NavItem href="/student/discussion" icon={MessageSquare} label="Diễn đàn học tập" pathname={pathname} />
+            <NavItem href="/builder" icon={Laptop} label="Thực hành PC 3D" />
+            <NavItem href="/student/quiz" icon={HelpCircle} label="Ngân hàng đề thi" />
+            <NavItem href="/student/learning-path" icon={TrendingUp} label="Lộ trình học tập" />
+            <NavItem href="/student/certificates" icon={Award} label="Chứng chỉ học viên" />
+            <NavItem href="/student/discussion" icon={MessageSquare} label="Diễn đàn học tập" />
           </NavGroup>
         </nav>
 
-        <div style={{ padding: '12px', borderTop: '1px solid var(--border-subtle)' }}>
-          <button onClick={async () => { if (confirm('Bạn muốn đăng xuất khỏi hệ thống?')) { await logout() } }}
-            style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', width: '100%', borderRadius: '10px', background: 'transparent', border: 'none', color: '#ef4444', fontWeight: 600, cursor: 'pointer', fontSize: '14px' }}>
+        <div style={{ padding: '12px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+          <button onClick={async () => { await logout() }}
+            style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', width: '100%', borderRadius: '10px', background: 'transparent', border: 'none', color: 'rgba(244,67,54,0.7)', fontWeight: 600, cursor: 'pointer', fontSize: '14px', fontFamily: 'inherit' }}>
             <LogOut size={18} /> Đăng xuất
           </button>
         </div>
       </aside>
 
-      <main style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
-        <Breadcrumb />
+      <main style={{ flex: 1, padding: '32px', overflowY: 'auto', minWidth: 0 }}>
+        <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--text-muted)' }}>
+          <Link href="/teacher" style={{ color: 'var(--accent-blue)', textDecoration: 'none', fontWeight: 500 }}>Bảng điều khiển</Link>
+          <span>/</span>
+          <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{pathname === '/teacher' ? 'Tổng quan' : pathname.split('/').pop()}</span>
+        </div>
         {children}
       </main>
     </div>

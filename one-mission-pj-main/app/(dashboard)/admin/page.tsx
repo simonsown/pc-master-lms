@@ -9,164 +9,123 @@ import {
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState<any[]>([]);
-  const [stats, setStats] = useState({
-    totalUsers: 0,
-    teachers: 0,
-    students: 0,
-    activeClasses: 0
-  });
+  const [stats, setStats] = useState({ totalUsers: 0, teachers: 0, students: 0, activeClasses: 0 });
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchAdminData();
-  }, []);
+  useEffect(() => { fetchAdminData(); }, []);
 
   async function fetchAdminData() {
     setLoading(true);
     try {
-      // 1. Fetch all profiles
-      const { data: profiles, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
-
+      const { data: profiles, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
       if (error) throw error;
       setUsers(profiles || []);
-
-      // 2. Calculate stats
       const teachers = profiles?.filter(u => u.role === 'teacher').length || 0;
       const students = profiles?.filter(u => u.role === 'student').length || 0;
-
-      const { count: classesCount } = await supabase
-        .from('classes')
-        .select('*', { count: 'exact', head: true });
-
-      setStats({
-        totalUsers: profiles?.length || 0,
-        teachers,
-        students,
-        activeClasses: classesCount || 0
-      });
-
-    } catch (err) {
-      console.error('Admin Data Error:', err);
-    } finally {
-      setLoading(false);
-    }
+      const { count: classesCount } = await supabase.from('classes').select('*', { count: 'exact', head: true });
+      setStats({ totalUsers: profiles?.length || 0, teachers, students, activeClasses: classesCount || 0 });
+    } catch (err) { console.error('Admin Data Error:', err); }
+    finally { setLoading(false); }
   }
 
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-        <Loader2 className="animate-spin" color="var(--brand-primary)" size={48} />
-      </div>
-    );
-  }
+  if (loading) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}><Loader2 size={48} style={{ color: 'var(--brand-primary)', animation: 'spin 1s linear infinite' }} /></div>
 
   return (
-    <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
         <div>
-          <h1 style={{ fontSize: '32px', fontWeight: 800, margin: '0 0 8px 0', color: '#fff' }}>Hệ thống <span style={{ color: 'var(--brand-primary)' }}>Admin Console</span></h1>
-          <p style={{ color: '#8899a6', margin: 0 }}>Quản lý người dùng, lớp học và giám sát hoạt động toàn sàn.</p>
+          <h1 style={{ fontSize: '28px', fontWeight: 800, margin: '0 0 6px 0', color: 'var(--text-primary)' }}>Admin Console</h1>
+          <p style={{ color: 'var(--text-muted)', margin: 0 }}>Quản lý người dùng, lớp học và giám sát hoạt động toàn hệ thống.</p>
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button style={{ padding: '12px 20px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-            <Activity size={18} /> Logs hệ thống
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button style={{ padding: '10px 18px', borderRadius: '10px', background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit' }}>
+            <Activity size={18} /> Logs
           </button>
-          <button style={{ padding: '12px 20px', borderRadius: '12px', background: 'var(--brand-primary)', color: '#000', fontWeight: 700, border: 'none', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+          <button style={{ padding: '10px 18px', borderRadius: '10px', background: 'var(--brand-primary)', color: '#fff', fontWeight: 700, border: 'none', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', fontFamily: 'inherit' }}>
             <Settings size={18} /> Cấu hình
           </button>
         </div>
       </header>
 
-      {/* Stats Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '48px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '40px' }}>
         {[
           { label: 'Tổng người dùng', value: stats.totalUsers, icon: <Users size={20} />, color: '#6366f1' },
-          { label: 'Giáo viên', value: stats.teachers, icon: <Shield size={20} />, color: '#06b6d4' },
-          { label: 'Học sinh', value: stats.students, icon: <Users size={20} />, color: '#10b981' },
-          { label: 'Lớp học hoạt động', value: stats.activeClasses, icon: <Database size={20} />, color: '#f59e0b' },
+          { label: 'Giáo viên', value: stats.teachers, icon: <Shield size={20} />, color: 'var(--accent-blue)' },
+          { label: 'Học sinh', value: stats.students, icon: <Users size={20} />, color: 'var(--brand-primary)' },
+          { label: 'Lớp học hoạt động', value: stats.activeClasses, icon: <Database size={20} />, color: 'var(--warning)' },
         ].map((s, i) => (
-          <div key={i} style={{ background: 'rgba(12, 20, 36, 0.8)', padding: '32px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <div style={{ padding: '12px', borderRadius: '12px', background: `${s.color}15`, color: s.color }}>{s.icon}</div>
-              <div style={{ color: '#10b981', fontSize: '12px', fontWeight: 700 }}>+12%</div>
+          <div key={i} className="lms-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: `${s.color}15`, color: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{s.icon}</div>
             </div>
-            <div style={{ fontSize: '14px', color: '#8899a6', fontWeight: 600, marginBottom: '4px' }}>{s.label}</div>
-            <div style={{ fontSize: '32px', fontWeight: 900, color: '#fff' }}>{s.value.toLocaleString()}</div>
+            <div style={{ fontSize: '28px', fontWeight: 900, color: 'var(--text-primary)' }}>{s.value.toLocaleString()}</div>
+            <div style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 500, marginTop: '2px' }}>{s.label}</div>
           </div>
         ))}
       </div>
 
-      {/* User Management Table */}
-      <div style={{ background: 'rgba(12, 20, 36, 0.8)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
-        <div style={{ padding: '24px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#fff', margin: 0 }}>Quản lý người dùng</h3>
-          <div style={{ display: 'flex', gap: '12px' }}>
+      <div className="lms-card" style={{ overflow: 'hidden' }}>
+        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Quản lý người dùng</h3>
+          <div style={{ display: 'flex', gap: '10px' }}>
             <div style={{ position: 'relative' }}>
-              <Search size={18} color="#4b5563" style={{ position: 'absolute', left: '12px', top: '11px' }} />
-              <input placeholder="Tìm kiếm email, tên..." style={{ padding: '10px 16px 10px 40px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '14px', outline: 'none', width: '250px' }} />
+              <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+              <input placeholder="Tìm kiếm..." style={{ padding: '8px 12px 8px 36px', borderRadius: '8px', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', color: 'var(--text-primary)', fontSize: '13px', outline: 'none', width: '200px' }} />
             </div>
-            <button style={{ padding: '10px 16px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-              <Filter size={18} /> Lọc
+            <button style={{ padding: '8px 14px', borderRadius: '8px', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '13px', fontFamily: 'inherit' }}>
+              <Filter size={16} /> Lọc
             </button>
           </div>
         </div>
         
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-              <th style={{ padding: '16px 24px', color: '#8899a6', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase' }}>Người dùng</th>
-              <th style={{ padding: '16px 24px', color: '#8899a6', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase' }}>Vai trò</th>
-              <th style={{ padding: '16px 24px', color: '#8899a6', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase' }}>Trường học</th>
-              <th style={{ padding: '16px 24px', color: '#8899a6', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase' }}>Ngày tham gia</th>
-              <th style={{ padding: '16px 24px', color: '#8899a6', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase' }}>Trạng thái</th>
-              <th style={{ padding: '16px 24px', color: '#8899a6', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase' }}>Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.2s' }}>
-                <td style={{ padding: '20px 24px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(45deg, #00f3ff, #0066ff)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: '#fff' }}>
-                      {user.full_name?.charAt(0) || 'U'}
-                    </div>
-                    <div>
-                      <div style={{ color: '#fff', fontWeight: 700, fontSize: '14px' }}>{user.full_name}</div>
-                      <div style={{ color: '#4b5563', fontSize: '12px' }}>{user.email}</div>
-                    </div>
-                  </div>
-                </td>
-                <td style={{ padding: '20px 24px' }}>
-                  <span style={{ 
-                    padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase',
-                    background: user.role === 'admin' ? 'rgba(239, 68, 68, 0.1)' : user.role === 'teacher' ? 'rgba(6, 182, 212, 0.1)' : 'rgba(16, 185, 129, 0.1)',
-                    color: user.role === 'admin' ? '#ef4444' : user.role === 'teacher' ? '#06b6d4' : '#10b981'
-                  }}>
-                    {user.role}
-                  </span>
-                </td>
-                <td style={{ padding: '20px 24px', color: '#8899a6', fontSize: '14px' }}>{user.school_id ? 'Đã liên kết' : 'Tự do'}</td>
-                <td style={{ padding: '20px 24px', color: '#8899a6', fontSize: '14px' }}>{new Date(user.created_at).toLocaleDateString('vi-VN')}</td>
-                <td style={{ padding: '20px 24px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#10b981', fontSize: '13px', fontWeight: 600 }}>
-                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }}></div> Online
-                  </div>
-                </td>
-                <td style={{ padding: '20px 24px' }}>
-                  <button style={{ padding: '8px 12px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: 'none', color: '#8899a6', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>Chi tiết</button>
-                </td>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                {['Người dùng', 'Vai trò', 'Trường học', 'Ngày tham gia', 'Trạng thái', 'Hành động'].map(h => (
+                  <th key={h} style={{ padding: '12px 20px', color: 'var(--text-muted)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {users.map((user) => (
+                <tr key={user.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                  <td style={{ padding: '14px 20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: `linear-gradient(135deg, var(--brand-primary), var(--accent-blue))`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: '#fff', fontSize: '14px' }}>
+                        {user.full_name?.charAt(0) || 'U'}
+                      </div>
+                      <div>
+                        <div style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: '14px' }}>{user.full_name}</div>
+                        <div style={{ color: 'var(--text-muted)', fontSize: '12px' }}>{user.email}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style={{ padding: '14px 20px' }}>
+                    <span className={`lms-tag lms-tag-${user.role === 'admin' ? 'danger' : user.role === 'teacher' ? 'info' : 'success'}`}>
+                      {user.role}
+                    </span>
+                  </td>
+                  <td style={{ padding: '14px 20px', color: 'var(--text-muted)', fontSize: '13px' }}>{user.school_id ? 'Đã liên kết' : 'Tự do'}</td>
+                  <td style={{ padding: '14px 20px', color: 'var(--text-muted)', fontSize: '13px' }}>{new Date(user.created_at).toLocaleDateString('vi-VN')}</td>
+                  <td style={{ padding: '14px 20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--brand-primary)', fontSize: '13px', fontWeight: 600 }}>
+                      <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--brand-primary)' }}></div> Online
+                    </div>
+                  </td>
+                  <td style={{ padding: '14px 20px' }}>
+                    <button style={{ padding: '6px 12px', borderRadius: '6px', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', color: 'var(--text-secondary)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Chi tiết</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
         
         {users.length === 0 && (
-          <div style={{ padding: '60px', textAlign: 'center', color: '#4b5563' }}>
+          <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>
             <AlertCircle size={48} style={{ marginBottom: '16px', opacity: 0.2 }} />
-            <p>Không tìm thấy người dùng nào trong hệ thống.</p>
+            <p>Không tìm thấy người dùng nào.</p>
           </div>
         )}
       </div>
