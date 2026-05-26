@@ -16,6 +16,30 @@ interface ProgressViewProps {
   }
 }
 
+const MOTIVATIONAL_QUOTES = [
+  "Kiến thức là sức mạnh. Mỗi bài học bạn hoàn thành là một bước tiến! 💪",
+  "Lắp ráp PC cũng như xây dựng tương lai - từng linh kiện đều quan trọng! 🖥️",
+  "Sai lầm là một phần của học tập. Hãy thử lại và bạn sẽ làm được! 🔧",
+  "Hôm nay bạn học được điều gì mới? Mỗi ngày một chút, một năm là cả kho báu! 📚",
+  "CPU là não bộ, RAM là trí nhớ - bạn đang rèn luyện cả hai! 🧠",
+  "Đam mê công nghệ là ngọn lửa không bao giờ tắt. Hãy giữ lửa nhé! 🔥",
+  "Mỗi dòng code, mỗi con chip đều kể một câu chuyện. Hãy khám phá! 💻",
+  "Kiên trì là chìa khóa. Ngày hôm nay mệt mỏi, ngày mai sẽ tiến bộ! ⚡",
+  "Tương lai thuộc về những ai học hỏi không ngừng. Bạn đang đi đúng hướng! 🚀",
+  "PC Master không chỉ là lắp ráp, mà là sáng tạo và đam mê! ⭐",
+  "Học qua thực hành là cách tốt nhất. Builder Lab đang chờ bạn! 🎮",
+  "Thử thách bản thân mỗi ngày. Học một linh kiện mới, hiểu thêm về công nghệ! 📈",
+  "Công nghệ thay đổi từng ngày, và bạn đang bắt kịp! 🌟",
+  "Mỗi bài quiz hoàn thành là một chiến thắng nhỏ. Tiếp tục nhé! 🏆",
+  "PC là công cụ mạnh nhất - bạn đang học cách làm chủ nó! 💡",
+]
+
+function getDailyQuote(): string {
+  const today = new Date()
+  const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000)
+  return MOTIVATIONAL_QUOTES[dayOfYear % MOTIVATIONAL_QUOTES.length]
+}
+
 export default function ProgressView({ data }: ProgressViewProps) {
   const router = useRouter()
   const { stats, dailyProgress, lessons, quizResults, builderActivity } = data
@@ -59,6 +83,12 @@ export default function ProgressView({ data }: ProgressViewProps) {
           <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
           Quay lại Dashboard
         </button>
+      </div>
+
+      {/* Daily Motivation */}
+      <div className="bg-gradient-to-r from-[#00d4aa15] to-[#06b6d415] border border-[#00d4aa]/20 rounded-2xl p-5 flex items-center gap-4">
+        <span className="text-2xl">💡</span>
+        <p className="text-sm text-[#dde0ed] leading-relaxed">{getDailyQuote()}</p>
       </div>
 
       {/* Section 1 - Header Stats */}

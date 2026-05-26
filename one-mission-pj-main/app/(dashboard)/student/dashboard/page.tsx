@@ -107,24 +107,27 @@ export default async function StudentDashboardPage() {
   const user = await requireRole(['student'])
   const supabase = await createClient()
 
-  const [progressRes, quizRes, inProgressRes, achievementsRes, lessonsCountRes] = await Promise.all([
+  const today = new Date().toISOString().slice(0, 10)
+
+  const [progressRes, quizRes, inProgressRes, achievementsRes, lessonsCountRes, dailyQuizRes] = await Promise.all([
     supabase
       .from('lesson_progress')
       .select('lesson_id, status, time_spent_seconds, completed_at, last_accessed, completion_percentage, lessons(title, thumbnail_url)')
-      .eq('student_id', user.id),
-    supabase
-      .from('quiz_attempts')
-      .select('score, submitted_at, status')
-      .eq('student_id', user.id)
+      .eq('user_id', user.id),
+      supabase
+        .from('quiz_attempts')
+        .select('score, submitted_at, status')
+        .eq('student_id', user.id)
       .eq('status', 'graded')
       .order('submitted_at', { ascending: false })
       .limit(10),
     supabase
       .from('lesson_progress')
       .select('lesson_id, status, completion_percentage, last_accessed, lessons(title, thumbnail_url)')
-      .eq('student_id', user.id)
-      .eq('status', 'in_progress')
+      .eq('user_id', user.id)
+      .is('is_completed', false)
       .order('last_accessed', { ascending: false })
+      .not('is_completed', 'is', null)
       .limit(1),
     supabase
       .from('student_achievements')
@@ -135,16 +138,29 @@ export default async function StudentDashboardPage() {
     supabase
       .from('lessons')
       .select('id', { count: 'exact', head: true })
-      .eq('is_published', true)
+      .eq('is_published', true),
+    supabase
+      .from('quizzes')
+      .select('id, title, description, time_limit_minutes')
+      .eq('is_daily', true)
+      .is('is_published', true)
+      .gte('created_at', `${today}T00:00:00Z`)
+      .lte('created_at', `${today}T23:59:59Z`)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    // We'll get the daily attempt after we know the dailyQuiz id
+    Promise.resolve({ data: null })
   ])
 
-  if (progressRes.error || quizRes.error || inProgressRes.error || achievementsRes.error || lessonsCountRes.error) {
+  if (progressRes.error || quizRes.error || inProgressRes.error || achievementsRes.error || lessonsCountRes.error || dailyQuizRes.error) {
     console.error('Student dashboard fetch error', {
       progressError: progressRes.error,
       quizError: quizRes.error,
       inProgressError: inProgressRes.error,
       achievementsError: achievementsRes.error,
-      lessonsCountError: lessonsCountRes.error
+      lessonsCountError: lessonsCountRes.error,
+      dailyQuizError: dailyQuizRes.error
     })
   }
 
@@ -180,6 +196,21 @@ export default async function StudentDashboardPage() {
     }
   })
 
+  const dailyQuiz = dailyQuizRes.data ?? null
+  // Fetch daily quiz attempt separately (depends on dailyQuiz)
+  let dailyAttempt = null
+  if (dailyQuiz) {
+    const { data: attemptData } = await supabase
+      .from('quiz_attempts')
+      .select('id, score, status, submitted_at')
+      .eq('quiz_id', dailyQuiz.id)
+      .eq('student_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    dailyAttempt = attemptData
+  }
+
   return (
     <StudentDashboardClient
       user={user}
@@ -196,6 +227,8 @@ export default async function StudentDashboardPage() {
       chartData={chartData}
       inProgressLesson={inProgressLesson}
       recentAchievements={recentAchievements}
+      dailyQuiz={dailyQuiz}
+      dailyAttempt={dailyAttempt}
     />
   )
 }

@@ -261,7 +261,7 @@ export default function LectureCourse({ lang, onBack }) {
 
             const [{ data: allLessons }, { data: progress }] = await Promise.all([
                 supabase.from('lessons').select('*').eq('is_published', true).order('created_at', { ascending: false }),
-                user ? supabase.from('lesson_progress').select('lesson_id').eq('user_id', user.id) : { data: [] }
+                user ? supabase.from('lesson_progress').select('lesson_id').eq('student_id', user.id) : { data: [] }
             ]);
 
             const all = allLessons || [];
@@ -278,10 +278,10 @@ export default function LectureCourse({ lang, onBack }) {
     const handleToggleComplete = async (lessonId, wasCompleted) => {
         if (!userId) return;
         if (wasCompleted) {
-            await supabase.from('lesson_progress').delete().eq('user_id', userId).eq('lesson_id', lessonId);
+            await supabase.from('lesson_progress').delete().eq('student_id', userId).eq('lesson_id', lessonId);
             setCompletedIds(prev => { const s = new Set(prev); s.delete(lessonId); return s; });
         } else {
-            await supabase.from('lesson_progress').upsert({ user_id: userId, lesson_id: lessonId });
+            await supabase.from('lesson_progress').upsert({ student_id: userId, lesson_id: lessonId });
             setCompletedIds(prev => new Set([...prev, lessonId]));
         }
     };

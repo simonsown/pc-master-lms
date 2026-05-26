@@ -84,25 +84,29 @@ const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems }, ref) 
 
     // Expose methods to parent
     useImperativeHandle(ref, () => ({
-        spawnComponent: (type) => {
-            let w, h, spawnY = 100;
-            if (type === 'CPU') { w = 80; h = 80; }
-            else if (type === 'RAM') { w = 35; h = 160; spawnY = 250; }
-            else if (type === 'GPU') { w = 320; h = 130; spawnY = 450; }
-            else if (type === 'SSD') { w = 140; h = 35; spawnY = 320; }
-            else if (type === 'COOLER') { w = 90; h = 90; spawnY = 350; }
+        spawnComponent: (type, count = 1) => {
+            const spawnOne = () => {
+                let w, h, spawnY = 100;
+                if (type === 'CPU') { w = 80; h = 80; }
+                else if (type === 'RAM') { w = 35; h = 160; spawnY = 250; }
+                else if (type === 'GPU') { w = 320; h = 130; spawnY = 450; }
+                else if (type === 'SSD') { w = 140; h = 35; spawnY = 320; }
+                else if (type === 'COOLER') { w = 90; h = 90; spawnY = 350; }
+                else if (type === 'PSU') { w = 180; h = 160; spawnY = 550; }
 
-            // Limit duplicate unplaced logic
-            const alreadyExists = stateRef.current.components.find(c => c.type === type && !c.isPlaced);
-            if (!alreadyExists) {
+                const offset = stateRef.current.components.filter(c => c.type === type && !c.isPlaced).length;
                 stateRef.current.components.push({
-                    id: Date.now(),
+                    id: Date.now() + Math.random(),
                     type,
-                    x: 120, // Clean staging area on the left
-                    y: spawnY,
+                    x: 120 + offset * 30,
+                    y: spawnY + offset * 20,
                     width: w, height: h,
                     isGrabbed: false, isPlaced: false
                 });
+            };
+
+            for (let i = 0; i < count; i++) {
+                spawnOne();
             }
         }
     }));

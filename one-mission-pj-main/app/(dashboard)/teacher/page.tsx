@@ -3,9 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { 
-  Users, FileText, ClipboardCheck, Plus, 
-  ArrowRight, BookOpen, GraduationCap, TrendingUp,
-  Laptop, HelpCircle, Award, MessageSquare
+  Users, FileText, BookOpen, GraduationCap, TrendingUp
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -68,14 +66,6 @@ export default function TeacherDashboard() {
     { title: 'Quản lý Bài giảng', desc: 'Soạn thảo nội dung học tập, bài giảng lý thuyết', icon: <FileText size={24} />, color: '#10b981', href: '/teacher/lessons' },
     { title: 'Sách giáo khoa', desc: 'Nội dung số theo chương trình GDPT', icon: <BookOpen size={24} />, color: '#8b5cf6', href: '/teacher/lessons' },
     { title: 'Kiến thức mở rộng', desc: 'Thư viện phần cứng và công nghệ mới', icon: <TrendingUp size={24} />, color: '#ec4899', href: '/teacher/lessons' },
-  ];
-
-  const studentSyncActions = [
-    { title: 'Giả lập 3D PC (Lab)', desc: 'Trải nghiệm lắp ráp PC tương tác', icon: <Laptop size={24} />, color: '#00f3ff', href: '/builder' },
-    { title: 'Ngân hàng đề thi', desc: 'Xem & làm thử đề thi phần cứng từ Internet', icon: <HelpCircle size={24} />, color: '#f59e0b', href: '/student/quiz' },
-    { title: 'Lộ trình học tập mẫu', desc: 'Theo dõi hành trình học PC Master', icon: <TrendingUp size={24} />, color: '#10b981', href: '/student/learning-path' },
-    { title: 'Chứng chỉ học viên', desc: 'Thử thách nhận chứng chỉ danh giá', icon: <Award size={24} />, color: '#ec4899', href: '/student/certificates' },
-    { title: 'Diễn đàn học tập', desc: 'Thảo luận thời gian thực với học sinh', icon: <MessageSquare size={24} />, color: '#8b5cf6', href: '/student/discussion' },
   ];
 
   return (
@@ -144,33 +134,7 @@ export default function TeacherDashboard() {
             ))}
           </div>
 
-          <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#fff', marginBottom: '24px' }}>Trải nghiệm tính năng của Học sinh (Đồng bộ)</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
-            {studentSyncActions.map((action, idx) => (
-              <Link key={idx} href={action.href} style={{ textDecoration: 'none' }}>
-                <div style={{ 
-                  background: 'rgba(12, 20, 36, 0.8)', padding: '24px', borderRadius: '20px', 
-                  border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', 
-                  gap: '16px', transition: 'all 0.2s', cursor: 'pointer'
-                }}
-                onMouseOver={e => e.currentTarget.style.borderColor = action.color}
-                onMouseOut={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'}
-                >
-                  <div style={{ 
-                    width: '48px', height: '48px', borderRadius: '12px', 
-                    background: `${action.color}10`, color: action.color,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                  }}>
-                    {action.icon}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <h3 style={{ color: '#fff', fontSize: '16px', fontWeight: 700, margin: '0 0 2px 0' }}>{action.title}</h3>
-                    <p style={{ color: '#8899a6', fontSize: '13px', margin: 0 }}>{action.desc}</p>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+
         </div>
 
         <div>

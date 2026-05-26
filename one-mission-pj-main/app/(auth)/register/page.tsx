@@ -55,7 +55,7 @@ function RegisterForm() {
     // Calculate password strength
     if (name === 'password') {
       let strength = 0
-      if (value.length >= 6) strength += 1
+      if (value.length >= 8) strength += 1
       if (value.match(/[A-Z]/) && value.match(/[a-z]/)) strength += 1
       if (value.match(/[0-9!@#$%^&*]/)) strength += 1
       setPasswordStrength(strength)
@@ -73,8 +73,16 @@ function RegisterForm() {
         setError('Mật khẩu xác nhận không khớp.')
         return
       }
-      if (formData.password.length < 6) {
-        setError('Mật khẩu phải có ít nhất 6 ký tự.')
+      if (formData.password.length < 8) {
+        setError('Mật khẩu phải có ít nhất 8 ký tự.')
+        return
+      }
+      if (!/[A-Z]/.test(formData.password)) {
+        setError('Mật khẩu phải chứa ít nhất 1 chữ hoa.')
+        return
+      }
+      if (!/[0-9]/.test(formData.password)) {
+        setError('Mật khẩu phải chứa ít nhất 1 số.')
         return
       }
     } else if (step === 2) {
@@ -148,7 +156,7 @@ function RegisterForm() {
         if (isOauth) {
           router.push(formData.role === 'student' ? '/builder' : `/${formData.role}`)
         } else {
-          router.push('/login?registered=true')
+          router.push('/check-email')
         }
       }, 2000)
     }
@@ -267,7 +275,7 @@ function RegisterForm() {
                 <div className="relative">
                   <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
                   <input 
-                    type="password" name="password" placeholder="Mật khẩu (tối thiểu 6 ký tự)" value={formData.password} onChange={handleInputChange} required
+                    type="password" name="password" placeholder="Mật khẩu (tối thiểu 8 ký tự, 1 chữ hoa, 1 số)" value={formData.password} onChange={handleInputChange} required
                     className="w-full bg-[#0f0f1a] border border-[#1e293b] rounded-xl pl-11 pr-4 py-3.5 outline-none focus:border-[#00d2a0] text-white"
                   />
                 </div>

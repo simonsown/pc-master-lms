@@ -1,3 +1,8 @@
 {
-  "name": "pc-master-lms"
+  "crons": [
+    {
+      "path": "/api/cron/daily-quiz",
+      "schedule": "0 6 * * *"
+    }
+  ]
 }

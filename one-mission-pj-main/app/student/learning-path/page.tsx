@@ -20,7 +20,7 @@ export interface PathItemWithUnlock {
   completed?: boolean;
 }
 import { PathTimeline } from '@/components/learning-path/PathTimeline'
-import { RefreshCw, Map, ArrowLeft } from 'lucide-react'
+import { RefreshCw, Map, ArrowLeft, Youtube, Lightbulb, ExternalLink, Sparkles, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 export default function StudentLearningPathPage() {
@@ -28,6 +28,8 @@ export default function StudentLearningPathPage() {
   const [items, setItems] = useState<PathItemWithUnlock[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [suggestions, setSuggestions] = useState<any[]>([])
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false)
   const supabase = createClientComponentClient()
 
   useEffect(() => {
@@ -230,6 +232,43 @@ export default function StudentLearningPathPage() {
     loadPath()
   }, [supabase])
 
+  // Fetch AI suggestions when items are loaded
+  useEffect(() => {
+    if (items.length === 0 || suggestionsLoading) return
+
+    const fetchSuggestions = async () => {
+      setSuggestionsLoading(true)
+      try {
+        const completedTopics = items
+          .filter(i => i.completed)
+          .map(i => i.title)
+        const currentItem = items.find(i => !i.completed && i.is_unlocked)
+        const currentTopic = currentItem?.title || items[items.length - 1]?.title || ''
+
+        const res = await fetch('/api/ai/suggest-resources', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            completedTopics,
+            currentTopic,
+            strengths: [],
+            weaknesses: [],
+          })
+        })
+        if (res.ok) {
+          const data = await res.json()
+          setSuggestions(data)
+        }
+      } catch (err) {
+        console.warn('Failed to fetch suggestions:', err)
+      } finally {
+        setSuggestionsLoading(false)
+      }
+    }
+
+    fetchSuggestions()
+  }, [items.length])
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#161F38] text-white pt-24 flex flex-col items-center justify-center gap-2">
@@ -276,6 +315,98 @@ export default function StudentLearningPathPage() {
           </div>
         ) : (
           <PathTimeline items={items} />
+        )}
+
+        {/* AI suggestions + YouTube recommendations */}
+        {suggestions.length > 0 && (
+          <div className="mt-10">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-[#ff0000]/10 border border-[#ff0000]/25 text-[#ff0000] rounded-xl">
+                <Youtube size={22} />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-white">Gợi ý từ AI</h2>
+                <p className="text-xs text-gray-400">Video & tài liệu đề xuất dựa trên tiến độ của bạn</p>
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              {suggestions.map((s, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl border border-white/10 bg-[#1a1c25] p-5 hover:border-[#00d4aa]/30 transition-all group"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#00d4aa]/10 text-[#00d4aa]">
+                      <Lightbulb size={16} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-bold text-sm text-white mb-1">{s.topic}</h3>
+                      <p className="text-xs text-gray-400 mb-2 leading-relaxed">{s.description}</p>
+                      <p className="text-[10px] text-[#00d4aa]/70 italic mb-3">💡 {s.reason}</p>
+
+                      {/* YouTube links */}
+                      {s.youtubeKeywords && (
+                        <div className="flex flex-wrap gap-2">
+                          {s.youtubeKeywords.split(',').map((kw: string, j: number) => {
+                            const query = encodeURIComponent(kw.trim() + ' PC')
+                            return (
+                              <a
+                                key={j}
+                                href={`https://www.youtube.com/results?search_query=${query}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#ff0000]/10 border border-[#ff0000]/20 text-[11px] font-semibold text-[#ff4444] hover:bg-[#ff0000]/20 transition-all"
+                              >
+                                <Youtube size={12} />
+                                <span className="truncate max-w-[140px]">{kw.trim()}</span>
+                                <ExternalLink size={10} className="opacity-50" />
+                              </a>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {suggestions.length > 0 && (
+              <div className="mt-6 text-center">
+                <button
+                  onClick={async () => {
+                    setSuggestions([])
+                    setSuggestionsLoading(true)
+                    try {
+                      const completedTopics = items.filter(i => i.completed).map(i => i.title)
+                      const currentItem = items.find(i => !i.completed && i.is_unlocked)
+                      const currentTopic = currentItem?.title || items[items.length - 1]?.title || ''
+                      const res = await fetch('/api/ai/suggest-resources', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ completedTopics, currentTopic, strengths: [], weaknesses: [] })
+                      })
+                      if (res.ok) setSuggestions(await res.json())
+                    } catch {} finally {
+                      setSuggestionsLoading(false)
+                    }
+                  }}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-gray-400 hover:text-white hover:border-white/20 transition-all"
+                >
+                  <RefreshCw size={14} />
+                  Tải lại gợi ý
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {suggestionsLoading && (
+          <div className="mt-10 text-center py-10">
+            <Loader2 size={24} className="animate-spin text-[#00d4aa] mx-auto mb-2" />
+            <p className="text-xs text-gray-500">AI đang phân tích tiến độ của bạn...</p>
+          </div>
         )}
       </div>
     </div>

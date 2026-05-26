@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { supabase } from '@/lib/supabase';
 import { startBuilderSession, endBuilderSession } from '@/lib/learning-actions';
@@ -21,6 +21,7 @@ import GameEngine from '../../components/GameEngine';
 import MultiplayerEngine from '../../components/MultiplayerEngine';
 import MainMenu from '../../components/MainMenu';
 import ComponentInfo from '../../components/ComponentInfo';
+import PartPickerSidebar from '../../components/PartPickerSidebar';
 import AIGuru from '../../components/AIGuru';
 import BurgerMenu from '../../components/BurgerMenu';
 import QuizModal from '../../components/QuizModal';
@@ -31,6 +32,7 @@ import LectureCourse from '../../components/LectureCourse';
 import VirtualAssistant from '../../components/VirtualAssistant';
 import LoadingScreen from '../../components/LoadingScreen';
 import ExamsList from '../../components/ExamsList';
+import LoginModal from '../../components/auth/LoginModal';
 import { GURU_MESSAGES } from '../../utils/i18nData';
 import { withTracking } from '@/lib/tracking';
 
@@ -59,6 +61,22 @@ function Home(props) {
 
   const [isDemo, setIsDemo] = useState(false);
   const [sessionId, setSessionId] = useState(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginRedirectTo, setLoginRedirectTo] = useState(null);
+
+  const gameEngineRef = useRef(null);
+
+  const handlePartSelect = useCallback((type) => {
+    if (gameEngineRef.current && gameEngineRef.current.spawnComponent) {
+      const count = type === 'RAM' ? 2 : 1;
+      gameEngineRef.current.spawnComponent(type, count);
+    }
+  }, []);
+
+  const placedCounts = {};
+  placedItemsList.forEach(item => {
+    placedCounts[item] = (placedCounts[item] || 0) + 1;
+  });
 
   useEffect(() => {
     let currentSessionId = null;
@@ -96,6 +114,11 @@ function Home(props) {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('demo') === 'true') {
         setIsDemo(true);
+      }
+      if (urlParams.get('requireAuth') === 'true') {
+        setShowLoginModal(true);
+        setLoginRedirectTo(urlParams.get('redirect') || null);
+        window.history.replaceState({}, '', window.location.pathname);
       }
     }
   }, []);
@@ -231,7 +254,7 @@ function Home(props) {
           background: 'linear-gradient(90deg, #6366f1, #00d2a0)',
           color: 'white', padding: '8px 16px', textAlign: 'center',
           fontSize: '14px', fontWeight: 600, display: 'flex', 
-          alignItems: 'center', justifyCenter: 'center', gap: '12px'
+          alignItems: 'center', justifyContent: 'center', gap: '12px'
         }}>
           <span>Bạn đang ở Chế độ Demo (Khách). Tiến độ học tập sẽ không được lưu lại.</span>
           <Link href="/register" style={{ 
@@ -293,13 +316,14 @@ function Home(props) {
             <MainMenu
                 lang={lang}
                 onStart={(mode) => setAppMode(mode)}
+                onOpenLogin={() => setShowLoginModal(true)}
             />
         ) : (
             <div style={{
                 display: 'flex', flexDirection: 'column', width: '100%',
                 height: 'calc(100vh - 60px)',
                 padding: ['course','market'].includes(appMode) ? '0' : '24px',
-                overflow: ['course','market'].includes(appMode) ? 'hidden' : 'auto'
+                overflow: 'auto'
             }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '12px 24px', background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-subtle)', borderRadius: '12px', marginBottom: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -395,11 +419,18 @@ function Home(props) {
                 <div style={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, alignItems: 'center', justifyContent: ['course','market'].includes(appMode) ? 'flex-start' : 'center', overflow: 'auto' }}>
                     <div style={{ width: '100%', maxWidth: ['course','market'].includes(appMode) ? '100%' : '1400px', position: 'relative', height: ['course','market'].includes(appMode) ? '100%' : 'auto', padding: ['course','market'].includes(appMode) ? '0' : '0' }}>
                         {appMode === 'assembly' ? (
-                            <div style={{ width: '100%', position: 'relative' }}>
+                            <div style={{ display: 'flex', gap: '16px', width: '100%' }}>
+                                <PartPickerSidebar
+                                    lang={lang}
+                                    onSelect={handlePartSelect}
+                                    placedCounts={placedCounts}
+                                />
+                                <div style={{ flex: 1, position: 'relative' }}>
                                 <h2 style={{ color: 'var(--success)', marginTop: 0 }}>
                                     {lang === 'en' ? 'Free Practice' : 'Luyện tập tự do'}
                                 </h2>
                                 <GameEngine
+                                    ref={gameEngineRef}
                                     landmarks={landmarks}
                                     onHover={handleHover}
                                     onGameEvent={handleGameEvent}
@@ -431,6 +462,7 @@ function Home(props) {
                                     </div>
                                 </div>
                             </div>
+                            </div>
                         ) : appMode === 'market' ? (
                             <Marketplace
                                 lang={lang}
@@ -441,11 +473,18 @@ function Home(props) {
                                 onCancel={() => setAppMode('menu')}
                             />
                         ) : appMode === 'mission_assembly' ? (
-                            <div style={{ width: '100%', position: 'relative' }}>
+                            <div style={{ display: 'flex', gap: '16px', width: '100%' }}>
+                                <PartPickerSidebar
+                                    lang={lang}
+                                    onSelect={handlePartSelect}
+                                    placedCounts={placedCounts}
+                                />
+                                <div style={{ width: '100%', position: 'relative' }}>
                                 <h2 style={{ color: 'var(--brand-primary)', marginTop: 0 }}>
                                     {lang === 'en' ? `Lab: ${missionData?.missionId}` : `Phòng Lab: ${missionData?.missionId}`}
                                 </h2>
                                 <GameEngine
+                                    ref={gameEngineRef}
                                     landmarks={landmarks}
                                     onHover={handleHover}
                                     onGameEvent={handleGameEvent}
@@ -468,6 +507,7 @@ function Home(props) {
                                         ))}
                                     </div>
                                 </div>
+                            </div>
                             </div>
                         ) : appMode === 'course' ? (
                             <LectureCourse lang={lang} onBack={() => setAppMode('menu')} />
@@ -520,6 +560,8 @@ function Home(props) {
 
         <AIGuru message={guruMessage} trigger={guruTrigger} lang={lang} />
       </main>
+
+      <LoginModal isOpen={showLoginModal} onClose={() => { setShowLoginModal(false); setLoginRedirectTo(null); }} redirectTo={loginRedirectTo} />
     </div>
   );
 }

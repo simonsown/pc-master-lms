@@ -83,7 +83,7 @@ export default function LessonEditorPage({ params }) {
     };
 
     const addSection = async (type) => {
-        const newSection = { lesson_id: lessonId, type, title: `Phần ${type.toUpperCase()} mới`, content: '', order_index: sections.length };
+        const newSection = { lesson_id: lessonId, type, content_type: type, title: `Phần ${type.toUpperCase()} mới`, content: '', order_index: sections.length };
         const { data, error } = await supabase.from('lesson_sections').insert(newSection).select().single();
         if (error) { showToast('Không thêm được section: ' + error.message, 'error'); return; }
         if (data) { setSections(prev => [...prev, data]); setActiveSection(data); }
@@ -309,7 +309,7 @@ export default function LessonEditorPage({ params }) {
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', minHeight: '360px' }}>
                                 <div>
                                     <label style={{ display: 'block', color: '#4b5563', fontSize: '12px', fontWeight: 700, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Tiêu đề phần</label>
                                     <input value={activeSection.title} onChange={(e) => updateSectionLocal({ ...activeSection, title: e.target.value })} style={inputStyle} />

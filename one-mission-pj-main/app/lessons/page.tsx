@@ -22,7 +22,7 @@ export default async function LessonsListPage() {
   const { data: progressList } = await supabase
     .from('lesson_progress')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('student_id', user.id)
 
   const getProgress = (lessonId: string) => {
     return progressList?.find(p => p.lesson_id === lessonId)

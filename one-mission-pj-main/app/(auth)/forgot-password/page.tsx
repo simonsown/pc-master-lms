@@ -3,20 +3,43 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Mail, ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react'
+import { Mail, ArrowLeft, Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
+import { createBrowserClient } from '@supabase/ssr'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    setLoading(false)
-    setSubmitted(true)
+    setError(null)
+
+    try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      )
+      const redirectUrl = process.env.NEXT_PUBLIC_SITE_URL
+        ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`
+        : 'http://localhost:3000/auth/callback'
+
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${redirectUrl}?type=recovery`,
+      })
+
+      if (resetError) {
+        setError(resetError.message)
+      } else {
+        setSubmitted(true)
+      }
+    } catch (err) {
+      setError('Có lỗi xảy ra. Vui lòng thử lại sau.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (submitted) {
@@ -69,6 +92,13 @@ export default function ForgotPasswordPage() {
               placeholder="Email của bạn"
             />
           </div>
+
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-3">
+              <AlertCircle size={18} className="shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
 
           <button 
             type="submit" 

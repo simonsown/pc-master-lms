@@ -1,10 +1,36 @@
 'use client';
 
-import React, { useState } from 'react';
-import { BookOpen, Cpu, ShoppingCart, Users, ArrowRight, Info } from 'lucide-react';
-import AuthButton from './AuthButton';
+import React, { useState, useEffect } from 'react';
+import { BookOpen, Cpu, ShoppingCart, Users, ArrowRight, Info, LogIn, LogOut, User } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import Link from 'next/link';
 
-const MainMenu = ({ onStart, lang }) => {
+const MainMenu = ({ onStart, lang, onOpenLogin }) => {
+    const [user, setUser] = useState(null);
+    const [profile, setProfile] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const checkUser = async () => {
+            const { data: { user: currentUser } } = await supabase.auth.getUser();
+            setUser(currentUser);
+            if (currentUser) {
+                const { data: userProfile } = await supabase
+                    .from('profiles')
+                    .select('role, full_name')
+                    .eq('id', currentUser.id)
+                    .single();
+                setProfile(userProfile);
+            }
+            setLoading(false);
+        };
+        checkUser();
+    }, []);
+
+    const handleSignOut = async () => {
+        await supabase.auth.signOut();
+        window.location.href = '/';
+    };
     const modes = [
         {
             id: 'course',
@@ -76,7 +102,45 @@ const MainMenu = ({ onStart, lang }) => {
                             {lang === 'en' ? 'Advanced 2D PC Assembly Simulator with AI' : 'Mô phỏng lắp ráp PC 2D tích hợp trí tuệ nhân tạo'}
                         </p>
                     </div>
-                    <AuthButton />
+                    {loading ? (
+                        <div style={{ width: '40px' }} />
+                    ) : user ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                            <Link href={profile?.role === 'teacher' ? '/teacher' : profile?.role === 'parent' ? '/parent' : '/builder'} style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+                                <div style={{
+                                    width: '32px', height: '32px', borderRadius: '50%',
+                                    background: 'rgba(0, 243, 255, 0.1)', border: '1px solid #00f3ff',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00f3ff'
+                                }}>
+                                    <User size={18} />
+                                </div>
+                                <span style={{ fontSize: '14px', fontWeight: 600, color: '#e0e6ed' }}>
+                                    {profile?.full_name || user.email?.split('@')[0]}
+                                </span>
+                            </Link>
+                            <button
+                                onClick={handleSignOut}
+                                style={{
+                                    background: 'rgba(239, 68, 68, 0.1)', color: '#f87171', border: 'none',
+                                    padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px',
+                                    display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600
+                                }}
+                            >
+                                <LogOut size={16} /> Đăng xuất
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            onClick={onOpenLogin}
+                            style={{
+                                background: 'rgba(0, 243, 255, 0.1)', color: '#00f3ff', border: '1px solid #00f3ff',
+                                padding: '10px 20px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px'
+                            }}
+                        >
+                            <LogIn size={18} /> Đăng nhập
+                        </button>
+                    )}
                 </div>
 
                 <div style={{

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { GraduationCap, LayoutDashboard, Cpu, History, LogOut, Users } from 'lucide-react'
+import { GraduationCap, LayoutDashboard, Cpu, History, LogOut, Users, BookOpen } from 'lucide-react'
 import { logout } from '@/lib/auth-actions'
 import { createBrowserClient } from '@supabase/ssr'
 
@@ -49,6 +49,9 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
               <Users size={20} /> Lớp học của tôi
             </Link>
           )}
+          <Link href="/student/lessons" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '10px', color: 'var(--text-secondary)', fontWeight: 500 }}>
+            <BookOpen size={20} /> Bài giảng
+          </Link>
           <Link href="/builder" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '10px', color: 'var(--text-secondary)', fontWeight: 500 }}>
             <Cpu size={20} /> Thực hành lắp ráp
           </Link>

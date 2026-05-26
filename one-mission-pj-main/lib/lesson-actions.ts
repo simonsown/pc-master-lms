@@ -12,13 +12,15 @@ export async function saveLessonProgress(lessonId: string, score: number, isComp
   const { data, error } = await supabase
     .from('lesson_progress')
     .upsert({
-      user_id: user.id,
+      student_id: user.id,
       lesson_id: lessonId,
       score: score,
       is_completed: isCompleted,
+      status: isCompleted ? 'completed' : 'in_progress',
+      completion_percentage: isCompleted ? 100 : 0,
       last_accessed: new Date().toISOString()
     }, {
-      onConflict: 'user_id,lesson_id'
+      onConflict: 'student_id,lesson_id'
     })
 
   if (error) {

@@ -55,6 +55,20 @@ type Achievement = {
   description: string
 }
 
+type DailyQuiz = {
+  id: string
+  title: string
+  description: string | null
+  time_limit_minutes: number | null
+}
+
+type DailyAttempt = {
+  id: string
+  score: number | null
+  status: string | null
+  submitted_at: string | null
+}
+
 type Props = {
   user: UserProps
   greeting: string
@@ -64,6 +78,8 @@ type Props = {
   chartData: ChartPoint[]
   inProgressLesson: InProgressLesson | null
   recentAchievements: Achievement[]
+  dailyQuiz: DailyQuiz | null
+  dailyAttempt: DailyAttempt | null
 }
 
 const BAR_FILL = '#00d4aa'
@@ -80,12 +96,16 @@ export function StudentDashboardClient({
   progressPercent,
   chartData,
   inProgressLesson,
-  recentAchievements
+  recentAchievements,
+  dailyQuiz,
+  dailyAttempt
 }: Props) {
   const thumbnailUrl = inProgressLesson?.lessons?.thumbnail_url ?? '/lesson-summary.png'
   const lessonTitle = inProgressLesson?.lessons?.title ?? 'Chưa có bài học dở'
   const progressValue = Math.max(0, Math.min(progressPercent, 100))
   const percentageLabel = `${progressValue}%`
+
+  const dailyQuizCompleted = dailyAttempt?.status === 'submitted'
 
   return (
     <div className="min-h-screen bg-[#080910] text-[#d8dbe8] p-6 md:p-8 lg:p-10">
@@ -105,6 +125,44 @@ export function StudentDashboardClient({
             <p className="mt-4 text-sm text-[#5a5d72]">Dựa trên bài học đã hoàn thành trong toàn bộ lộ trình.</p>
           </div>
         </section>
+
+        {/* Daily Quiz Card */}
+        {dailyQuiz && (
+          <section>
+            <div className="rounded-3xl border border-[#1d1f2a] bg-gradient-to-br from-[#0f1018] to-[#11141d] p-6">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#f59e0b]/20 to-[#f59e0b]/5 text-2xl shrink-0">
+                    {dailyQuizCompleted ? '✅' : '📝'}
+                  </div>
+                  <div>
+                    <div className="text-sm uppercase tracking-[0.2em] text-[#f59e0b] font-semibold">
+                      {dailyQuizCompleted ? 'Đã hoàn thành' : 'Thử thách hằng ngày'}
+                    </div>
+                    <div className="mt-1 text-xl font-bold text-[#d8dbe8]">{dailyQuiz.title}</div>
+                    <p className="mt-1 text-sm text-[#5a5d72]">
+                      {dailyQuizCompleted
+                        ? `Bạn đạt ${dailyAttempt?.score?.toFixed(1) ?? 0}% · Hoàn thành lúc ${dailyAttempt?.submitted_at ? new Date(dailyAttempt.submitted_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : ''}`
+                        : `${dailyQuiz.description ?? '5 câu hỏi nhanh để ôn tập kiến thức.'} · ⏱ ${dailyQuiz.time_limit_minutes ?? 10} phút`}
+                    </p>
+                  </div>
+                </div>
+                {dailyQuizCompleted ? (
+                  <div className="text-sm text-[#5a5d72] flex items-center gap-2 shrink-0">
+                    <span>Điểm: {dailyAttempt?.score?.toFixed(0) ?? 0}%</span>
+                  </div>
+                ) : (
+                  <Link
+                    href={`/daily-quiz/${dailyQuiz.id}`}
+                    className="inline-flex items-center justify-center rounded-full bg-[#f59e0b] px-6 py-3 text-sm font-semibold text-[#080910] transition hover:bg-[#d48a0a] shrink-0"
+                  >
+                    Làm ngay →
+                  </Link>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
 
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <div className="rounded-3xl border border-[#1d1f2a] bg-[#0f1018] p-6">

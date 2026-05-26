@@ -25,7 +25,7 @@ export default function SkillTreePage() {
       const { data: progress } = await supabase
         .from('lesson_progress')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('student_id', user.id)
         .eq('is_completed', true)
 
       const completedCount = progress?.length || 0

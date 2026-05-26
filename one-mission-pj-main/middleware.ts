@@ -18,7 +18,8 @@ const ROUTE_PERMISSIONS: Record<string, string[]> = {
 const PUBLIC_ROUTES = [
   '/', '/login', '/register', '/about', '/builder',
   '/forgot-password', '/reset-password', '/verify-email',
-  '/verify',
+  '/verify', '/check-email',
+  '/builder',
 ]
 
 export async function middleware(request: NextRequest) {
