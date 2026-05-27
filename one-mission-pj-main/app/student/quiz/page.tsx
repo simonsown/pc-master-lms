@@ -22,7 +22,7 @@ function Flashcards() {
   return (
     <div className="mt-12">
       <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-        <BrainCircuit size={20} className="text-[#00d4aa]" />
+        <BrainCircuit size={20} style={{ color: 'var(--brand-primary)' }} />
         Flashcard Thuật Ngữ ({current + 1}/{cards.length})
       </h2>
       <div className="relative" style={{ perspective: '1000px', height: '180px' }}>
@@ -34,26 +34,26 @@ function Flashcards() {
           onClick={() => setFlipped(!flipped)}
           style={{ transformStyle: 'preserve-3d', transition: 'transform 0.5s', transform: flipped ? 'rotateY(180deg)' : 'none' }}
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-[#1a2f53] to-[#0f1a2e] border border-[#00d4aa]/20 rounded-2xl p-6 flex flex-col items-center justify-center backface-hidden" style={{ backfaceVisibility: 'hidden' }}>
+          <div className="absolute inset-0 rounded-2xl p-6 flex flex-col items-center justify-center backface-hidden" style={{ background: 'linear-gradient(to bottom right, var(--bg-surface), var(--bg-base))', borderColor: 'color-mix(in srgb, var(--brand-primary) 20%, transparent)', backfaceVisibility: 'hidden' }}>
             <span className="text-lg font-bold text-white text-center">{cards[current].front}</span>
-            <span className="text-xs text-gray-400 mt-2">Chạm để xem chi tiết</span>
+            <span className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>Chạm để xem chi tiết</span>
           </div>
-          <div className="absolute inset-0 bg-gradient-to-br from-[#00d4aa]/10 to-teal-500/10 border border-[#00d4aa]/30 rounded-2xl p-6 flex flex-col items-center justify-center" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
+          <div className="absolute inset-0 rounded-2xl p-6 flex flex-col items-center justify-center" style={{ background: 'linear-gradient(to bottom right, color-mix(in srgb, var(--brand-primary) 10%, transparent), color-mix(in srgb, var(--brand-primary) 10%, transparent))', borderColor: 'color-mix(in srgb, var(--brand-primary) 30%, transparent)', backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
             <span className="text-sm text-white text-center">{cards[current].back}</span>
           </div>
         </motion.div>
       </div>
       <div className="flex justify-center gap-3 mt-4">
         <button onClick={() => { setFlipped(false); setCurrent(c => Math.max(0, c - 1)) }} disabled={current === 0}
-          className="px-4 py-2 bg-[#16213e]/50 border border-gray-800 rounded-xl text-xs text-gray-400 hover:text-white disabled:opacity-30 transition-all">
+          className="px-4 py-2 rounded-xl text-xs text-[var(--text-muted)] disabled:opacity-30 hover:text-white transition-all" style={{ background: 'color-mix(in srgb, var(--bg-surface) 50%, transparent)', borderColor: 'var(--border-default)' }}>
           ← Trước
         </button>
         <button onClick={() => { setFlipped(false); setCurrent(c => (c + 1) % cards.length) }}
-          className="px-4 py-2 bg-[#16213e]/50 border border-gray-800 rounded-xl text-xs text-gray-400 hover:text-white transition-all">
+          className="px-4 py-2 rounded-xl text-xs text-[var(--text-muted)] transition-all" style={{ background: 'color-mix(in srgb, var(--bg-surface) 50%, transparent)', borderColor: 'var(--border-default)' }}>
           Sau →
         </button>
         <button onClick={() => { setFlipped(false); setCurrent(Math.floor(Math.random() * cards.length)) }}
-          className="px-4 py-2 bg-[#00d4aa]/10 border border-[#00d4aa]/20 rounded-xl text-xs text-[#00d4aa] hover:bg-[#00d4aa]/20 transition-all flex items-center gap-1">
+          className="px-4 py-2 rounded-xl text-xs hover:bg-[var(--brand-subtle)] transition-all flex items-center gap-1" style={{ background: 'color-mix(in srgb, var(--brand-primary) 10%, transparent)', borderColor: 'color-mix(in srgb, var(--brand-primary) 20%, transparent)', color: 'var(--brand-primary)' }}>
           <RotateCcw size={12} /> Ngẫu nhiên
         </button>
       </div>
@@ -202,41 +202,41 @@ export default function StudentQuizPage() {
   )
 
   return (
-    <div className="min-h-screen bg-[#161F38] text-white pt-24 pb-16 px-4 sm:px-6 relative overflow-hidden">
+    <div className="min-h-screen text-white pt-24 pb-16 px-4 sm:px-6 relative overflow-hidden" style={{ background: 'var(--bg-base)' }}>
       
       <div className="absolute inset-0 bg-grid-pattern opacity-[0.02] pointer-events-none" />
-      <div className="absolute top-1/4 left-1/4 w-[350px] h-[350px] bg-[#00d4aa]/5 rounded-full filter blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 w-[350px] h-[350px] rounded-full filter blur-[100px] pointer-events-none" style={{ background: 'color-mix(in srgb, var(--brand-primary) 5%, transparent)' }} />
 
       <div className="max-w-6xl mx-auto relative z-10">
         
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-4 border-b border-white/10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-4 border-b" style={{ borderColor: 'var(--border-default)' }}>
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-[#00d4aa]/10 border border-[#00d4aa]/25 text-[#00d4aa] rounded-2xl">
+            <div className="p-2.5 rounded-2xl" style={{ background: 'color-mix(in srgb, var(--brand-primary) 10%, transparent)', borderColor: 'color-mix(in srgb, var(--brand-primary) 25%, transparent)', color: 'var(--brand-primary)' }}>
               <Award size={24} />
             </div>
             <div>
               <h1 className="text-xl md:text-2xl font-black tracking-tight text-white uppercase flex items-center gap-2">
-                Ngân Hàng <span className="text-[#00d4aa]">Đề Thi & Quiz</span>
+                Ngân Hàng <span style={{ color: 'var(--brand-primary)' }}>Đề Thi & Quiz</span>
               </h1>
-              <p className="text-xs text-gray-400 mt-0.5">{unlockedCount}/{QUIZ_BANK.length} bài đã mở khóa</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{unlockedCount}/{QUIZ_BANK.length} bài đã mở khóa</p>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="relative w-64 hidden sm:block">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2" size={16} style={{ color: 'var(--text-muted)' }} />
               <input 
                 type="text"
                 placeholder="Tìm kiếm bài trắc nghiệm..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#16213e]/50 border border-gray-800 focus:border-[#00d4aa] outline-none pl-11 pr-4 py-2.5 rounded-2xl text-xs transition-all text-white placeholder-gray-500"
+                className="w-full outline-none pl-11 pr-4 py-2.5 rounded-2xl text-xs transition-all text-white placeholder-[var(--text-muted)] focus:border-[var(--brand-primary)]" style={{ background: 'color-mix(in srgb, var(--bg-surface) 50%, transparent)', borderColor: 'var(--border-default)' }}
               />
             </div>
 
             <button 
               onClick={() => router.push('/builder')}
-              className="relative z-50 pointer-events-auto flex items-center gap-2 px-4 py-2 bg-gray-900/90 hover:bg-gray-850 border border-gray-800 hover:border-gray-700 text-xs font-bold text-slate-300 hover:text-white rounded-xl transition-all shadow-md group cursor-pointer"
+              className="relative z-50 pointer-events-auto flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all shadow-md group cursor-pointer border text-[var(--text-secondary)] hover:text-white" style={{ background: 'color-mix(in srgb, var(--bg-base) 90%, transparent)', borderColor: 'var(--border-default)' }}
             >
               <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
               Quay lại
@@ -245,47 +245,47 @@ export default function StudentQuizPage() {
         </div>
 
         <div className="relative w-full sm:hidden mb-6">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2" size={16} style={{ color: 'var(--text-muted)' }} />
           <input 
             type="text"
             placeholder="Tìm kiếm bài trắc nghiệm..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#16213e]/50 border border-gray-800 focus:border-[#00d4aa] outline-none pl-11 pr-4 py-2 rounded-2xl text-xs transition-all text-white placeholder-gray-500"
+            className="w-full outline-none pl-11 pr-4 py-2 rounded-2xl text-xs transition-all text-white placeholder-[var(--text-muted)] focus:border-[var(--brand-primary)]" style={{ background: 'color-mix(in srgb, var(--bg-surface) 50%, transparent)', borderColor: 'var(--border-default)' }}
           />
         </div>
 
         {/* Real-time Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
-            className="p-6 bg-gradient-to-br from-[#00d4aa]/10 to-teal-500/10 border border-[#00d4aa]/20 rounded-3xl flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-[#00d4aa]/25 text-[#00d4aa] flex items-center justify-center shrink-0">
+            className="p-6 rounded-3xl flex items-center gap-4" style={{ background: 'linear-gradient(to bottom right, color-mix(in srgb, var(--brand-primary) 10%, transparent), color-mix(in srgb, var(--brand-primary) 10%, transparent))', borderColor: 'color-mix(in srgb, var(--brand-primary) 20%, transparent)' }}>
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0" style={{ background: 'color-mix(in srgb, var(--brand-primary) 25%, transparent)', color: 'var(--brand-primary)' }}>
               <Zap size={24} />
             </div>
             <div>
-              <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Động lực học tập</p>
+              <p className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Động lực học tập</p>
               <h3 className="text-xl font-bold mt-0.5">{motivation}</h3>
             </div>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="p-6 bg-[#16213e]/40 border border-gray-800 rounded-3xl flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center shrink-0">
+            className="p-6 rounded-3xl flex items-center gap-4" style={{ background: 'color-mix(in srgb, var(--bg-surface) 40%, transparent)', borderColor: 'var(--border-default)' }}>
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0" style={{ background: 'color-mix(in srgb, var(--accent-amber) 10%, transparent)', color: 'var(--accent-amber)' }}>
               <Star size={24} />
             </div>
             <div>
-              <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Độ chính xác trung bình</p>
+              <p className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Độ chính xác trung bình</p>
               <h3 className="text-xl font-bold mt-0.5">{accuracy}</h3>
             </div>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-            className="p-6 bg-[#16213e]/40 border border-gray-800 rounded-3xl flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-500 flex items-center justify-center shrink-0">
+            className="p-6 rounded-3xl flex items-center gap-4" style={{ background: 'color-mix(in srgb, var(--bg-surface) 40%, transparent)', borderColor: 'var(--border-default)' }}>
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0" style={{ background: 'color-mix(in srgb, var(--accent-orange) 10%, transparent)', color: 'var(--accent-orange)' }}>
               <Flame size={24} />
             </div>
             <div>
-              <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Học tập chuyên cần</p>
+              <p className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Học tập chuyên cần</p>
               <h3 className="text-xl font-bold mt-0.5">{streak}</h3>
             </div>
           </motion.div>
@@ -293,8 +293,8 @@ export default function StudentQuizPage() {
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-2">
-            <Loader2 className="animate-spin text-[#00d4aa]" size={40} />
-            <span className="text-xs text-gray-500">Đang đồng bộ ngân hàng đề thi...</span>
+            <Loader2 className="animate-spin" size={40} style={{ color: 'var(--brand-primary)' }} />
+            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Đang đồng bộ ngân hàng đề thi...</span>
           </div>
         ) : (
           <>
@@ -307,42 +307,42 @@ export default function StudentQuizPage() {
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.03 }}
-                    className={`bg-[#1a1c25]/80 border rounded-3xl p-6 transition-all flex flex-col justify-between group ${isUnlocked ? 'border-gray-800 hover:shadow-[0_0_30px_rgba(0,212,170,0.05)] hover:border-gray-700' : 'border-gray-800/50 opacity-50'}`}
+                    className={`border rounded-3xl p-6 transition-all flex flex-col justify-between group ${isUnlocked ? 'hover:shadow-[0_0_30px_var(--brand-subtle)] hover:border-[var(--border-strong)]' : 'opacity-50'}`} style={{ background: 'var(--bg-elevated)', borderColor: isUnlocked ? 'var(--border-default)' : 'color-mix(in srgb, var(--border-default) 50%, transparent)' }}
                   >
                     <div>
                       <div className="flex items-center justify-between mb-4">
-                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-gray-900/60 px-2.5 py-1 rounded-md">
+                        <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md" style={{ color: 'var(--text-muted)', background: 'color-mix(in srgb, var(--bg-base) 60%, transparent)' }}>
                           {quiz.lessons?.title || 'Chương Trình PC'}
                         </span>
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          !isUnlocked ? 'bg-gray-500/10 text-gray-500' :
+                          !isUnlocked ? 'text-[var(--text-muted)]' :
                           quiz.difficulty === 'Dễ' ? 'bg-green-500/10 text-green-400' :
                           quiz.difficulty === 'Khó' ? 'bg-red-500/10 text-red-400' : 'bg-blue-500/10 text-blue-400'
-                        }`}>
+                        }`} style={!isUnlocked ? { background: 'color-mix(in srgb, var(--text-muted) 10%, transparent)' } : {}}>
                           {isUnlocked ? (quiz.difficulty || 'Trung bình') : '🔒 Khóa'}
                         </span>
                       </div>
 
-                      <h3 className={`text-lg font-bold mb-6 line-clamp-2 ${isUnlocked ? 'text-white group-hover:text-[#00d4aa] transition-colors' : 'text-gray-500'}`}>
+                      <h3 className={`text-lg font-bold mb-6 line-clamp-2 ${isUnlocked ? 'group-hover:text-[var(--brand-primary)] transition-colors' : ''}`} style={{ color: isUnlocked ? 'var(--text-primary)' : 'var(--text-muted)' }}>
                         {quiz.title}
                       </h3>
                     </div>
 
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between text-xs text-gray-400 font-medium">
+                      <div className="flex items-center justify-between text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
                         <span>⏱️ {quiz.estimated_minutes || 15} phút</span>
-                        <span className="text-[#00d4aa] font-bold">⚡ +{quiz.xp || 100} XP</span>
+                        <span className="font-bold" style={{ color: 'var(--brand-primary)' }}>⚡ +{quiz.xp || 100} XP</span>
                       </div>
 
                       {isUnlocked ? (
-                        <Link 
-                          href={`/student/quiz/${quiz.id}`}
-                          className="w-full py-3 bg-[#0d0e13] text-white border border-gray-800 hover:border-[#00d4aa] hover:text-[#00d4aa] font-bold rounded-2xl flex items-center justify-center gap-2 transition-all"
-                        >
+                          <Link 
+                            href={`/student/quiz/${quiz.id}`}
+                            className="w-full py-3 border font-bold rounded-2xl flex items-center justify-center gap-2 transition-all text-[var(--text-primary)] hover:text-[var(--brand-primary)] border-[var(--border-default)] hover:border-[var(--brand-primary)]" style={{ background: 'var(--bg-base)' }}
+                          >
                           BẮT ĐẦU LÀM BÀI <Play size={14} fill="currentColor" />
                         </Link>
                       ) : (
-                        <div className="w-full py-3 bg-gray-900/50 text-gray-600 border border-gray-800/50 font-bold rounded-2xl flex items-center justify-center gap-2 text-sm">
+                        <div className="w-full py-3 border font-bold rounded-2xl flex items-center justify-center gap-2 text-sm" style={{ background: 'color-mix(in srgb, var(--bg-base) 50%, transparent)', color: 'var(--text-muted)', borderColor: 'color-mix(in srgb, var(--border-default) 50%, transparent)' }}>
                           🔒 Mở khóa sau {index - unlockedCount + 1} ngày
                         </div>
                       )}

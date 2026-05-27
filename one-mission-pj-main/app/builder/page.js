@@ -340,7 +340,7 @@ function Home(props) {
                 display: 'flex', flexDirection: 'column', width: '100%',
                 height: 'calc(100vh - 60px)',
                 padding: ['course','market'].includes(appMode) ? '0' : '24px',
-                overflow: 'auto'
+                overflow: 'hidden'
             }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '12px 24px', background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-subtle)', borderRadius: '12px', marginBottom: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
