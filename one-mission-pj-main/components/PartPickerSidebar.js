@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import componentsData from '../data/componentsData.json';
 import { COMPONENT_DATA } from '@/utils/i18nData';
+import ComponentPreview from './ComponentPreview';
 
 const PART_ICONS = {
   CPU: '⚡', RAM: '🧠', GPU: '🎮', SSD: '💾', PSU: '🔌', COOLER: '❄️'
@@ -16,6 +17,7 @@ const PART_COLORS = {
 
 export default function PartPickerSidebar({ lang, onSelect, placedCounts }) {
   const [expandedType, setExpandedType] = useState(null);
+  const [selectedModel, setSelectedModel] = useState(null);
   const data = COMPONENT_DATA[lang] || COMPONENT_DATA.en;
   const parts = ['CPU', 'GPU', 'RAM', 'SSD', 'PSU', 'COOLER'];
 
@@ -30,9 +32,12 @@ export default function PartPickerSidebar({ lang, onSelect, placedCounts }) {
   const handleSelect = (type, modelId = null) => {
     if (modelId) {
       onSelect(type, modelId);
+      const model = modelsByType[type]?.find(m => m.id === modelId);
+      setSelectedModel(model);
       setExpandedType(null);
     } else {
       setExpandedType(expandedType === type ? null : type);
+      setSelectedModel(null);
     }
   };
 
@@ -96,6 +101,12 @@ export default function PartPickerSidebar({ lang, onSelect, placedCounts }) {
               </span>
             </button>
 
+            {/* Component Preview */}
+            {isExpanded && (
+              <div style={{ margin: '8px 0', padding: '0 4px' }}>
+                <ComponentPreview type={type} model={null} />
+              </div>
+            )}
             {/* Nested scrollable model list */}
             <AnimatePresence>
               {isExpanded && (

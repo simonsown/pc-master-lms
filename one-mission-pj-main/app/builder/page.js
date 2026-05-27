@@ -23,6 +23,7 @@ import MultiplayerEngine from '../../components/MultiplayerEngine';
 import MainMenu from '../../components/MainMenu';
 import ComponentInfo from '../../components/ComponentInfo';
 import PartPickerSidebar from '../../components/PartPickerSidebar';
+import ComponentPreview from '../../components/ComponentPreview';
 import AIGuru from '../../components/AIGuru';
 import BurgerMenu from '../../components/BurgerMenu';
 import QuizModal from '../../components/QuizModal';
@@ -255,6 +256,9 @@ function Home(props) {
         case 'mission_assembly': return lang === 'en' ? `Lab: ${missionData?.missionId}` : `Phòng Lab: ${missionData?.missionId}`;
         case 'multiplayer': return lang === 'en' ? '2-Player Versus' : '2 Người Chơi';
         case 'exams': return lang === 'en' ? 'Exams' : 'Kỳ Thi';
+        case 'challenge': return lang === 'en' ? 'Daily Challenge' : 'Thử Thách';
+        case 'components': return lang === 'en' ? 'Component Library' : 'Tủ Linh Kiện';
+        case 'lab': return lang === 'en' ? 'AI Lab' : 'Phòng AI Lab';
         default: return 'PC Master Builder';
     }
   };
@@ -563,6 +567,63 @@ function Home(props) {
                             </div>
                         ) : appMode === 'exams' ? (
                             <ExamsList lang={lang} onBack={() => setAppMode('menu')} />
+                        ) : appMode === 'challenge' ? (
+                            <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
+                                <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#1A2F4A', marginBottom: '16px' }}>Thử Thách Hằng Ngày</h2>
+                                <p style={{ color: '#64748B', fontSize: '14px', marginBottom: '24px' }}>Hoàn thành thử thách để nhận điểm kinh nghiệm và huy hiệu.</p>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                    {[
+                                        { title: 'Lắp ráp nhanh', desc: 'Hoàn thành 1 bộ PC trong 5 phút', reward: '100 XP', color: '#D32F2F' },
+                                        { title: 'Tiết kiệm', desc: 'Build dưới 15 triệu với hiệu năng cao', reward: '150 XP', color: '#0097A7' },
+                                        { title: 'Tương thích hoàn hảo', desc: 'Lắp 5 bộ không lỗi tương thích', reward: '75 XP', color: '#F5A623' },
+                                        { title: 'Cấu hình cân bằng', desc: 'CPU + GPU đồng cấp, không nghẽn cổ chai', reward: '200 XP', color: '#1A2F4A' },
+                                    ].map((c, i) => (
+                                        <div key={i} style={{ padding: '20px', borderRadius: '10px', border: '1px solid #E2E8F0', background: '#fff' }}>
+                                            <div style={{ fontSize: '11px', fontWeight: 700, color: c.color, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>{c.title}</div>
+                                            <p style={{ fontSize: '13px', color: '#64748B', marginBottom: '12px', lineHeight: 1.5 }}>{c.desc}</p>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <span style={{ fontSize: '12px', fontWeight: 700, color: c.color }}>+{c.reward}</span>
+                                                <button onClick={() => { setAppMode('learning'); }}
+                                                    style={{ padding: '6px 14px', borderRadius: '6px', border: 'none', background: c.color, color: '#fff', fontWeight: 600, fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
+                                                    Nhận thử thách
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : appMode === 'components' ? (
+                            <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto', width: '100%' }}>
+                                <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#1A2F4A', marginBottom: '8px' }}>Tủ Linh Kiện</h2>
+                                <p style={{ color: '#64748B', fontSize: '14px', marginBottom: '24px' }}>Tra cứu toàn bộ linh kiện, thông số kỹ thuật, và giá tham khảo.</p>
+                                <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+                                    {['CPU', 'GPU', 'RAM', 'SSD', 'PSU', 'COOLER'].map(type => (
+                                        <div key={type} style={{ flex: '1 1 220px', minWidth: '180px' }}>
+                                            <ComponentPreview type={type} model={null} size="large" />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : appMode === 'lab' ? (
+                            <div style={{ display: 'flex', gap: '16px', width: '100%' }}>
+                                <PartPickerSidebar lang={lang} onSelect={handlePartSelect} placedCounts={placedCounts} />
+                                <div style={{ flex: 1, position: 'relative' }}>
+                                    <h2 style={{ color: '#0097A7', marginTop: 0, fontSize: '18px' }}>Phòng AI Lab</h2>
+                                    <p style={{ color: '#64748B', fontSize: '13px', marginBottom: '12px' }}>Thí nghiệm cấu hình với sự hỗ trợ của AI Guru — gợi ý linh kiện, tối ưu hiệu năng.</p>
+                                    <GameEngine
+                                        ref={gameEngineRef}
+                                        landmarks={landmarks}
+                                        onHover={handleHover}
+                                        onGameEvent={handleGameEvent}
+                                        trackingSensitivity={trackingSensitivity}
+                                    />
+                                    <div style={{ marginTop: '12px', padding: '12px', borderRadius: '8px', background: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+                                        <p style={{ fontSize: '12px', color: '#64748B', margin: 0, fontStyle: 'italic' }}>
+                                            💡 Mẹo: AI Guru sẽ gợi ý linh kiện phù hợp với ngân sách và nhu cầu của bạn. Hãy bật AI ở menu bên trái.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                         ) : null}
                     </div>
 

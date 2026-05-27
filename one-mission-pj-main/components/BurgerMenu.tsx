@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { BookOpen, Cpu, ShoppingCart, Users, BrainCircuit, Award, Globe, Sparkles, Menu, Webcam, X, Sun, Moon, BarChart2, Map, FileText, Trophy, Bell, MessageSquare, User, ArrowRight } from 'lucide-react';
+import { BookOpen, Cpu, ShoppingCart, Users, BrainCircuit, Award, Globe, Sparkles, Menu, Webcam, X, Sun, Moon, BarChart2, Map, FileText, Trophy, Bell, MessageSquare, User, ArrowRight, History } from 'lucide-react';
 import JoinClassModal from './JoinClassModal';
 
 interface NavItem {
@@ -110,6 +110,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ lang, toggleLang, onStartQuiz, 
               { id: 'course', icon: BookOpen, label: lang === 'en' ? 'Lecture Course' : 'Bài Giảng', onClick: () => setAppMode('course') },
               { id: 'progress', icon: BarChart2, label: lang === 'en' ? 'Progress' : 'Tiến Độ Học Tập', href: '/student/progress' },
               { id: 'learning_path', icon: Map, label: lang === 'en' ? 'Learning Path' : 'Lộ Trình Học', href: '/student/learning-path' },
+              { id: 'history', icon: History, label: lang === 'en' ? 'Learning History' : 'Lịch Sử Học Tập', href: '/student/history' },
               { id: 'learning', icon: Cpu, label: lang === 'en' ? 'Practice Mode' : 'Luyện Tập', onClick: () => setAppMode('learning') },
               { id: 'market', icon: ShoppingCart, label: lang === 'en' ? 'Marketplace' : 'Chợ Máy Tính', onClick: () => setAppMode('market') },
               { id: 'exams', icon: Award, label: lang === 'en' ? 'Exams' : 'Kỳ Thi', onClick: () => setAppMode('exams') },
