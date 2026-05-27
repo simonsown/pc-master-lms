@@ -5,315 +5,276 @@ import { motion, AnimatePresence } from 'framer-motion';
 import componentsData from '../data/componentsData.json';
 import WindowsSimulator from './WindowsSimulator';
 
-// Danh sách các nhiệm vụ ngẫu nhiên
 const MISSIONS_LIST = [
-    {
-        title: "Home Office Setup",
-        title_vn: "Máy Văn Phòng Cơ Bản",
-        desc: "Build a reliable, compact, and energy-efficient PC for word processing and lightweight browsing.",
-        desc_vn: "Lắp ráp một cỗ máy ổn định, nhỏ gọn, tiết kiệm điện để soạn thảo văn bản và lướt web nhẹ nhàng.",
-        budget: 10000000,
-        targets: { category: "Office", maxBudget: 10000000 }
-    },
-    {
-        title: "Esports Gamer",
-        title_vn: "Game Thủ Tập Sự",
-        desc: "Assemble a competitive gaming rig capable of high framerates in 1080p for games like CS:GO and Valorant.",
-        desc_vn: "Ráp một bộ PC chiến game Thể thao điện tử với FPS cao ở độ phân giải 1080p.",
-        budget: 20000000,
-        targets: { category: "1080p Gaming" }
-    },
-    {
-        title: "Deep Learning Machine",
-        title_vn: "Cỗ Máy Trí Tuệ Nhân Tạo",
-        desc: "Build a stable machine for AI/Deep Learning models with maximum processing power and VRAM.",
-        desc_vn: "Xây dựng một cỗ máy ổn định để đào tạo các mô hình AI/Deep Learning kết hợp xử lý dữ liệu nặng.",
-        budget: 60000000,
-        targets: { category: "AI", minPower: 850 }
-    },
-    {
-        title: "4K Content Creator",
-        title_vn: "Dựng Phim 4K Chuyên Nghiệp",
-        desc: "Construct a powerhouse workstation for 4K video editing, heavy multitasking, and rendering.",
-        desc_vn: "Lắp ráp một máy trạm hiệu năng cao để edit video 4K, đa nhiệm nặng và render đồ họa 3D.",
-        budget: 50000000,
-        targets: { category: "Workstation", minPower: 750 }
-    },
-    {
-        title: "Budget Student PC",
-        title_vn: "PC Sinh Viên Tiết Kiệm",
-        desc: "A very tight budget build for students doing basic assignments and online classes.",
-        desc_vn: "Một bộ máy với ngân sách cực kỳ eo hẹp dành cho học sinh sinh viên học tập online.",
-        budget: 8000000,
-        targets: { category: "Budget" }
-    }
+  { title: "Home Office Setup", title_vn: "Máy Văn Phòng Cơ Bản",
+    desc: "Build a reliable, compact, and energy-efficient PC for word processing and lightweight browsing.",
+    desc_vn: "Lắp ráp một cỗ máy ổn định, nhỏ gọn, tiết kiệm điện để soạn thảo văn bản và lướt web nhẹ nhàng.",
+    budget: 10000000, targets: { category: "Office", maxBudget: 10000000 } },
+  { title: "Esports Gamer", title_vn: "Game Thủ Tập Sự",
+    desc: "Assemble a competitive gaming rig capable of high framerates in 1080p for games like CS:GO and Valorant.",
+    desc_vn: "Ráp một bộ PC chiến game Thể thao điện tử với FPS cao ở độ phân giải 1080p.",
+    budget: 20000000, targets: { category: "1080p Gaming" } },
+  { title: "Deep Learning Machine", title_vn: "Cỗ Máy Trí Tuệ Nhân Tạo",
+    desc: "Build a stable machine for AI/Deep Learning models with maximum processing power and VRAM.",
+    desc_vn: "Xây dựng một cỗ máy ổn định để đào tạo các mô hình AI/Deep Learning kết hợp xử lý dữ liệu nặng.",
+    budget: 60000000, targets: { category: "AI", minPower: 850 } },
+  { title: "4K Content Creator", title_vn: "Dựng Phim 4K Chuyên Nghiệp",
+    desc: "Construct a powerhouse workstation for 4K video editing, heavy multitasking, and rendering.",
+    desc_vn: "Lắp ráp một máy trạm hiệu năng cao để edit video 4K, đa nhiệm nặng và render đồ họa 3D.",
+    budget: 50000000, targets: { category: "Workstation", minPower: 750 } },
+  { title: "Budget Student PC", title_vn: "PC Sinh Viên Tiết Kiệm",
+    desc: "A very tight budget build for students doing basic assignments and online classes.",
+    desc_vn: "Một bộ máy với ngân sách cực kỳ eo hẹp dành cho học sinh sinh viên học tập online.",
+    budget: 8000000, targets: { category: "Budget" } }
 ];
 
-const Marketplace = ({ lang = 'en', onCheckout, onCancel }) => {
-    // Tự động chọn ngẫu nhiên 1 nhiệm vụ khi Component được Mount (render lần đầu)
-    const [mission] = useState(() => MISSIONS_LIST[Math.floor(Math.random() * MISSIONS_LIST.length)]);
+const categories = ['CPU', 'Mainboard', 'RAM', 'GPU', 'PSU', 'Storage', 'Cooler'];
 
-    const [cart, setCart] = useState([]);
-    const [budget, setBudget] = useState(mission.budget);
-    const [activeTab, setActiveTab] = useState('CPU');
-    const [errorMsg, setErrorMsg] = useState("");
-    const [showWindows, setShowWindows] = useState(false);
-
-    const categories = ['CPU', 'Mainboard', 'RAM', 'GPU', 'PSU', 'Storage', 'Cooler'];
-    const categoryLabels = {
-        'CPU': lang === 'en' ? 'CPU' : 'Bộ vi xử lý',
-        'Mainboard': lang === 'en' ? 'Mainboard' : 'Bo mạch chủ',
-        'RAM': lang === 'en' ? 'RAM' : 'Bộ nhớ RAM',
-        'GPU': lang === 'en' ? 'GPU' : 'Card đồ họa',
-        'PSU': lang === 'en' ? 'PSU' : 'Nguồn điện',
-        'Storage': lang === 'en' ? 'Storage' : 'Ổ cứng',
-        'Cooler': lang === 'en' ? 'Cooler' : 'Tản nhiệt'
-    };
-
-    const filteredProducts = useMemo(() => {
-        return componentsData.filter(item => item.type === activeTab);
-    }, [activeTab]);
-
-    const groupedProducts = useMemo(() => {
-        const groups = {};
-        for (const prod of filteredProducts) {
-            const key = prod.socket || prod.ramType || (prod.type === 'GPU' ? (prod.power >= 200 ? 'High-End' : prod.power >= 100 ? 'Mid-Range' : 'Entry') : 'Default');
-            if (!groups[key]) groups[key] = [];
-            groups[key].push(prod);
-        }
-        return groups;
-    }, [filteredProducts]);
-
-    // Check Logic tương thích cơ bản (Mô phỏng)
-    const validateCompat = (item) => {
-        let err = null;
-        if (item.type === 'Mainboard') {
-            const cpu = cart.find(c => c.type === 'CPU');
-            if (cpu && cpu.socket !== item.socket) {
-                err = lang === 'en'
-                    ? `Incompatible! CPU is ${cpu.socket} but Mainboard is ${item.socket}`
-                    : `Không tương thích! CPU dùng Socket ${cpu.socket} nhưng Bo mạch dùng Socket ${item.socket}`;
-            }
-        }
-        if (item.type === 'CPU') {
-            const mb = cart.find(c => c.type === 'Mainboard');
-            if (mb && mb.socket !== item.socket) {
-                err = lang === 'en'
-                    ? `Incompatible! Mainboard is ${mb.socket} but CPU is ${item.socket}`
-                    : `Không tương thích! Bo mạch dùng Socket ${mb.socket} nhưng CPU dùng Socket ${item.socket}`;
-            }
-        }
-        if (item.type === 'RAM') {
-            const mb = cart.find(c => c.type === 'Mainboard');
-            if (mb && mb.ramType && mb.ramType !== item.ramType) {
-                err = lang === 'en'
-                    ? `Mainboard requires ${mb.ramType}, but you picked ${item.ramType}`
-                    : `Bo mạch yêu cầu ${mb.ramType}, nhưng bạn chọn RAM loại ${item.ramType}`;
-            }
-        }
-        return err;
-    };
-
-    const handleAddToCart = (product) => {
-        if (cart.find(item => item.type === product.type)) {
-            setErrorMsg(lang === 'en' ? `You already have a ${product.type} in cart.` : `Bạn đã có ${product.type} trong giỏ!`);
-            return;
-        }
-
-        const compatError = validateCompat(product);
-        if (compatError) {
-            setErrorMsg(lang === 'en' ? compatError : 'Lỗi tương thích: Vui lòng kiểm tra lại linh kiện.');
-            return;
-        }
-
-        if (budget - product.price < 0) {
-            setErrorMsg(lang === 'en' ? 'Not enough budget!' : 'Không đủ ngân sách!');
-            return;
-        }
-
-        setErrorMsg("");
-        setCart(prev => [...prev, product]);
-        setBudget(prev => prev - product.price);
-    };
-
-    const handleRemoveFromCart = (product) => {
-        setCart(prev => prev.filter(c => c.id !== product.id));
-        setBudget(prev => prev + product.price);
-        setErrorMsg("");
-    };
-
-    const handleCheckout = () => {
-        // Simple check if essential components are present
-        const required = ['CPU', 'Mainboard', 'RAM', 'PSU'];
-        const missing = required.filter(req => !cart.some(c => c.type === req));
-
-        if (missing.length > 0) {
-            setErrorMsg(lang === 'en'
-                ? `Missing essential components: ${missing.join(', ')}`
-                : `Thiếu linh kiện thiết yếu: ${missing.join(', ')}`);
-            return;
-        }
-
-        // Chuyển sang Giai đoạn 3: Lắp ráp (Truyền giỏ hàng ra ngoài)
-        if (onCheckout) {
-            onCheckout({ purchasedItems: cart, remainingBudget: budget, missionId: mission.title });
-        } else {
-            // Show Windows simulation if no onCheckout handler
-            setShowWindows(true);
-        }
-    };
-
-    if (showWindows) return <WindowsSimulator cart={cart} onExit={() => setShowWindows(false)} />;
-
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '1300px', margin: '0 auto', gap: '1rem', padding: '0 16px', height: 'calc(100vh - 120px)' }}>
-            {/* Mission Header */}
-            <div className="glass-panel" style={{ padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderColor: 'var(--accent-purple)' }}>
-                <div>
-                    <h2 className="neon-text-purple" style={{ margin: 0, textTransform: 'uppercase', fontSize: '1.2rem' }}>
-                        {lang === 'en' ? `Quest: ${mission.title}` : `Nhiệm vụ: ${mission.title_vn}`}
-                    </h2>
-                    <p style={{ color: '#ccc', margin: '4px 0 0 0', fontSize: '0.9rem' }}>{lang === 'en' ? mission.desc : mission.desc_vn}</p>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                    <h3 style={{ margin: 0, color: 'var(--text-dim)', fontSize: '0.8rem' }}>{lang === 'en' ? 'REMAINING BUDGET' : 'NGÂN SÁCH CÒN LẠI'}</h3>
-                    <div style={{
-                        fontSize: '1.8rem', fontWeight: 'bold', color: budget > 5000000 ? 'var(--accent-green)' : (budget > 1000000 ? 'var(--accent-yellow)' : '#ef4444'),
-                        textShadow: '0 0 10px rgba(16, 185, 129, 0.4)'
-                    }}>
-                        {budget.toLocaleString()} VNĐ
-                    </div>
-                </div>
-            </div>
-
-            {errorMsg && (
-                <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
-                    style={{ padding: '1rem', background: 'rgba(239, 68, 68, 0.1)', borderLeft: '4px solid #ef4444', color: '#fca5a5', fontWeight: 'bold' }}>
-                    ⚠ {errorMsg}
-                </motion.div>
-            )}
-
-            <div style={{ display: 'flex', gap: '1.5rem', flex: 1, overflow: 'hidden', alignItems: 'start', minHeight: 0 }}>
-                {/* Product Catalog */}
-                <div className="glass-panel" style={{ flex: 1, padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem', overflow: 'hidden', minHeight: 0 }}>
-                    <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px' }}>
-                        {categories.map(cat => (
-                            <button key={cat} onClick={() => setActiveTab(cat)} style={{
-                                padding: '10px 20px',
-                                background: activeTab === cat ? 'var(--primary-neon)' : 'transparent',
-                                color: activeTab === cat ? '#000' : '#fff',
-                                border: '1px solid var(--primary-neon)',
-                                borderRadius: '8px',
-                                cursor: 'pointer',
-                                fontWeight: 'bold',
-                                textTransform: 'uppercase',
-                                transition: 'all 0.2s',
-                                whiteSpace: 'nowrap'
-                            }}>
-                                {categoryLabels[cat]}
-                            </button>
-                        ))}
-                    </div>
-
-                    <div style={{ flex: 1, overflowY: 'auto', paddingRight: '10px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        {Object.entries(groupedProducts).map(([groupKey, products]) => (
-                            <div key={groupKey} style={{ minHeight: 0 }}>
-                                <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--primary-neon)', marginBottom: '0.5rem', padding: '4px 8px', background: 'rgba(0,255,255,0.06)', borderRadius: '6px', display: 'inline-block' }}>
-                                    {groupKey}
-                                </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.75rem' }}>
-                                    {products.map(prod => {
-                                        const inCart = cart.some(c => c.id === prod.id);
-                                        return (
-                                            <div key={prod.id} style={{
-                                                background: 'rgba(15, 23, 42, 0.8)', border: '1px solid #334155', borderRadius: '10px', padding: '1rem',
-                                                display: 'flex', flexDirection: 'column', gap: '8px', transition: 'transform 0.2s, box-shadow 0.2s',
-                                                cursor: inCart ? 'not-allowed' : 'pointer',
-                                                opacity: inCart ? 0.5 : 1
-                                            }}
-                                                onMouseOver={(e) => { if (!inCart) { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,255,255,0.1)'; } }}
-                                                onMouseOut={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}
-                                            >
-                                                <h4 style={{ margin: 0, color: 'var(--text-light)', fontSize: '1rem' }}>{prod.name}</h4>
-                                                <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--primary-neon)' }}>{prod.price.toLocaleString()} VNĐ</div>
-                                                <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: 0, flex: 1 }}>{prod.desc}</p>
-                                                <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', fontSize: '0.7rem' }}>
-                                                    {prod.socket && <span style={{ background: '#1e293b', padding: '2px 6px', borderRadius: '4px' }}>Socket: {prod.socket}</span>}
-                                                    {prod.ramType && <span style={{ background: '#1e293b', padding: '2px 6px', borderRadius: '4px' }}>{lang === 'en' ? 'RAM:' : 'Loại RAM:'} {prod.ramType}</span>}
-                                                    {prod.power && <span style={{ background: '#1e293b', padding: '2px 6px', borderRadius: '4px' }}>TDP: {prod.power}W</span>}
-                                                    {prod.wattage && <span style={{ background: '#1e293b', padding: '2px 6px', borderRadius: '4px' }}>{lang === 'en' ? 'Power:' : 'Công suất:'} {prod.wattage}W</span>}
-                                                </div>
-                                                <button disabled={inCart} onClick={() => handleAddToCart(prod)}
-                                                    style={{
-                                                        marginTop: 'auto', width: '100%', padding: '10px', background: inCart ? '#334155' : 'var(--accent-blue)', color: 'white',
-                                                        border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: inCart ? 'not-allowed' : 'pointer',
-                                                        boxShadow: inCart ? 'none' : '0 0 10px rgba(56, 189, 248, 0.5)'
-                                                    }}>
-                                                    {inCart ? (lang === 'en' ? 'PURCHASED' : 'ĐÃ CHỌN') : (lang === 'en' ? 'BUY' : 'MUA')}
-                                                </button>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Right Panel: CART */}
-                <div className="glass-panel" style={{ width: '300px', flexShrink: 0, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(2, 6, 23, 0.8)', overflowY: 'auto' }}>
-                    <h3 className="neon-text-blue" style={{ margin: 0, borderBottom: '1px solid #334155', paddingBottom: '1rem' }}>
-                        {lang === 'en' ? 'INVENTORY CARD' : 'GIỎ HÀNG'} ({cart.length})
-                    </h3>
-
-                    <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '500px' }}>
-                        <AnimatePresence>
-                            {cart.length === 0 && (
-                                <p style={{ color: '#64748b', textAlign: 'center', marginTop: '2rem' }}>
-                                    {lang === 'en' ? 'Your cart is empty.' : 'Giỏ hàng đang trống.'}
-                                </p>
-                            )}
-                            {cart.map(item => (
-                                <motion.div
-                                    key={item.id}
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -20 }}
-                                    style={{
-                                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                        background: '#0f172a', padding: '10px', borderRadius: '8px', borderLeft: '3px solid var(--primary-neon)'
-                                    }}
-                                >
-                                    <div>
-                                        <div style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase' }}>{item.type}</div>
-                                        <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#fff' }}>{item.name}</div>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                        <span style={{ color: 'var(--accent-green)', fontWeight: 'bold' }}>{item.price.toLocaleString()} VNĐ</span>
-                                        <button onClick={() => handleRemoveFromCart(item)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '1.2rem' }}>×</button>
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '1rem' }}>
-                        <button onClick={handleCheckout} style={{
-                            padding: '1rem', background: 'var(--primary-neon)', color: '#000', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '1.1rem',
-                            cursor: 'pointer', boxShadow: '0 0 15px rgba(0, 255, 255, 0.4)'
-                        }}>
-                            {lang === 'en' ? 'PROCEED TO LAB ➔' : 'TỚI PHÒNG LAB ➔'}
-                        </button>
-                        <button onClick={onCancel} style={{
-                            padding: '1rem', background: 'transparent', color: '#94a3b8', border: '1px solid #334155', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer'
-                        }}>
-                            {lang === 'en' ? 'CHANGE MISSION' : 'ĐỔI NHIỆM VỤ'}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
+const categoryLabels = {
+  'CPU': 'Bộ vi xử lý', 'Mainboard': 'Bo mạch chủ', 'RAM': 'Bộ nhớ RAM',
+  'GPU': 'Card đồ họa', 'PSU': 'Nguồn điện', 'Storage': 'Ổ cứng', 'Cooler': 'Tản nhiệt'
 };
+
+const categoryIcons = { 'CPU': '⚡', 'Mainboard': '🔌', 'RAM': '🧠', 'GPU': '🎮', 'PSU': '🔋', 'Storage': '💾', 'Cooler': '❄️' };
+
+const Marketplace = ({ lang = 'en', onCheckout, onCancel }) => {
+  const [mission] = useState(() => MISSIONS_LIST[Math.floor(Math.random() * MISSIONS_LIST.length)]);
+  const [cart, setCart] = useState([]);
+  const [budget, setBudget] = useState(mission.budget);
+  const [activeTab, setActiveTab] = useState('CPU');
+  const [errorMsg, setErrorMsg] = useState("");
+  const [showWindows, setShowWindows] = useState(false);
+
+  const s = {
+    bgBase: 'var(--bg-base)', bgSurface: 'var(--bg-surface)',
+    bgElevated: 'var(--bg-elevated)', textPrimary: 'var(--text-primary)',
+    textMuted: 'var(--text-muted)', textSecondary: 'var(--text-secondary)',
+    border: 'var(--border-default)', brand: 'var(--brand-primary)',
+    success: 'var(--success)', danger: 'var(--danger)',
+  };
+
+  const filteredProducts = useMemo(() => componentsData.filter(item => item.type === activeTab), [activeTab]);
+
+  const groupedProducts = useMemo(() => {
+    const groups = {};
+    for (const prod of filteredProducts) {
+      const key = prod.socket || prod.ramType || (prod.type === 'GPU' ?
+        (prod.power >= 200 ? 'Cao cấp' : prod.power >= 100 ? 'Tầm trung' : 'Phổ thông') : 'Mặc định');
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(prod);
+    }
+    return groups;
+  }, [filteredProducts]);
+
+  const validateCompat = (item) => {
+    if (item.type === 'Mainboard') {
+      const cpu = cart.find(c => c.type === 'CPU');
+      if (cpu && cpu.socket !== item.socket) return `Không tương thích! CPU (${cpu.socket}) khác socket với Mainboard (${item.socket})`;
+    }
+    if (item.type === 'CPU') {
+      const mb = cart.find(c => c.type === 'Mainboard');
+      if (mb && mb.socket !== item.socket) return `Không tương thích! Mainboard (${mb.socket}) khác socket với CPU (${item.socket})`;
+    }
+    if (item.type === 'RAM') {
+      const mb = cart.find(c => c.type === 'Mainboard');
+      if (mb && mb.ramType && mb.ramType !== item.ramType) return `Bo mạch yêu cầu RAM ${mb.ramType}, nhưng bạn chọn ${item.ramType}`;
+    }
+    return null;
+  };
+
+  const handleAddToCart = (product) => {
+    if (cart.find(item => item.type === product.type)) {
+      setErrorMsg(`Bạn đã chọn ${product.type} rồi!`); return;
+    }
+    const compatError = validateCompat(product);
+    if (compatError) { setErrorMsg(compatError); return; }
+    if (budget - product.price < 0) { setErrorMsg('Không đủ ngân sách!'); return; }
+    setErrorMsg("");
+    setCart(prev => [...prev, product]);
+    setBudget(prev => prev - product.price);
+  };
+
+  const handleRemoveFromCart = (product) => {
+    setCart(prev => prev.filter(c => c.id !== product.id));
+    setBudget(prev => prev + product.price);
+    setErrorMsg("");
+  };
+
+  const handleCheckout = () => {
+    const required = ['CPU', 'Mainboard', 'RAM', 'PSU'];
+    const missing = required.filter(req => !cart.some(c => c.type === req));
+    if (missing.length > 0) {
+      setErrorMsg(`Thiếu linh kiện thiết yếu: ${missing.join(', ')}`); return;
+    }
+    if (onCheckout) onCheckout({ purchasedItems: cart, remainingBudget: budget, missionId: mission.title });
+    else setShowWindows(true);
+  };
+
+  if (showWindows) return <WindowsSimulator cart={cart} onExit={() => setShowWindows(false)} />;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '1300px', margin: '0 auto', gap: '1rem', padding: '0 16px', height: 'calc(100vh - 120px)' }}>
+      {/* Mission Header */}
+      <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} style={{
+        padding: '20px 28px', background: s.bgSurface, border: `1px solid ${s.border}`, borderRadius: '16px',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px',
+        boxShadow: '0 2px 12px var(--shadow-color)'
+      }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+            <span style={{ fontSize: '16px' }}>🎯</span>
+            <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: s.textMuted }}>Nhiệm vụ</span>
+          </div>
+          <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: s.textPrimary }}>{mission.title_vn}</h2>
+          <p style={{ color: s.textMuted, margin: '4px 0 0 0', fontSize: '13px', lineHeight: 1.4 }}>{mission.desc_vn}</p>
+        </div>
+        <div style={{ textAlign: 'right', flexShrink: 0 }}>
+          <span style={{ fontSize: '11px', fontWeight: 600, color: s.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Ngân sách còn</span>
+          <div style={{
+            fontSize: '24px', fontWeight: 900,
+            color: budget > mission.budget * 0.5 ? s.success : (budget > mission.budget * 0.2 ? s.warning || '#f59e0b' : s.danger),
+            textShadow: 'none'
+          }}>{budget.toLocaleString()} ₫</div>
+          <div style={{ height: '4px', background: s.bgElevated, borderRadius: '2px', marginTop: '4px', width: '160px', overflow: 'hidden' }}>
+            <div style={{ width: `${(budget / mission.budget) * 100}%`, height: '100%', background: `linear-gradient(90deg, ${s.success}, ${s.brand})`, borderRadius: '2px', transition: 'width 0.3s ease' }} />
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Error */}
+      <AnimatePresence>
+        {errorMsg && (
+          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+            style={{ padding: '12px 16px', background: `color-mix(in srgb, ${s.danger} 10%, transparent)`, borderLeft: `3px solid ${s.danger}`, borderRadius: '8px', color: s.danger, fontSize: '13px', fontWeight: 600 }}>
+            ⚠ {errorMsg}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div style={{ display: 'flex', gap: '1.5rem', flex: 1, overflow: 'hidden', minHeight: 0 }}>
+        {/* Product Catalog */}
+        <div style={{
+          flex: 1, padding: '24px', background: s.bgSurface, border: `1px solid ${s.border}`, borderRadius: '16px',
+          display: 'flex', flexDirection: 'column', gap: '16px', overflow: 'hidden', minHeight: 0
+        }}>
+          {/* Category Tabs */}
+          <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', flexShrink: 0 }}>
+            {categories.map(cat => (
+              <motion.button key={cat} onClick={() => setActiveTab(cat)} whileTap={{ scale: 0.96 }} style={{
+                padding: '10px 18px', display: 'flex', alignItems: 'center', gap: '6px',
+                background: activeTab === cat ? s.brand : s.bgElevated,
+                color: activeTab === cat ? '#fff' : s.textSecondary,
+                border: `1px solid ${activeTab === cat ? s.brand : s.border}`,
+                borderRadius: '10px', cursor: 'pointer', fontWeight: 700, fontSize: '13px',
+                transition: 'all 0.2s', whiteSpace: 'nowrap', fontFamily: 'inherit'
+              }}>
+                <span>{categoryIcons[cat]}</span> {categoryLabels[cat]}
+              </motion.button>
+            ))}
+          </div>
+
+          {/* Products */}
+          <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {Object.entries(groupedProducts).map(([groupKey, products]) => (
+              <motion.div key={groupKey} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: s.brand, marginBottom: '8px' }}>
+                  {groupKey}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
+                  {products.map(prod => {
+                    const inCart = cart.some(c => c.id === prod.id);
+                    return (
+                      <motion.div key={prod.id} layout whileHover={{ y: -3, boxShadow: `0 8px 24px var(--shadow-hover)` }} style={{
+                        background: s.bgElevated, border: `1px solid ${inCart ? s.brand : s.border}`,
+                        borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px',
+                        opacity: inCart ? 0.7 : 1, transition: 'border-color 0.2s', position: 'relative'
+                      }}>
+                        {inCart && <div style={{ position: 'absolute', top: '8px', right: '8px', background: s.brand, color: '#fff', fontSize: '9px', fontWeight: 700, padding: '2px 8px', borderRadius: '999px' }}>ĐÃ MUA</div>}
+                        <h4 style={{ margin: 0, color: s.textPrimary, fontSize: '14px', fontWeight: 700, paddingRight: inCart ? '50px' : 0 }}>{prod.name}</h4>
+                        <div style={{ fontSize: '16px', fontWeight: 800, color: s.brand }}>{prod.price.toLocaleString()} ₫</div>
+                        <p style={{ fontSize: '12px', color: s.textMuted, margin: 0, lineHeight: 1.4, flex: 1 }}>{prod.desc}</p>
+                        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                          {prod.socket && <Tag label={`Socket: ${prod.socket}`} />}
+                          {prod.ramType && <Tag label={`RAM: ${prod.ramType}`} />}
+                          {prod.power && <Tag label={`TDP: ${prod.power}W`} />}
+                          {prod.wattage && <Tag label={`C.suất: ${prod.wattage}W`} />}
+                        </div>
+                        <motion.button whileTap={{ scale: 0.95 }} disabled={inCart} onClick={() => handleAddToCart(prod)} style={{
+                          width: '100%', padding: '10px', marginTop: '4px', fontWeight: 700, fontSize: '13px',
+                          background: inCart ? s.bgElevated : s.brand, color: inCart ? s.textMuted : '#fff',
+                          border: `1px solid ${inCart ? s.border : s.brand}`,
+                          borderRadius: '8px', cursor: inCart ? 'not-allowed' : 'pointer', fontFamily: 'inherit'
+                        }}>
+                          {inCart ? 'Đã chọn' : 'Thêm vào giỏ'}
+                        </motion.button>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Cart Panel */}
+        <div style={{
+          width: '300px', flexShrink: 0, padding: '20px', background: s.bgSurface, border: `1px solid ${s.border}`,
+          borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '12px', overflowY: 'auto'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${s.border}`, paddingBottom: '12px' }}>
+            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: s.textPrimary }}>🛒 Giỏ hàng</h3>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: s.textMuted }}>{cart.length} linh kiện</span>
+          </div>
+
+          <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', minHeight: 0 }}>
+            <AnimatePresence>
+              {cart.length === 0 ? (
+                <div style={{ padding: '40px 0', textAlign: 'center', color: s.textMuted, fontSize: '13px' }}>
+                  <div style={{ fontSize: '32px', marginBottom: '8px' }}>🛍️</div>
+                  Giỏ hàng trống
+                </div>
+              ) : cart.map(item => (
+                <motion.div key={item.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px',
+                    background: s.bgElevated, padding: '10px 12px', borderRadius: '10px', borderLeft: `3px solid ${s.brand}` }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '10px', color: s.textMuted, textTransform: 'uppercase', fontWeight: 600 }}>{item.type}</div>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: s.textPrimary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                    <span style={{ color: s.success, fontWeight: 700, fontSize: '12px' }}>{item.price.toLocaleString()} ₫</span>
+                    <button onClick={() => handleRemoveFromCart(item)}
+                      style={{ background: 'none', border: 'none', color: s.danger, cursor: 'pointer', fontSize: '18px', padding: '0', lineHeight: 1 }}>×</button>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '12px', borderTop: `1px solid ${s.border}` }}>
+            <motion.button onClick={handleCheckout} whileTap={{ scale: 0.97 }} style={{
+              padding: '14px', background: `linear-gradient(135deg, ${s.brand}, var(--brand-dark, #067a4d))`, color: '#fff',
+              border: 'none', borderRadius: '10px', fontWeight: 800, fontSize: '14px', cursor: 'pointer',
+              boxShadow: `0 4px 16px color-mix(in srgb, ${s.brand} 40%, transparent)`, fontFamily: 'inherit'
+            }}>
+              🚀 TỚI PHÒNG LAB
+            </motion.button>
+            <button onClick={onCancel} style={{
+              padding: '10px', background: 'transparent', color: s.textMuted, border: `1px solid ${s.border}`,
+              borderRadius: '8px', fontWeight: 600, cursor: 'pointer', fontSize: '13px', fontFamily: 'inherit'
+            }}>
+              Đổi nhiệm vụ
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+function Tag({ label }) {
+  const s = { border: 'var(--border-default)', bg: 'var(--bg-elevated)', text: 'var(--text-muted)' };
+  return <span style={{ background: s.bg, padding: '2px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 600, color: s.text, border: `1px solid ${s.border}` }}>{label}</span>;
+}
 
 export default Marketplace;

@@ -78,8 +78,8 @@ const LoadingScreen = ({ onComplete }) => {
                 justifyContent: 'center',
                 alignItems: 'center',
                 cursor: 'pointer',
-                animation: 'fadeOut 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-                animationPlayState: visible ? 'paused' : 'running',
+                opacity: visible ? 1 : 0,
+                transition: 'opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
                 overflow: 'hidden'
             }}
         >
@@ -162,7 +162,7 @@ const LoadingScreen = ({ onComplete }) => {
                     marginTop: '20px',
                     padding: '12px 24px',
                     background: 'rgba(26, 28, 37, 0.6)',
-                    border: '1px border rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.05)',
                     borderRadius: '16px',
                     minWidth: '280px',
                     textAlign: 'center',
