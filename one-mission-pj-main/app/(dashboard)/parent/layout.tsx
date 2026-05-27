@@ -8,6 +8,7 @@ import { GraduationCap, LayoutDashboard, UserPlus, Bell, LogOut } from 'lucide-r
 import { logout } from '@/lib/auth-actions'
 import { createBrowserClient } from '@supabase/ssr'
 import { useParentNotifications } from '@/hooks/useParentNotifications'
+import PageTransition from '@/components/PageTransition'
 
 export default function ParentLayout({ children }: { children: React.ReactNode }) {
   const [parentId, setParentId] = useState<string | null>(null)
@@ -168,7 +169,7 @@ export default function ParentLayout({ children }: { children: React.ReactNode }
 
       {/* Main Content Area */}
       <main style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
-        {children}
+        <PageTransition>{children}</PageTransition>
       </main>
     </div>
   )

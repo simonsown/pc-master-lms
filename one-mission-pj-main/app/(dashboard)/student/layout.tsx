@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { GraduationCap, LayoutDashboard, Cpu, History, LogOut, Users, BookOpen, ChevronDown, User, Sun, Moon, Map, BarChart2 } from 'lucide-react'
 import { logout } from '@/lib/auth-actions'
 import { createBrowserClient } from '@supabase/ssr'
+import PageTransition from '@/components/PageTransition'
 
 function ThemeToggle() {
   const [theme, setThemeState] = useState<'light' | 'dark'>('light')
@@ -96,7 +97,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
       </aside>
 
       <main style={{ flex: 1, padding: '32px', overflowY: 'auto', minWidth: 0 }}>
-        {children}
+        <PageTransition>{children}</PageTransition>
       </main>
     </div>
   )

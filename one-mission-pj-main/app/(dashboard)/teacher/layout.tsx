@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { BookOpen, Users, FileText, LogOut, LayoutDashboard, Compass, HelpCircle, Award, Laptop, MessageSquare, TrendingUp, ChevronDown, User, Shield, GraduationCap, Sun, Moon } from 'lucide-react'
 import { logout } from '@/lib/auth-actions'
 import { supabase } from '@/lib/supabase'
+import PageTransition from '@/components/PageTransition'
 
 function ThemeToggle() {
   const [theme, setThemeState] = useState<'light' | 'dark'>('light')
@@ -132,7 +133,7 @@ export default function TeacherLayout({ children }: { children: React.ReactNode 
           <span>/</span>
           <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{pathname === '/teacher' ? 'Tổng quan' : pathname.split('/').pop()}</span>
         </div>
-        {children}
+        <PageTransition>{children}</PageTransition>
       </main>
     </div>
   )

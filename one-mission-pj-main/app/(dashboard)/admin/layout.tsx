@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { LayoutDashboard, Users, Settings, LogOut, Book, ShieldAlert, GraduationCap, Sun, Moon, BarChart3, Activity, Bell, FileText, Radio, Database, Wifi } from 'lucide-react'
+import PageTransition from '@/components/PageTransition'
 
 function ThemeToggle() {
   const [theme, setThemeState] = useState<'light' | 'dark'>('light')
@@ -121,7 +122,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       <main style={{ flex: 1, padding: '28px 32px', overflowY: 'auto', minWidth: 0 }}>
-        {children}
+        <PageTransition>{children}</PageTransition>
       </main>
     </div>
   )
