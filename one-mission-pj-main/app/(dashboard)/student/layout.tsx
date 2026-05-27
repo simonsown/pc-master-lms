@@ -3,12 +3,10 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { GraduationCap, LayoutDashboard, Cpu, History, LogOut, Users, BookOpen, ChevronDown, User, Sun, Moon, Map, BarChart2, Monitor, Compass, MessageSquare } from 'lucide-react'
+import { GraduationCap, LayoutDashboard, Cpu, History, LogOut, Users, BookOpen, ChevronDown, User, Sun, Moon, Map, BarChart2 } from 'lucide-react'
 import { logout } from '@/lib/auth-actions'
 import { createBrowserClient } from '@supabase/ssr'
 import PageTransition from '@/components/PageTransition'
-
-const s = { red: '#D32F2F', navy: '#1A2F4A', teal: '#0097A7', orange: '#F5A623' }
 
 function ThemeToggle() {
   const [theme, setThemeState] = useState<'light' | 'dark'>('light')
@@ -24,8 +22,8 @@ function ThemeToggle() {
     localStorage.setItem('theme', next)
   }, [theme])
   return (
-    <button onClick={toggle} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', width: '100%', borderRadius: '8px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontWeight: 500, cursor: 'pointer', fontSize: '13px', fontFamily: 'inherit', transition: 'all 0.2s' }}>
-      {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+    <button onClick={toggle} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', width: '100%', borderRadius: '10px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontWeight: 500, cursor: 'pointer', fontSize: '14px', fontFamily: 'inherit', transition: 'all 0.2s' }}>
+      {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
       {theme === 'light' ? 'Giao diện tối' : 'Giao diện sáng'}
     </button>
   )
@@ -62,46 +60,44 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
   ]
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#F8FAFC' }}>
-      <aside style={{ width: '260px', background: `linear-gradient(180deg, #0B1A2E 0%, ${s.navy} 100%)`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
-        <div style={{ padding: '20px 20px 16px', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-          <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: s.red, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ color: '#fff', fontSize: '13px', fontWeight: 900 }}>PC</span>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-base)' }}>
+      <aside style={{ width: '280px', background: 'linear-gradient(180deg, #031f3b 0%, #1a2f53 100%)', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+        <div style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--brand-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <GraduationCap size={20} color="#fff" />
           </div>
           <div>
-            <div style={{ fontWeight: 800, fontSize: '16px', color: '#fff', letterSpacing: '-0.02em' }}>PC Master</div>
-            <div style={{ fontSize: '11px', color: s.red, fontWeight: 600 }}>Học sinh</div>
+            <div style={{ fontWeight: 800, fontSize: '18px', color: '#fff' }}>PC Master</div>
+            <div style={{ fontSize: '11px', color: 'var(--brand-primary)', fontWeight: 600, opacity: 0.9 }}>Học sinh</div>
           </div>
         </div>
 
-        <nav style={{ padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+        <nav style={{ padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
           {navItems.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href || (href !== '/student/dashboard' && pathname.startsWith(href))
+            const active = pathname === href
             return (
               <Link key={href} href={href} style={{
-                display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: active ? 700 : 500,
-                background: active ? 'rgba(211,47,47,0.15)' : 'transparent',
-                color: active ? '#fff' : 'rgba(255,255,255,0.55)',
-                transition: 'all 0.15s'
+                display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '10px', textDecoration: 'none', fontSize: '14px', fontWeight: active ? 700 : 500,
+                background: active ? 'rgba(8,158,96,0.15)' : 'transparent',
+                color: active ? '#fff' : 'rgba(255,255,255,0.6)',
+                transition: 'all 0.2s'
               }}>
-                <Icon size={18} /> {label}
+                <Icon size={20} /> {label}
               </Link>
             )
           })}
         </nav>
 
-        <div style={{ padding: '12px', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <div style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <ThemeToggle />
-          <button onClick={() => logout()} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', width: '100%', borderRadius: '8px', background: 'transparent', border: 'none', color: 'rgba(244,67,54,0.6)', fontWeight: 500, cursor: 'pointer', fontSize: '13px', fontFamily: 'inherit' }}>
-            <LogOut size={16} /> Đăng xuất
+          <button onClick={() => logout()} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', width: '100%', borderRadius: '10px', background: 'transparent', border: 'none', color: 'rgba(244,67,54,0.7)', fontWeight: 600, cursor: 'pointer', fontSize: '14px', fontFamily: 'inherit' }}>
+            <LogOut size={18} /> Đăng xuất
           </button>
         </div>
       </aside>
 
-      <main style={{ flex: 1, overflowY: 'auto', minWidth: 0 }}>
-        <div style={{ padding: '32px 36px', maxWidth: '1200px' }}>
-          <PageTransition>{children}</PageTransition>
-        </div>
+      <main style={{ flex: 1, padding: '32px', overflowY: 'auto', minWidth: 0 }}>
+        <PageTransition>{children}</PageTransition>
       </main>
     </div>
   )

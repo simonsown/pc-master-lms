@@ -2,10 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Users, FileText, BookOpen, GraduationCap, TrendingUp, ArrowRight, Loader2, Plus, Monitor, Award, MessageSquare } from 'lucide-react';
+import { 
+  Users, FileText, BookOpen, GraduationCap, TrendingUp, ArrowRight, Loader2
+} from 'lucide-react';
 import Link from 'next/link';
-
-const s = { red: '#D32F2F', navy: '#1A2F4A', teal: '#0097A7', orange: '#F5A623' }
 
 export default function TeacherDashboard() {
   const [stats, setStats] = useState({ classes: 0, students: 0, assignments: 0, submissions: 0 });
@@ -29,56 +29,56 @@ export default function TeacherDashboard() {
   }
 
   const quickActions = [
-    { title: 'Lớp học', desc: 'Tạo mã lớp, quản lý thành viên', icon: <Users size={22} />, color: s.teal, href: '/teacher/classes' },
-    { title: 'Bài giảng', desc: 'Soạn thảo nội dung học tập', icon: <FileText size={22} />, color: s.red, href: '/teacher/lessons' },
-    { title: 'Sách giáo khoa', desc: 'Nội dung số theo chương trình GDPT', icon: <BookOpen size={22} />, color: s.navy, href: '/teacher/lessons' },
-    { title: 'Kiến thức mở rộng', desc: 'Thư viện phần cứng & công nghệ mới', icon: <Monitor size={22} />, color: s.orange, href: '/teacher/lessons' },
+    { title: 'Quản lý Lớp học', desc: 'Tạo mã lớp, quản lý thành viên', icon: <Users size={24} />, color: 'var(--accent-blue)', href: '/teacher/classes' },
+    { title: 'Quản lý Bài giảng', desc: 'Soạn thảo nội dung học tập', icon: <FileText size={24} />, color: 'var(--brand-primary)', href: '/teacher/lessons' },
+    { title: 'Sách giáo khoa', desc: 'Nội dung số theo chương trình GDPT', icon: <BookOpen size={24} />, color: '#8b5cf6', href: '/teacher/lessons' },
+    { title: 'Kiến thức mở rộng', desc: 'Thư viện phần cứng và công nghệ mới', icon: <TrendingUp size={24} />, color: '#ec4899', href: '/teacher/lessons' },
   ];
 
-  if (loading) return <div style={{ display: 'flex', justifyContent: 'center', padding: '80px' }}><Loader2 size={36} style={{ color: s.red, animation: 'spin 1s linear infinite' }} /></div>
+  if (loading) return <div style={{ display: 'flex', justifyContent: 'center', padding: '80px' }}><Loader2 size={40} style={{ color: 'var(--brand-primary)', animation: 'spin 1s linear infinite' }} /></div>
 
   return (
-    <div style={{ margin: 0 }}>
-      <header style={{ marginBottom: '28px' }}>
-        <h1 style={{ fontSize: '26px', fontWeight: 800, color: s.navy, margin: '0 0 4px 0' }}>Chào mừng Thầy/Cô!</h1>
-        <p style={{ color: '#64748B', margin: 0, fontSize: '14px' }}>Hôm nay Thầy/Cô muốn thực hiện công việc gì?</p>
+    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      <header style={{ marginBottom: '32px' }}>
+        <h1 style={{ fontSize: '28px', fontWeight: 800, margin: '0 0 6px 0', color: 'var(--text-primary)' }}>Chào mừng Thầy/Cô!</h1>
+        <p style={{ color: 'var(--text-muted)', margin: 0 }}>Hôm nay Thầy/Cô muốn thực hiện công việc gì?</p>
       </header>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '36px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '40px' }}>
         {[
-          { label: 'Số lớp đang quản lý', value: stats.classes, icon: <GraduationCap size={20} />, color: s.teal },
-          { label: 'Tổng số học sinh', value: stats.students, icon: <Users size={20} />, color: s.red },
-          { label: 'Nhiệm vụ đã giao', value: stats.assignments, icon: <BookOpen size={20} />, color: s.orange },
-        ].map((st, i) => (
-          <div key={i} style={{ padding: '22px 24px', display: 'flex', alignItems: 'center', gap: '16px', borderRadius: '12px', border: '1px solid #E2E8F0', background: '#fff' }}>
-            <div style={{ width: '46px', height: '46px', borderRadius: '10px', background: `${st.color}0d`, color: st.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              {st.icon}
+          { label: 'Số lớp đang quản lý', value: stats.classes, icon: <GraduationCap size={20} />, color: 'var(--accent-blue)' },
+          { label: 'Tổng số học sinh', value: stats.students, icon: <Users size={20} />, color: 'var(--brand-primary)' },
+          { label: 'Nhiệm vụ đã giao', value: stats.assignments, icon: <BookOpen size={20} />, color: 'var(--warning)' },
+        ].map((s, i) => (
+          <div key={i} className="lms-card" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: `${s.color}15`, color: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              {s.icon}
             </div>
             <div>
-              <div style={{ fontSize: '22px', fontWeight: 800, color: s.navy }}>{st.value}</div>
-              <div style={{ fontSize: '13px', color: '#64748B' }}>{st.label}</div>
+              <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)' }}>{s.value}</div>
+              <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{s.label}</div>
             </div>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '28px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '32px' }}>
         <div>
-          <h2 style={{ fontSize: '16px', fontWeight: 700, color: s.navy, marginBottom: '14px' }}>Thao tác nhanh</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px', marginBottom: '28px' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '16px' }}>Thao tác nhanh</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px', marginBottom: '32px' }}>
             {quickActions.map((action, idx) => (
               <Link key={idx} href={action.href} style={{ textDecoration: 'none' }}>
-                <div style={{ padding: '18px 20px', display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer', borderRadius: '10px', border: '1px solid #E2E8F0', background: '#fff' }}
-                  onMouseOver={e => { e.currentTarget.style.borderColor = action.color; e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.06)' }}
-                  onMouseOut={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.boxShadow = 'none' }}>
-                  <div style={{ width: '42px', height: '42px', borderRadius: '8px', background: `${action.color}0d`, color: action.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div className="lms-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer' }}
+                  onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--brand-primary)'; e.currentTarget.style.boxShadow = '0 4px 16px var(--shadow-color)' }}
+                  onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.boxShadow = 'none' }}>
+                  <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: `${action.color}15`, color: action.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     {action.icon}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ color: s.navy, fontSize: '14px', fontWeight: 700, marginBottom: '2px' }}>{action.title}</div>
-                    <div style={{ color: '#64748B', fontSize: '12px', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{action.desc}</div>
+                    <div style={{ color: 'var(--text-primary)', fontSize: '14px', fontWeight: 700, marginBottom: '2px' }}>{action.title}</div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '12px', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{action.desc}</div>
                   </div>
-                  <ArrowRight size={14} style={{ color: '#94A3B8', flexShrink: 0 }} />
+                  <ArrowRight size={16} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
                 </div>
               </Link>
             ))}
@@ -86,26 +86,24 @@ export default function TeacherDashboard() {
         </div>
 
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-            <h2 style={{ fontSize: '16px', fontWeight: 700, color: s.navy, margin: 0 }}>Lớp của tôi</h2>
-            <Link href="/teacher/classes/new" style={{ color: s.red, fontSize: '12px', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Plus size={14} /> Tạo mới
-            </Link>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Lớp của tôi</h2>
+            <Link href="/teacher/classes/new" style={{ color: 'var(--accent-blue)', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>+ Tạo mới</Link>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {classes.length > 0 ? classes.map(cls => (
-              <div key={cls.id} style={{ padding: '14px 16px', borderRadius: '10px', border: '1px solid #E2E8F0', background: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div key={cls.id} className="lms-card" style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: s.navy }}>{cls.name}</div>
-                  <div style={{ fontSize: '11px', color: '#64748B' }}>{cls.subject}{cls.grade ? ` • Khối ${cls.grade}` : ''}</div>
+                  <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>{cls.name}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{cls.subject}{cls.grade ? ` • Khối ${cls.grade}` : ''}</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '9px', color: s.teal, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase' }}>Mã lớp</div>
-                  <div style={{ fontSize: '15px', fontWeight: 900, color: s.navy, fontFamily: 'monospace' }}>{cls.code}</div>
+                  <div style={{ fontSize: '10px', color: 'var(--accent-blue)', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase' }}>Mã lớp</div>
+                  <div style={{ fontSize: '16px', fontWeight: 900, color: 'var(--text-primary)', fontFamily: 'monospace' }}>{cls.code}</div>
                 </div>
               </div>
             )) : (
-              <div style={{ padding: '28px', textAlign: 'center', border: '2px dashed #E2E8F0', borderRadius: '10px', color: '#64748B', fontSize: '13px' }}>
+              <div style={{ padding: '32px', textAlign: 'center', border: '2px dashed var(--border-default)', borderRadius: '12px', color: 'var(--text-muted)' }}>
                 Chưa có lớp học nào
               </div>
             )}
