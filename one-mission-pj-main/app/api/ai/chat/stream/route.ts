@@ -49,9 +49,9 @@ export async function POST(req: Request) {
     if (!geminiRes.ok) {
       const errBody = await geminiRes.text();
       console.error('Gemini Stream Error:', geminiRes.status, errBody);
-      const msg = errBody.includes('API_KEY') ? '⚠️ API Key không hợp lệ.' :
-                  errBody.includes('not found') || errBody.includes('not support') ? 'Xin lỗi, AI hiện không khả dụng.' :
-                  'Xin lỗi, tôi gặp sự cố kết nối.';
+      const msg = errBody.includes('API_KEY') ? `⚠️ API Key không hợp lệ. Chi tiết: ${errBody.substring(0, 300)}` :
+                  errBody.includes('not found') || errBody.includes('not support') ? `Xin lỗi, AI hiện không khả dụng. Chi tiết: ${errBody.substring(0, 300)}` :
+                  `Xin lỗi, tôi gặp sự cố kết nối. Chi tiết: ${errBody.substring(0, 300)}`;
       return new Response(JSON.stringify({ error: msg }), { status: 200 });
     }
 
