@@ -1,3 +1,5 @@
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
 const GEMINI_API_KEY = () => process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY || '';
 
 const SYSTEM_PROMPT = `Bạn là AI Guru - trợ lý AI của nền tảng học tập PC Master Builder. Nhiệm vụ của bạn là hướng dẫn, hỗ trợ học sinh trong việc sử dụng website và trả lời câu hỏi về phần cứng máy tính.
@@ -29,59 +31,27 @@ export async function POST(req: Request) {
       return new Response(JSON.stringify({ error: 'API Key chưa được cấu hình' }), { status: 200 });
     }
 
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:streamGenerateContent?alt=sse&key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: 'user',
-              parts: [{ text: `${SYSTEM_PROMPT}\n\nNgười dùng hỏi: ${message}` }]
-            }
-          ],
-          generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
-        })
-      }
-    );
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-1.5-flash',
+      systemInstruction: SYSTEM_PROMPT,
+    });
 
-    if (!geminiRes.ok) {
-      const errBody = await geminiRes.text();
-      console.error('Gemini Stream Error:', geminiRes.status, errBody);
-      const msg = errBody.includes('API_KEY') ? '⚠️ API Key không hợp lệ.' :
-                  errBody.includes('not found') || errBody.includes('not support') ? 'Xin lỗi, AI hiện không khả dụng.' :
-                  'Xin lỗi, tôi gặp sự cố kết nối.';
-      return new Response(JSON.stringify({ error: msg }), { status: 200 });
-    }
-
+    const result = await model.generateContentStream(message);
     const encoder = new TextEncoder();
-    const decoder = new TextDecoder();
-    const reader = geminiRes.body?.getReader();
-    if (!reader) {
-      return new Response(JSON.stringify({ error: 'Không thể kết nối AI' }), { status: 200 });
-    }
 
     const stream = new ReadableStream({
       async start(controller) {
-        let buffer = '';
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              try {
-                const json = JSON.parse(line.slice(6));
-                const text = json?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                if (text) {
-                  controller.enqueue(encoder.encode(JSON.stringify({ text }) + '\n'));
-                }
-              } catch {}
+        try {
+          for await (const chunk of result.stream) {
+            const text = chunk.text();
+            if (text) {
+              controller.enqueue(encoder.encode(JSON.stringify({ text }) + '\n'));
             }
           }
+        } catch (err: any) {
+          console.error('Stream error:', err);
+          controller.enqueue(encoder.encode(JSON.stringify({ error: `Lỗi: ${err.message}` }) + '\n'));
         }
         controller.enqueue(encoder.encode(JSON.stringify({ done: true }) + '\n'));
         controller.close();

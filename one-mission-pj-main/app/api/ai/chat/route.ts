@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const GEMINI_API_KEY = () => process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY || '';
 
@@ -31,47 +32,28 @@ export async function POST(req: Request) {
       return NextResponse.json({ reply: "Xin lỗi, API Key chưa được cấu hình. Vui lòng liên hệ quản trị viên." });
     }
 
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: 'user',
-              parts: [{ text: `${SYSTEM_PROMPT}\n\nNgười dùng hỏi: ${message}` }]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 1024,
-          }
-        })
-      }
-    );
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-1.5-flash',
+      systemInstruction: SYSTEM_PROMPT,
+    });
 
-    if (!geminiRes.ok) {
-      const errBody = await geminiRes.text();
-      console.error('Gemini API Error:', geminiRes.status, errBody);
-      if (errBody.includes('API_KEY') || errBody.includes('API key')) {
-        return NextResponse.json({ reply: "⚠️ API Key không hợp lệ. Vui lòng liên hệ quản trị viên." });
-      }
-      if (errBody.includes('quota') || errBody.includes('429')) {
-        return NextResponse.json({ reply: "⚠️ AI tạm thời quá tải (hết lượt sử dụng). Vui lòng thử lại sau vài phút hoặc liên hệ quản trị viên để gia hạn API Key." });
-      }
-      if (errBody.includes('not found') || errBody.includes('not support') || errBody.includes('image')) {
-        return NextResponse.json({ reply: "Xin lỗi, AI chat hiện chỉ hỗ trợ văn bản. Vui lòng thử lại với câu hỏi khác." });
-      }
-      return NextResponse.json({ reply: "Xin lỗi, tôi gặp sự cố khi kết nối AI. Vui lòng thử lại sau." });
-    }
-
-    const data = await geminiRes.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'Xin lỗi, tôi không thể tạo phản hồi ngay bây giờ.';
+    const result = await model.generateContent(message);
+    const text = result.response.text();
 
     return NextResponse.json({ reply: text });
   } catch (err: any) {
     console.error('AI Chat Route Error:', err?.message || err);
+    const msg = (err?.message || '').toLowerCase();
+    if (msg.includes('api_key') || msg.includes('api key')) {
+      return NextResponse.json({ reply: "⚠️ API Key không hợp lệ. Vui lòng liên hệ quản trị viên." });
+    }
+    if (msg.includes('quota') || msg.includes('429') || msg.includes('too many')) {
+      return NextResponse.json({ reply: "⚠️ AI tạm thời quá tải (hết lượt sử dụng). Vui lòng thử lại sau vài phút hoặc liên hệ quản trị viên để gia hạn API Key." });
+    }
+    if (msg.includes('not found') || msg.includes('not support')) {
+      return NextResponse.json({ reply: "Xin lỗi, AI hiện không khả dụng. Vui lòng thử lại sau." });
+    }
     return NextResponse.json({ reply: "Xin lỗi, hệ thống đang bảo trì. Vui lòng thử lại sau." });
   }
 }
