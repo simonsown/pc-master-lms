@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     }
 
     const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -54,16 +54,8 @@ export async function POST(req: Request) {
     if (!geminiRes.ok) {
       const errBody = await geminiRes.text();
       console.error('Gemini API Error:', geminiRes.status, errBody);
-      if (errBody.includes('API_KEY') || errBody.includes('API key')) {
-        return NextResponse.json({ reply: "⚠️ API Key không hợp lệ. Vui lòng liên hệ quản trị viên." });
-      }
-      if (errBody.includes('quota') || errBody.includes('429')) {
-        return NextResponse.json({ reply: "⚠️ AI tạm thời quá tải (hết lượt sử dụng). Vui lòng thử lại sau vài phút hoặc liên hệ quản trị viên để gia hạn API Key." });
-      }
-      if (errBody.includes('not found') || errBody.includes('not support') || errBody.includes('image')) {
-        return NextResponse.json({ reply: "Xin lỗi, AI chat hiện chỉ hỗ trợ văn bản. Vui lòng thử lại với câu hỏi khác." });
-      }
-      return NextResponse.json({ reply: "Xin lỗi, tôi gặp sự cố khi kết nối AI. Vui lòng thử lại sau." });
+      // Show real error so admin can diagnose
+      return NextResponse.json({ reply: `⚠️ Gemini API lỗi ${geminiRes.status}: ${errBody.substring(0, 500)}` });
     }
 
     const data = await geminiRes.json();
