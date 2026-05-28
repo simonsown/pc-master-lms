@@ -22,6 +22,7 @@ const PUBLIC_ROUTES = [
   '/verify', '/check-email',
   '/builder',
   '/admin', '/admin/settings', '/admin/users', '/admin/schools',
+  '/api',
 ]
 
 export async function middleware(request: NextRequest) {
