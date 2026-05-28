@@ -18,7 +18,7 @@ export async function POST(req) {
             .join('\n\n');
 
         const context = `Tên bài học: ${lessonTitle}\n\n${textContent}`;
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         let prompt = '';
         if (type === 'quiz') {

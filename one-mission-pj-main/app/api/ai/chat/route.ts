@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     }
 
     const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ reply: "⚠️ API Key không hợp lệ. Vui lòng liên hệ quản trị viên." });
       }
       if (errBody.includes('quota') || errBody.includes('429')) {
-        return NextResponse.json({ reply: `⚠️ AI tạm thời quá tải (hết lượt sử dụng). Chi tiết lỗi: ${errBody.substring(0, 500)}` });
+        return NextResponse.json({ reply: "⚠️ AI tạm thời quá tải (hết lượt sử dụng). Vui lòng thử lại sau vài phút hoặc liên hệ quản trị viên để gia hạn API Key." });
       }
       if (errBody.includes('not found') || errBody.includes('not support') || errBody.includes('image')) {
         return NextResponse.json({ reply: "Xin lỗi, AI chat hiện chỉ hỗ trợ văn bản. Vui lòng thử lại với câu hỏi khác." });

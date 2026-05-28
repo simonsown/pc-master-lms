@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     }
 
     const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?alt=sse&key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -49,9 +49,9 @@ export async function POST(req: Request) {
     if (!geminiRes.ok) {
       const errBody = await geminiRes.text();
       console.error('Gemini Stream Error:', geminiRes.status, errBody);
-      const msg = errBody.includes('API_KEY') ? `⚠️ API Key không hợp lệ. Chi tiết: ${errBody.substring(0, 300)}` :
-                  errBody.includes('not found') || errBody.includes('not support') ? `Xin lỗi, AI hiện không khả dụng. Chi tiết: ${errBody.substring(0, 300)}` :
-                  `Xin lỗi, tôi gặp sự cố kết nối. Chi tiết: ${errBody.substring(0, 300)}`;
+      const msg = errBody.includes('API_KEY') ? '⚠️ API Key không hợp lệ.' :
+                  errBody.includes('not found') || errBody.includes('not support') ? 'Xin lỗi, AI hiện không khả dụng.' :
+                  'Xin lỗi, tôi gặp sự cố kết nối.';
       return new Response(JSON.stringify({ error: msg }), { status: 200 });
     }
 
