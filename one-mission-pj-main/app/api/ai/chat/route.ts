@@ -45,15 +45,6 @@ export async function POST(req: Request) {
   } catch (err: any) {
     console.error('AI Chat Route Error:', err?.message || err);
     const msg = (err?.message || '').toLowerCase();
-    if (msg.includes('api_key') || msg.includes('api key')) {
-      return NextResponse.json({ reply: "⚠️ API Key không hợp lệ. Vui lòng liên hệ quản trị viên." });
-    }
-    if (msg.includes('quota') || msg.includes('429') || msg.includes('too many')) {
-      return NextResponse.json({ reply: "⚠️ AI tạm thời quá tải (hết lượt sử dụng). Vui lòng thử lại sau vài phút hoặc liên hệ quản trị viên để gia hạn API Key." });
-    }
-    if (msg.includes('not found') || msg.includes('not support')) {
-      return NextResponse.json({ reply: "Xin lỗi, AI hiện không khả dụng. Vui lòng thử lại sau." });
-    }
-    return NextResponse.json({ reply: "Xin lỗi, hệ thống đang bảo trì. Vui lòng thử lại sau." });
+    return NextResponse.json({ reply: `❌ Lỗi: ${err?.message || err}` });
   }
 }
