@@ -22,7 +22,7 @@ type ExamPlayerProps = {
   examId: string;
   attemptId: string;
   questions: Question[];
-  timeLimit: number; // in minutes
+  timeLimit: number;
 }
 
 export default function ExamPlayer({ examId, attemptId, questions, timeLimit }: ExamPlayerProps) {
@@ -32,7 +32,6 @@ export default function ExamPlayer({ examId, attemptId, questions, timeLimit }: 
   const [timeLeft, setTimeLeft] = useState(timeLimit * 60)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Timer logic
   useEffect(() => {
     if (timeLeft <= 0) {
       handleAutoSubmit()
@@ -42,7 +41,6 @@ export default function ExamPlayer({ examId, attemptId, questions, timeLimit }: 
     return () => clearInterval(timer)
   }, [timeLeft])
 
-  // Prevent accidental page reloads, tab close or navigation during active exam
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       e.preventDefault()
@@ -50,9 +48,7 @@ export default function ExamPlayer({ examId, attemptId, questions, timeLimit }: 
       return e.returnValue
     }
     window.addEventListener('beforeunload', handleBeforeUnload)
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload)
-    }
+    return () => { window.removeEventListener('beforeunload', handleBeforeUnload) }
   }, [])
 
   const formatTime = (seconds: number) => {
@@ -65,7 +61,6 @@ export default function ExamPlayer({ examId, attemptId, questions, timeLimit }: 
     setAnswers(prev => ({ ...prev, [qId]: val }))
   }
 
-  // Real-time progress update (Mega Prompt #6 Requirement)
   useEffect(() => {
     const updateProgress = async () => {
       const answeredCount = Object.keys(answers).length
@@ -85,10 +80,9 @@ export default function ExamPlayer({ examId, attemptId, questions, timeLimit }: 
 
   const handleSubmit = async () => {
     setIsSubmitting(true)
-    // Simple mock score calculation
-    const score = Math.floor(Math.random() * 50) + 50 // 50-100
+    const score = Math.floor(Math.random() * 50) + 50
     const timeSpent = timeLimit * 60 - timeLeft
-    
+
     const res = await submitExamAttempt(attemptId, answers, score, timeSpent)
     if (res.success) {
       router.push(`/exam/${examId}/result/${attemptId}`)
@@ -101,64 +95,66 @@ export default function ExamPlayer({ examId, attemptId, questions, timeLimit }: 
   const activeQ = questions[currentIdx]
 
   return (
-    <div className="min-h-screen bg-[#0f0f1a] text-white flex flex-col">
-      {/* Header / Timer Bar */}
-      <header className="h-20 bg-[#16213e] border-b border-[#1e293b] flex items-center justify-between px-6 md:px-12 sticky top-0 z-50">
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
+      <header className="h-20 flex items-center justify-between px-6 md:px-12 sticky top-0 z-50" style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-default)' }}>
         <div className="flex items-center gap-4">
-          <div className="p-2 bg-[#00d2a0]/10 rounded-lg text-[#00d2a0]">
+          <div className="p-2 rounded-lg" style={{ background: 'color-mix(in srgb, var(--brand-primary) 10%, transparent)', color: 'var(--brand-primary)' }}>
             <Timer size={24} />
           </div>
           <div>
-            <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Thời gian còn lại</div>
-            <div className={`text-2xl font-mono font-bold ${timeLeft < 60 ? 'text-red-500 animate-pulse' : 'text-white'}`}>
+            <div className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Thời gian còn lại</div>
+            <div className={`text-2xl font-mono font-bold ${timeLeft < 60 ? 'text-red-500 animate-pulse' : ''}`} style={{ color: timeLeft >= 60 ? 'var(--text-primary)' : undefined }}>
               {formatTime(timeLeft)}
             </div>
           </div>
         </div>
 
         <div className="hidden md:flex items-center gap-2">
-           {questions.map((_, i) => (
-             <div 
-                key={i} 
-                className={`w-2 h-2 rounded-full transition-all 
-                  ${i === currentIdx ? 'bg-[#00d2a0] w-6' : (answers[questions[i].id] ? 'bg-[#00b4d8]' : 'bg-slate-700')}
-                `}
-             />
-           ))}
+          {questions.map((_, i) => (
+            <div
+              key={i}
+              className="rounded-full transition-all"
+              style={{
+                width: i === currentIdx ? '24px' : '8px',
+                height: '8px',
+                background: i === currentIdx ? 'var(--brand-primary)' : (answers[questions[i].id] ? 'var(--accent-blue)' : 'var(--bg-elevated)')
+              }}
+            />
+          ))}
         </div>
 
-        <button 
-          onClick={() => { if(confirm("Bạn chắc chắn muốn nộp bài?")) handleSubmit() }}
+        <button
+          onClick={() => { if (confirm("Bạn chắc chắn muốn nộp bài?")) handleSubmit() }}
           disabled={isSubmitting}
-          className="bg-[#00d2a0] text-black px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:shadow-[0_0_20px_rgba(0,210,160,0.4)] transition-all disabled:opacity-50"
+          className="px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all disabled:opacity-50"
+          style={{ background: 'var(--brand-primary)', color: 'var(--bg-base)' }}
         >
           <Send size={18} /> {isSubmitting ? 'Đang nộp...' : 'Nộp bài'}
         </button>
       </header>
 
       <div className="flex-1 flex overflow-hidden">
-        {/* Question Navigation Sidebar */}
-        <aside className="w-20 md:w-64 bg-[#16213e]/50 border-r border-[#1e293b] overflow-y-auto p-4 hidden md:block">
-           <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-6 px-2">Danh sách câu hỏi</h3>
-           <div className="grid grid-cols-1 gap-2">
-             {questions.map((q, i) => (
-               <button
-                  key={q.id}
-                  onClick={() => setCurrentIdx(i)}
-                  className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left
-                    ${currentIdx === i ? 'bg-[#00d2a0]/10 border-[#00d2a0] text-[#00d2a0]' : 
-                      (answers[q.id] ? 'bg-[#0f0f1a] border-[#1e293b] text-[#00b4d8]' : 'bg-transparent border-transparent text-slate-500 hover:bg-[#1e293b]')
-                    }
-                  `}
-               >
-                 <span className="font-bold text-sm">Câu {i + 1}</span>
-                 {answers[q.id] && <CheckCircle2 size={14} className="ml-auto" />}
-               </button>
-             ))}
-           </div>
+        <aside className="w-20 md:w-64 overflow-y-auto p-4 hidden md:block" style={{ background: 'color-mix(in srgb, var(--bg-surface) 50%, transparent)', borderRight: '1px solid var(--border-default)' }}>
+          <h3 className="text-xs font-black uppercase tracking-widest mb-6 px-2" style={{ color: 'var(--text-muted)' }}>Danh sách câu hỏi</h3>
+          <div className="grid grid-cols-1 gap-2">
+            {questions.map((q, i) => (
+              <button
+                key={q.id}
+                onClick={() => setCurrentIdx(i)}
+                className="flex items-center gap-3 p-3 rounded-xl border transition-all text-left"
+                style={{
+                  background: currentIdx === i ? 'color-mix(in srgb, var(--brand-primary) 10%, transparent)' : (answers[q.id] ? 'var(--bg-base)' : 'transparent'),
+                  borderColor: currentIdx === i ? 'var(--brand-primary)' : (answers[q.id] ? 'var(--border-default)' : 'transparent'),
+                  color: currentIdx === i ? 'var(--brand-primary)' : (answers[q.id] ? 'var(--accent-blue)' : 'var(--text-muted)')
+                }}
+              >
+                <span className="font-bold text-sm">Câu {i + 1}</span>
+                {answers[q.id] && <CheckCircle2 size={14} className="ml-auto" />}
+              </button>
+            ))}
+          </div>
         </aside>
 
-        {/* Question Area */}
         <main className="flex-1 overflow-y-auto p-6 md:p-12 lg:p-20 relative">
           <AnimatePresence mode="wait">
             <motion.div
@@ -170,86 +166,97 @@ export default function ExamPlayer({ examId, attemptId, questions, timeLimit }: 
               className="max-w-3xl mx-auto"
             >
               <div className="mb-10">
-                <span className="inline-block px-3 py-1 bg-[#00b4d8]/10 text-[#00b4d8] rounded-lg text-xs font-bold uppercase tracking-wider mb-4">
-                  {activeQ.type === 'single' ? 'Trắc nghiệm 1 đáp án' : 
-                   activeQ.type === 'multiple' ? 'Trắc nghiệm nhiều đáp án' : 
-                   activeQ.type === 'boolean' ? 'Đúng / Sai' : 
+                <span className="inline-block px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider mb-4" style={{ background: 'color-mix(in srgb, var(--accent-blue) 10%, transparent)', color: 'var(--accent-blue)' }}>
+                  {activeQ.type === 'single' ? 'Trắc nghiệm 1 đáp án' :
+                   activeQ.type === 'multiple' ? 'Trắc nghiệm nhiều đáp án' :
+                   activeQ.type === 'boolean' ? 'Đúng / Sai' :
                    activeQ.type === 'fill' ? 'Điền vào chỗ trống' : 'Tự luận ngắn'}
                 </span>
                 <h2 className="text-2xl md:text-3xl font-bold leading-tight">
-                  <span className="text-slate-500 mr-4 italic">Câu {currentIdx + 1}.</span>
+                  <span className="mr-4 italic" style={{ color: 'var(--text-muted)' }}>Câu {currentIdx + 1}.</span>
                   {activeQ.text}
                 </h2>
               </div>
 
-              {/* Answers Input */}
               <div className="space-y-4 mb-20">
                 {activeQ.type === 'single' && activeQ.options?.map(opt => (
                   <button
                     key={opt.id}
                     onClick={() => handleAnswer(activeQ.id, opt.id)}
-                    className={`w-full p-6 rounded-2xl border-2 text-left transition-all flex items-center gap-4
-                      ${answers[activeQ.id] === opt.id ? 'bg-[#00d2a0]/10 border-[#00d2a0]' : 'bg-[#16213e] border-[#1e293b] hover:border-slate-500'}
-                    `}
+                    className="w-full p-6 rounded-2xl border-2 text-left transition-all flex items-center gap-4"
+                    style={{
+                      background: answers[activeQ.id] === opt.id ? 'color-mix(in srgb, var(--brand-primary) 10%, transparent)' : 'var(--bg-surface)',
+                      borderColor: answers[activeQ.id] === opt.id ? 'var(--brand-primary)' : 'var(--border-default)'
+                    }}
                   >
-                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center font-bold text-xs
-                      ${answers[activeQ.id] === opt.id ? 'border-[#00d2a0] bg-[#00d2a0] text-black' : 'border-slate-500 text-slate-500'}
-                    `}>{opt.id}</div>
+                    <div className="w-6 h-6 rounded-full border-2 flex items-center justify-center font-bold text-xs"
+                      style={{
+                        borderColor: answers[activeQ.id] === opt.id ? 'var(--brand-primary)' : 'var(--text-muted)',
+                        background: answers[activeQ.id] === opt.id ? 'var(--brand-primary)' : 'transparent',
+                        color: answers[activeQ.id] === opt.id ? 'var(--bg-base)' : 'var(--text-muted)'
+                      }}
+                    >{opt.id}</div>
                     <span className="text-lg font-medium">{opt.text}</span>
                   </button>
                 ))}
 
                 {activeQ.type === 'boolean' && (
                   <div className="flex gap-4">
-                     {['Đúng', 'Sai'].map(val => (
-                       <button
-                         key={val}
-                         onClick={() => handleAnswer(activeQ.id, val)}
-                         className={`flex-1 p-8 rounded-3xl border-2 font-bold text-xl transition-all
-                           ${answers[activeQ.id] === val ? 'bg-[#00d2a0] border-[#00d2a0] text-black shadow-[0_0_30px_rgba(0,210,160,0.2)]' : 'bg-[#16213e] border-[#1e293b]'}
-                         `}
-                       >
-                         {val}
-                       </button>
-                     ))}
+                    {['Đúng', 'Sai'].map(val => (
+                      <button
+                        key={val}
+                        onClick={() => handleAnswer(activeQ.id, val)}
+                        className="flex-1 p-8 rounded-3xl border-2 font-bold text-xl transition-all"
+                        style={{
+                          background: answers[activeQ.id] === val ? 'var(--brand-primary)' : 'var(--bg-surface)',
+                          borderColor: answers[activeQ.id] === val ? 'var(--brand-primary)' : 'var(--border-default)',
+                          color: answers[activeQ.id] === val ? 'var(--bg-base)' : 'var(--text-primary)'
+                        }}
+                      >
+                        {val}
+                      </button>
+                    ))}
                   </div>
                 )}
 
                 {activeQ.type === 'fill' && (
-                  <input 
+                  <input
                     type="text"
                     value={answers[activeQ.id] || ''}
                     onChange={(e) => handleAnswer(activeQ.id, e.target.value)}
                     placeholder="Nhập câu trả lời của bạn..."
-                    className="w-full p-6 bg-[#16213e] border-2 border-[#1e293b] rounded-2xl focus:outline-none focus:border-[#00d2a0] text-xl font-bold transition-all"
+                    className="w-full p-6 border-2 rounded-2xl focus:outline-none text-xl font-bold transition-all"
+                    style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-default)', color: 'var(--text-primary)' }}
                   />
                 )}
 
                 {activeQ.type === 'essay' && (
-                  <textarea 
+                  <textarea
                     rows={8}
                     value={answers[activeQ.id] || ''}
                     onChange={(e) => handleAnswer(activeQ.id, e.target.value)}
                     placeholder="Viết câu trả lời tự luận tại đây..."
-                    className="w-full p-6 bg-[#16213e] border-2 border-[#1e293b] rounded-2xl focus:outline-none focus:border-[#00d2a0] text-lg leading-relaxed transition-all"
+                    className="w-full p-6 border-2 rounded-2xl focus:outline-none text-lg leading-relaxed transition-all"
+                    style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-default)', color: 'var(--text-primary)' }}
                   />
                 )}
               </div>
 
-              {/* Bottom Nav */}
-              <div className="flex items-center justify-between pt-10 border-t border-[#1e293b]">
+              <div className="flex items-center justify-between pt-10" style={{ borderTop: '1px solid var(--border-default)' }}>
                 <button
                   disabled={currentIdx === 0}
                   onClick={() => setCurrentIdx(prev => prev - 1)}
-                  className="p-4 rounded-xl bg-[#16213e] border border-[#1e293b] disabled:opacity-30 hover:bg-[#1e293b] transition-all flex items-center gap-2"
+                  className="p-4 rounded-xl disabled:opacity-30 transition-all flex items-center gap-2"
+                  style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: 'var(--text-muted)' }}
                 >
                   <ChevronLeft size={20} /> Câu trước
                 </button>
-                <div className="text-slate-500 font-bold text-sm">Câu {currentIdx + 1} / {questions.length}</div>
+                <div className="font-bold text-sm" style={{ color: 'var(--text-muted)' }}>Câu {currentIdx + 1} / {questions.length}</div>
                 <button
                   disabled={currentIdx === questions.length - 1}
                   onClick={() => setCurrentIdx(prev => prev + 1)}
-                  className="p-4 rounded-xl bg-[#16213e] border border-[#1e293b] disabled:opacity-30 hover:bg-[#1e293b] transition-all flex items-center gap-2 text-[#00d2a0]"
+                  className="p-4 rounded-xl disabled:opacity-30 transition-all flex items-center gap-2"
+                  style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: 'var(--brand-primary)' }}
                 >
                   Câu sau <ChevronRight size={20} />
                 </button>

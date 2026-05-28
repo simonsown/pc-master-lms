@@ -289,8 +289,8 @@ export default function StudentLearningPathPage() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="min-h-screen bg-[#161F38] text-white pt-24 pb-12 px-4 sm:px-6 relative overflow-hidden"
-      style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
+        className="min-h-screen pt-24 pb-12 px-4 sm:px-6 relative overflow-hidden"
+        style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
     >
       
       {/* Tech decorative corners & neon overlays */}
@@ -306,7 +306,8 @@ export default function StudentLearningPathPage() {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
-          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-4 border-b border-white/10"
+          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-4"
+          style={{ borderBottom: '1px solid var(--border-default)' }}
         >
           <div className="flex items-center gap-3">
             <div className="p-2.5 bg-[#00d4aa]/10 border border-[#00d4aa]/25 text-[#00d4aa] rounded-2xl"
@@ -354,7 +355,7 @@ export default function StudentLearningPathPage() {
             className="mt-10"
           >
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-[#ff0000]/10 border border-[#ff0000]/25 text-[#ff0000] rounded-xl">
+              <div className="p-2 rounded-xl" style={{ background: 'color-mix(in srgb, var(--accent-orange) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--accent-orange) 25%, transparent)', color: 'var(--accent-orange)' }}>
                 <Youtube size={22} />
               </div>
               <div>
@@ -371,8 +372,8 @@ export default function StudentLearningPathPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.4 + i * 0.08 }}
                   whileHover={{ y: -4, boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}
-                  className="rounded-2xl border border-white/10 bg-[#1a1c25] p-5 hover:border-[#00d4aa]/30 transition-all group"
-                  style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-default)' }}
+                  className="rounded-2xl p-5 transition-all group"
+                  style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
                 >
                   <div className="flex items-start gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#00d4aa]/10 text-[#00d4aa]"
@@ -396,7 +397,8 @@ export default function StudentLearningPathPage() {
                                 href={`https://www.youtube.com/results?search_query=${query}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#ff0000]/10 border border-[#ff0000]/20 text-[11px] font-semibold text-[#ff4444] hover:bg-[#ff0000]/20 transition-all"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all"
+                                style={{ background: 'color-mix(in srgb, var(--accent-orange) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--accent-orange) 20%, transparent)', color: 'var(--accent-orange)' }}
                               >
                                 <Youtube size={12} />
                                 <span className="truncate max-w-[140px]">{kw.trim()}</span>
@@ -432,8 +434,8 @@ export default function StudentLearningPathPage() {
                       setSuggestionsLoading(false)
                     }
                   }}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-gray-400 hover:text-white transition-all"
-                  style={{ color: 'var(--text-secondary)' }}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold transition-all"
+                  style={{ background: 'color-mix(in srgb, var(--bg-elevated) 50%, transparent)', border: '1px solid var(--border-default)', color: 'var(--text-secondary)' }}
                 >
                   <RefreshCw size={14} />
                   Tải lại gợi ý
