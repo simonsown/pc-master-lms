@@ -54,13 +54,7 @@ export async function POST(req: Request) {
     if (!geminiRes.ok) {
       const errBody = await geminiRes.text();
       console.error('Gemini API Error:', geminiRes.status, errBody);
-      if (errBody.includes('API_KEY') || errBody.includes('API key')) {
-        return NextResponse.json({ reply: "⚠️ API Key không hợp lệ. Vui lòng liên hệ quản trị viên." });
-      }
-      if (errBody.includes('not found') || errBody.includes('not support') || errBody.includes('image')) {
-        return NextResponse.json({ reply: "Xin lỗi, AI chat hiện chỉ hỗ trợ văn bản. Vui lòng thử lại với câu hỏi khác." });
-      }
-      return NextResponse.json({ reply: "Xin lỗi, tôi gặp sự cố khi kết nối AI. Vui lòng thử lại sau." });
+      return NextResponse.json({ reply: `Gemini lỗi (${geminiRes.status}): ${errBody.slice(0, 300)}` });
     }
 
     const data = await geminiRes.json();
