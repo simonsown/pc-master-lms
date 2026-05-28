@@ -17,8 +17,8 @@ const HandTracker = dynamic(
     )
   }
 )
-import AIGuru from '@/components/AIGuru'
 import VirtualAssistant from '@/components/VirtualAssistant'
+import { useGuru } from '@/lib/guru-state'
 import { GURU_MESSAGES } from '@/utils/i18nData'
 import { Timer, Send, AlertCircle, Info, ChevronLeft } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -34,8 +34,7 @@ export default function LabExamPage({ params }: { params: Promise<{ examId: stri
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [landmarks, setLandmarks] = useState([]);
   const [isCameraActive, setIsCameraActive] = useState(false);
-  const [guruMessage, setGuruMessage] = useState("Chào mừng bạn đến với bài thi thực hành lắp ráp PC!");
-  const [guruTrigger, setGuruTrigger] = useState(0);
+  const guru = useGuru();
 
   // 2. Mission Data (Mocked from Mega Prompt Scenario)
   const [missionData] = useState({
@@ -69,13 +68,12 @@ export default function LabExamPage({ params }: { params: Promise<{ examId: stri
 
   // 4. Handle Game Events (Tái sử dụng logic chấm điểm của bạn)
   const handleGameEvent = useCallback((event: string, type: string) => {
-    setGuruTrigger(t => t + 1);
     if (event === 'grabbed') {
-      setGuruMessage(`Bạn đang cầm: ${type}`);
+      guru.setMessage(`Bạn đang cầm: ${type}`);
     } else if (event === 'placed') {
-      setGuruMessage(`Đã lắp xong: ${type}. Tiếp tục nào!`);
+      guru.setMessage(`Đã lắp xong: ${type}. Tiếp tục nào!`);
     } else if (event === 'COMPLETE') {
-      setGuruMessage("Hệ thống đã được lắp ráp hoàn tất! Hãy kiểm tra lại và nhấn Nộp bài.");
+      guru.setMessage("Hệ thống đã được lắp ráp hoàn tất! Hãy kiểm tra lại và nhấn Nộp bài.");
     }
   }, []);
 
@@ -186,7 +184,6 @@ export default function LabExamPage({ params }: { params: Promise<{ examId: stri
         </main>
       </div>
 
-      <AIGuru message={guruMessage} trigger={guruTrigger} lang="vn" />
     </div>
   )
 }

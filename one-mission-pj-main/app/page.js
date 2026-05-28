@@ -307,8 +307,8 @@ export default function LandingPage() {
             <div>
               <h4 style={{ fontWeight: 700, fontSize: '14px', marginBottom: '16px', color: 'var(--text-primary)' }}>Hỗ trợ</h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Email: contact@pc-master.edu.vn</span>
-                <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Hotline: (028) 1234 5678</span>
+                <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Email: phuckhanhsonnguyen@gmail.com</span>
+                <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Hotline: 0772934951</span>
               </div>
             </div>
           </div>

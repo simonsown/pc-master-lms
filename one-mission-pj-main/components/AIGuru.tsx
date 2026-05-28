@@ -1,31 +1,30 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MessageSquare, X, Send, Sparkles, User, Bot, Loader2, Cpu } from 'lucide-react'
+import { X, Send, Sparkles, Bot, Cpu, Volume2 } from 'lucide-react'
+import { useGuru } from '@/lib/guru-state'
 
-export default function AIGuru({ message, trigger, lang = 'vn' }: { message?: string, trigger?: number, lang?: string }) {
+export default function AIGuru() {
+  const { message, trigger, silentMessage, silentTrigger, lang } = useGuru()
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState([
     { role: 'bot', content: lang === 'vn' ? 'Chào bạn! Tôi là AI Guru, chuyên gia phần cứng của bạn. Hôm nay bạn cần tôi giúp gì về lắp ráp PC?' : 'Hello! I am AI Guru, your hardware expert. How can I help you with PC building today?' }
   ])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
+  const [toast, setToast] = useState<{ show: boolean; text: string }>({ show: false, text: '' })
+  const [unreadCount, setUnreadCount] = useState(0)
+  const toastTimer = useRef<any>(null)
   const abortRef = useRef<AbortController | null>(null)
   const endRef = useRef<HTMLDivElement>(null)
+  const [streamingMsgIdx, setStreamingMsgIdx] = useState(-1)
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
-
-  useEffect(() => {
-    if (message && trigger) {
-      setMessages(prev => [...prev, { role: 'bot', content: message }])
-      setIsOpen(true)
-    }
-  }, [message, trigger])
 
   const handleSend = async () => {
     if (!input.trim()) return
     const userMsg = { role: 'user', content: input }
-    setMessages(prev => [...prev, userMsg])
+    const inputText = input
     setInput('')
     setIsTyping(true)
 
@@ -37,13 +36,13 @@ export default function AIGuru({ message, trigger, lang = 'vn' }: { message?: st
       const res = await fetch('/api/ai/chat/stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: input }),
+        body: JSON.stringify({ message: inputText }),
         signal: controller.signal
       })
 
       if (!res.ok || !res.body) {
         const data = await res.json().catch(() => ({}))
-        setMessages(prev => [...prev, { role: 'bot', content: data?.error || 'Xin lỗi, tôi gặp sự cố kết nối.' }])
+        setMessages(prev => [...prev, userMsg, { role: 'bot', content: data?.error || 'Xin lỗi, tôi gặp sự cố kết nối.' }])
         setIsTyping(false)
         return
       }
@@ -51,7 +50,9 @@ export default function AIGuru({ message, trigger, lang = 'vn' }: { message?: st
       const reader = res.body.getReader()
       const decoder = new TextDecoder()
       let botReply = ''
-      setMessages(prev => [...prev, { role: 'bot', content: '' }])
+
+      setMessages(prev => [...prev, userMsg, { role: 'bot', content: '' }])
+      setStreamingMsgIdx(messages.length + 1)
 
       while (true) {
         const { done, value } = await reader.read()
@@ -75,12 +76,46 @@ export default function AIGuru({ message, trigger, lang = 'vn' }: { message?: st
       }
     } catch (err: any) {
       if (err?.name !== 'AbortError') {
-        setMessages(prev => [...prev, { role: 'bot', content: 'Xin lỗi, tôi gặp sự cố kết nối.' }])
+        setMessages(prev => {
+          const hasBotMsg = prev[prev.length - 1]?.role === 'bot'
+          if (!hasBotMsg) {
+            return [...prev, { role: 'bot', content: 'Xin lỗi, tôi gặp sự cố kết nối.' }]
+          }
+          return prev
+        })
       }
     } finally {
       setIsTyping(false)
+      setStreamingMsgIdx(-1)
     }
   }
+
+  useEffect(() => {
+    if (message && trigger > 0) {
+      setMessages(prev => {
+        const last = prev[prev.length - 1]
+        if (last?.role === 'bot' && last?.content === message) return prev
+        return [...prev, { role: 'bot', content: message }]
+      })
+      setIsOpen(true)
+    }
+  }, [message, trigger])
+
+  useEffect(() => {
+    if (silentMessage && silentTrigger > 0) {
+      setMessages(prev => {
+        const last = prev[prev.length - 1]
+        if (last?.role === 'bot' && last?.content === '🔔 ' + silentMessage) return prev
+        return [...prev, { role: 'bot', content: '🔔 ' + silentMessage }]
+      })
+      if (!isOpen) {
+        setUnreadCount(c => c + 1)
+        setToast({ show: true, text: silentMessage })
+        if (toastTimer.current) clearTimeout(toastTimer.current)
+        toastTimer.current = setTimeout(() => setToast({ show: false, text: '' }), 3000)
+      }
+    }
+  }, [silentMessage, silentTrigger])
 
   const styles = {
     brand: 'var(--brand-primary)',
@@ -92,27 +127,68 @@ export default function AIGuru({ message, trigger, lang = 'vn' }: { message?: st
     border: 'var(--border-default)',
   }
 
+  const duplicateIdRef = useRef(false)
+  useEffect(() => {
+    if (duplicateIdRef.current) return
+    duplicateIdRef.current = true
+  }, [])
+
   return (
     <>
-      <button 
-        onClick={() => setIsOpen(true)}
+      <AnimatePresence>
+        {toast.show && !isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.9 }}
+            transition={{ duration: 0.2 }}
+            className="fixed z-[999]"
+            style={{ bottom: '80px', right: '16px', maxWidth: '260px' }}
+          >
+            <div style={{
+              background: styles.elevated, border: `1px solid ${styles.brand}40`,
+              borderRadius: '12px', padding: '10px 14px',
+              display: 'flex', alignItems: 'center', gap: '8px',
+              boxShadow: `0 4px 20px rgba(0,0,0,0.15)`,
+            }}>
+              <Volume2 size={14} style={{ color: styles.brand, flexShrink: 0 }} />
+              <span style={{ fontSize: '12px', color: styles.text, lineHeight: 1.4 }}>{toast.text}</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <button
+        onClick={() => { setIsOpen(true); setUnreadCount(0); }}
         className="fixed bottom-8 right-8 w-14 h-14 shadow-lg rounded-full flex items-center justify-center z-[1000] hover:scale-110 transition-all duration-300 group"
         style={{
-          background: `linear-gradient(135deg, ${styles.brand}, var(--accent-blue))`,
+          background: `linear-gradient(135deg, ${styles.brand}, #289cf9)`,
           color: '#fff',
           boxShadow: `0 0 25px color-mix(in srgb, ${styles.brand} 50%, transparent)`,
         }}
       >
         <div className="absolute -inset-1 rounded-full blur opacity-40 group-hover:opacity-75 transition-opacity" style={{ background: `linear-gradient(135deg, ${styles.brand}, var(--accent-blue))` }} />
-        <Cpu size={22} className="relative z-10" />
-        <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center shadow-md relative z-20" style={{ background: 'var(--bg-base)', border: `2px solid ${styles.brand}` }}>
-          <Sparkles size={10} style={{ color: styles.brand }} />
-        </div>
+        {isOpen ? <X size={22} className="relative z-10" /> : <Cpu size={22} className="relative z-10" />}
+        {!isOpen && (
+          <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center shadow-md relative z-20" style={{ background: 'var(--bg-base)', border: `2px solid ${styles.brand}` }}>
+            <Sparkles size={10} style={{ color: styles.brand }} />
+          </div>
+        )}
+        {unreadCount > 0 && !isOpen && (
+          <div style={{
+            position: 'absolute', top: '-4px', right: '-4px', width: '18px', height: '18px',
+            borderRadius: '50%', background: '#EF4444', color: '#fff', fontSize: '9px',
+            fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            border: `2px solid var(--bg-base)`
+          }}>
+            {unreadCount}
+          </div>
+        )}
       </button>
 
       <AnimatePresence>
         {isOpen && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 50 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 50 }}
@@ -145,10 +221,16 @@ export default function AIGuru({ message, trigger, lang = 'vn' }: { message?: st
                     borderTopRightRadius: m.role === 'user' ? '4px' : '16px',
                   }}>
                     {m.content}
+                    {i === streamingMsgIdx && (
+                      <span className="inline-block w-1.5 h-4 ml-0.5" style={{
+                        background: styles.text,
+                        animation: 'terminal-blink 0.8s infinite'
+                      }} />
+                    )}
                   </div>
                 </div>
               ))}
-              {isTyping && (
+              {isTyping && streamingMsgIdx === -1 && (
                 <div className="flex justify-start">
                   <div className="flex gap-1.5 p-3 rounded-2xl" style={{ background: styles.elevated, borderTopLeftRadius: '4px' }}>
                     {[0, 1, 2].map(i => (
@@ -163,8 +245,8 @@ export default function AIGuru({ message, trigger, lang = 'vn' }: { message?: st
 
             <div style={{ padding: '12px 16px', background: styles.elevated, borderTop: `1px solid ${styles.border}` }}>
               <div className="flex items-center gap-2 p-1.5 rounded-2xl" style={{ background: styles.base, border: `1px solid ${styles.border}` }}>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSend()}
@@ -172,7 +254,7 @@ export default function AIGuru({ message, trigger, lang = 'vn' }: { message?: st
                   className="flex-1 bg-transparent border-none outline-none text-sm"
                   style={{ padding: '8px 12px', color: styles.text, fontFamily: 'inherit' }}
                 />
-                <button 
+                <button
                   onClick={handleSend}
                   className="rounded-xl hover:scale-105 transition-transform"
                   style={{ padding: '10px', background: styles.brand, color: '#fff', border: 'none', cursor: 'pointer' }}

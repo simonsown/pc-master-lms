@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Loader2, Mail, Lock, Eye, EyeOff, ShieldCheck, LogIn, ArrowLeft, Github, Monitor, Shield, KeyRound } from 'lucide-react'
+import { Loader2, Mail, Lock, Eye, EyeOff, ShieldCheck, LogIn, ArrowLeft, Shield, KeyRound } from 'lucide-react'
 import { login } from '@/lib/auth-actions'
 import { createBrowserClient } from '@supabase/ssr'
 
@@ -73,6 +73,122 @@ export default function LoginPage() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', background: 'var(--bg-base)' }}>
+      {/* Left Panel - Animated Illustration */}
+      <div style={{
+        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'linear-gradient(160deg, #031f3b 0%, #1a2f53 80%)',
+        padding: '64px', position: 'relative', overflow: 'hidden',
+      }}>
+        {/* Background decorative elements */}
+        <div style={{ position: 'absolute', top: '-100px', right: '-100px', width: '500px', height: '500px', background: 'radial-gradient(circle, rgba(8,158,96,0.12) 0%, transparent 70%)', borderRadius: '50%', animation: 'floatSlow 8s ease-in-out infinite' }}></div>
+        <div style={{ position: 'absolute', bottom: '-80px', left: '-80px', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(40,156,249,0.08) 0%, transparent 70%)', borderRadius: '50%', animation: 'floatSlow 10s ease-in-out infinite reverse' }}></div>
+        <div style={{ position: 'absolute', top: '30%', left: '10%', width: '200px', height: '200px', background: 'radial-gradient(circle, rgba(255,185,0,0.05) 0%, transparent 70%)', borderRadius: '50%', animation: 'floatSlow 12s ease-in-out infinite 2s' }}></div>
+
+        <div style={{ textAlign: 'center', position: 'relative', zIndex: 1, color: '#fff', maxWidth: '480px' }}>
+          {/* Animated illustration - nhóm bạn học tập công nghệ */}
+          <div style={{ position: 'relative', width: '300px', height: '260px', margin: '0 auto 32px' }}>
+            {/* Monitor screen */}
+            <svg viewBox="0 0 300 260" style={{ width: '100%', height: '100%' }}>
+              <defs>
+                <linearGradient id="screenGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#00d4aa" stopOpacity="0.3" />
+                  <stop offset="100%" stopColor="#289cf9" stopOpacity="0.1" />
+                </linearGradient>
+              </defs>
+
+              {/* Desk */}
+              <rect x="20" y="195" width="260" height="8" rx="4" fill="rgba(255,255,255,0.1)" />
+              <rect x="40" y="203" width="12" height="35" rx="2" fill="rgba(255,255,255,0.08)" />
+              <rect x="248" y="203" width="12" height="35" rx="2" fill="rgba(255,255,255,0.08)" />
+
+              {/* Monitor */}
+              <rect x="85" y="60" width="130" height="100" rx="8" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" />
+              <rect x="90" y="65" width="120" height="85" rx="4" fill="url(#screenGlow)" />
+
+              {/* Screen content: code lines */}
+              <rect x="100" y="75" width="40" height="4" rx="2" fill="rgba(0,212,170,0.5)" />
+              <rect x="100" y="85" width="60" height="4" rx="2" fill="rgba(40,156,249,0.4)" />
+              <rect x="100" y="95" width="25" height="4" rx="2" fill="rgba(255,185,0,0.4)" />
+              <rect x="110" y="105" width="50" height="4" rx="2" fill="rgba(0,212,170,0.3)" />
+              <rect x="110" y="115" width="35" height="4" rx="2" fill="rgba(40,156,249,0.3)" />
+              <rect x="100" y="130" width="70" height="4" rx="2" fill="rgba(255,185,0,0.5)" />
+
+              {/* CPU icon on screen */}
+              <rect x="170" y="75" width="30" height="30" rx="3" fill="none" stroke="rgba(0,212,170,0.4)" strokeWidth="1.5" />
+              <rect x="177" y="82" width="16" height="16" rx="2" fill="rgba(0,212,170,0.2)" />
+              <rect x="181" y="86" width="8" height="8" rx="1" fill="rgba(0,212,170,0.5)" />
+
+              {/* Monitor stand */}
+              <rect x="140" y="160" width="20" height="25" rx="2" fill="rgba(255,255,255,0.08)" />
+              <rect x="125" y="183" width="50" height="6" rx="3" fill="rgba(255,255,255,0.1)" />
+
+              {/* Student 1 - left */}
+              <g style={{ animation: 'floatBounce 3s ease-in-out infinite' }}>
+                <circle cx="45" cy="175" r="20" fill="rgba(255,255,255,0.08)" />
+                <circle cx="45" cy="168" r="12" fill="rgba(255,255,255,0.15)" />
+                <circle cx="45" cy="165" r="5" fill="rgba(255,255,255,0.2)" />
+                <rect x="37" y="180" width="16" height="25" rx="4" fill="rgba(255,255,255,0.08)" />
+                {/* Headphones */}
+                <path d="M33 163 Q33 158 38 158 Q45 155 52 158 Q57 158 57 163" fill="none" stroke="rgba(0,212,170,0.3)" strokeWidth="2.5" />
+              </g>
+
+              {/* Student 2 - right */}
+              <g style={{ animation: 'floatBounce 3.5s ease-in-out infinite 0.5s' }}>
+                <circle cx="255" cy="170" r="20" fill="rgba(255,255,255,0.08)" />
+                <circle cx="255" cy="163" r="12" fill="rgba(255,255,255,0.15)" />
+                <circle cx="255" cy="160" r="5" fill="rgba(255,255,255,0.2)" />
+                <rect x="247" y="175" width="16" height="25" rx="4" fill="rgba(255,255,255,0.08)" />
+                {/* Glasses */}
+                <circle cx="250" cy="163" r="4" fill="none" stroke="rgba(40,156,249,0.4)" strokeWidth="1.5" />
+                <circle cx="260" cy="163" r="4" fill="none" stroke="rgba(40,156,249,0.4)" strokeWidth="1.5" />
+                <line x1="254" y1="163" x2="256" y2="163" stroke="rgba(40,156,249,0.4)" strokeWidth="1" />
+              </g>
+
+              {/* Floating tech elements */}
+              <g style={{ animation: 'floatRotate 6s linear infinite', transformOrigin: '150px 130px' }}>
+                <circle cx="210" cy="50" r="6" fill="none" stroke="rgba(0,212,170,0.3)" strokeWidth="1.5" />
+                <circle cx="210" cy="50" r="2" fill="rgba(0,212,170,0.4)" />
+              </g>
+              <g style={{ animation: 'floatRotate 8s linear infinite reverse', transformOrigin: '150px 130px' }}>
+                <rect x="80" y="40" width="8" height="8" rx="2" fill="none" stroke="rgba(255,185,0,0.3)" strokeWidth="1.5" />
+              </g>
+
+              {/* Connection lines */}
+              <line x1="65" y1="180" x2="90" y2="160" stroke="rgba(0,212,170,0.15)" strokeWidth="1" strokeDasharray="3,3" />
+              <line x1="235" y1="175" x2="210" y2="160" stroke="rgba(40,156,249,0.15)" strokeWidth="1" strokeDasharray="3,3" />
+            </svg>
+          </div>
+
+          <h2 style={{ fontSize: '28px', fontWeight: 800, marginBottom: '16px', lineHeight: 1.3 }}>
+            PC Master Builder
+          </h2>
+          <p style={{ fontSize: '16px', opacity: 0.7, maxWidth: '360px', margin: '0 auto', lineHeight: 1.6 }}>
+            Mô phỏng lắp ráp PC 2D tích hợp trí tuệ nhân tạo — học mà như chơi.
+          </p>
+
+          {/* Feature tags */}
+          <div style={{ marginTop: '32px', display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <span style={{ padding: '6px 14px', borderRadius: '99px', background: 'rgba(0,212,170,0.15)', color: '#00d4aa', fontSize: '12px', fontWeight: 600, border: '1px solid rgba(0,212,170,0.2)' }}>
+              AI hướng dẫn
+            </span>
+            <span style={{ padding: '6px 14px', borderRadius: '99px', background: 'rgba(40,156,249,0.15)', color: '#289cf9', fontSize: '12px', fontWeight: 600, border: '1px solid rgba(40,156,249,0.2)' }}>
+              100% Web
+            </span>
+            <span style={{ padding: '6px 14px', borderRadius: '99px', background: 'rgba(255,185,0,0.15)', color: '#ffb900', fontSize: '12px', fontWeight: 600, border: '1px solid rgba(255,185,0,0.2)' }}>
+              Không cài đặt
+            </span>
+          </div>
+
+          {/* Testimonial */}
+          <div style={{ marginTop: '32px', padding: '16px 20px', background: 'rgba(255,255,255,0.04)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+            <p style={{ fontSize: '13px', opacity: 0.6, fontStyle: 'italic', lineHeight: 1.5, margin: 0 }}>
+              "Hơn 5,000+ học sinh đang học tập và thực hành lắp ráp PC mỗi ngày."
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Panel - Login Form */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px' }}>
         <div style={{ maxWidth: '440px', width: '100%' }}>
           <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '14px', fontWeight: 500, marginBottom: '32px', textDecoration: 'none' }}>
@@ -208,22 +324,20 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <div style={{ flex: 1, display: { xs: 'none', md: 'flex' } as any, alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(160deg, #031f3b 0%, #1a2f53 80%)', padding: '64px', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: '-80px', right: '-80px', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(8,158,96,0.15) 0%, transparent 70%)', borderRadius: '50%' }}></div>
-        <div style={{ position: 'absolute', bottom: '-60px', left: '-60px', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(40,156,249,0.1) 0%, transparent 70%)', borderRadius: '50%' }}></div>
-        <div style={{ textAlign: 'center', position: 'relative', zIndex: 1, color: '#fff' }}>
-          <Monitor size={80} style={{ marginBottom: '24px', opacity: 0.8 }} />
-          <h2 style={{ fontSize: '28px', fontWeight: 800, marginBottom: '16px', lineHeight: 1.3 }}>PC Master Builder</h2>
-          <p style={{ fontSize: '16px', opacity: 0.7, maxWidth: '360px', margin: '0 auto', lineHeight: 1.6 }}>
-            Mô phỏng lắp ráp PC 2D tích hợp trí tuệ nhân tạo — học mà như chơi.
-          </p>
-          <div style={{ marginTop: '32px', display: 'flex', gap: '16px', justifyContent: 'center' }}>
-            <span style={{ padding: '6px 14px', borderRadius: '99px', background: 'rgba(255,255,255,0.1)', fontSize: '12px', fontWeight: 600 }}>AI hướng dẫn</span>
-            <span style={{ padding: '6px 14px', borderRadius: '99px', background: 'rgba(255,255,255,0.1)', fontSize: '12px', fontWeight: 600 }}>100% Web</span>
-            <span style={{ padding: '6px 14px', borderRadius: '99px', background: 'rgba(255,255,255,0.1)', fontSize: '12px', fontWeight: 600 }}>Không cài đặt</span>
-          </div>
-        </div>
-      </div>
+      <style>{`
+        @keyframes floatSlow {
+          0%, 100% { transform: translate(0, 0); }
+          50% { transform: translate(15px, -15px); }
+        }
+        @keyframes floatBounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-6px); }
+        }
+        @keyframes floatRotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   )
 }

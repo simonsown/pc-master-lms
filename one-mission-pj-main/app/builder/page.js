@@ -24,7 +24,6 @@ import MainMenu from '../../components/MainMenu';
 import ComponentInfo from '../../components/ComponentInfo';
 import PartPickerSidebar from '../../components/PartPickerSidebar';
 import ComponentPreview from '../../components/ComponentPreview';
-import AIGuru from '../../components/AIGuru';
 import BurgerMenu from '../../components/BurgerMenu';
 import QuizModal from '../../components/QuizModal';
 import WebcamCursor from '../../components/WebcamCursor';
@@ -37,6 +36,7 @@ import ExamsList from '../../components/ExamsList';
 import LoginModal from '../../components/auth/LoginModal';
 import StudentDashboardContent from '../../components/StudentDashboardContent';
 import { GURU_MESSAGES } from '../../utils/i18nData';
+import { useGuru } from '@/lib/guru-state';
 import { withTracking } from '@/lib/tracking';
 
 // Hoist camera state outside component or use persistent Context to ensure "only turn on once" stays on even if rerendered
@@ -46,8 +46,7 @@ function Home(props) {
   const [landmarks, setLandmarks] = useState([]);
   const [hoveredComponent, setHoveredComponent] = useState(null);
   const [lang, setLang] = useState('vn'); // 'en' or 'vn'
-  const [guruMessage, setGuruMessage] = useState(GURU_MESSAGES['en'].welcome);
-  const [guruTrigger, setGuruTrigger] = useState(0);
+  const guru = useGuru();
   const [lastPlaced, setLastPlaced] = useState(null);
   const [showQuiz, setShowQuiz] = useState(false);
   const [quizParams, setQuizParams] = useState(null); // { topic, level, onSuccess }
@@ -147,8 +146,7 @@ function Home(props) {
   const toggleLang = useCallback(() => {
     setLang(prev => {
       const newLang = prev === 'en' ? 'vn' : 'en';
-      setGuruMessage(GURU_MESSAGES[newLang].welcome);
-      setGuruTrigger(t => t + 1);
+      guru.setMessage(GURU_MESSAGES[newLang].welcome);
       return newLang;
     });
   }, []);
@@ -189,16 +187,14 @@ function Home(props) {
   }, []);
 
   const handleGameEvent = useCallback((event, type) => {
-    setGuruTrigger(prev => prev + 1);
     const messages = GURU_MESSAGES[lang];
     if (event === 'grabbed') {
-      setGuruMessage(messages.grabbed(type));
+      guru.setSilentMessage(messages.grabbed(type));
     } else if (event === 'placed') {
       setLastPlaced({ type, id: Date.now() });
       setPlacedItemsList(prev => [...prev, type]);
-      setGuruMessage(messages.placed(type));
+      guru.setSilentMessage(messages.placed(type));
     } else if (event === 'COMPLETE') {
-      // Lưu vào Database
       const saveSession = async () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
@@ -206,7 +202,7 @@ function Home(props) {
             user_id: user.id,
             mode: appMode,
             completed: true,
-            time_taken: 0 // Có thể nâng cấp đếm thời gian sau
+            time_taken: 0
           });
         }
       };
@@ -231,19 +227,19 @@ function Home(props) {
           msg += lang === 'en' ? 'MISSION ACCOMPLISHED! Perfect build 🏆' : 'HOÀN THÀNH NHIỆM VỤ! Cấu hình hoàn hảo 🏆';
           confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
         }
-        setGuruMessage(msg);
+        guru.setMessage(msg);
       } else {
-        setGuruMessage(lang === 'en' ? 'SYSTEM COMPLETE!' : 'HỆ THỐNG HOÀN THIỆN!');
+        guru.setMessage(lang === 'en' ? 'SYSTEM COMPLETE!' : 'HỆ THỐNG HOÀN THIỆN!');
       }
     } else if (event.startsWith('grabbed_')) {
       const player = event.split('_')[1].toUpperCase();
-      setGuruMessage(`${player}: ${messages.grabbed(type)}`);
+      guru.setSilentMessage(`${player}: ${messages.grabbed(type)}`);
     } else if (event.startsWith('placed_')) {
       const player = event.split('_')[1].toUpperCase();
-      setGuruMessage(`${player}: ${messages.placed(type)}`);
+      guru.setSilentMessage(`${player}: ${messages.placed(type)}`);
     } else if (event.startsWith('win_')) {
       const player = event.split('_')[1].toUpperCase();
-      setGuruMessage(lang === 'en' ? `${player} WINS THE MATCH!` : `${player} ĐÃ GIÀNH CHIẾN THẮNG!`);
+      guru.setMessage(lang === 'en' ? `${player} WINS THE MATCH!` : `${player} ĐÃ GIÀNH CHIẾN THẮNG!`);
     }
   }, [lang, appMode, missionData]);
 
@@ -636,7 +632,6 @@ function Home(props) {
             </div>
         )}
 
-        <AIGuru message={guruMessage} trigger={guruTrigger} lang={lang} />
       </main>
 
       <LoginModal isOpen={showLoginModal} onClose={() => { setShowLoginModal(false); setLoginRedirectTo(null); }} redirectTo={loginRedirectTo} />

@@ -85,13 +85,69 @@ export default function AboutPage() {
                         position: 'relative', borderRadius: '32px', overflow: 'hidden', 
                         boxShadow: '0 25px 50px -12px rgba(0, 243, 255, 0.25)',
                         border: '1px solid rgba(255,255,255,0.08)',
-                        aspectRatio: '16/9', animation: 'fadeInRight 1s ease'
+                        aspectRatio: '16/9', animation: 'fadeInRight 1s ease',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        background: 'radial-gradient(circle at 30% 40%, rgba(0, 212, 170, 0.08) 0%, rgba(5, 5, 7, 1) 70%)'
                     }}>
-                        <img 
-                            src="/vision-spread.png" 
-                            alt="One Mission Vision" 
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                        />
+                        <svg viewBox="0 0 400 225" style={{ width: '80%', height: '80%' }}>
+                            <defs>
+                                <linearGradient id="teamGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stopColor="#00d4aa" stopOpacity="0.3" />
+                                    <stop offset="100%" stopColor="#289cf9" stopOpacity="0.1" />
+                                </linearGradient>
+                            </defs>
+
+                            {/* Monitor frame */}
+                            <rect x="120" y="30" width="160" height="120" rx="10" fill="rgba(255,255,255,0.03)" stroke="rgba(0,212,170,0.2)" strokeWidth="1.5" />
+                            <rect x="128" y="38" width="144" height="100" rx="5" fill="url(#teamGlow)" />
+
+                            {/* Technology icons on screen */}
+                            <circle cx="170" cy="65" r="15" fill="none" stroke="rgba(0,212,170,0.3)" strokeWidth="1.5" />
+                            <circle cx="170" cy="65" r="5" fill="rgba(0,212,170,0.3)" />
+                            <rect x="200" y="55" width="20" height="6" rx="2" fill="rgba(40,156,249,0.3)" />
+                            <rect x="200" y="68" width="30" height="4" rx="2" fill="rgba(40,156,249,0.2)" />
+                            <rect x="200" y="78" width="15" height="4" rx="2" fill="rgba(40,156,249,0.2)" />
+                            <rect x="200" y="88" width="25" height="4" rx="2" fill="rgba(40,156,249,0.2)" />
+
+                            {/* Team members on screen - animated figures */}
+                            <g style={{ animation: 'floatBounce 3s ease-in-out infinite' }}>
+                                <circle cx="140" cy="100" r="8" fill="rgba(0,212,170,0.2)" />
+                                <circle cx="140" cy="95" r="5" fill="rgba(0,212,170,0.3)" />
+                                <rect x="135" y="105" width="10" height="15" rx="3" fill="rgba(0,212,170,0.15)" />
+                            </g>
+                            <g style={{ animation: 'floatBounce 3.5s ease-in-out infinite 0.5s' }}>
+                                <circle cx="200" cy="105" r="8" fill="rgba(40,156,249,0.2)" />
+                                <circle cx="200" cy="100" r="5" fill="rgba(40,156,249,0.3)" />
+                                <rect x="195" y="110" width="10" height="15" rx="3" fill="rgba(40,156,249,0.15)" />
+                            </g>
+                            <g style={{ animation: 'floatBounce 4s ease-in-out infinite 1s' }}>
+                                <circle cx="250" cy="100" r="8" fill="rgba(255,185,0,0.2)" />
+                                <circle cx="250" cy="95" r="5" fill="rgba(255,185,0,0.3)" />
+                                <rect x="245" y="105" width="10" height="15" rx="3" fill="rgba(255,185,0,0.15)" />
+                            </g>
+
+                            {/* Stand */}
+                            <rect x="190" y="150" width="20" height="20" rx="2" fill="rgba(255,255,255,0.05)" />
+                            <rect x="175" y="168" width="50" height="5" rx="2" fill="rgba(255,255,255,0.08)" />
+
+                            {/* Floating tech elements */}
+                            <g style={{ animation: 'floatRotate 8s linear infinite', transformOrigin: '200px 100px' }}>
+                                <rect x="290" y="40" width="12" height="12" rx="3" fill="none" stroke="rgba(0,212,170,0.2)" strokeWidth="1" />
+                                <circle cx="296" cy="46" r="3" fill="rgba(0,212,170,0.2)" />
+                            </g>
+                            <g style={{ animation: 'floatRotate 6s linear infinite reverse', transformOrigin: '200px 100px' }}>
+                                <rect x="90" y="50" width="8" height="8" rx="2" fill="none" stroke="rgba(255,185,0,0.2)" strokeWidth="1" />
+                            </g>
+
+                            {/* AI connection dots */}
+                            <circle cx="130" cy="155" r="2" fill="rgba(0,212,170,0.4)" style={{ animation: 'pulseDot 2s infinite' }} />
+                            <circle cx="200" cy="160" r="2" fill="rgba(40,156,249,0.4)" style={{ animation: 'pulseDot 2s infinite 0.5s' }} />
+                            <circle cx="270" cy="155" r="2" fill="rgba(255,185,0,0.4)" style={{ animation: 'pulseDot 2s infinite 1s' }} />
+
+                            {/* Text labels */}
+                            <text x="200" y="200" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="10" fontFamily="monospace">ONE MISSION TEAM</text>
+                            <text x="200" y="215" textAnchor="middle" fill="rgba(0,212,170,0.2)" fontSize="8" fontFamily="monospace">TECHNOLOGY · INNOVATION · EDUCATION</text>
+                        </svg>
                     </div>
                 </div>
             </section>
@@ -149,6 +205,29 @@ export default function AboutPage() {
             <footer style={{ padding: '60px 24px', textAlign: 'center', color: 'rgba(255,255,255,0.3)' }}>
                 One Mission Team - THPT Nguyễn Công Trứ
             </footer>
+
+            <style>{`
+                @keyframes floatBounce {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-6px); }
+                }
+                @keyframes floatRotate {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+                @keyframes pulseDot {
+                    0%, 100% { opacity: 0.3; }
+                    50% { opacity: 0.8; }
+                }
+                @keyframes fadeInLeft {
+                    from { opacity: 0; transform: translateX(-24px); }
+                    to { opacity: 1; transform: translateX(0); }
+                }
+                @keyframes fadeInRight {
+                    from { opacity: 0; transform: translateX(24px); }
+                    to { opacity: 1; transform: translateX(0); }
+                }
+            `}</style>
         </div>
     );
 }

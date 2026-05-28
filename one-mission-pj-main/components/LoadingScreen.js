@@ -6,6 +6,7 @@ const LoadingScreen = ({ onComplete }) => {
     const [progress, setProgress] = useState(0);
     const [step, setStep] = useState(0);
     const [visible, setVisible] = useState(true);
+    const [rotation, setRotation] = useState(0);
 
     const loadingMessages = [
         "Đang khởi động hệ thống giả lập PC Master...",
@@ -16,14 +17,20 @@ const LoadingScreen = ({ onComplete }) => {
 
     useEffect(() => {
         let mounted = true;
+        let animFrame;
+
+        const rotate = () => {
+            if (!mounted) return;
+            setRotation(prev => (prev + 0.5) % 360);
+            animFrame = requestAnimationFrame(rotate);
+        };
+        animFrame = requestAnimationFrame(rotate);
 
         const runSequence = async () => {
-            // Step 0: Initializing
             await new Promise(r => setTimeout(r, 600));
             if (!mounted) return;
             setStep(1);
 
-            // Step 1: Loading hardware database (animate progress)
             for (let i = 0; i <= 100; i += 4) {
                 await new Promise(r => setTimeout(r, 15));
                 if (!mounted) return;
@@ -34,7 +41,6 @@ const LoadingScreen = ({ onComplete }) => {
             setStep(2);
             setProgress(0);
 
-            // Step 2: Connecting AI engine
             for (let i = 0; i <= 100; i += 8) {
                 await new Promise(r => setTimeout(r, 20));
                 if (!mounted) return;
@@ -44,20 +50,67 @@ const LoadingScreen = ({ onComplete }) => {
             if (!mounted) return;
             setStep(3);
 
-            // Step 3: Ready
             await new Promise(r => setTimeout(r, 800));
             if (!mounted) return;
 
             setVisible(false);
-            setTimeout(onComplete, 400); // Wait for fade out
+            setTimeout(onComplete, 400);
         };
 
         runSequence();
 
-        return () => { mounted = false; };
+        return () => {
+            mounted = false;
+            if (animFrame) cancelAnimationFrame(animFrame);
+        };
     }, [onComplete]);
 
     if (!visible) return null;
+
+    const ringCount = 3;
+    const rings = [];
+    for (let i = 0; i < ringCount; i++) {
+        const baseSize = 150 + i * 35;
+        const delay = i * 0.8;
+        const direction = i % 2 === 0 ? 1 : -1;
+        rings.push(
+            <div key={i} style={{
+                position: 'absolute',
+                width: `${baseSize}px`,
+                height: `${baseSize}px`,
+                borderRadius: '50%',
+                border: `1.5px solid transparent`,
+                borderTopColor: i === 0 ? '#00d4aa' : i === 1 ? '#289cf9' : '#ffb900',
+                borderRightColor: i === 1 ? '#289cf9' : 'transparent',
+                borderLeftColor: i === 2 ? '#ffb900' : 'transparent',
+                transform: `rotate(${rotation * direction + delay * 30}deg)`,
+                transition: 'transform 0.05s linear',
+                opacity: 0.7 - i * 0.15,
+                boxShadow: i === 0 ? '0 0 15px rgba(0, 212, 170, 0.2)' : 'none'
+            }} />
+        );
+    }
+
+    const particles = [];
+    for (let i = 0; i < 12; i++) {
+        const angle = (i / 12) * 360;
+        const radius = 110;
+        const x = Math.cos((angle * Math.PI) / 180) * radius;
+        const y = Math.sin((angle * Math.PI) / 180) * radius;
+        particles.push(
+            <div key={`dot-${i}`} style={{
+                position: 'absolute',
+                width: '3px',
+                height: '3px',
+                borderRadius: '50%',
+                background: '#00d4aa',
+                transform: `translate(${x}px, ${y}px)`,
+                opacity: 0.3 + Math.sin((rotation + angle * 3) * Math.PI / 180) * 0.3,
+                transition: 'opacity 0.1s ease',
+                boxShadow: '0 0 6px rgba(0, 212, 170, 0.5)'
+            }} />
+        );
+    }
 
     return (
         <div
@@ -71,7 +124,7 @@ const LoadingScreen = ({ onComplete }) => {
                 left: 0,
                 width: '100vw',
                 height: '100vh',
-                backgroundColor: '#0a0a14',
+                background: 'radial-gradient(ellipse at center, #0d1117 0%, #06080c 100%)',
                 zIndex: 99999,
                 display: 'flex',
                 flexDirection: 'column',
@@ -83,61 +136,84 @@ const LoadingScreen = ({ onComplete }) => {
                 overflow: 'hidden'
             }}
         >
-            {/* Elegant Tech Grid Overlay */}
             <div style={{
                 position: 'absolute',
                 inset: 0,
-                backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(0, 212, 170, 0.05) 0%, transparent 80%), linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px)',
-                backgroundSize: '100% 100%, 20px 20px, 20px 20px',
+                background: `
+                    radial-gradient(circle at 20% 50%, rgba(0, 212, 170, 0.03) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 50%, rgba(40, 156, 249, 0.03) 0%, transparent 50%),
+                    radial-gradient(circle at 50% 20%, rgba(255, 185, 0, 0.02) 0%, transparent 40%)
+                `,
                 pointerEvents: 'none'
             }} />
 
-            {/* Glowing tech circles */}
             <div style={{
                 position: 'absolute',
-                width: '600px',
-                height: '600px',
-                background: 'radial-gradient(circle, rgba(0, 212, 170, 0.03) 0%, transparent 70%)',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                pointerEvents: 'none'
+                inset: 0,
+                backgroundImage: `
+                    linear-gradient(rgba(255, 255, 255, 0.008) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255, 255, 255, 0.008) 1px, transparent 1px)
+                `,
+                backgroundSize: '60px 60px, 60px 60px',
+                pointerEvents: 'none',
+                maskImage: 'radial-gradient(ellipse at center, transparent 30%, black 70%)',
+                WebkitMaskImage: 'radial-gradient(ellipse at center, transparent 30%, black 70%)'
             }} />
 
             <div style={{
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '24px',
+                gap: '28px',
                 position: 'relative',
                 zIndex: 10
             }}>
-                {/* Glowing Logo Container */}
                 <div style={{
                     position: 'relative',
-                    width: '120px',
-                    height: '120px',
+                    width: '160px',
+                    height: '160px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    background: 'radial-gradient(circle, rgba(0,212,170,0.1) 0%, transparent 60%)',
-                    borderRadius: '50%'
                 }}>
-                    <img 
-                        src="/logo.png" 
-                        alt="Logo" 
-                        style={{ 
-                            width: '80px', 
-                            filter: 'drop-shadow(0 0 20px rgba(0, 212, 170, 0.5))',
-                            animation: 'pulseLogo 2.5s infinite ease-in-out'
-                        }} 
-                    />
+                    {rings}
+                    <div style={{
+                        position: 'absolute',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}>
+                        {particles}
+                    </div>
+
+                    <div style={{
+                        position: 'absolute',
+                        width: '120px',
+                        height: '120px',
+                        borderRadius: '50%',
+                        background: 'radial-gradient(circle, rgba(0,212,170,0.08) 0%, transparent 70%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}>
+                        <img
+                            src="/logo.png"
+                            alt="Logo"
+                            style={{
+                                width: '72px',
+                                height: '72px',
+                                objectFit: 'contain',
+                                filter: 'drop-shadow(0 0 25px rgba(0, 212, 170, 0.6)) brightness(1.1)',
+                                animation: 'pulseLogo 2.5s infinite ease-in-out'
+                            }}
+                        />
+                    </div>
                 </div>
-                
+
                 <div style={{ textAlign: 'center' }}>
-                    <h1 style={{ 
-                        color: '#ffffff', 
-                        fontSize: '22px', 
+                    <h1 style={{
+                        color: '#ffffff',
+                        fontSize: '22px',
                         fontWeight: 900,
                         letterSpacing: '4px',
                         margin: 0,
@@ -157,9 +233,8 @@ const LoadingScreen = ({ onComplete }) => {
                     </p>
                 </div>
 
-                {/* Educational Loading Message Card */}
                 <div style={{
-                    marginTop: '20px',
+                    marginTop: '12px',
                     padding: '12px 24px',
                     background: 'rgba(26, 28, 37, 0.6)',
                     border: '1px solid rgba(255, 255, 255, 0.05)',
@@ -180,29 +255,30 @@ const LoadingScreen = ({ onComplete }) => {
                     </p>
                 </div>
 
-                {/* Smooth High-End Progress Bar */}
-                <div style={{ 
-                    width: '320px', 
-                    height: '3px', 
-                    background: 'rgba(255,255,255,0.05)', 
+                <div style={{
+                    width: '320px',
+                    height: '3px',
+                    background: 'rgba(255,255,255,0.05)',
                     borderRadius: '10px',
                     overflow: 'hidden',
-                    marginTop: '15px'
+                    marginTop: '10px'
                 }}>
                     <div style={{
                         width: `${progress}%`,
                         height: '100%',
-                        background: 'linear-gradient(90deg, #00d4aa, #00b4d8)',
+                        background: 'linear-gradient(90deg, #00d4aa, #289cf9, #ffb900)',
+                        backgroundSize: '200% 100%',
+                        animation: 'shimmerBar 2s linear infinite',
                         transition: 'width 0.15s cubic-bezier(0.1, 0.8, 0.2, 1)',
                         boxShadow: '0 0 12px rgba(0, 212, 170, 0.6)'
                     }} />
                 </div>
             </div>
 
-            <div style={{ 
-                position: 'absolute', 
-                bottom: '40px', 
-                color: 'rgba(255, 255, 255, 0.3)', 
+            <div style={{
+                position: 'absolute',
+                bottom: '40px',
+                color: 'rgba(255, 255, 255, 0.3)',
                 fontSize: '11px',
                 letterSpacing: '1px',
                 fontWeight: 600,
@@ -214,14 +290,14 @@ const LoadingScreen = ({ onComplete }) => {
                 Chạm bất kỳ đâu để bỏ qua intro
             </div>
 
-            <style jsx>{`
+            <style>{`
                 @keyframes fadeOut {
                     to { opacity: 0; visibility: hidden; }
                 }
                 @keyframes pulseLogo {
-                    0% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(0, 212, 170, 0.4)); }
-                    50% { transform: scale(1.04); filter: drop-shadow(0 0 25px rgba(0, 212, 170, 0.7)); }
-                    100% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(0, 212, 170, 0.4)); }
+                    0% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(0, 212, 170, 0.4)) brightness(1.1); }
+                    50% { transform: scale(1.04); filter: drop-shadow(0 0 30px rgba(0, 212, 170, 0.7)) brightness(1.2); }
+                    100% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(0, 212, 170, 0.4)) brightness(1.1); }
                 }
                 @keyframes fadeInText {
                     from { opacity: 0; transform: translateY(4px); }
@@ -231,6 +307,10 @@ const LoadingScreen = ({ onComplete }) => {
                     0% { opacity: 0.5; }
                     50% { opacity: 1; }
                     100% { opacity: 0.5; }
+                }
+                @keyframes shimmerBar {
+                    0% { background-position: -200% 0; }
+                    100% { background-position: 200% 0; }
                 }
             `}</style>
         </div>

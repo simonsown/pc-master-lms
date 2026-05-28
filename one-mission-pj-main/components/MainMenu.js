@@ -1,14 +1,23 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Cpu, ShoppingCart, Users, ArrowRight, Info, LogIn, LogOut, User, Award, Swords, Star, Trophy, GraduationCap, Compass, Puzzle, Zap, Sparkles, Gamepad2, BarChart3, Target, ShieldCheck, Flag, Clock, Gift, Layers, Bot } from 'lucide-react';
+import { BookOpen, Cpu, ShoppingCart, Users, ArrowRight, Info, LogIn, LogOut, User, Award, Swords, Star, Trophy, GraduationCap, Zap, ShieldCheck, Bot } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
-const s = { red: '#D32F2F', navy: '#1A2F4A', teal: '#0097A7', orange: '#F5A623' }
+const s = {
+  red: '#D32F2F',
+  navy: '#1A2F4A',
+  teal: '#0097A7',
+  orange: '#F5A623'
+};
 
-const fadeUp = (delay = 0) => ({ initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.4, delay, ease: [0.25, 0.46, 0.45, 0.94] } })
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.4, delay, ease: [0.25, 0.46, 0.45, 0.94] }
+});
 
 const MainMenu = ({ onStart, lang, onOpenLogin }) => {
     const [user, setUser] = useState(null);
@@ -52,35 +61,11 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
         window.location.href = '/';
     };
 
-    const sections = [
-        {
-            label: 'Học Tập',
-            items: [
-                { id: 'course', title: 'Bài Giảng', desc: 'Lý thuyết phần cứng theo chủ đề', Icon: BookOpen, color: s.red },
-                { id: 'exams', title: 'Kỳ Thi', desc: 'Kiểm tra kiến thức định kỳ', Icon: ShieldCheck, color: s.teal },
-            ]
-        },
-        {
-            label: 'Thực Hành',
-            items: [
-                { id: 'learning', title: 'Luyện Tập', desc: 'Lắp ráp tự do theo sở thích', Icon: Cpu, color: s.teal },
-                { id: 'market', title: 'Chợ Máy Tính', desc: 'Mua linh kiện, tối ưu cấu hình', Icon: ShoppingCart, color: s.orange },
-            ]
-        },
-        {
-            label: 'Thi Đấu',
-            items: [
-                { id: 'multiplayer', title: '2 Người Chơi', desc: 'Đối kháng — ai lắp nhanh hơn thắng', Icon: Users, color: s.red },
-                { id: 'challenge', title: 'Thử Thách', desc: 'Nhiệm vụ hàng ngày, thử thách thời gian', Icon: Swords, color: s.orange },
-            ]
-        },
-        {
-            label: 'Khám Phá',
-            items: [
-                { id: 'components', title: 'Tủ Linh Kiện', desc: 'Tra cứu toàn bộ linh kiện & thông số', Icon: Layers, color: s.navy },
-                { id: 'lab', title: 'Phòng AI Lab', desc: 'Thí nghiệm cấu hình với AI Guru', Icon: Bot, color: s.teal },
-            ]
-        },
+    const modes = [
+        { id: 'course', title: 'Bài Giảng', desc: 'Lý thuyết phần cứng theo chủ đề', Icon: BookOpen, color: s.red },
+        { id: 'learning', title: 'Luyện Tập', desc: 'Lắp ráp tự do theo sở thích', Icon: Cpu, color: s.teal },
+        { id: 'market', title: 'Chợ Máy Tính', desc: 'Mua linh kiện, tối ưu cấu hình', Icon: ShoppingCart, color: s.orange },
+        { id: 'multiplayer', title: '2 Người Chơi', desc: 'Đối kháng — ai lắp nhanh hơn thắng', Icon: Users, color: s.red },
     ];
 
     const quickStats = [
@@ -94,17 +79,19 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
             display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '1100px',
             margin: '0 auto', padding: '32px 48px', minHeight: '100vh'
         }}>
-            {/* HEADER */}
             <motion.div {...fadeUp(0)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                    <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: s.red, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{
+                        width: '44px', height: '44px', borderRadius: '10px',
+                        background: s.red, display: 'flex', alignItems: 'center', justifyContent: 'center'
+                    }}>
                         <GraduationCap size={22} color="#fff" />
                     </div>
                     <div>
-                        <h1 style={{ fontSize: '24px', fontWeight: 800, color: s.navy, margin: 0, letterSpacing: '-0.03em' }}>
+                        <h1 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.03em' }}>
                             PC Master Builder
                         </h1>
-                        <p style={{ fontSize: '13px', color: '#64748B', margin: '2px 0 0' }}>
+                        <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '2px 0 0' }}>
                             Mô phỏng lắp ráp PC 2D tích hợp AI
                         </p>
                     </div>
@@ -115,88 +102,174 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                 ) : user ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <Link href={profile?.role === 'teacher' ? '/teacher' : profile?.role === 'parent' ? '/parent' : '/builder'}
-                            style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', padding: '6px 14px', borderRadius: '8px', background: '#F8FAFC', border: '1px solid #E2E8F0' }}>
-                            <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: `${s.red}0d`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: s.red }}>
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none',
+                                padding: '6px 14px', borderRadius: '8px',
+                                background: 'var(--bg-elevated)', border: '1px solid var(--border-default)'
+                            }}>
+                            <div style={{
+                                width: '28px', height: '28px', borderRadius: '50%',
+                                background: `${s.red}0d`, display: 'flex', alignItems: 'center',
+                                justifyContent: 'center', color: s.red
+                            }}>
                                 <User size={14} />
                             </div>
-                            <span style={{ fontSize: '13px', fontWeight: 600, color: s.navy }}>{profile?.full_name || user.email?.split('@')[0]}</span>
+                            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                                {profile?.full_name || user.email?.split('@')[0]}
+                            </span>
                         </Link>
                         <button onClick={handleSignOut}
-                            style={{ background: `${s.red}0d`, color: s.red, border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600, fontFamily: 'inherit' }}>
+                            style={{
+                                background: `${s.red}0d`, color: s.red, border: 'none',
+                                padding: '6px 12px', borderRadius: '6px', cursor: 'pointer',
+                                fontSize: '12px', display: 'flex', alignItems: 'center',
+                                gap: '4px', fontWeight: 600, fontFamily: 'inherit'
+                            }}>
                             <LogOut size={14} /> Thoát
                         </button>
                     </div>
                 ) : (
                     <button onClick={onOpenLogin}
-                        style={{ background: s.navy, color: '#fff', border: 'none', padding: '8px 18px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontFamily: 'inherit' }}>
+                        style={{
+                            background: 'linear-gradient(90deg, var(--accent-amber), var(--accent-orange))',
+                            color: '#fff', border: 'none', padding: '8px 18px', borderRadius: '8px',
+                            fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center',
+                            gap: '6px', fontSize: '13px', fontFamily: 'inherit'
+                        }}>
                         <LogIn size={16} /> Đăng nhập
                     </button>
                 )}
             </motion.div>
 
-            <motion.div {...fadeUp(0.05)} style={{ borderBottom: '1px solid #E2E8F0', margin: '20px 0' }} />
+            <motion.div {...fadeUp(0.05)} style={{
+                borderBottom: '1px solid var(--border-default)',
+                margin: '20px 0'
+            }} />
 
-            {/* QUICK STATS */}
             {user && (
-                <motion.div {...fadeUp(0.1)} style={{ display: 'flex', gap: '12px', marginBottom: '28px' }}>
+                <motion.div {...fadeUp(0.1)} style={{ display: 'flex', gap: '12px', marginBottom: '28px', flexWrap: 'wrap' }}>
                     {quickStats.map((stat, i) => (
-                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 14px', borderRadius: '8px', background: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+                        <div key={i} style={{
+                            display: 'flex', alignItems: 'center', gap: '8px',
+                            padding: '8px 14px', borderRadius: '8px',
+                            background: 'var(--bg-elevated)', border: '1px solid var(--border-default)'
+                        }}>
                             <div style={{ color: stat.color }}>{stat.icon}</div>
                             <div>
-                                <div style={{ fontSize: '14px', fontWeight: 800, color: s.navy, lineHeight: 1.2 }}>{stat.value}</div>
-                                <div style={{ fontSize: '11px', color: '#64748B' }}>{stat.label}</div>
+                                <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.2 }}>{stat.value}</div>
+                                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{stat.label}</div>
                             </div>
                         </div>
                     ))}
                 </motion.div>
             )}
 
-            {/* SECTIONS GRID */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                {sections.map((section, secIdx) => (
-                    <motion.div key={secIdx} {...fadeUp(0.15 + secIdx * 0.08)}>
-                        <div style={{ fontSize: '11px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '10px' }}>
-                            <span style={{ display: 'inline-block', width: '3px', height: '12px', borderRadius: '2px', background: [s.red, s.teal, s.orange, s.navy][secIdx], marginRight: '8px', verticalAlign: 'middle' }} />
-                            {section.label}
-                        </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                            {section.items.map((mode) => (
-                                <motion.button
-                                    key={mode.id}
-                                    onClick={() => onStart(mode.id)}
-                                    whileHover={{ y: -2, boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }}
-                                    style={{
-                                        display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 18px',
-                                        borderRadius: '10px', border: '1px solid #E2E8F0', background: '#fff',
-                                        cursor: 'pointer', textAlign: 'left', width: '100%',
-                                        fontFamily: 'inherit', transition: 'border-color 0.15s'
-                                    }}
-                                    onMouseOver={e => e.currentTarget.style.borderColor = mode.color}
-                                    onMouseOut={e => e.currentTarget.style.borderColor = '#E2E8F0'}
-                                >
-                                    <div style={{
-                                        width: '40px', height: '40px', borderRadius: '8px',
-                                        background: `${mode.color}0d`, color: mode.color,
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
-                                    }}>
-                                        <mode.Icon size={18} />
-                                    </div>
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{ fontSize: '14px', fontWeight: 700, color: s.navy, marginBottom: '2px' }}>{mode.title}</div>
-                                        <div style={{ fontSize: '12px', color: '#64748B', margin: 0 }}>{mode.desc}</div>
-                                    </div>
-                                    <ArrowRight size={14} style={{ color: '#94A3B8', flexShrink: 0 }} />
-                                </motion.button>
-                            ))}
-                        </div>
-                    </motion.div>
-                ))}
-            </div>
+            {/* 4 MODES GRID */}
+            <motion.div {...fadeUp(0.15)} style={{ marginBottom: '24px' }}>
+                <div style={{
+                    fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)',
+                    textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '12px'
+                }}>
+                    Chế độ
+                </div>
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(4, 1fr)',
+                    gap: '12px'
+                }}>
+                    {modes.map((mode, idx) => (
+                        <motion.button
+                            key={mode.id}
+                            onClick={() => onStart(mode.id)}
+                            whileHover={{ y: -2, boxShadow: '0 4px 12px var(--shadow-color)' }}
+                            style={{
+                                display: 'flex', flexDirection: 'column',
+                                padding: '20px', borderRadius: '12px',
+                                border: '1px solid var(--border-default)',
+                                background: 'var(--bg-surface)',
+                                cursor: 'pointer', textAlign: 'left', width: '100%',
+                                fontFamily: 'inherit',
+                                transition: 'border-color 0.2s, box-shadow 0.2s'
+                            }}
+                            onMouseOver={e => { e.currentTarget.style.borderColor = mode.color; e.currentTarget.style.boxShadow = `0 0 0 1px ${mode.color}20`; }}
+                            onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.boxShadow = 'none'; }}
+                        >
+                            <div style={{
+                                width: '44px', height: '44px', borderRadius: '10px',
+                                background: `${mode.color}15`, color: mode.color,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                marginBottom: '14px', flexShrink: 0
+                            }}>
+                                <mode.Icon size={22} />
+                            </div>
+                            <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>
+                                {mode.title}
+                            </div>
+                            <div style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: 1.5, flex: 1 }}>
+                                {mode.desc}
+                            </div>
+                            <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'flex-end' }}>
+                                <ArrowRight size={14} style={{ color: 'var(--text-muted)' }} />
+                            </div>
+                        </motion.button>
+                    ))}
+                </div>
+            </motion.div>
 
-            {/* TIPS BAR */}
-            <motion.div {...fadeUp(0.5)} style={{ marginTop: '28px', padding: '12px 16px', borderRadius: '8px', background: `${s.orange}08`, border: `1px solid ${s.orange}20`, display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+            {/* EXTRA MODES */}
+            <motion.div {...fadeUp(0.25)} style={{ marginBottom: '24px' }}>
+                <div style={{
+                    fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)',
+                    textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '12px'
+                }}>
+                    {lang === 'en' ? 'More' : 'Thêm'}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
+                    {[
+                        { id: 'exams', title: 'Kỳ Thi', desc: 'Kiểm tra kiến thức định kỳ', Icon: ShieldCheck, color: s.teal },
+                        { id: 'lab', title: 'Phòng AI Lab', desc: 'Thí nghiệm cấu hình với AI Guru', Icon: Bot, color: s.navy },
+                        { id: 'challenge', title: 'Thử Thách', desc: 'Nhiệm vụ hàng ngày', Icon: Swords, color: s.orange },
+                        { id: 'components', title: 'Tủ Linh Kiện', desc: 'Tra cứu thông số linh kiện', Icon: Trophy, color: s.red },
+                    ].map((mode) => (
+                        <motion.button
+                            key={mode.id}
+                            onClick={() => onStart(mode.id)}
+                            whileHover={{ y: -1 }}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '12px',
+                                padding: '12px 16px', borderRadius: '10px',
+                                border: '1px solid var(--border-default)',
+                                background: 'var(--bg-elevated)',
+                                cursor: 'pointer', textAlign: 'left', width: '100%',
+                                fontFamily: 'inherit',
+                                transition: 'border-color 0.2s'
+                            }}
+                            onMouseOver={e => { e.currentTarget.style.borderColor = mode.color; e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                            onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.background = 'var(--bg-elevated)'; }}
+                        >
+                            <div style={{
+                                width: '34px', height: '34px', borderRadius: '8px',
+                                background: `${mode.color}12`, color: mode.color,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                            }}>
+                                <mode.Icon size={16} />
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>{mode.title}</div>
+                                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{mode.desc}</div>
+                            </div>
+                        </motion.button>
+                    ))}
+                </div>
+            </motion.div>
+
+            <motion.div {...fadeUp(0.35)} style={{
+                marginTop: '12px', padding: '12px 16px', borderRadius: '10px',
+                background: `${s.orange}08`, border: `1px solid ${s.orange}20`,
+                display: 'flex', gap: '10px', alignItems: 'flex-start'
+            }}>
                 <Info size={15} color={s.orange} style={{ flexShrink: 0, marginTop: '1px' }} />
-                <span style={{ fontSize: '12px', color: '#64748B', lineHeight: 1.5 }}>
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: 1.5 }}>
                     Bạn có thể dùng Webcam hoặc Chuột để lắp ráp. Điều chỉnh độ nhạy tracking tại menu bên trái.
                 </span>
             </motion.div>
