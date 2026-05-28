@@ -13,16 +13,14 @@ export default function TeacherLearningPathPage() {
   const [items, setItems] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  
-  // New Path Form
+
   const [newTitle, setNewTitle] = useState('')
   const [newDesc, setNewDesc] = useState('')
-  
-  // New Item Form
+
   const [itemTitle, setItemTitle] = useState('')
   const [itemType, setItemType] = useState<'lesson' | 'quiz' | 'lab_session'>('lesson')
   const [itemMinutes, setItemMinutes] = useState(30)
-  
+
   const supabase = createClientComponentClient()
 
   const loadPaths = async () => {
@@ -73,8 +71,6 @@ export default function TeacherLearningPathPage() {
 
     setSaving(true)
     const nextOrder = items.length + 1
-    
-    // Default unlock condition for items after the first one is 'complete_previous'
     const defaultUnlock = nextOrder === 1 ? null : { type: 'complete_previous' }
 
     const { data: newItem, error } = await supabase
@@ -105,7 +101,6 @@ export default function TeacherLearningPathPage() {
         order: idx + 1
       }))
       setItems(updated)
-      // Update DB orders
       await updateItemOrder(selectedPath.id, updated.map(u => ({ id: u.id, order: u.order })))
     }
   }
@@ -113,58 +108,51 @@ export default function TeacherLearningPathPage() {
   const moveItem = async (index: number, direction: 'up' | 'down') => {
     const newItems = [...items]
     const targetIdx = direction === 'up' ? index - 1 : index + 1
-    
     if (targetIdx < 0 || targetIdx >= newItems.length) return
 
-    // Swap items
     const temp = newItems[index]
     newItems[index] = newItems[targetIdx]
     newItems[targetIdx] = temp
 
-    // Re-assign orders
-    const updated = newItems.map((item, idx) => ({
-      ...item,
-      order: idx + 1
-    }))
-
+    const updated = newItems.map((item, idx) => ({ ...item, order: idx + 1 }))
     setItems(updated)
-
-    // Save orders in DB
     await updateItemOrder(selectedPath.id, updated.map(u => ({ id: u.id, order: u.order })))
   }
 
   const toggleUnlockCondition = async (item: any) => {
-    // Toggles between Always open (null) and Complete previous
     const isCurrentlyLocked = !!item.unlock_condition
     const newCondition = isCurrentlyLocked ? null : { type: 'complete_previous' }
-    
     setItems(items.map(i => i.id === item.id ? { ...i, unlock_condition: newCondition } : i))
     await setUnlockCondition(item.id, newCondition)
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0d0e13] text-white pt-24 flex flex-col items-center justify-center gap-2">
-        <RefreshCw size={28} className="animate-spin text-[#00d4aa]" />
-        <span className="text-xs text-gray-500">Đang tải cấu hình lộ trình...</span>
+      <div className="min-h-screen pt-24 flex flex-col items-center justify-center gap-2" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
+        <RefreshCw size={28} className="animate-spin" style={{ color: 'var(--brand-primary)' }} />
+        <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Đang tải cấu hình lộ trình...</span>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#0d0e13] text-white pt-24 pb-12 px-4 sm:px-6">
+    <div className="min-h-screen pt-24 pb-12 px-4 sm:px-6" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
       <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-        
-        {/* Left Side: Paths Manager & Create forms */}
+
         <div className="space-y-6">
-          <div className="bg-[#1a1c25] border border-gray-800 p-6 rounded-2xl shadow-xl">
-            <h2 className="text-lg font-bold text-white mb-4">Lộ trình học tập</h2>
+          <div className="p-6 rounded-2xl shadow-xl" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
+            <h2 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Lộ trình học tập</h2>
             <div className="space-y-2">
               {paths.map(p => (
                 <button
                   key={p.id}
                   onClick={() => { setSelectedPath(p); loadItems(p.id); }}
-                  className={`w-full text-left px-4 py-3 rounded-xl border text-sm font-semibold transition-all ${selectedPath?.id === p.id ? 'border-[#00d4aa] bg-[#00d4aa]/10 text-white' : 'border-gray-800 text-gray-400 hover:border-gray-700'}`}
+                  className="w-full text-left px-4 py-3 rounded-xl border text-sm font-semibold transition-all"
+                  style={{
+                    background: selectedPath?.id === p.id ? 'color-mix(in srgb, var(--brand-primary) 10%, transparent)' : 'transparent',
+                    borderColor: selectedPath?.id === p.id ? 'var(--brand-primary)' : 'var(--border-default)',
+                    color: selectedPath?.id === p.id ? 'var(--brand-primary)' : 'var(--text-muted)'
+                  }}
                 >
                   {p.title}
                 </button>
@@ -172,8 +160,8 @@ export default function TeacherLearningPathPage() {
             </div>
           </div>
 
-          <div className="bg-[#1a1c25] border border-gray-800 p-6 rounded-2xl shadow-xl">
-            <h3 className="text-sm font-bold text-white mb-3">Tạo lộ trình mới</h3>
+          <div className="p-6 rounded-2xl shadow-xl" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
+            <h3 className="text-sm font-bold mb-3" style={{ color: 'var(--text-primary)' }}>Tạo lộ trình mới</h3>
             <form onSubmit={handleCreatePath} className="space-y-3">
               <input
                 type="text"
@@ -181,18 +169,21 @@ export default function TeacherLearningPathPage() {
                 placeholder="Tên lộ trình..."
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
-                className="w-full bg-[#1e202f]/50 border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#00d4aa] transition-colors"
+                className="w-full rounded-xl px-4 py-2.5 text-xs focus:outline-none transition-colors"
+                style={{ background: 'color-mix(in srgb, var(--bg-elevated) 50%, transparent)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
               />
               <textarea
                 placeholder="Mô tả lộ trình học..."
                 value={newDesc}
                 onChange={(e) => setNewDesc(e.target.value)}
-                className="w-full bg-[#1e202f]/50 border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#00d4aa] transition-colors resize-none"
+                className="w-full rounded-xl px-4 py-2.5 text-xs focus:outline-none transition-colors resize-none"
+                style={{ background: 'color-mix(in srgb, var(--bg-elevated) 50%, transparent)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
               />
               <button
                 type="submit"
                 disabled={saving}
-                className="w-full py-2.5 bg-[#00d4aa] text-[#0d0e13] font-bold text-xs rounded-xl hover:opacity-90 transition-opacity"
+                className="w-full py-2.5 font-bold text-xs rounded-xl hover:opacity-90 transition-opacity"
+                style={{ background: 'var(--brand-primary)', color: 'var(--bg-base)' }}
               >
                 Tạo lộ trình
               </button>
@@ -200,31 +191,31 @@ export default function TeacherLearningPathPage() {
           </div>
         </div>
 
-        {/* Right Side: Timeline builder */}
         <div className="md:col-span-2 space-y-6">
           {selectedPath ? (
             <>
-              {/* Add Item form */}
-              <div className="bg-[#1a1c25] border border-gray-800 p-6 rounded-2xl shadow-xl">
-                <h3 className="text-md font-bold text-white mb-4">Thêm nhiệm vụ vào lộ trình</h3>
+              <div className="p-6 rounded-2xl shadow-xl" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
+                <h3 className="text-md font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Thêm nhiệm vụ vào lộ trình</h3>
                 <form onSubmit={handleAddItem} className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
                   <div className="sm:col-span-2">
-                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Tên nhiệm vụ</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>Tên nhiệm vụ</label>
                     <input
                       type="text"
                       required
                       placeholder="VD: Lắp Ráp CPU vào Mainboard"
                       value={itemTitle}
                       onChange={(e) => setItemTitle(e.target.value)}
-                      className="w-full bg-[#1e202f]/50 border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#00d4aa] transition-colors"
+                      className="w-full rounded-xl px-4 py-2.5 text-xs focus:outline-none transition-colors"
+                      style={{ background: 'color-mix(in srgb, var(--bg-elevated) 50%, transparent)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Loại bài</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>Loại bài</label>
                     <select
                       value={itemType}
                       onChange={(e) => setItemType(e.target.value as any)}
-                      className="w-full bg-[#1e202f]/50 border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-[#00d4aa] transition-colors"
+                      className="w-full rounded-xl px-4 py-2.5 text-xs focus:outline-none transition-colors"
+                      style={{ background: 'color-mix(in srgb, var(--bg-elevated) 50%, transparent)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
                     >
                       <option value="lesson">📖 Bài học</option>
                       <option value="quiz">📝 Trắc nghiệm</option>
@@ -234,66 +225,70 @@ export default function TeacherLearningPathPage() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="w-full py-2.5 bg-[#00d4aa] text-[#0d0e13] font-bold text-xs rounded-xl hover:opacity-90 transition-opacity"
+                    className="w-full py-2.5 font-bold text-xs rounded-xl hover:opacity-90 transition-opacity"
+                    style={{ background: 'var(--brand-primary)', color: 'var(--bg-base)' }}
                   >
                     Thêm bài
                   </button>
                 </form>
               </div>
 
-              {/* Items List */}
-              <div className="bg-[#1a1c25] border border-gray-800 p-6 rounded-2xl shadow-xl space-y-4">
-                <h3 className="text-md font-bold text-white mb-2">Chi tiết tiến trình bài giảng</h3>
-                
+              <div className="p-6 rounded-2xl shadow-xl space-y-4" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
+                <h3 className="text-md font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Chi tiết tiến trình bài giảng</h3>
+
                 {items.length === 0 ? (
-                  <div className="p-8 text-center text-gray-500 text-xs">
+                  <div className="p-8 text-center text-xs" style={{ color: 'var(--text-muted)' }}>
                     Chưa có bài giảng nào trong lộ trình này.
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {items.map((item, idx) => (
-                      <div key={item.id} className="p-4 bg-[#1e202f]/50 border border-gray-800 rounded-xl flex items-center justify-between gap-4">
+                      <div key={item.id} className="p-4 rounded-xl flex items-center justify-between gap-4" style={{ background: 'color-mix(in srgb, var(--bg-elevated) 50%, transparent)', border: '1px solid var(--border-default)' }}>
                         <div className="flex items-center gap-3">
-                          <span className="text-xs font-bold text-[#00d4aa] w-6">#{item.order}</span>
+                          <span className="text-xs font-bold w-6" style={{ color: 'var(--brand-primary)' }}>#{item.order}</span>
                           <div>
-                            <h4 className="font-semibold text-sm text-white">{item.title}</h4>
-                            <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mt-0.5">
+                            <h4 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{item.title}</h4>
+                            <p className="text-[10px] uppercase font-bold tracking-wider mt-0.5" style={{ color: 'var(--text-muted)' }}>
                               {item.item_type === 'quiz' ? '📝 TRẮC NGHIỆM' : item.item_type === 'lab_session' ? '⚙️ THỰC HÀNH' : '📖 BÀI HỌC'}
                             </p>
                           </div>
                         </div>
 
-                        {/* Controls */}
                         <div className="flex items-center gap-3">
-                          {/* Move up / down */}
                           <button
                             disabled={idx === 0}
                             onClick={() => moveItem(idx, 'up')}
-                            className="p-1.5 bg-gray-800 rounded hover:bg-gray-700 text-gray-400 disabled:opacity-30"
+                            className="p-1.5 rounded hover:opacity-70 disabled:opacity-30"
+                            style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
                           >
                             <ArrowUp size={14} />
                           </button>
                           <button
                             disabled={idx === items.length - 1}
                             onClick={() => moveItem(idx, 'down')}
-                            className="p-1.5 bg-gray-800 rounded hover:bg-gray-700 text-gray-400 disabled:opacity-30"
+                            className="p-1.5 rounded hover:opacity-70 disabled:opacity-30"
+                            style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
                           >
                             <ArrowDown size={14} />
                           </button>
 
-                          {/* Toggle Lock */}
                           <button
                             onClick={() => toggleUnlockCondition(item)}
-                            className={`p-1.5 rounded flex items-center gap-1 text-[10px] font-bold border transition-colors ${item.unlock_condition ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-[#00d4aa]/10 border-[#00d4aa]/30 text-[#00d4aa]'}`}
+                            className="p-1.5 rounded flex items-center gap-1 text-[10px] font-bold border transition-colors"
+                            style={{
+                              background: item.unlock_condition ? 'color-mix(in srgb, var(--accent-orange) 10%, transparent)' : 'color-mix(in srgb, var(--brand-primary) 10%, transparent)',
+                              borderColor: item.unlock_condition ? 'color-mix(in srgb, var(--accent-orange) 30%, transparent)' : 'color-mix(in srgb, var(--brand-primary) 30%, transparent)',
+                              color: item.unlock_condition ? 'var(--accent-orange)' : 'var(--brand-primary)'
+                            }}
                           >
                             {item.unlock_condition ? <Lock size={12} /> : <Unlock size={12} />}
                             {item.unlock_condition ? 'Khóa tuần tự' : 'Mở tự do'}
                           </button>
 
-                          {/* Delete */}
                           <button
                             onClick={() => handleDeleteItem(item.id)}
-                            className="p-1.5 bg-red-500/10 border border-red-500/20 rounded text-red-400 hover:bg-red-500/20"
+                            className="p-1.5 rounded hover:opacity-80"
+                            style={{ background: 'color-mix(in srgb, var(--accent-orange) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--accent-orange) 20%, transparent)', color: 'var(--accent-orange)' }}
                           >
                             <Trash size={14} />
                           </button>
@@ -305,7 +300,7 @@ export default function TeacherLearningPathPage() {
               </div>
             </>
           ) : (
-            <div className="p-12 text-center bg-[#1a1c25] border border-gray-800 rounded-2xl text-gray-500">
+            <div className="p-12 text-center rounded-2xl" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: 'var(--text-muted)' }}>
               Hãy tạo hoặc chọn một Lộ trình ở cột bên trái để bắt đầu sắp xếp.
             </div>
           )}

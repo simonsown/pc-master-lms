@@ -9,9 +9,9 @@ import { supabase } from '@/lib/supabase'
 import PageTransition from '@/components/PageTransition'
 
 function ThemeToggle() {
-  const [theme, setThemeState] = useState<'light' | 'dark'>('light')
+  const [theme, setThemeState] = useState<'light' | 'dark'>('dark')
   React.useEffect(() => {
-    const saved = (localStorage.getItem('theme') as 'light' | 'dark') || 'light'
+    const saved = (localStorage.getItem('theme') as 'light' | 'dark') || 'dark'
     setThemeState(saved)
     document.documentElement.setAttribute('data-theme', saved)
   }, [])

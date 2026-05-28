@@ -1,11 +1,12 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, ReferenceLine, Cell } from 'recharts'
 import { ProgressStats, DailyProgress, LessonProgress, QuizAttempt, BuilderActivity } from '@/lib/progress'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, BarChart2 } from 'lucide-react'
+import { ArrowLeft, BarChart2, Clock, RefreshCw } from 'lucide-react'
+import { createBrowserClient } from '@supabase/ssr'
 
 interface ProgressViewProps {
   data: {
@@ -18,21 +19,21 @@ interface ProgressViewProps {
 }
 
 const MOTIVATIONAL_QUOTES = [
-  "Kiến thức là sức mạnh. Mỗi bài học bạn hoàn thành là một bước tiến! 💪",
-  "Lắp ráp PC cũng như xây dựng tương lai - từng linh kiện đều quan trọng! 🖥️",
-  "Sai lầm là một phần của học tập. Hãy thử lại và bạn sẽ làm được! 🔧",
-  "Hôm nay bạn học được điều gì mới? Mỗi ngày một chút, một năm là cả kho báu! 📚",
-  "CPU là não bộ, RAM là trí nhớ - bạn đang rèn luyện cả hai! 🧠",
-  "Đam mê công nghệ là ngọn lửa không bao giờ tắt. Hãy giữ lửa nhé! 🔥",
-  "Mỗi dòng code, mỗi con chip đều kể một câu chuyện. Hãy khám phá! 💻",
-  "Kiên trì là chìa khóa. Ngày hôm nay mệt mỏi, ngày mai sẽ tiến bộ! ⚡",
-  "Tương lai thuộc về những ai học hỏi không ngừng. Bạn đang đi đúng hướng! 🚀",
-  "PC Master không chỉ là lắp ráp, mà là sáng tạo và đam mê! ⭐",
-  "Học qua thực hành là cách tốt nhất. Builder Lab đang chờ bạn! 🎮",
-  "Thử thách bản thân mỗi ngày. Học một linh kiện mới, hiểu thêm về công nghệ! 📈",
-  "Công nghệ thay đổi từng ngày, và bạn đang bắt kịp! 🌟",
-  "Mỗi bài quiz hoàn thành là một chiến thắng nhỏ. Tiếp tục nhé! 🏆",
-  "PC là công cụ mạnh nhất - bạn đang học cách làm chủ nó! 💡",
+  "Kiến thức là sức mạnh. Mỗi bài học bạn hoàn thành là một bước tiến!",
+  "Lắp ráp PC cũng như xây dựng tương lai - từng linh kiện đều quan trọng!",
+  "Sai lầm là một phần của học tập. Hãy thử lại và bạn sẽ làm được!",
+  "Hôm nay bạn học được điều gì mới? Mỗi ngày một chút, một năm là cả kho báu!",
+  "CPU là não bộ, RAM là trí nhớ - bạn đang rèn luyện cả hai!",
+  "Đam mê công nghệ là ngọn lửa không bao giờ tắt. Hãy giữ lửa nhé!",
+  "Mỗi dòng code, mỗi con chip đều kể một câu chuyện. Hãy khám phá!",
+  "Kiên trì là chìa khóa. Ngày hôm nay mệt mỏi, ngày mai sẽ tiến bộ!",
+  "Tương lai thuộc về những ai học hỏi không ngừng. Bạn đang đi đúng hướng!",
+  "PC Master không chỉ là lắp ráp, mà là sáng tạo và đam mê!",
+  "Học qua thực hành là cách tốt nhất. Builder Lab đang chờ bạn!",
+  "Thử thách bản thân mỗi ngày. Học một linh kiện mới, hiểu thêm về công nghệ!",
+  "Công nghệ thay đổi từng ngày, và bạn đang bắt kịp!",
+  "Mỗi bài quiz hoàn thành là một chiến thắng nhỏ. Tiếp tục nhé!",
+  "PC là công cụ mạnh nhất - bạn đang học cách làm chủ nó!",
 ]
 
 function getDailyQuote(): string {
@@ -54,18 +55,109 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 }
 }
 
-export default function ProgressView({ data }: ProgressViewProps) {
+function formatDuration(seconds: number): string {
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const s = seconds % 60
+  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+}
+
+export default function ProgressView({ data: initialData }: ProgressViewProps) {
   const router = useRouter()
-  const { stats, dailyProgress, lessons, quizResults, builderActivity } = data
+  const { dailyProgress: initialDaily, lessons: initialLessons, quizResults: initialQuizResults, builderActivity: initialBuilderActivity } = initialData
+  const [initialStats] = useState(initialData.stats)
+  const [dailyProgress, setDailyProgress] = useState(initialDaily)
+  const [lessons, setLessons] = useState(initialLessons)
+  const [quizResults, setQuizResults] = useState(initialQuizResults)
+  const [builderActivity, setBuilderActivity] = useState(initialBuilderActivity)
   const [filter, setFilter] = useState<'all' | 'completed' | 'in_progress' | 'not_started'>('all')
+  const [sessionTime, setSessionTime] = useState(0)
+  const [lastUpdated, setLastUpdated] = useState<string>('')
+  const [quote] = useState(getDailyQuote)
+  const startTime = useRef(Date.now())
+
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSessionTime(Math.floor((Date.now() - startTime.current) / 1000))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  useEffect(() => {
+    let mounted = true
+
+    async function refreshData() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user || !mounted) return
+
+      const { data: progressData } = await supabase
+        .from('lesson_progress')
+        .select('id, lesson_id, status, completed_at, completion_percentage')
+        .eq('student_id', user.id)
+        .order('last_accessed', { ascending: false })
+
+      if (progressData && mounted) {
+        setLessons(progressData.map((row, index) => ({
+          id: row.id,
+          lesson_id: row.lesson_id,
+          lesson_title: `Bài học ${index + 1}`,
+          type: index % 3 === 0 ? 'Quiz' : (index % 2 === 0 ? 'Lab' : 'Lý thuyết'),
+          status: row.status,
+          score: row.status === 'completed' ? 100 : null,
+          completed_at: row.completed_at,
+          completion_percentage: row.completion_percentage ?? 0
+        })))
+      }
+
+      const { data: quizData } = await supabase
+        .from('quiz_attempts')
+        .select('id, score, status')
+        .eq('student_id', user.id)
+        .eq('status', 'graded')
+        .order('created_at', { ascending: false })
+        .limit(10)
+
+      if (quizData && mounted) {
+        setQuizResults(quizData.map((row, index) => ({
+          id: row.id,
+          quiz_title: `Bài kiểm tra ${index + 1}`,
+          score: row.score,
+          passing_score: 70
+        })))
+      }
+
+      setLastUpdated(new Date().toLocaleTimeString('vi-VN'))
+    }
+
+    const channel = supabase
+      .channel('progress-realtime')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'lesson_progress', filter: `student_id=eq.${initialData.stats.total > 0 ? 'placeholder' : 'placeholder'}` },
+        () => refreshData()
+      )
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'quiz_attempts' },
+        () => refreshData()
+      )
+      .subscribe()
+
+    return () => {
+      mounted = false
+      supabase.removeChannel(channel)
+    }
+  }, [])
 
   const filteredLessons = lessons.filter(l => {
     if (filter === 'all') return true
     return l.status === filter
   })
 
-  // Heatmap rows & cols logic (simplified for Github contribution graph style)
-  const heatmapCols = 13 // approx 3 months of weeks
+  const heatmapCols = 13
   const getIntensityColor = (minutes: number) => {
     if (minutes === 0) return 'var(--bg-elevated)'
     if (minutes < 15) return 'color-mix(in srgb, var(--brand-primary) 40%, transparent)'
@@ -93,21 +185,28 @@ export default function ProgressView({ data }: ProgressViewProps) {
           </div>
         </div>
 
-        {/* EXIT BUTTON */}
-        <button
-          onClick={() => router.push('/student')}
-          className="relative z-50 pointer-events-auto flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all shadow-md group cursor-pointer"
-          style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
-        >
-          <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
-          Quay lại Dashboard
-        </button>
+        <div className="flex items-center gap-3">
+          {/* Session Timer */}
+          <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium" style={{ background: 'color-mix(in srgb, var(--brand-primary) 8%, transparent)', border: '1px solid color-mix(in srgb, var(--brand-primary) 15%, transparent)', color: 'var(--brand-primary)' }}>
+            <Clock size={14} />
+            <span>{formatDuration(sessionTime)}</span>
+          </div>
+
+          <button
+            onClick={() => router.push('/student')}
+            className="relative z-50 pointer-events-auto flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all shadow-md group cursor-pointer"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
+          >
+            <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
+            Quay lại Dashboard
+          </button>
+        </div>
       </motion.div>
 
       {/* Daily Motivation */}
       <motion.div variants={itemVariants} className="rounded-2xl p-5 flex items-center gap-4 border" style={{ background: 'linear-gradient(to right, color-mix(in srgb, var(--brand-primary) 10%, transparent), color-mix(in srgb, #06b6d4 10%, transparent))', borderColor: 'color-mix(in srgb, var(--brand-primary) 20%, transparent)' }}>
         <span className="text-2xl">💡</span>
-        <p className="text-sm leading-relaxed" style={{ color: 'var(--text-primary)' }}>{getDailyQuote()}</p>
+        <p className="text-sm leading-relaxed" style={{ color: 'var(--text-primary)' }}>{quote}</p>
       </motion.div>
 
       {/* Section 1 - Header Stats */}
@@ -115,7 +214,7 @@ export default function ProgressView({ data }: ProgressViewProps) {
         <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} className="rounded-2xl p-6 flex items-center justify-between shadow-lg" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
           <div>
             <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Hoàn thành</p>
-            <h2 className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>{stats.completed} <span className="text-lg" style={{ color: 'var(--text-secondary)' }}>/ {stats.total}</span></h2>
+            <h2 className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>{initialStats.completed} <span className="text-lg" style={{ color: 'var(--text-secondary)' }}>/ {initialStats.total}</span></h2>
           </div>
           <div className="w-12 h-12 rounded-full flex items-center justify-center text-xl" style={{ background: 'color-mix(in srgb, var(--brand-primary) 10%, transparent)', color: 'var(--brand-primary)' }}>✅</div>
         </motion.div>
@@ -123,7 +222,7 @@ export default function ProgressView({ data }: ProgressViewProps) {
         <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} className="rounded-2xl p-6 flex items-center justify-between shadow-lg" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
           <div>
             <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Điểm TB Quiz</p>
-            <h2 className={`text-3xl font-bold ${stats.avgScore >= 70 ? '' : 'text-red-500'}`} style={{ color: stats.avgScore >= 70 ? 'var(--brand-primary)' : undefined }}>{stats.avgScore}</h2>
+            <h2 className={`text-3xl font-bold ${initialStats.avgScore >= 70 ? '' : 'text-red-500'}`} style={{ color: initialStats.avgScore >= 70 ? 'var(--brand-primary)' : undefined }}>{initialStats.avgScore}</h2>
           </div>
           <div className="w-12 h-12 rounded-full flex items-center justify-center text-xl" style={{ background: 'color-mix(in srgb, var(--brand-primary) 10%, transparent)', color: 'var(--brand-primary)' }}>🎯</div>
         </motion.div>
@@ -131,7 +230,7 @@ export default function ProgressView({ data }: ProgressViewProps) {
         <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} className="rounded-2xl p-6 flex items-center justify-between shadow-lg" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
           <div>
             <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Thời gian học</p>
-            <h2 className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>{(stats.totalSeconds / 3600).toFixed(1)}h</h2>
+            <h2 className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>{(initialStats.totalSeconds / 3600).toFixed(1)}h</h2>
           </div>
           <div className="w-12 h-12 rounded-full flex items-center justify-center text-xl" style={{ background: 'color-mix(in srgb, var(--brand-primary) 10%, transparent)', color: 'var(--brand-primary)' }}>⏱️</div>
         </motion.div>
@@ -139,10 +238,21 @@ export default function ProgressView({ data }: ProgressViewProps) {
         <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} className="rounded-2xl p-6 flex items-center justify-between shadow-lg" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
           <div>
             <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Streak</p>
-            <h2 className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>{stats.streak} ngày</h2>
+            <h2 className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>{initialStats.streak} ngày</h2>
           </div>
           <div className="w-12 h-12 bg-orange-500/10 rounded-full flex items-center justify-center text-orange-500 text-xl">🔥</div>
         </motion.div>
+      </div>
+
+      <div className="flex items-center justify-between mt-2">
+        <p className="text-xs flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
+          <RefreshCw size={12} />
+          {lastUpdated ? `Cập nhật lúc ${lastUpdated}` : 'Theo thời gian thực'}
+        </p>
+        <p className="text-xs sm:hidden flex items-center gap-1" style={{ color: 'var(--brand-primary)' }}>
+          <Clock size={12} />
+          {formatDuration(sessionTime)}
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -273,7 +383,7 @@ export default function ProgressView({ data }: ProgressViewProps) {
                     ) : l.status === 'in_progress' ? (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400">Đang học ({l.completion_percentage}%)</span>
                     ) : (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-500/10 text-gray-400">Chưa bắt đầu</span>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style={{ background: 'color-mix(in srgb, var(--text-muted) 10%, transparent)', color: 'var(--text-muted)' }}>Chưa bắt đầu</span>
                     )}
                   </td>
                   <td className="py-4 px-4 text-sm" style={{ color: 'var(--text-primary)' }}>{l.score !== null ? l.score : '-'}</td>
