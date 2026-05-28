@@ -117,13 +117,13 @@ export default function ParentNotificationsView({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-[#dde0ed] flex items-center gap-2">
-            <Bell size={24} className="text-[#00d4aa]" />
+          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+            <Bell size={24} style={{ color: 'var(--brand-primary)' }} />
             Thông báo Phụ huynh
           </h1>
-          <p className="text-[#636678] mt-1 text-sm">
+          <p className="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>
             Quản lý thông báo tiến độ, điểm quiz, streaks và thành tích của con.
           </p>
         </div>
@@ -133,7 +133,8 @@ export default function ParentNotificationsView({
             <button
               onClick={handleMarkAllRead}
               disabled={isPending}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#00d4aa]/10 hover:bg-[#00d4aa]/25 text-[#00d4aa] border border-[#00d4aa]/20 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
+              style={{ background: 'rgba(0, 212, 170, 0.1)', border: '1px solid rgba(0, 212, 170, 0.2)', color: 'var(--brand-primary)' }}
             >
               <Check size={14} />
               Đã đọc tất cả
@@ -141,7 +142,8 @@ export default function ParentNotificationsView({
             <button
               onClick={handleDeleteAll}
               disabled={isPending}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-red-500/10 hover:bg-red-500/25 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
+              style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#ef4444' }}
             >
               <Trash2 size={14} />
               Xóa tất cả
@@ -151,7 +153,7 @@ export default function ParentNotificationsView({
       </div>
 
       {/* Tabs Filter */}
-      <div className="flex items-center gap-1 overflow-x-auto pb-2 border-b border-white/5 no-scrollbar scroll-smooth">
+      <div className="flex items-center gap-1 overflow-x-auto pb-2 no-scrollbar scroll-smooth" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
         {[
           { key: 'all', label: 'Tất cả' },
           { key: 'lesson', label: 'Tiến độ học' },
@@ -162,11 +164,12 @@ export default function ParentNotificationsView({
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key as TabType)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-150 whitespace-nowrap border ${
-              activeTab === tab.key
-                ? 'bg-[#00d4aa]/10 border-[#00d4aa]/30 text-[#00d4aa] shadow-[0_0_15px_rgba(0,212,170,0.03)]'
-                : 'bg-transparent border-transparent text-[#636678] hover:text-[#dde0ed] hover:bg-white/5'
-            }`}
+            className="px-4 py-2 rounded-xl text-xs font-bold transition-all duration-150 whitespace-nowrap border"
+            style={{
+              background: activeTab === tab.key ? 'rgba(0, 212, 170, 0.1)' : 'transparent',
+              borderColor: activeTab === tab.key ? 'rgba(0, 212, 170, 0.3)' : 'transparent',
+              color: activeTab === tab.key ? 'var(--brand-primary)' : 'var(--text-muted)'
+            }}
           >
             {tab.label}
           </button>
@@ -175,14 +178,14 @@ export default function ParentNotificationsView({
 
       {/* List */}
       {filteredNotifications.length === 0 ? (
-        <div className="bg-[#111318] border border-white/5 rounded-2xl p-10 md:p-14 text-center my-6">
-          <div className="w-14 h-14 bg-[#1a1c25] rounded-full flex items-center justify-center mx-auto mb-4 text-[#636678]">
+        <div className="rounded-2xl p-10 md:p-14 text-center my-6" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
+          <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
             <Bell size={24} />
           </div>
-          <h3 className="text-base font-bold text-[#dde0ed] mb-1">
+          <h3 className="text-base font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
             Không tìm thấy thông báo
           </h3>
-          <p className="text-[#636678] text-xs max-w-xs mx-auto">
+          <p className="text-xs max-w-xs mx-auto" style={{ color: 'var(--text-muted)' }}>
             Không có thông báo nào khớp với danh mục bộ lọc hiện tại của bạn.
           </p>
         </div>
@@ -195,12 +198,15 @@ export default function ParentNotificationsView({
             return (
               <div
                 key={notif.id}
-                className={`bg-[#111318] border rounded-xl p-4 transition-all hover:border-white/10 flex items-start gap-4 ${
-                  notif.is_read ? 'border-white/5 opacity-60' : 'border-[#00d4aa]/20 shadow-[0_0_15px_rgba(0,212,170,0.02)]'
-                }`}
+                className="rounded-xl p-4 transition-all flex items-start gap-4"
+                style={{
+                  background: 'var(--bg-surface)',
+                  border: notif.is_read ? '1px solid var(--border-subtle)' : '1px solid rgba(0, 212, 170, 0.2)',
+                  opacity: notif.is_read ? 0.6 : 1
+                }}
               >
                 {/* Loại icon */}
-                <div className="w-8 h-8 rounded-lg bg-[#1a1c25] border border-white/5 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                   {getIcon(notif.type)}
                 </div>
 
@@ -210,15 +216,16 @@ export default function ParentNotificationsView({
                     {student.avatar_url ? (
                       <img
                         src={student.avatar_url}
-                        className="w-10 h-10 rounded-full object-cover border border-white/10"
+                        className="w-10 h-10 rounded-full object-cover"
+                        style={{ border: '1px solid var(--border-default)' }}
                         alt={student.full_name}
                       />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-[#1f2130] flex items-center justify-center text-sm font-bold text-[#00d4aa] border border-white/5 uppercase">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold uppercase" style={{ background: 'var(--bg-elevated)', color: 'var(--brand-primary)', border: '1px solid var(--border-subtle)' }}>
                         {student.full_name[0] || 'S'}
                       </div>
                     )}
-                    <span className="absolute -bottom-1 -right-1 text-[10px] bg-[#1a1c25] text-[#00d4aa] px-1 rounded-md border border-white/5 font-bold uppercase scale-75">
+                    <span className="absolute -bottom-1 -right-1 text-[10px] px-1 rounded-md font-bold uppercase scale-75" style={{ background: 'var(--bg-elevated)', color: 'var(--brand-primary)', border: '1px solid var(--border-subtle)' }}>
                       Con
                     </span>
                   </div>
@@ -227,22 +234,22 @@ export default function ParentNotificationsView({
                 {/* Nội dung thông báo */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-sm text-[#dde0ed]">{notif.title}</span>
+                    <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>{notif.title}</span>
                     {student && (
-                      <span className="text-[10px] font-bold text-[#00d4aa] sm:hidden">
+                      <span className="text-[10px] font-bold sm:hidden" style={{ color: 'var(--brand-primary)' }}>
                         ({student.full_name})
                       </span>
                     )}
                   </div>
                   {student && (
-                    <div className="text-[10px] text-[#636678] font-bold mt-0.5 hidden sm:block">
-                      Học sinh: <span className="text-[#dde0ed]">{student.full_name}</span>
+                    <div className="text-[10px] font-bold mt-0.5 hidden sm:block" style={{ color: 'var(--text-muted)' }}>
+                      Học sinh: <span style={{ color: 'var(--text-primary)' }}>{student.full_name}</span>
                     </div>
                   )}
-                  <div className="text-xs text-[#8a8d9f] mt-1.5 leading-relaxed">{notif.body}</div>
+                  <div className="text-xs mt-1.5 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{notif.body}</div>
 
                   {/* Time Footer */}
-                  <div className="flex items-center gap-1.5 text-[9px] text-[#636678] font-bold mt-3">
+                  <div className="flex items-center gap-1.5 text-[9px] font-bold mt-3" style={{ color: 'var(--text-muted)' }}>
                     <Calendar size={11} />
                     <span>{new Date(notif.created_at).toLocaleString('vi-VN')}</span>
                   </div>
@@ -253,7 +260,8 @@ export default function ParentNotificationsView({
                   {!notif.is_read && (
                     <button
                       onClick={() => handleMarkSingleRead(notif.id)}
-                      className="text-[10px] font-bold text-[#00d4aa] hover:underline bg-[#00d4aa]/5 border border-[#00d4aa]/10 hover:border-[#00d4aa]/30 px-2.5 py-1.5 rounded-lg whitespace-nowrap"
+                      className="text-[10px] font-bold hover:underline px-2.5 py-1.5 rounded-lg whitespace-nowrap"
+                      style={{ background: 'rgba(0, 212, 170, 0.05)', border: '1px solid rgba(0, 212, 170, 0.1)', color: 'var(--brand-primary)' }}
                     >
                       Đánh dấu đã đọc
                     </button>
@@ -261,14 +269,16 @@ export default function ParentNotificationsView({
                   {notif.action_url && (
                     <a
                       href={notif.action_url}
-                      className="text-[10px] font-bold text-[#dde0ed] hover:underline bg-white/5 border border-white/5 hover:border-white/10 px-2.5 py-1.5 rounded-lg whitespace-nowrap"
+                      className="text-[10px] font-bold hover:underline px-2.5 py-1.5 rounded-lg whitespace-nowrap"
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
                     >
                       Xem chi tiết con
                     </a>
                   )}
                   <button
                     onClick={() => handleDeleteSingle(notif.id)}
-                    className="text-red-400 hover:text-red-300 p-1.5 hover:bg-red-500/10 rounded-lg transition-all"
+                    className="p-1.5 rounded-lg transition-all"
+                    style={{ color: '#ef4444' }}
                     title="Xóa thông báo"
                   >
                     <Trash2 size={13} />

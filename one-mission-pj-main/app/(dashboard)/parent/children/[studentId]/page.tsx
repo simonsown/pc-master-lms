@@ -196,12 +196,13 @@ export default async function StudentDetailPage({ params }: PageProps) {
   }))
 
   return (
-    <div className="min-h-screen bg-[#0b0c11] text-[#dde0ed] p-6 md:p-8 max-w-6xl mx-auto space-y-8">
+    <div className="min-h-screen p-6 md:p-8 max-w-6xl mx-auto space-y-8" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
       {/* Quay lại link */}
       <div>
         <a 
           href="/parent/dashboard" 
-          className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#636678] hover:text-[#00d4aa] transition-colors"
+          className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider transition-colors"
+          style={{ color: 'var(--text-muted)' }}
         >
           <ArrowLeft size={14} />
           Quay lại bảng điều khiển
@@ -209,84 +210,85 @@ export default async function StudentDetailPage({ params }: PageProps) {
       </div>
 
       {/* SECTION 1 — HEADER */}
-      <div className="bg-[#111318] border border-white/5 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
-        <div className="absolute -top-24 -left-24 w-48 h-48 bg-[#00d4aa]/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
+        <div className="absolute -top-24 -left-24 w-48 h-48 rounded-full blur-3xl pointer-events-none" style={{ background: 'rgba(0, 212, 170, 0.05)' }} />
 
         <div className="flex items-center gap-4 relative z-10">
           {student.avatar_url ? (
             <img 
               src={student.avatar_url} 
-              className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border-2 border-white/10" 
+              className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover"
+              style={{ border: '2px solid var(--border-default)' }}
               alt={student.full_name} 
             />
           ) : (
-            <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#1f2130] flex items-center justify-center text-3xl font-black text-[#00d4aa] border border-white/5 uppercase">
+            <div className="w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center text-3xl font-black uppercase" style={{ background: 'var(--bg-elevated)', color: 'var(--brand-primary)', border: '1px solid var(--border-subtle)' }}>
               {student.full_name[0] || 'S'}
             </div>
           )}
           <div>
-            <h1 className="text-xl md:text-2xl font-bold text-[#dde0ed]">{student.full_name}</h1>
-            <div className="text-xs text-[#636678] mt-1">{student.school_name || 'Chưa cập nhật trường'}</div>
+            <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{student.full_name}</h1>
+            <div className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{student.school_name || 'Chưa cập nhật trường'}</div>
             <div className="flex items-center gap-2 mt-2">
-              <span className="font-mono text-[10px] bg-white/5 border border-white/5 text-[#dde0ed] px-2 py-0.5 rounded uppercase tracking-widest">
+              <span className="font-mono text-[10px] px-2 py-0.5 rounded uppercase tracking-widest" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}>
                 {student.student_code}
               </span>
-              <span className="text-[10px] font-bold bg-[#00d4aa]/10 border border-[#00d4aa]/20 text-[#00d4aa] px-2 py-0.5 rounded-full uppercase tracking-wider">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider" style={{ background: 'rgba(0, 212, 170, 0.1)', border: '1px solid rgba(0, 212, 170, 0.2)', color: 'var(--brand-primary)' }}>
                 Cấp {student.level || 1}
               </span>
             </div>
           </div>
         </div>
 
-        <div className="bg-[#1a1c25] border border-white/5 rounded-xl px-5 py-4 min-w-[140px] text-center md:text-right relative z-10 self-stretch md:self-auto flex md:flex-col justify-between items-center md:items-end">
-          <span className="text-[10px] uppercase font-bold tracking-wider text-[#636678]">Tổng điểm tích lũy</span>
-          <span className="text-2xl font-black text-[#00d4aa]">{student.xp || 0} XP</span>
+        <div className="rounded-xl px-5 py-4 min-w-[140px] text-center md:text-right relative z-10 self-stretch md:self-auto flex md:flex-col justify-between items-center md:items-end" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+          <span className="text-[10px] uppercase font-bold tracking-wider" style={{ color: 'var(--text-muted)' }}>Tổng điểm tích lũy</span>
+          <span className="text-2xl font-black" style={{ color: 'var(--brand-primary)' }}>{student.xp || 0} XP</span>
         </div>
       </div>
 
       {/* SECTION 2 — STATS TỔNG */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {/* Bài hoàn thành */}
-        <div className="bg-[#111318] border border-white/5 rounded-2xl p-5 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center flex-shrink-0">
+        <div className="rounded-2xl p-5 flex items-center gap-4" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
             <BookOpen size={22} />
           </div>
           <div>
-            <div className="text-2xl font-black text-[#dde0ed]">{completedLessonsCount}</div>
-            <div className="text-[10px] text-[#636678] uppercase font-bold tracking-wider">Bài đã xong</div>
+            <div className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>{completedLessonsCount}</div>
+            <div className="text-[10px] uppercase font-bold tracking-wider" style={{ color: 'var(--text-muted)' }}>Bài đã xong</div>
           </div>
         </div>
 
         {/* Giờ học */}
-        <div className="bg-[#111318] border border-white/5 rounded-2xl p-5 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-[#00d4aa]/10 text-[#00d4aa] flex items-center justify-center flex-shrink-0">
+        <div className="rounded-2xl p-5 flex items-center gap-4" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(0, 212, 170, 0.1)', color: 'var(--brand-primary)' }}>
             <Clock size={22} />
           </div>
           <div>
-            <div className="text-2xl font-black text-[#dde0ed]">{formatDuration(totalSeconds)}</div>
-            <div className="text-[10px] text-[#636678] uppercase font-bold tracking-wider">Tổng giờ học</div>
+            <div className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>{formatDuration(totalSeconds)}</div>
+            <div className="text-[10px] uppercase font-bold tracking-wider" style={{ color: 'var(--text-muted)' }}>Tổng giờ học</div>
           </div>
         </div>
 
         {/* Điểm TB quiz */}
-        <div className="bg-[#111318] border border-white/5 rounded-2xl p-5 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center flex-shrink-0">
+        <div className="rounded-2xl p-5 flex items-center gap-4" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(168, 85, 247, 0.1)', color: '#a855f7' }}>
             <Percent size={22} />
           </div>
           <div>
-            <div className="text-2xl font-black text-[#dde0ed]">{avgScore}%</div>
-            <div className="text-[10px] text-[#636678] uppercase font-bold tracking-wider">Điểm TB Quiz</div>
+            <div className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>{avgScore}%</div>
+            <div className="text-[10px] uppercase font-bold tracking-wider" style={{ color: 'var(--text-muted)' }}>Điểm TB Quiz</div>
           </div>
         </div>
 
         {/* Streak */}
-        <div className="bg-[#111318] border border-white/5 rounded-2xl p-5 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center flex-shrink-0">
+        <div className="rounded-2xl p-5 flex items-center gap-4" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255, 152, 0, 0.1)', color: '#ff9800' }}>
             <Flame size={22} />
           </div>
           <div>
-            <div className="text-2xl font-black text-[#dde0ed]">{streak} ngày</div>
-            <div className="text-[10px] text-[#636678] uppercase font-bold tracking-wider">Chuỗi liên tục</div>
+            <div className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>{streak} ngày</div>
+            <div className="text-[10px] uppercase font-bold tracking-wider" style={{ color: 'var(--text-muted)' }}>Chuỗi liên tục</div>
           </div>
         </div>
       </div>
@@ -298,27 +300,28 @@ export default async function StudentDetailPage({ params }: PageProps) {
         </div>
 
         {/* SECTION 6 — THÀNH TÍCH ĐẠT ĐƯỢC */}
-        <div className="bg-[#111318] border border-white/5 rounded-2xl p-5">
+        <div className="rounded-2xl p-5" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
           <div className="mb-4">
-            <h3 className="text-sm font-bold text-[#dde0ed] flex items-center gap-2">
-              <Trophy size={16} className="text-[#00d4aa]" />
+            <h3 className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+              <Trophy size={16} style={{ color: 'var(--brand-primary)' }} />
               Thành tích của con
             </h3>
-            <p className="text-[10px] text-[#636678] uppercase font-bold tracking-wider mt-0.5">Các huy hiệu con đã nhận được</p>
+            <p className="text-[10px] uppercase font-bold tracking-wider mt-0.5" style={{ color: 'var(--text-muted)' }}>Các huy hiệu con đã nhận được</p>
           </div>
           <div className="grid grid-cols-3 gap-3">
             {achievements.map((ach) => (
               <div 
                 key={ach.id} 
-                className={`p-3 rounded-xl border flex flex-col items-center justify-center text-center transition-all ${
-                  ach.earned 
-                    ? 'bg-[#1a1c25] border-white/5 shadow-[0_0_15px_rgba(255,255,255,0.02)]' 
-                    : 'bg-black/20 border-white/5 opacity-40'
-                }`}
+                className="p-3 rounded-xl border flex flex-col items-center justify-center text-center transition-all"
+                style={{
+                  background: ach.earned ? 'var(--bg-elevated)' : 'rgba(0,0,0,0.2)',
+                  border: '1px solid var(--border-subtle)',
+                  opacity: ach.earned ? 1 : 0.4
+                }}
                 title={ach.description}
               >
                 <div className="text-2xl mb-1.5">{ach.icon}</div>
-                <div className={`text-[10px] font-bold truncate w-full ${ach.earned ? 'text-[#dde0ed]' : 'text-[#636678]'}`}>
+                <div className="text-[10px] font-bold truncate w-full" style={{ color: ach.earned ? 'var(--text-primary)' : 'var(--text-muted)' }}>
                   {ach.title}
                 </div>
               </div>
@@ -329,28 +332,28 @@ export default async function StudentDetailPage({ params }: PageProps) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* SECTION 4 — DANH SÁCH BÀI HỌC */}
-        <div className="bg-[#111318] border border-white/5 rounded-2xl p-5 space-y-4">
+        <div className="rounded-2xl p-5 space-y-4" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
           <div>
-            <h3 className="text-sm font-bold text-[#dde0ed] flex items-center gap-2">
-              <Activity size={16} className="text-[#00b4d8]" />
+            <h3 className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+              <Activity size={16} style={{ color: '#00b4d8' }} />
               Tiến trình học tập
             </h3>
-            <p className="text-[10px] text-[#636678] uppercase font-bold tracking-wider mt-0.5">Các bài học gần đây nhất</p>
+            <p className="text-[10px] uppercase font-bold tracking-wider mt-0.5" style={{ color: 'var(--text-muted)' }}>Các bài học gần đây nhất</p>
           </div>
           
           <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1">
             {lessons.length === 0 ? (
-              <div className="text-center py-8 text-xs text-[#636678]">Con chưa bắt đầu bài học nào</div>
+              <div className="text-center py-8 text-xs" style={{ color: 'var(--text-muted)' }}>Con chưa bắt đầu bài học nào</div>
             ) : (
               lessons.map((lesson) => (
                 <div 
                   key={lesson.id} 
-                  className="bg-[#1a1c25] border border-white/5 rounded-xl p-3.5 flex justify-between items-center gap-4 hover:border-white/10 transition-colors"
+                  className="rounded-xl p-3.5 flex justify-between items-center gap-4 transition-colors" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="font-bold text-xs text-[#dde0ed] truncate">{lesson.lesson_title}</div>
-                    <div className="flex items-center gap-2 mt-1.5 text-[10px] text-[#636678] font-bold">
-                      <span className="bg-white/5 px-2 py-0.5 rounded uppercase">{lesson.type}</span>
+                    <div className="font-bold text-xs truncate" style={{ color: 'var(--text-primary)' }}>{lesson.lesson_title}</div>
+                    <div className="flex items-center gap-2 mt-1.5 text-[10px] font-bold" style={{ color: 'var(--text-muted)' }}>
+                      <span className="px-2 py-0.5 rounded uppercase" style={{ background: 'rgba(255,255,255,0.05)' }}>{lesson.type}</span>
                       <span>•</span>
                       <span>Học {formatDuration(lesson.time_spent_seconds)}</span>
                     </div>
@@ -358,11 +361,11 @@ export default async function StudentDetailPage({ params }: PageProps) {
 
                   <div className="text-right flex-shrink-0">
                     {lesson.status === 'completed' ? (
-                      <span className="text-[10px] font-bold bg-[#00d4aa]/10 border border-[#00d4aa]/20 text-[#00d4aa] px-2.5 py-1 rounded-full uppercase tracking-wider">
+                      <span className="text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider" style={{ background: 'rgba(0, 212, 170, 0.1)', border: '1px solid rgba(0, 212, 170, 0.2)', color: 'var(--brand-primary)' }}>
                         Hoàn thành
                       </span>
                     ) : (
-                      <span className="text-[10px] font-bold bg-orange-500/10 border border-orange-500/20 text-orange-400 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                      <span className="text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider" style={{ background: 'rgba(255, 152, 0, 0.1)', border: '1px solid rgba(255, 152, 0, 0.2)', color: '#ff9800' }}>
                         {lesson.completion_percentage}%
                       </span>
                     )}
@@ -374,39 +377,37 @@ export default async function StudentDetailPage({ params }: PageProps) {
         </div>
 
         {/* SECTION 5 — KẾT QUẢ QUIZ GẦN ĐÂY */}
-        <div className="bg-[#111318] border border-white/5 rounded-2xl p-5 space-y-4">
+        <div className="rounded-2xl p-5 space-y-4" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
           <div>
-            <h3 className="text-sm font-bold text-[#dde0ed] flex items-center gap-2">
-              <Award size={16} className="text-[#a855f7]" />
+            <h3 className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+              <Award size={16} style={{ color: '#a855f7' }} />
               Kết quả trắc nghiệm
             </h3>
-            <p className="text-[10px] text-[#636678] uppercase font-bold tracking-wider mt-0.5">Điểm số 10 bài kiểm tra gần nhất</p>
+            <p className="text-[10px] uppercase font-bold tracking-wider mt-0.5" style={{ color: 'var(--text-muted)' }}>Điểm số 10 bài kiểm tra gần nhất</p>
           </div>
 
           <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1">
             {quizResults.length === 0 ? (
-              <div className="text-center py-8 text-xs text-[#636678]">Con chưa thực hiện bài kiểm tra nào</div>
+              <div className="text-center py-8 text-xs" style={{ color: 'var(--text-muted)' }}>Con chưa thực hiện bài kiểm tra nào</div>
             ) : (
               quizResults.map((attempt) => (
                 <div 
                   key={attempt.id} 
-                  className="bg-[#1a1c25] border border-white/5 rounded-xl p-3.5 flex justify-between items-center gap-4 hover:border-white/10 transition-colors"
+                  className="rounded-xl p-3.5 flex justify-between items-center gap-4 transition-colors" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="font-bold text-xs text-[#dde0ed] truncate">{attempt.quiz_title}</div>
-                    <div className="text-[10px] text-[#636678] font-bold mt-1.5">
-                      Đạt: <span className="text-[#00d4aa]">{attempt.score}%</span>
+                    <div className="font-bold text-xs truncate" style={{ color: 'var(--text-primary)' }}>{attempt.quiz_title}</div>
+                    <div className="text-[10px] font-bold mt-1.5" style={{ color: 'var(--text-muted)' }}>
+                      Đạt: <span style={{ color: 'var(--brand-primary)' }}>{attempt.score}%</span>
                     </div>
                   </div>
 
                   <div className="text-right flex-shrink-0">
-                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border ${
-                      attempt.score >= 80 
-                        ? 'bg-[#00d4aa]/10 border-[#00d4aa]/20 text-[#00d4aa]' 
-                        : attempt.score >= 50 
-                        ? 'bg-orange-500/10 border-orange-500/20 text-orange-400' 
-                        : 'bg-red-500/10 border-red-500/20 text-red-400'
-                    }`}>
+                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border" style={{
+                      background: attempt.score >= 80 ? 'rgba(0,212,170,0.1)' : attempt.score >= 50 ? 'rgba(255,152,0,0.1)' : 'rgba(239,68,68,0.1)',
+                      borderColor: attempt.score >= 80 ? 'rgba(0,212,170,0.2)' : attempt.score >= 50 ? 'rgba(255,152,0,0.2)' : 'rgba(239,68,68,0.2)',
+                      color: attempt.score >= 80 ? 'var(--brand-primary)' : attempt.score >= 50 ? '#ff9800' : '#ef4444'
+                    }}>
                       {attempt.grade}
                     </span>
                   </div>

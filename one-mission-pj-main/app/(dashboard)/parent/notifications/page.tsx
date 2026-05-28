@@ -85,7 +85,7 @@ export default async function ParentNotificationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0b0c11] text-[#dde0ed] p-6 md:p-8 max-w-4xl mx-auto">
+    <div className="min-h-screen p-6 md:p-8 max-w-4xl mx-auto" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
       <ParentNotificationsView
         initialNotifications={notifications}
         students={students}

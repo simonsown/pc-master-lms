@@ -47,47 +47,48 @@ export function ChildCard({ child }: { child: ChildSummary }) {
   return (
     <Link
       href={`/parent/children/${child.student_id}`}
-      className="block bg-[#111318] border border-white/5 rounded-xl p-5 hover:border-[#00d4aa]/30 transition-all duration-200 hover:shadow-[0_0_20px_rgba(0,212,170,0.03)] group"
+      className="block rounded-xl p-5 transition-all duration-200 group"
+      style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}
     >
       {/* Avatar + Tên */}
       <div className="flex items-center gap-3 mb-4">
         {child.avatar_url ? (
-          <img src={child.avatar_url} className="w-12 h-12 rounded-full object-cover border border-white/10" alt={child.student_name} />
+          <img src={child.avatar_url} className="w-12 h-12 rounded-full object-cover" style={{ border: '1px solid var(--border-default)' }} alt={child.student_name} />
         ) : (
-          <div className="w-12 h-12 rounded-full bg-[#1f2130] flex items-center justify-center text-xl font-bold text-[#00d4aa] border border-white/5 uppercase">
+          <div className="w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold uppercase" style={{ background: 'var(--bg-elevated)', color: 'var(--brand-primary)', border: '1px solid var(--border-subtle)' }}>
             {child.student_name[0] || 'S'}
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <div className="font-bold text-[#dde0ed] truncate group-hover:text-[#00d4aa] transition-colors">{child.student_name}</div>
-          <div className="text-xs text-[#636678] truncate">{child.school_name || 'Chưa cập nhật trường học'}</div>
+          <div className="font-bold truncate transition-colors" style={{ color: 'var(--text-primary)' }}>{child.student_name}</div>
+          <div className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{child.school_name || 'Chưa cập nhật trường học'}</div>
         </div>
-        <div className="bg-[#00d4aa]/10 text-[#00d4aa] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+        <div className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider" style={{ background: 'rgba(0, 212, 170, 0.1)', color: 'var(--brand-primary)' }}>
           Cấp {child.level || 1}
         </div>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="bg-[#1a1c25] rounded-xl p-3 text-center border border-white/5">
-          <div className="text-xl font-black text-[#00d4aa]">{child.lessons_completed}</div>
-          <div className="text-[10px] text-[#636678] uppercase font-bold tracking-wider">Bài đã xong</div>
+        <div className="rounded-xl p-3 text-center" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+          <div className="text-xl font-black" style={{ color: 'var(--brand-primary)' }}>{child.lessons_completed}</div>
+          <div className="text-[10px] uppercase font-bold tracking-wider" style={{ color: 'var(--text-muted)' }}>Bài đã xong</div>
         </div>
-        <div className="bg-[#1a1c25] rounded-xl p-3 text-center border border-white/5">
-          <div className="text-xl font-black text-[#dde0ed]">
+        <div className="rounded-xl p-3 text-center" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+          <div className="text-xl font-black" style={{ color: 'var(--text-primary)' }}>
             {Math.round((child.total_time_seconds ?? 0) / 3600)}h
           </div>
-          <div className="text-[10px] text-[#636678] uppercase font-bold tracking-wider">Tổng giờ học</div>
+          <div className="text-[10px] uppercase font-bold tracking-wider" style={{ color: 'var(--text-muted)' }}>Tổng giờ học</div>
         </div>
       </div>
 
       {/* Progress Bar */}
       <div className="mb-4">
-        <div className="flex justify-between text-[11px] font-bold text-[#636678] mb-1">
+        <div className="flex justify-between text-[11px] font-bold mb-1" style={{ color: 'var(--text-muted)' }}>
           <span>Tiến độ hoàn thành bài</span>
-          <span className="text-[#dde0ed]">{progressPercent}%</span>
+          <span style={{ color: 'var(--text-primary)' }}>{progressPercent}%</span>
         </div>
-        <div className="h-2 bg-[#1a1c25] rounded-full overflow-hidden border border-white/5">
+        <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
           <div
             className="h-full bg-gradient-to-r from-[#00d4aa] to-[#00b4d8] rounded-full transition-all duration-300"
             style={{ width: `${progressPercent}%` }}
@@ -96,10 +97,11 @@ export function ChildCard({ child }: { child: ChildSummary }) {
       </div>
 
       {/* Last Active Footer */}
-      <div className="text-[11px] text-[#636678] flex items-center gap-2 pt-3 border-t border-white/5">
-        <span className={`w-2 h-2 rounded-full ${
-          isRecentlyActive ? 'bg-[#00d4aa] shadow-[0_0_8px_rgba(0,212,170,0.5)]' : 'bg-[#636678]'
-        }`} />
+      <div className="text-[11px] flex items-center gap-2 pt-3" style={{ color: 'var(--text-muted)', borderTop: '1px solid var(--border-subtle)' }}>
+        <span className="w-2 h-2 rounded-full" style={{
+          background: isRecentlyActive ? 'var(--brand-primary)' : 'var(--text-muted)',
+          boxShadow: isRecentlyActive ? '0 0 8px var(--brand-primary)' : 'none'
+        }} />
         <span>Hoạt động: {lastActiveText}</span>
       </div>
     </Link>

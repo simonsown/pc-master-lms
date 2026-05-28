@@ -113,7 +113,6 @@ export default function TeacherLayout({ children }: { children: React.ReactNode 
             <NavItem href="/teacher/certificates" icon={Award} label="Chứng chỉ" />
           </NavGroup>
           <NavGroup label="Tiện ích">
-            <NavItem href="/teacher/certificates" icon={Award} label="Chứng chỉ" />
             <NavItem href="/student/discussion" icon={MessageSquare} label="Diễn đàn" />
           </NavGroup>
         </nav>

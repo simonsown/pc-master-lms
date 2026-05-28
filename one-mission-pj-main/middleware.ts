@@ -6,6 +6,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 const ROUTE_PERMISSIONS: Record<string, string[]> = {
   '/admin':       ['admin'],
   '/teacher':     ['teacher', 'admin'],
+  '/student/discussion': ['student', 'teacher', 'admin'],
   '/student':     ['student', 'admin'],
   '/parent':      ['parent', 'admin'],
   '/builder':     ['student', 'admin'],

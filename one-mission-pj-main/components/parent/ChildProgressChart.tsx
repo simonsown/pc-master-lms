@@ -50,21 +50,21 @@ export default function ChildProgressChart({ data }: ChildProgressChartProps) {
 
   if (processedData.length === 0) {
     return (
-      <div className="h-48 flex items-center justify-center text-xs text-[#636678] bg-[#111318] border border-white/5 rounded-2xl">
+      <div className="h-48 flex items-center justify-center text-xs rounded-2xl" style={{ color: 'var(--text-muted)', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
         Chưa có dữ liệu học tập trong 30 ngày qua
       </div>
     )
   }
 
   return (
-    <div className="bg-[#111318] border border-white/5 rounded-2xl p-5">
+    <div className="rounded-2xl p-5" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <div className="text-sm font-bold text-[#dde0ed]">Tiến trình học tập</div>
-          <div className="text-[10px] text-[#636678] uppercase font-bold tracking-wider mt-0.5">Số bài học hoàn thành mỗi ngày</div>
+          <div className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Tiến trình học tập</div>
+          <div className="text-[10px] uppercase font-bold tracking-wider mt-0.5" style={{ color: 'var(--text-muted)' }}>Số bài học hoàn thành mỗi ngày</div>
         </div>
-        <div className="flex items-center gap-1.5 text-xs text-[#00d4aa] font-semibold bg-[#00d4aa]/10 px-2.5 py-1 rounded-full">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#00d4aa] animate-ping" />
+        <div className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full" style={{ color: 'var(--brand-primary)', background: 'rgba(0, 212, 170, 0.1)' }}>
+          <span className="w-1.5 h-1.5 rounded-full animate-ping" style={{ background: 'var(--brand-primary)' }} />
           30 ngày gần đây
         </div>
       </div>

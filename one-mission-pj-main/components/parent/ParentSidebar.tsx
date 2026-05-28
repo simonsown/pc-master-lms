@@ -33,7 +33,8 @@ export default function ParentSidebar() {
       {/* Nút Hamburger trên Mobile */}
       <button
         onClick={() => setIsMobileOpen(true)}
-        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-[#1a1c25] border border-white/10 rounded-lg text-[#dde0ed] hover:bg-[#222533] transition-colors"
+        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg transition-colors"
+        style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
       >
         <Menu size={20} />
       </button>
@@ -48,21 +49,22 @@ export default function ParentSidebar() {
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed md:sticky top-0 left-0 z-50 flex flex-col w-64 h-screen bg-[#1a1c25] border-r border-white/5 transition-transform duration-300 md:translate-x-0 ${
+        className={`fixed md:sticky top-0 left-0 z-50 flex flex-col w-64 h-screen transition-transform duration-300 md:translate-x-0 ${
           isMobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
+        style={{ background: 'var(--bg-surface)', borderRight: '1px solid var(--border-subtle)' }}
       >
         {/* Header */}
-        <div className="h-16 px-6 flex items-center justify-between border-b border-white/5">
+        <div className="h-16 px-6 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
           <Link href="/" className="flex items-center gap-3">
             <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
-            <span className="font-bold text-sm text-[#dde0ed] tracking-wide">
-              PC Master <span className="text-[#00d4aa]">Parent</span>
+            <span className="font-bold text-sm tracking-wide" style={{ color: 'var(--text-primary)' }}>
+              PC Master <span style={{ color: 'var(--brand-primary)' }}>Parent</span>
             </span>
           </Link>
           <button
             onClick={() => setIsMobileOpen(false)}
-            className="md:hidden text-[#636678] hover:text-[#dde0ed]"
+            className="md:hidden" style={{ color: 'var(--text-muted)' }}
           >
             <X size={18} />
           </button>
@@ -70,7 +72,7 @@ export default function ParentSidebar() {
 
         {/* Navigation Items */}
         <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
-          <div className="px-3 mb-2 text-[10px] font-bold tracking-wider text-[#636678] uppercase">
+          <div className="px-3 mb-2 text-[10px] font-bold tracking-wider uppercase" style={{ color: 'var(--text-muted)' }}>
             Menu Phụ Huynh
           </div>
           {parentNavItems.map((item) => {
@@ -83,11 +85,15 @@ export default function ParentSidebar() {
                 onClick={() => setIsMobileOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 border-l-2 ${
                   isActive
-                    ? 'bg-[#00d4aa]/10 text-[#00d4aa] border-[#00d4aa]'
-                    : 'text-[#636678] border-transparent hover:bg-[#222533] hover:text-[#dde0ed]'
+                    ? 'border-[#00d4aa]'
+                    : 'border-transparent'
                 }`}
+                style={{
+                  background: isActive ? 'rgba(0, 212, 170, 0.1)' : 'transparent',
+                  color: isActive ? 'var(--brand-primary)' : 'var(--text-muted)'
+                }}
               >
-                <Icon size={18} className={isActive ? 'text-[#00d4aa]' : 'text-[#636678]'} />
+                <Icon size={18} style={{ color: isActive ? 'var(--brand-primary)' : 'var(--text-muted)' }} />
                 <span>{item.label}</span>
               </Link>
             )
@@ -95,14 +101,14 @@ export default function ParentSidebar() {
         </nav>
 
         {/* Footer Sidebar với Nút Log Out */}
-        <div className="p-4 border-t border-white/5 bg-[#14161e]">
+        <div className="p-4" style={{ borderTop: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)' }}>
           <div className="flex items-center gap-3 px-2 mb-4">
-            <div className="w-9 h-9 rounded-full bg-[#222533] flex items-center justify-center text-sm font-bold text-[#00d4aa]">
+            <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: 'var(--bg-base)', color: 'var(--brand-primary)' }}>
               P
             </div>
             <div className="overflow-hidden">
-              <div className="text-xs font-bold text-[#dde0ed] truncate">Phụ huynh</div>
-              <div className="text-[10px] text-[#636678] truncate">Tài khoản liên kết</div>
+              <div className="text-xs font-bold truncate" style={{ color: 'var(--text-primary)' }}>Phụ huynh</div>
+              <div className="text-[10px] truncate" style={{ color: 'var(--text-muted)' }}>Tài khoản liên kết</div>
             </div>
           </div>
           <button
@@ -111,7 +117,8 @@ export default function ParentSidebar() {
                 await logout()
               }
             }}
-            className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/20 rounded-lg text-xs font-bold transition-all duration-150"
+            className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-xs font-bold transition-all duration-150 rounded-lg"
+            style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#ef4444' }}
           >
             <LogOut size={14} />
             Đăng xuất

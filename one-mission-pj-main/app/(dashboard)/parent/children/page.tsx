@@ -18,19 +18,20 @@ export default async function ParentChildrenPage() {
     .order('student_name')
 
   return (
-    <div className="min-h-screen bg-[#0b0c11] text-[#dde0ed] p-6 md:p-8 max-w-6xl mx-auto">
+    <div className="min-h-screen p-6 md:p-8 max-w-6xl mx-auto" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-[#dde0ed] flex items-center gap-2">
+          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
             Học sinh đang theo dõi
           </h1>
-          <p className="text-[#636678] mt-1 text-sm">
+          <p className="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>
             Danh sách tất cả tài khoản con đã được liên kết với bạn.
           </p>
         </div>
         <a
           href="/parent/link-child"
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#00d4aa]/10 hover:bg-[#00d4aa]/25 border border-[#00d4aa]/30 hover:border-[#00d4aa]/60 text-[#00d4aa] rounded-xl font-semibold text-sm transition-all duration-150 shadow-[0_0_15px_rgba(0,212,170,0.05)] self-start md:self-auto"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all duration-150 self-start md:self-auto"
+          style={{ background: 'rgba(0, 212, 170, 0.1)', border: '1px solid rgba(0, 212, 170, 0.3)', color: 'var(--brand-primary)' }}
         >
           <Plus size={16} />
           Liên kết thêm con
@@ -38,15 +39,16 @@ export default async function ParentChildrenPage() {
       </div>
 
       {(!children || children.length === 0) ? (
-        <div className="bg-[#111318] border border-dashed border-[#00d4aa]/20 rounded-2xl p-8 md:p-12 text-center max-w-2xl mx-auto my-12">
+        <div className="rounded-2xl p-8 md:p-12 text-center max-w-2xl mx-auto my-12" style={{ background: 'var(--bg-surface)', border: '1.5px dashed rgba(0, 212, 170, 0.25)' }}>
           <div className="text-5xl mb-5">👨‍👩‍👧‍👦</div>
-          <h3 className="text-xl font-bold text-[#dde0ed] mb-2">Chưa liên kết tài khoản con</h3>
-          <p className="text-[#636678] text-sm mb-6 max-w-md mx-auto leading-relaxed">
+          <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Chưa liên kết tài khoản con</h3>
+          <p className="text-sm mb-6 max-w-md mx-auto leading-relaxed" style={{ color: 'var(--text-muted)' }}>
             Nhập mã học sinh của con bạn để bắt đầu cập nhật điểm quiz, bài luyện tập và theo dõi tiến độ của con.
           </p>
           <a
             href="/parent/link-child"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#00d4aa]/10 hover:bg-[#00d4aa]/25 border border-[#00d4aa]/30 hover:border-[#00d4aa]/60 text-[#00d4aa] rounded-xl font-semibold text-sm transition-all duration-150"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-150"
+            style={{ background: 'rgba(0, 212, 170, 0.1)', border: '1px solid rgba(0, 212, 170, 0.3)', color: 'var(--brand-primary)' }}
           >
             Liên kết con ngay
           </a>
