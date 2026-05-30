@@ -93,6 +93,7 @@ export default function QuizTakingPage({ params }: { params: Promise<{ quizId: s
   const [activeTerm, setActiveTerm] = useState<string | null>(null)
   const [showGlossary, setShowGlossary] = useState(false)
   const [glossarySearch, setGlossarySearch] = useState('')
+  const [attemptId, setAttemptId] = useState<string | null>(null)
   const tooltipRef = useRef<HTMLDivElement>(null)
 
   const scoreRef = useRef(0)
@@ -141,6 +142,21 @@ export default function QuizTakingPage({ params }: { params: Promise<{ quizId: s
     setActiveTerm(prev => prev === term ? null : term)
   }, [])
 
+  const getQuestionResults = useCallback(() => {
+    const results: { question: string; options: string[]; selectedIndex: number | null; correctIndex: number; isCorrect: boolean }[] = []
+    for (let i = 0; i < questionsRef.current.length; i++) {
+      const q = questionsRef.current[i]
+      results.push({
+        question: q.question,
+        options: q.options,
+        selectedIndex: q.selectedIndex ?? null,
+        correctIndex: q.correctIndex,
+        isCorrect: (q.selectedIndex ?? -1) === q.correctIndex
+      })
+    }
+    return results
+  }, [])
+
   async function finishQuiz(finalScore: number) {
     if (finishedRef.current) return
     finishedRef.current = true
@@ -150,19 +166,29 @@ export default function QuizTakingPage({ params }: { params: Promise<{ quizId: s
     try {
       const { data: { user } } = await supabaseRef.current.auth.getUser()
       if (user) {
-        await supabaseRef.current.from('quiz_attempts').insert({
+        const { data: attempt } = await supabaseRef.current.from('quiz_attempts').insert({
           student_id: user.id,
           quiz_id: quizId,
           score: finalScore,
           total_questions: questionsRef.current.length,
           status: finalScore >= 80 ? 'passed' : 'failed'
-        })
+        }).select('id').single()
 
         const { data: profile } = await supabaseRef.current.from('profiles').select('total_score').eq('id', user.id).single()
         if (profile) {
           await supabaseRef.current.from('profiles').update({
             total_score: (profile.total_score || 0) + finalScore
           }).eq('id', user.id)
+        }
+
+        if (attempt) {
+          setAttemptId(attempt.id)
+          const questionResults = getQuestionResults()
+          try {
+            sessionStorage.setItem(`quiz-result-${attempt.id}`, JSON.stringify(questionResults))
+            sessionStorage.setItem(`quiz-score-${attempt.id}`, String(finalScore))
+            sessionStorage.setItem(`quiz-max-${attempt.id}`, String(questionsRef.current.length * 10))
+          } catch(e) {}
         }
       }
     } catch (e) {
@@ -186,6 +212,10 @@ export default function QuizTakingPage({ params }: { params: Promise<{ quizId: s
     if (selectedOption === currentQ.correctIndex) {
       scoreRef.current += 10
       setScore(scoreRef.current)
+    }
+    questionsRef.current[currentQIndex] = {
+      ...questionsRef.current[currentQIndex],
+      selectedIndex: selectedOption
     }
   }
 
@@ -251,7 +281,7 @@ export default function QuizTakingPage({ params }: { params: Promise<{ quizId: s
         {submitting ? (
           <div className="flex flex-col items-center gap-4">
             <RefreshCw size={32} className="animate-spin" style={{ color: 'var(--brand-primary)' }} />
-            <h2 className="text-xl font-bold tracking-widest text-gray-300 uppercase">Đang nộp bài...</h2>
+            <h2 className="text-xl font-bold tracking-widest uppercase" style={{ color: 'var(--text-secondary)' }}>Đang nộp bài...</h2>
           </div>
         ) : (
           <div className="border p-8 rounded-3xl shadow-2xl max-w-lg w-full text-center relative overflow-hidden backdrop-blur-xl" style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-default)' }}>
@@ -265,9 +295,16 @@ export default function QuizTakingPage({ params }: { params: Promise<{ quizId: s
             </div>
 
             <div className="flex justify-center gap-4">
+              {attemptId && (
+                <button onClick={() => router.push(`/student/quiz/${quizId}/results?attemptId=${attemptId}`)}
+                  className="relative z-50 pointer-events-auto px-6 py-3 rounded-xl font-black transition-all"
+                  style={{ background: 'var(--brand-primary)', color: 'black' }}>
+                  Xem Chi Tiết
+                </button>
+              )}
               <button onClick={() => router.push('/student/quiz')}
-                className="relative z-50 pointer-events-auto px-6 py-3 border rounded-xl font-bold transition-all" style={{ background: 'var(--brand-primary)', border: '1px solid var(--brand-primary)', color: 'white' }}>
-                Quay Lại Ngân Hàng Đề Thi
+                className="relative z-50 pointer-events-auto px-6 py-3 border rounded-xl font-bold transition-all" style={{ borderColor: 'var(--border-default)', color: 'var(--text-secondary)' }}>
+                Quay Lại
               </button>
             </div>
           </div>

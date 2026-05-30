@@ -2,7 +2,6 @@
 
 import { createClient } from '@/lib/supabase-ssr-server'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 
 export async function publishLessonAction(lessonId: string) {
   const supabase = await createClient()
@@ -49,6 +48,8 @@ export async function deleteLessonAction(lessonId: string) {
   if (!user) return { error: 'Unauthorized' }
 
   await supabase.from('lesson_sections').delete().eq('lesson_id', lessonId)
+  await supabase.from('lesson_progress').delete().eq('lesson_id', lessonId)
+  await supabase.from('lesson_class_assignments').delete().eq('lesson_id', lessonId)
   const { error } = await supabase
     .from('lessons')
     .delete()
@@ -58,7 +59,7 @@ export async function deleteLessonAction(lessonId: string) {
   if (error) return { error: error.message }
 
   revalidatePath('/teacher/lessons')
-  redirect('/teacher/lessons')
+  return { success: true }
 }
 
 export async function incrementViewCountAction(lessonId: string) {

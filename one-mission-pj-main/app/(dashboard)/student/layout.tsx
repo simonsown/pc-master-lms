@@ -8,6 +8,24 @@ import { logout } from '@/lib/auth-actions'
 import { createBrowserClient } from '@supabase/ssr'
 import PageTransition from '@/components/PageTransition'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Clock } from 'lucide-react'
+import { useSessionTime } from '@/lib/session-time'
+
+function SessionTimer() {
+  const { formatted } = useSessionTime()
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: '8px',
+      padding: '8px 16px', margin: '8px 12px',
+      borderRadius: '8px', fontSize: '12px', fontWeight: 600,
+      background: 'rgba(8,158,96,0.1)', color: 'var(--brand-primary)',
+      border: '1px solid rgba(8,158,96,0.2)'
+    }}>
+      <Clock size={14} />
+      <span>{formatted}</span>
+    </div>
+  )
+}
 
 function ThemeToggle() {
   const [theme, setThemeState] = useState<'light' | 'dark'>('dark')
@@ -85,6 +103,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
         </div>
       </div>
 
+      <SessionTimer />
       <nav style={{ padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
         {navItems.map(({ href, label, icon: Icon }) => {
           const active = pathname === href

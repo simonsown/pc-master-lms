@@ -11,6 +11,7 @@ export interface ProgressStats {
 export interface DailyProgress {
   date: string
   count: number
+  minutes: number
 }
 
 export interface LessonProgress {
@@ -29,6 +30,11 @@ export interface QuizAttempt {
   quiz_title: string
   score: number
   passing_score: number
+  max_score: number
+  total_questions: number
+  correct_count: number
+  submitted_at: string | null
+  status: string
 }
 
 export interface BuilderActivity {
@@ -50,7 +56,7 @@ export async function getProgressStats(supabase: SupabaseClient, userId: string)
     .from('quiz_attempts')
     .select('score')
     .eq('student_id', userId)
-    .eq('status', 'graded')
+    .in('status', ['graded', 'passed', 'failed', 'submitted'])
 
   const avgScore = quizData && quizData.length > 0
     ? Math.round(quizData.reduce((s, r) => s + r.score, 0) / quizData.length)
@@ -110,50 +116,66 @@ export async function getStreak(supabase: SupabaseClient, userId: string): Promi
 }
 
 export async function getDailyProgress(supabase: SupabaseClient, userId: string, days: number): Promise<DailyProgress[]> {
-  const { data } = await supabase
+  const { data: progressData } = await supabase
     .from('lesson_progress')
-    .select('completed_at')
+    .select('last_accessed, time_spent_seconds')
     .eq('student_id', userId)
-    .eq('status', 'completed')
-    .not('completed_at', 'is', null)
+    .not('last_accessed', 'is', null)
 
-  const counts: Record<string, number> = {}
+  const { data: builderData } = await supabase
+    .from('builder_sessions')
+    .select('started_at, ended_at')
+    .eq('student_id', userId)
+
+  const counts: Record<string, { count: number; minutes: number }> = {}
   
   const today = new Date()
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date(today)
     d.setDate(d.getDate() - i)
     const formatted = `${d.getDate()}/${d.getMonth() + 1}`
-    counts[formatted] = 0
+    counts[formatted] = { count: 0, minutes: 0 }
   }
 
-  data?.forEach(row => {
-    if (row.completed_at) {
-      const d = new Date(row.completed_at)
+  progressData?.forEach(row => {
+    if (row.last_accessed) {
+      const d = new Date(row.last_accessed)
       const formatted = `${d.getDate()}/${d.getMonth() + 1}`
-      if (counts[formatted] !== undefined) {
-        counts[formatted] += 1
+      if (counts[formatted]) {
+        counts[formatted].count += 1
+        counts[formatted].minutes += Math.round((row.time_spent_seconds ?? 0) / 60)
       }
     }
   })
 
-  return Object.keys(counts).map(date => ({ date, count: counts[date] }))
+  builderData?.forEach(row => {
+    if (row.started_at && row.ended_at) {
+      const d = new Date(row.started_at)
+      const formatted = `${d.getDate()}/${d.getMonth() + 1}`
+      if (counts[formatted]) {
+        const minutes = Math.round((new Date(row.ended_at).getTime() - new Date(row.started_at).getTime()) / 60000)
+        counts[formatted].minutes += minutes
+      }
+    }
+  })
+
+  return Object.keys(counts).map(date => ({ date, count: counts[date].count, minutes: counts[date].minutes }))
 }
 
 export async function getAllLessonProgress(supabase: SupabaseClient, userId: string): Promise<LessonProgress[]> {
   const { data } = await supabase
     .from('lesson_progress')
-    .select('id, lesson_id, status, completed_at, completion_percentage')
+    .select('id, lesson_id, status, score, completed_at, completion_percentage, last_accessed, lessons(title)')
     .eq('student_id', userId)
     .order('last_accessed', { ascending: false })
 
-  return (data || []).map((row, index) => ({
+  return (data || []).map(row => ({
     id: row.id,
     lesson_id: row.lesson_id,
-    lesson_title: `Bài học giả lập ${index + 1}`,
-    type: index % 3 === 0 ? 'Quiz' : (index % 2 === 0 ? 'Lab' : 'Lý thuyết'),
+    lesson_title: (row as any).lessons?.title || `Bài học`,
+    type: (row as any).lessons?.title ? 'Lý thuyết' : 'Bài học',
     status: row.status,
-    score: row.status === 'completed' ? 100 : null,
+    score: row.score,
     completed_at: row.completed_at,
     completion_percentage: row.completion_percentage ?? 0
   }))
@@ -162,17 +184,22 @@ export async function getAllLessonProgress(supabase: SupabaseClient, userId: str
 export async function getAllQuizAttempts(supabase: SupabaseClient, userId: string): Promise<QuizAttempt[]> {
   const { data } = await supabase
     .from('quiz_attempts')
-    .select('id, score, status')
+    .select('id, quiz_id, score, max_score, status, submitted_at, created_at, quizzes(title, passing_score)')
     .eq('student_id', userId)
-    .eq('status', 'graded')
+    .in('status', ['graded', 'passed', 'failed', 'submitted'])
     .order('created_at', { ascending: false })
-    .limit(10)
+    .limit(20)
 
-  return (data || []).map((row, index) => ({
+  return (data || []).map((row: any) => ({
     id: row.id,
-    quiz_title: `Bài kiểm tra ${index + 1}`,
+    quiz_title: row.quizzes?.title || 'Bài kiểm tra',
     score: row.score,
-    passing_score: 70
+    passing_score: row.quizzes?.passing_score || 70,
+    max_score: row.max_score || 100,
+    total_questions: 0,
+    correct_count: 0,
+    submitted_at: row.submitted_at,
+    status: row.status
   }))
 }
 

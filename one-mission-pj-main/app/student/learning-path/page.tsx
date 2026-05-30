@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic'
 
 import React, { useEffect, useState } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { QUIZ_BANK } from '@/data/quiz-bank'
 export interface PathItemWithUnlock {
   id: string;
   path_id: string;
@@ -112,7 +113,7 @@ export default function StudentLearningPathPage() {
           const { data: lessonsData } = await supabase
             .from('lessons')
             .select('id, title, description')
-            .limit(10)
+            .limit(20)
           if (lessonsData) dbLessons = lessonsData
 
           // Query completions
@@ -132,7 +133,6 @@ export default function StudentLearningPathPage() {
         if (dbLessons && dbLessons.length > 0) {
           dbLessons.forEach((lesson, index) => {
             const completed = (progress || []).some(p => p.lesson_id === lesson.id && p.status === 'completed')
-            // Unlock first lesson always, subsequent ones unlocked if previous is completed
             const is_unlocked = index === 0 || (progress || []).some(p => p.lesson_id === dbLessons[index - 1].id && p.status === 'completed')
 
             mockList.push({
@@ -142,7 +142,7 @@ export default function StudentLearningPathPage() {
               item_id: lesson.id,
               title: lesson.title,
               description: lesson.description || 'Học phần cấu tạo phần cứng PC Master.',
-              order: index + 1,
+              order: mockList.length + 1,
               unlock_condition: index > 0 ? { type: 'complete_previous' } : null,
               estimated_minutes: 30 + (index * 10),
               is_optional: false,
@@ -150,23 +150,30 @@ export default function StudentLearningPathPage() {
               unlock_reason: is_unlocked ? 'always_available' : 'need_complete_previous',
               completed: completed
             })
-          })
 
-          // Add a beautiful custom mini quiz at the end of the lessons
-          mockList.push({
-            id: 'fallback_quiz_final',
-            path_id: 'fallback_path',
-            item_type: 'quiz',
-            item_id: 'quiz-cpu-base',
-            title: 'Bài Kiểm Tra Tổng Hợp: Lắp Ráp Máy Tính Căn Bản',
-            description: 'Trắc nghiệm củng cố kiến thức toàn diện sau khi hoàn thành các bài học.',
-            order: dbLessons.length + 1,
-            unlock_condition: { type: 'complete_previous' },
-            estimated_minutes: 15,
-            is_optional: false,
-            is_unlocked: (progress || []).some(p => p.lesson_id === dbLessons[dbLessons.length - 1].id && p.status === 'completed'),
-            unlock_reason: 'need_complete_previous',
-            completed: false
+            // Add matching quiz after each lesson
+            const matchingQuiz = QUIZ_BANK.find(q => 
+              lesson.title.toLowerCase().includes(q.lessonTitle.toLowerCase()) ||
+              q.lessonTitle.toLowerCase().includes(lesson.title.toLowerCase())
+            )
+            if (matchingQuiz) {
+              const quizCompleted = (progress || []).some(p => p.lesson_id === lesson.id && p.status === 'completed')
+              mockList.push({
+                id: `fallback_quiz_${matchingQuiz.id}`,
+                path_id: 'fallback_path',
+                item_type: 'quiz',
+                item_id: matchingQuiz.id,
+                title: matchingQuiz.title,
+                description: `Bài kiểm tra: ${matchingQuiz.questions.length} câu - ${matchingQuiz.difficulty}`,
+                order: mockList.length + 1,
+                unlock_condition: { type: 'complete_previous' },
+                estimated_minutes: matchingQuiz.estimated_minutes || 15,
+                is_optional: false,
+                is_unlocked: is_unlocked,
+                unlock_reason: is_unlocked ? 'always_available' : 'need_complete_previous',
+                completed: quizCompleted
+              })
+            }
           })
         } else {
           // Hardcoded beautiful demo items if database is totally empty
@@ -232,6 +239,19 @@ export default function StudentLearningPathPage() {
 
     loadPath()
   }, [supabase])
+
+  // Realtime: refresh path when progress changes
+  useEffect(() => {
+    const supabaseClient = createClientComponentClient()
+    const channel = supabaseClient
+      .channel('learning-path-realtime')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'lesson_progress' },
+        () => router.refresh()
+      )
+      .subscribe()
+    return () => { supabaseClient.removeChannel(channel) }
+  }, [])
 
   // Fetch AI suggestions when items are loaded
   useEffect(() => {

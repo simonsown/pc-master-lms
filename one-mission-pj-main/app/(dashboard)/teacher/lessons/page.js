@@ -6,6 +6,7 @@ import { Plus, BookOpen, Edit, Trash2, Eye, EyeOff, Loader2, ArrowLeft, ImageIco
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import AuthButton from '@/components/AuthButton'
+import { deleteLessonAction } from '@/app/actions/lessons'
 
 export default function TeacherLessonsPage() {
   const router = useRouter()
@@ -57,8 +58,11 @@ export default function TeacherLessonsPage() {
   }
 
   const deleteLesson = async (id) => {
-    if (!confirm('Xóa bài giảng này?')) return
-    await supabase.from('lessons').delete().eq('id', id)
+    if (!confirm('Xóa bài giảng này? Học sinh sẽ không còn thấy bài này nữa.')) return
+    const result = await deleteLessonAction(id)
+    if (result?.error) {
+      alert('Lỗi: ' + result.error)
+    }
     fetchLessons()
   }
 

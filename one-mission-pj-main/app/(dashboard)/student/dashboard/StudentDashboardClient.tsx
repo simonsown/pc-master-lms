@@ -17,6 +17,9 @@ import {
 } from 'recharts'
 
 import { motion, AnimatePresence } from 'framer-motion'
+import { useEffect } from 'react'
+import { createBrowserClient } from '@supabase/ssr'
+import { useRouter } from 'next/navigation'
 
 type UserProps = {
   id: string
@@ -108,6 +111,29 @@ export function StudentDashboardClient({
   const percentageLabel = `${progressValue}%`
 
   const dailyQuizCompleted = dailyAttempt?.status === 'submitted'
+
+  const router = useRouter()
+
+  useEffect(() => {
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+
+    const channel = supabase
+      .channel('dashboard-realtime')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'lesson_progress' },
+        () => router.refresh()
+      )
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'quiz_attempts' },
+        () => router.refresh()
+      )
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [])
 
   return (
     <motion.div className="p-6 md:p-8 lg:p-10" style={{ background: 'transparent' }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>

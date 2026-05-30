@@ -75,6 +75,8 @@ export default function LessonViewer({
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   useEffect(() => {
+    saveLessonProgress(lesson.id, 0, false)
+
     intervalRef.current = setInterval(async () => {
       setTimeSpent(prev => {
         const newTime = prev + 30
@@ -195,7 +197,7 @@ export default function LessonViewer({
                 )}
 
                 {s.type === 'text' && (
-                  <div className="prose prose-invert max-w-none text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                  <div className="prose max-w-none text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                     {parseRichContent(s.content).map((part, i) => {
                       if (part.type === 'video') {
                         const embedUrl = getYouTubeEmbed(part.url!)

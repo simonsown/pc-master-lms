@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { History, BookOpen, Award, Clock, ChevronRight } from 'lucide-react';
+import { History, BookOpen, Award, Clock, ChevronRight, Wrench, Map } from 'lucide-react';
 import { createBrowserClient } from '@supabase/ssr';
 
 const supabase = createBrowserClient(
@@ -11,15 +11,15 @@ const supabase = createBrowserClient(
 
 const TYPE_COLORS = {
   lesson: '#10B981', quiz: '#6366F1', achievement: '#F59E0B',
-  exam: '#EF4444', builder: '#06B6D4'
+  exam: '#EF4444', builder: '#06B6D4', learning_path: '#8B5CF6'
 };
 
 const TYPE_ICONS = {
   lesson: BookOpen, quiz: Award, achievement: Award,
-  exam: Award, builder: BookOpen
+  exam: Award, builder: Wrench, learning_path: Map
 };
 
-function formatTime(dateStr) {
+function formatTime(dateStr: string) {
   const d = new Date(dateStr);
   const now = new Date();
   const diff = (now.getTime() - d.getTime()) / 1000;
@@ -38,23 +38,29 @@ export default function StudentHistoryPage() {
     if (!u) return;
     setUserId(u.id);
 
-    const [lessonsRes, quizRes, achieveRes] = await Promise.all([
+    const [lessonsRes, quizRes, achieveRes, builderRes] = await Promise.all([
       supabase.from('lesson_progress')
         .select('lesson_id, status, completed_at, last_accessed, time_spent_seconds, score, completion_percentage, lessons(title)')
         .eq('student_id', u.id)
         .not('last_accessed', 'is', null)
         .order('last_accessed', { ascending: false })
-        .limit(20),
+        .limit(30),
       supabase.from('quiz_attempts')
-        .select('quiz_id, score, status, submitted_at')
+        .select('id, quiz_id, score, status, submitted_at, created_at, quizzes(title)')
         .eq('student_id', u.id)
-        .order('submitted_at', { ascending: false })
-        .limit(20),
+        .order('created_at', { ascending: false })
+        .limit(30),
       supabase.from('student_achievements')
         .select('achievement_id, earned_at, achievement_definitions(title)')
         .eq('student_id', u.id)
         .order('earned_at', { ascending: false })
-        .limit(20)
+        .limit(30),
+      supabase.from('builder_sessions')
+        .select('started_at, ended_at')
+        .eq('student_id', u.id)
+        .not('started_at', 'is', null)
+        .order('started_at', { ascending: false })
+        .limit(30)
     ]);
 
     const items: any[] = [];
@@ -72,12 +78,26 @@ export default function StudentHistoryPage() {
 
     (quizRes.data || []).forEach((q: any) => {
       items.push({
-        id: `quiz-${q.quiz_id}-${q.submitted_at}`,
+        id: `quiz-${q.id}-${q.created_at}`,
         type: 'quiz',
-        title: 'Bài kiểm tra',
-        desc: q.status === 'graded' || q.status === 'passed' || q.status === 'failed' ? `Điểm: ${q.score}/100` : 'Chưa chấm',
-        time: q.submitted_at,
+        title: q.quizzes?.title || 'Bài kiểm tra',
+        desc: q.status === 'submitted' || q.status === 'passed' || q.status === 'failed' ? `Điểm: ${q.score}/100` : 'Chưa chấm',
+        time: q.submitted_at || q.created_at,
         score: q.score
+      });
+    });
+
+    (builderRes.data || []).forEach((b: any) => {
+      const duration = b.ended_at
+        ? Math.round((new Date(b.ended_at).getTime() - new Date(b.started_at).getTime()) / 60000)
+        : 0;
+      items.push({
+        id: `builder-${b.started_at}`,
+        type: 'builder',
+        title: 'Phòng thực hành lắp ráp',
+        desc: duration > 0 ? `Thời gian: ${duration} phút` : 'Đã truy cập',
+        time: b.started_at,
+        score: null
       });
     });
 
@@ -111,6 +131,14 @@ export default function StudentHistoryPage() {
         { event: '*', schema: 'public', table: 'student_achievements', filter: `student_id=eq.${userId}` },
         () => fetchHistory()
       )
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'quiz_attempts', filter: `student_id=eq.${userId}` },
+        () => fetchHistory()
+      )
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'builder_sessions', filter: `student_id=eq.${userId}` },
+        () => fetchHistory()
+      )
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
@@ -135,7 +163,7 @@ export default function StudentHistoryPage() {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {activities.map((item, i) => {
+          {activities.map((item) => {
             const Icon = TYPE_ICONS[item.type] || BookOpen;
             const color = TYPE_COLORS[item.type] || '#666';
             return (
