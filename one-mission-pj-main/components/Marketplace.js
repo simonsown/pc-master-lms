@@ -5,29 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import componentsData from '../data/componentsData.json';
 import WindowsSimulator from './WindowsSimulator';
 
-const MISSIONS_LIST = [
-  { title: "Home Office Setup", title_vn: "Máy Văn Phòng Cơ Bản",
-    desc: "Build a reliable, compact, and energy-efficient PC for word processing and lightweight browsing.",
-    desc_vn: "Lắp ráp một cỗ máy ổn định, nhỏ gọn, tiết kiệm điện để soạn thảo văn bản và lướt web nhẹ nhàng.",
-    budget: 10000000, targets: { category: "Office", maxBudget: 10000000 } },
-  { title: "Esports Gamer", title_vn: "Game Thủ Tập Sự",
-    desc: "Assemble a competitive gaming rig capable of high framerates in 1080p for games like CS:GO and Valorant.",
-    desc_vn: "Ráp một bộ PC chiến game Thể thao điện tử với FPS cao ở độ phân giải 1080p.",
-    budget: 20000000, targets: { category: "1080p Gaming" } },
-  { title: "Deep Learning Machine", title_vn: "Cỗ Máy Trí Tuệ Nhân Tạo",
-    desc: "Build a stable machine for AI/Deep Learning models with maximum processing power and VRAM.",
-    desc_vn: "Xây dựng một cỗ máy ổn định để đào tạo các mô hình AI/Deep Learning kết hợp xử lý dữ liệu nặng.",
-    budget: 60000000, targets: { category: "AI", minPower: 850 } },
-  { title: "4K Content Creator", title_vn: "Dựng Phim 4K Chuyên Nghiệp",
-    desc: "Construct a powerhouse workstation for 4K video editing, heavy multitasking, and rendering.",
-    desc_vn: "Lắp ráp một máy trạm hiệu năng cao để edit video 4K, đa nhiệm nặng và render đồ họa 3D.",
-    budget: 50000000, targets: { category: "Workstation", minPower: 750 } },
-  { title: "Budget Student PC", title_vn: "PC Sinh Viên Tiết Kiệm",
-    desc: "A very tight budget build for students doing basic assignments and online classes.",
-    desc_vn: "Một bộ máy với ngân sách cực kỳ eo hẹp dành cho học sinh sinh viên học tập online.",
-    budget: 8000000, targets: { category: "Budget" } }
-];
-
 const categories = ['CPU', 'Mainboard', 'RAM', 'GPU', 'PSU', 'Storage', 'Cooler'];
 
 const categoryLabels = {
@@ -37,13 +14,16 @@ const categoryLabels = {
 
 const categoryIcons = { 'CPU': '⚡', 'Mainboard': '🔌', 'RAM': '🧠', 'GPU': '🎮', 'PSU': '🔋', 'Storage': '💾', 'Cooler': '❄️' };
 
-const Marketplace = ({ lang = 'en', onCheckout, onCancel }) => {
-  const [mission] = useState(() => MISSIONS_LIST[Math.floor(Math.random() * MISSIONS_LIST.length)]);
+const Marketplace = ({ lang = 'en', budget: initialBudget = 5000000, onCheckout, onCancel }) => {
   const [cart, setCart] = useState([]);
-  const [budget, setBudget] = useState(mission.budget);
+  const [budget, setBudget] = useState(initialBudget);
   const [activeTab, setActiveTab] = useState('CPU');
   const [errorMsg, setErrorMsg] = useState("");
   const [showWindows, setShowWindows] = useState(false);
+
+  useEffect(() => {
+    setBudget(initialBudget);
+  }, [initialBudget]);
 
   const s = {
     bgBase: 'var(--bg-base)', bgSurface: 'var(--bg-surface)',
@@ -106,7 +86,7 @@ const Marketplace = ({ lang = 'en', onCheckout, onCancel }) => {
     if (missing.length > 0) {
       setErrorMsg(`Thiếu linh kiện thiết yếu: ${missing.join(', ')}`); return;
     }
-    if (onCheckout) onCheckout({ purchasedItems: cart, remainingBudget: budget, missionId: mission.title });
+    if (onCheckout) onCheckout({ purchasedItems: cart, remainingBudget: budget });
     else setShowWindows(true);
   };
 
@@ -114,7 +94,7 @@ const Marketplace = ({ lang = 'en', onCheckout, onCancel }) => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '1300px', margin: '0 auto', gap: '1rem', padding: '0 16px', height: 'calc(100vh - 120px)' }}>
-      {/* Mission Header */}
+      {/* Budget Header */}
       <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} style={{
         padding: '20px 28px', background: s.bgSurface, border: `1px solid ${s.border}`, borderRadius: '16px',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px',
@@ -122,21 +102,29 @@ const Marketplace = ({ lang = 'en', onCheckout, onCancel }) => {
       }}>
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <span style={{ fontSize: '16px' }}>🎯</span>
-            <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: s.textMuted }}>Nhiệm vụ</span>
+            <span style={{ fontSize: '16px' }}>🏪</span>
+            <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: s.textMuted }}>
+              {lang === 'en' ? 'Computer Market' : 'Chợ Máy Tính'}
+            </span>
           </div>
-          <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: s.textPrimary }}>{mission.title_vn}</h2>
-          <p style={{ color: s.textMuted, margin: '4px 0 0 0', fontSize: '13px', lineHeight: 1.4 }}>{mission.desc_vn}</p>
+          <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: s.textPrimary }}>
+            {lang === 'en' ? 'Buy PC Components' : 'Mua linh kiện máy tính'}
+          </h2>
+          <p style={{ color: s.textMuted, margin: '4px 0 0 0', fontSize: '13px', lineHeight: 1.4 }}>
+            {lang === 'en' ? 'Use your quiz points to buy components!' : 'Dùng điểm từ bài kiểm tra để mua linh kiện!'}
+          </p>
         </div>
         <div style={{ textAlign: 'right', flexShrink: 0 }}>
-          <span style={{ fontSize: '11px', fontWeight: 600, color: s.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Ngân sách còn</span>
+          <span style={{ fontSize: '11px', fontWeight: 600, color: s.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            {lang === 'en' ? 'Remaining Budget' : 'Ngân sách còn'}
+          </span>
           <div style={{
             fontSize: '24px', fontWeight: 900,
-            color: budget > mission.budget * 0.5 ? s.success : (budget > mission.budget * 0.2 ? s.warning || '#f59e0b' : s.danger),
+            color: budget > initialBudget * 0.5 ? s.success : (budget > initialBudget * 0.2 ? '#f59e0b' : s.danger),
             textShadow: 'none'
           }}>{budget.toLocaleString()} ₫</div>
           <div style={{ height: '4px', background: s.bgElevated, borderRadius: '2px', marginTop: '4px', width: '160px', overflow: 'hidden' }}>
-            <div style={{ width: `${(budget / mission.budget) * 100}%`, height: '100%', background: `linear-gradient(90deg, ${s.success}, ${s.brand})`, borderRadius: '2px', transition: 'width 0.3s ease' }} />
+            <div style={{ width: `${initialBudget > 0 ? (budget / initialBudget) * 100 : 0}%`, height: '100%', background: `linear-gradient(90deg, ${s.success}, ${s.brand})`, borderRadius: '2px', transition: 'width 0.3s ease' }} />
           </div>
         </div>
       </motion.div>
@@ -257,13 +245,13 @@ const Marketplace = ({ lang = 'en', onCheckout, onCancel }) => {
               border: 'none', borderRadius: '10px', fontWeight: 800, fontSize: '14px', cursor: 'pointer',
               boxShadow: `0 4px 16px color-mix(in srgb, ${s.brand} 40%, transparent)`, fontFamily: 'inherit'
             }}>
-              🚀 TỚI PHÒNG LAB
+              🚀 {lang === 'en' ? 'GO TO LAB' : 'TỚI PHÒNG LAB'}
             </motion.button>
             <button onClick={onCancel} style={{
               padding: '10px', background: 'transparent', color: s.textMuted, border: `1px solid ${s.border}`,
               borderRadius: '8px', fontWeight: 600, cursor: 'pointer', fontSize: '13px', fontFamily: 'inherit'
             }}>
-              Đổi nhiệm vụ
+              {lang === 'en' ? 'Back' : 'Quay lại'}
             </button>
           </div>
         </div>

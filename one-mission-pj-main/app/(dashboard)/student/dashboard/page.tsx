@@ -115,18 +115,18 @@ export default async function StudentDashboardPage() {
     supabase
       .from('lesson_progress')
       .select('lesson_id, status, time_spent_seconds, completed_at, last_accessed, completion_percentage, lessons(title, thumbnail_url)')
-      .eq('user_id', user.id),
+      .eq('student_id', user.id),
       supabase
         .from('quiz_attempts')
         .select('score, submitted_at, status')
         .eq('student_id', user.id)
-      .eq('status', 'graded')
+      .in('status', ['passed', 'failed'])
       .order('submitted_at', { ascending: false })
       .limit(10),
     supabase
       .from('lesson_progress')
       .select('lesson_id, status, completion_percentage, last_accessed, lessons(title, thumbnail_url)')
-      .eq('user_id', user.id)
+      .eq('student_id', user.id)
       .is('is_completed', false)
       .order('last_accessed', { ascending: false })
       .not('is_completed', 'is', null)

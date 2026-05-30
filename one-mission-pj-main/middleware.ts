@@ -22,6 +22,8 @@ const PUBLIC_ROUTES = [
   '/verify', '/check-email',
   '/builder',
   '/admin', '/admin/settings', '/admin/users', '/admin/schools',
+  '/auth/callback', '/api/auth/callback',
+  '/onboarding',
   '/api',
 ]
 

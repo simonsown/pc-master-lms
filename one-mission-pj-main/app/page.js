@@ -33,7 +33,7 @@ export default function LandingPage() {
   return (
     <div style={{ background: 'var(--bg-base)', minHeight: '100vh', color: 'var(--text-primary)', overflowX: 'hidden' }}>
       {/* NAVBAR */}
-      <nav style={{
+      <nav className="landing-nav" style={{
         height: '72px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '0 32px', borderBottom: '1px solid var(--border-default)',
         position: 'fixed', top: 0, left: 0, right: 0, background: 'var(--bg-surface)',
@@ -42,7 +42,7 @@ export default function LandingPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', color: 'var(--text-primary)' }}>
             <img src="/logo.png" alt="" style={{ width: '36px', height: '36px' }} />
-            <span style={{ fontWeight: 800, fontSize: '20px', letterSpacing: '-0.02em' }}>
+            <span className="landing-nav-logo" style={{ fontWeight: 800, fontSize: '20px', letterSpacing: '-0.02em' }}>
               PC<span style={{ color: 'var(--brand-primary)' }}> MASTER</span> BUILDER
             </span>
           </Link>
@@ -107,7 +107,7 @@ export default function LandingPage() {
       </div>
 
       {/* HERO */}
-      <section className="hero-grid" style={{ padding: '140px 32px 80px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', position: 'relative' }}>
+      <section className="hero-grid landing-hero" style={{ padding: '140px 32px 80px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', position: 'relative' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
           <div className="animate-fade-in-up" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
             <span className="lms-tag lms-tag-green"><Sparkles size={14} /> AI hướng dẫn chi tiết</span>
@@ -159,8 +159,8 @@ export default function LandingPage() {
       </section>
 
       {/* STATS */}
-      <section className="animate-fade-in-up animate-delay-5" style={{ padding: '80px 32px', textAlign: 'center' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '24px' }}>
+      <section className="animate-fade-in-up animate-delay-5 landing-section" style={{ padding: '80px 32px', textAlign: 'center' }}>
+        <div className="landing-stats-grid" style={{ maxWidth: '1000px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '24px' }}>
           {[
             { num: '50+', label: 'Linh kiện chi tiết', color: 'var(--brand-primary)' },
             { num: '10+', label: 'Nhiệm vụ thử thách', color: 'var(--brand-primary)' },
@@ -176,7 +176,7 @@ export default function LandingPage() {
       </section>
 
       {/* FEATURES */}
-      <section style={{ padding: '0 32px 80px' }}>
+      <section className="landing-section" style={{ padding: '0 32px 80px' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '48px' }}>
             <h2 style={{ fontSize: '32px', fontWeight: 800, marginBottom: '12px', color: 'var(--text-primary)' }}>Mô phỏng trực quan, kết quả thực tế</h2>
@@ -185,7 +185,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', alignItems: 'center' }}>
+          <div className="landing-features-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', alignItems: 'center' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {[
                 { icon: <Zap size={22} />, text: 'Tính toán điện năng (TDP) thời gian thực', color: 'var(--accent-amber)' },
@@ -216,7 +216,7 @@ export default function LandingPage() {
       </section>
 
       {/* HOW TO USE */}
-      <section style={{ padding: '80px 32px', background: 'var(--bg-surface)', borderTop: '1px solid var(--border-default)', borderBottom: '1px solid var(--border-default)' }}>
+      <section className="landing-section-wide" style={{ padding: '80px 32px', background: 'var(--bg-surface)', borderTop: '1px solid var(--border-default)', borderBottom: '1px solid var(--border-default)' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '48px' }}>
             <h2 style={{ fontSize: '32px', fontWeight: 800, marginBottom: '12px', color: 'var(--text-primary)' }}>Hướng dẫn sử dụng</h2>
@@ -244,7 +244,7 @@ export default function LandingPage() {
       </section>
 
       {/* FAQ */}
-      <section style={{ padding: '80px 32px' }}>
+      <section className="landing-section" style={{ padding: '80px 32px' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '48px' }}>
             <h2 style={{ fontSize: '32px', fontWeight: 800, marginBottom: '12px', color: 'var(--text-primary)' }}>Câu hỏi thường gặp</h2>
@@ -287,7 +287,7 @@ export default function LandingPage() {
       </section>
 
       {/* FOOTER */}
-      <footer style={{ padding: '60px 32px 40px', textAlign: 'center', borderTop: '1px solid var(--border-default)', background: 'var(--bg-surface)' }}>
+      <footer className="landing-section" style={{ padding: '60px 32px 40px', textAlign: 'center', borderTop: '1px solid var(--border-default)', background: 'var(--bg-surface)' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '32px', marginBottom: '40px', textAlign: 'left' }}>
             <div>
@@ -323,7 +323,22 @@ export default function LandingPage() {
 
       <style>{`
         @media (min-width: 769px) { .desktop-nav { display: flex !important; } .mobile-hamburger-btn { display: none !important; } }
-        @media (max-width: 768px) { .desktop-nav { display: none !important; } .mobile-hamburger-btn { display: flex !important; } }
+        @media (max-width: 768px) {
+          .desktop-nav { display: none !important; }
+          .mobile-hamburger-btn { display: flex !important; }
+          .landing-nav { padding: 0 16px !important; }
+          .landing-nav-logo span { font-size: 14px !important; }
+          .landing-hero { padding: 120px 16px 60px !important; }
+          .landing-section { padding: 40px 16px !important; }
+          .landing-section-wide { padding: 40px 16px !important; }
+          .landing-features-grid { grid-template-columns: 1fr !important; }
+          .landing-stats-grid { grid-template-columns: 1fr 1fr !important; }
+        }
+        @media (max-width: 480px) {
+          .landing-nav { padding: 0 12px !important; }
+          .landing-hero { padding: 100px 12px 40px !important; }
+          .landing-stats-grid { grid-template-columns: 1fr !important; }
+        }
       `}</style>
     </div>
   );

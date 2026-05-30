@@ -3,13 +3,13 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Loader2, ChevronRight, BookOpen, FileText, Video, Image as ImageIcon, Link2, Eye, Plus, Trash2, GripVertical, Upload } from 'lucide-react'
+import { ArrowLeft, Loader2, ChevronRight, BookOpen, FileText, Video, Image as ImageIcon, Link2, Code, Eye, Plus, Trash2, GripVertical, Upload, FileSearch } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 type SectionInput = {
   id: string
   title: string
-  type: 'video' | 'text' | 'image' | 'pdf'
+  type: 'video' | 'text' | 'image' | 'pdf' | 'embed'
   content: string
 }
 
@@ -192,13 +192,14 @@ export default function CreateLessonPage() {
                   <GripVertical size={16} style={{ color: 'var(--text-muted)' }} />
                   <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)' }}>Mục {idx + 1}</span>
                   <div style={{ display: 'flex', gap: '4px', marginLeft: 'auto' }}>
-                    {(['video', 'text', 'image', 'pdf'] as const).map(type => (
+                    {(['video', 'text', 'image', 'pdf', 'embed'] as const).map(type => (
                       <button key={type} onClick={() => updateSection(s.id, 'type', type)}
                         style={{ padding: '6px', borderRadius: '6px', background: s.type === type ? 'var(--brand-primary)' : 'transparent', color: s.type === type ? '#fff' : 'var(--text-muted)', border: 'none', cursor: 'pointer' }}>
                         {type === 'video' && <Video size={14} />}
                         {type === 'text' && <FileText size={14} />}
                         {type === 'image' && <ImageIcon size={14} />}
                         {type === 'pdf' && <Link2 size={14} />}
+                        {type === 'embed' && <Code size={14} />}
                       </button>
                     ))}
                     <button onClick={() => removeSection(s.id)} style={{ padding: '6px', borderRadius: '6px', background: 'transparent', border: 'none', color: 'var(--danger)', cursor: 'pointer' }}>
@@ -210,13 +211,27 @@ export default function CreateLessonPage() {
                   style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: 'var(--text-primary)', fontSize: '13px', outline: 'none', marginBottom: '8px', boxSizing: 'border-box', fontFamily: 'inherit' }}
                   placeholder="Tiêu đề mục..." />
                 {s.type === 'text' ? (
-                  <textarea value={s.content} onChange={e => updateSection(s.id, 'content', e.target.value)} rows={4}
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: 'var(--text-primary)', fontSize: '13px', outline: 'none', resize: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
-                    placeholder="Nội dung markdown..." />
+                  <div>
+                    <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
+                      {[
+                        { icon: <ImageIcon size={14} />, label: 'Ảnh', getInsert: () => { const u = prompt('URL hình ảnh:'); return u ? `\n\n![Image](${u})\n\n` : null; } },
+                        { icon: <Video size={14} />, label: 'Video', getInsert: () => { const u = prompt('URL YouTube:'); return u ? `\n\n<div class="video-embed">${u}</div>\n\n` : null; } },
+                        { icon: <FileSearch size={14} />, label: 'PDF', getInsert: () => { const u = prompt('URL Google Drive PDF:'); return u ? `\n\n<div class="pdf-embed">${u}</div>\n\n` : null; } },
+                      ].map(({ icon, label, getInsert }) => (
+                        <button key={label} type="button" onClick={() => { const ins = getInsert(); if (ins) updateSection(s.id, 'content', s.content + ins); }}
+                          style={{ padding: '6px 10px', borderRadius: '6px', background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontFamily: 'inherit' }}>
+                          {icon} {label}
+                        </button>
+                      ))}
+                    </div>
+                    <textarea value={s.content} onChange={e => updateSection(s.id, 'content', e.target.value)} rows={4}
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: 'var(--text-primary)', fontSize: '13px', outline: 'none', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit' }}
+                      placeholder="Nội dung markdown... (dùng nút ở trên để chèn ảnh, video, PDF)" />
+                  </div>
                 ) : (
                   <input value={s.content} onChange={e => updateSection(s.id, 'content', e.target.value)}
                     style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: 'var(--text-primary)', fontSize: '13px', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
-                    placeholder={s.type === 'video' ? 'URL YouTube...' : s.type === 'image' ? 'URL hình ảnh...' : 'URL PDF...'} />
+                    placeholder={s.type === 'video' ? 'URL YouTube...' : s.type === 'image' ? 'URL hình ảnh...' : s.type === 'embed' ? 'Mã nhúng (iframe)...' : 'URL PDF...'} />
                 )}
               </div>
             ))}

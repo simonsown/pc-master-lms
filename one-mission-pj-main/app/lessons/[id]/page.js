@@ -3,7 +3,7 @@
 import React, { useEffect, useState, use } from 'react';
 import { supabase } from '@/lib/supabase';
 import { 
-    BookOpen, Video, FileText, Image as ImageIcon, FileSearch, 
+    BookOpen, Video, FileText, Image as ImageIcon, FileSearch, Code,
     ChevronRight, Loader2, ArrowLeft, Book, Maximize2, X
 } from 'lucide-react';
 import Link from 'next/link';
@@ -105,6 +105,7 @@ export default function StudentLessonPage({ params }) {
                                     {s.type === 'text' && <FileText size={20}/>}
                                     {s.type === 'image' && <ImageIcon size={20}/>}
                                     {s.type === 'pdf' && <FileSearch size={20}/>}
+                                    {s.type === 'embed' && <Code size={20} />}
                                 </div>
                                 <h2 style={{ fontSize: '24px', fontWeight: 800, margin: 0 }}>{s.title}</h2>
                             </div>
@@ -135,6 +136,12 @@ export default function StudentLessonPage({ params }) {
                                             <Maximize2 size={16} /> Xem toàn màn hình
                                         </a>
                                     </div>
+                                </div>
+                            )}
+
+                            {s.type === 'embed' && s.content && (
+                                <div style={{ borderRadius: '20px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div dangerouslySetInnerHTML={{ __html: s.content }} />
                                 </div>
                             )}
                         </section>

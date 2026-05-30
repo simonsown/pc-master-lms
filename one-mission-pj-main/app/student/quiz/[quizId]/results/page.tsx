@@ -7,7 +7,7 @@ export default function QuizResultsPage({ params }: { params: { quizId: string }
   const attemptId = params.quizId
 
   return (
-    <div className="min-h-screen text-[#dde0ed] p-4 sm:p-8 flex flex-col items-center justify-center relative overflow-hidden" style={{ background: 'var(--bg-base)' }}>
+    <div className="min-h-screen p-4 sm:p-8 flex flex-col items-center justify-center relative overflow-hidden" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
       <div className="absolute inset-0 bg-grid-pattern opacity-[0.02] pointer-events-none" />
       
       <div className="max-w-2xl w-full rounded-[28px] border p-6 sm:p-8 text-center relative overflow-hidden shadow-2xl z-10" style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-default)' }}>
@@ -16,7 +16,7 @@ export default function QuizResultsPage({ params }: { params: { quizId: string }
           <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to bottom, color-mix(in srgb, var(--brand-primary) 10%, transparent), transparent)' }}></div>
         )}
 
-        <h1 className="text-2xl sm:text-3xl font-black mb-2 uppercase tracking-tight text-white">Kết Quả Bài Kiểm Tra</h1>
+        <h1 className="text-2xl sm:text-3xl font-black mb-2 uppercase tracking-tight" style={{ color: 'var(--text-primary)' }}>Kết Quả Bài Kiểm Tra</h1>
         <p className="mb-8 text-sm" style={{ color: 'var(--text-muted)' }}>Mã lần làm: {attemptId}</p>
 
         <div className="flex flex-col items-center justify-center mb-8">
@@ -39,12 +39,12 @@ export default function QuizResultsPage({ params }: { params: { quizId: string }
           </div>
           <div className="bg-black/25 p-4 rounded-2xl border border-white/5">
             <p className="text-xs uppercase font-bold" style={{ color: 'var(--text-muted)' }}>Thời gian</p>
-            <p className="text-lg sm:text-xl font-black text-white mt-1">12:34</p>
+            <p className="text-lg sm:text-xl font-black mt-1" style={{ color: 'var(--text-primary)' }}>12:34</p>
           </div>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link href="/student" className="px-6 py-3 border border-gray-700 hover:border-gray-500 rounded-2xl hover:bg-gray-800/40 transition-all font-bold text-sm text-slate-300 hover:text-white">
+          <Link href="/student" className="px-6 py-3 border border-gray-700 hover:border-gray-500 rounded-2xl hover:bg-gray-800/40 transition-all font-bold text-sm" style={{ color: 'var(--text-secondary)' }}>
             Về Dashboard
           </Link>
           {passed ? (

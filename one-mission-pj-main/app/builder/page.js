@@ -31,6 +31,7 @@ import LearningMode from '../../components/LearningMode';
 import Marketplace from '../../components/Marketplace';
 import LectureCourse from '../../components/LectureCourse';
 import VirtualAssistant from '../../components/VirtualAssistant';
+import WindowsSimulator from '../../components/WindowsSimulator';
 import LoadingScreen from '../../components/LoadingScreen';
 import ExamsList from '../../components/ExamsList';
 import LoginModal from '../../components/auth/LoginModal';
@@ -50,15 +51,16 @@ function Home(props) {
   const [lastPlaced, setLastPlaced] = useState(null);
   const [showQuiz, setShowQuiz] = useState(false);
   const [quizParams, setQuizParams] = useState(null); // { topic, level, onSuccess }
-  const [appMode, setAppMode] = useState('menu'); // 'menu', 'assembly', 'learning', 'course', 'market', 'multiplayer', 'mission_assembly'
+  const [appMode, setAppMode] = useState('menu'); // 'menu', 'assembly', 'learning', 'course', 'market', 'multiplayer', 'mission_assembly', 'exams', 'challenge'
   const [appView, setAppView] = useState('menu'); // 'menu' or 'game'
   const [missionData, setMissionData] = useState(null);
   const [webcamMouseEnabled, setWebcamMouseEnabled] = useState(false);
   const [isCameraActive, setIsCameraActive] = useState(globalCameraState);
-  const [trackingSensitivity, setTrackingSensitivity] = useState(1.5);
+  const [trackingSensitivity, setTrackingSensitivity] = useState(1.0);
   const [placedItemsList, setPlacedItemsList] = useState([]);
   const [showLoading, setShowLoading] = useState(true);
   const [isAIOpen, setIsAIOpen] = useState(false);
+  const [showWindowsSim, setShowWindowsSim] = useState(false);
   const [theme, setTheme] = useState(() => {
     if (typeof window !== 'undefined') {
       try { return localStorage.getItem('theme') || 'dark' } catch(e) {}
@@ -72,8 +74,23 @@ function Home(props) {
   const [loginRedirectTo, setLoginRedirectTo] = useState(null);
   const [showStudentDashboard, setShowStudentDashboard] = useState(false);
   const [userName, setUserName] = useState('');
+  const [studentBudget, setStudentBudget] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try { return parseInt(localStorage.getItem('studentBudget')) || 5000000 } catch(e) {}
+    }
+    return 5000000;
+  });
 
   const gameEngineRef = useRef(null);
+
+  const handleQuizScore = useCallback((score) => {
+    const earned = score * 100000;
+    setStudentBudget(prev => {
+      const newBudget = prev + earned;
+      try { localStorage.setItem('studentBudget', String(newBudget)) } catch(e) {}
+      return newBudget;
+    });
+  }, []);
 
   const handlePartSelect = useCallback((type, modelId) => {
     if (gameEngineRef.current && gameEngineRef.current.spawnComponent) {
@@ -228,6 +245,8 @@ function Home(props) {
           confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
         }
         guru.setMessage(msg);
+      } else if (appMode === 'assembly') {
+        setShowWindowsSim(true);
       } else {
         guru.setMessage(lang === 'en' ? 'SYSTEM COMPLETE!' : 'HỆ THỐNG HOÀN THIỆN!');
       }
@@ -254,7 +273,6 @@ function Home(props) {
         case 'exams': return lang === 'en' ? 'Exams' : 'Kỳ Thi';
         case 'challenge': return lang === 'en' ? 'Daily Challenge' : 'Thử Thách';
         case 'components': return lang === 'en' ? 'Component Library' : 'Tủ Linh Kiện';
-        case 'lab': return lang === 'en' ? 'AI Lab' : 'Phòng AI Lab';
         default: return 'PC Master Builder';
     }
   };
@@ -287,7 +305,13 @@ function Home(props) {
         appMode={appMode}
         setAppMode={setAppMode}
         webcamMouseEnabled={webcamMouseEnabled}
-        setWebcamMouseEnabled={setWebcamMouseEnabled}
+        setWebcamMouseEnabled={(val) => {
+          setWebcamMouseEnabled(val);
+          if (val) {
+            globalCameraState = true;
+            setIsCameraActive(true);
+          }
+        }}
         trackingSensitivity={trackingSensitivity}
         setTrackingSensitivity={setTrackingSensitivity}
         onToggleAI={() => setIsAIOpen(prev => !prev)}
@@ -301,7 +325,7 @@ function Home(props) {
 
 
       <main className="main-content">
-        <WebcamCursor landmarks={landmarks} enabled={webcamMouseEnabled} trackingSensitivity={trackingSensitivity} />
+        {appMode !== 'multiplayer' && <WebcamCursor landmarks={landmarks} enabled={webcamMouseEnabled} trackingSensitivity={trackingSensitivity} />}
 
         {showQuiz && (
             <QuizModal
@@ -309,6 +333,7 @@ function Home(props) {
             topic={quizParams?.topic}
             level={quizParams?.level}
             onSuccess={quizParams?.onSuccess}
+            onScore={handleQuizScore}
             onClose={() => {
                 setShowQuiz(false);
                 setQuizParams(null);
@@ -391,7 +416,7 @@ function Home(props) {
                 {appMode !== 'menu' && appMode !== 'course' && appMode !== 'market' && appMode !== 'learning' && (
                     <div style={{
                         ...(appMode === 'multiplayer' ? {
-                            position: 'absolute', top: '100px', left: '50%', transform: 'translateX(-50%)', width: '200px',
+                            position: 'absolute', top: '80px', left: '50%', transform: 'translateX(-50%)', width: '280px', zIndex: 1001,
                         } : {
                             position: 'fixed', bottom: '2rem', right: '2rem', width: '360px',
                         }),
@@ -399,17 +424,21 @@ function Home(props) {
                     }}>
                         <div className="glass-panel" style={{ padding: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', pointerEvents: 'auto', boxShadow: '0 8px 32px rgba(0,0,0,0.3)', background: 'rgba(10, 20, 40, 0.8)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', marginBottom: '0.5rem' }}>
-                                <h3 style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 600 }}>{lang === 'en' ? 'Camera' : 'Camera'}</h3>
+                                <h3 style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    📷 Camera
+                                    {appMode === 'multiplayer' && <span style={{ fontSize: '9px', padding: '2px 6px', borderRadius: '4px', background: '#fbbf24', color: '#000', fontWeight: 700 }}>2 NGƯỜI</span>}
+                                </h3>
                                 <button
                                     onClick={() => {
                                         const nextCameraState = !isCameraActive;
                                         globalCameraState = nextCameraState;
                                         setIsCameraActive(nextCameraState);
+                                        setWebcamMouseEnabled(nextCameraState);
                                         if (!nextCameraState) setLandmarks([]);
                                     }}
                                     style={{
                                         background: isCameraActive ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)',
-                                        color: isCameraActive ? 'var(--danger)' : 'var(--success)',
+                                        color: isCameraActive ? '#ef4444' : 'var(--success)',
                                         border: `1px solid ${isCameraActive ? 'rgba(239, 68, 68, 0.3)' : 'rgba(16, 185, 129, 0.3)'}`,
                                         padding: '2px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', fontWeight: 600,
                                     }}
@@ -419,7 +448,7 @@ function Home(props) {
                             </div>
                             <div style={{ width: '100%', overflow: 'hidden', borderRadius: '4px', background: '#020617', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 {isCameraActive ? (
-                                    <div style={{ width: '100%', height: appMode === 'multiplayer' ? '120px' : '220px' }}>
+                                    <div style={{ width: '100%', height: appMode === 'multiplayer' ? '160px' : '220px' }}>
                                         <HandTracker onLandmarks={setLandmarks} />
                                     </div>
                                 ) : (
@@ -483,8 +512,11 @@ function Home(props) {
                         ) : appMode === 'market' ? (
                             <Marketplace
                                 lang={lang}
+                                budget={studentBudget}
                                 onCheckout={(data) => {
                                     setMissionData(data);
+                                    setStudentBudget(data.remainingBudget);
+                                    try { localStorage.setItem('studentBudget', String(data.remainingBudget)) } catch(e) {}
                                     setAppMode('mission_assembly');
                                 }}
                                 onCancel={() => setAppMode('menu')}
@@ -541,6 +573,7 @@ function Home(props) {
                                 setIsCameraActive={(val) => {
                                     globalCameraState = val;
                                     setIsCameraActive(val);
+                                    setWebcamMouseEnabled(val);
                                     if (!val) setLandmarks([]);
                                 }}
                                 onSetLandmarks={setLandmarks}
@@ -588,38 +621,6 @@ function Home(props) {
                                     ))}
                                 </div>
                             </div>
-                        ) : appMode === 'components' ? (
-                            <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto', width: '100%' }}>
-                                <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#1A2F4A', marginBottom: '8px' }}>Tủ Linh Kiện</h2>
-                                <p style={{ color: '#64748B', fontSize: '14px', marginBottom: '24px' }}>Tra cứu toàn bộ linh kiện, thông số kỹ thuật, và giá tham khảo.</p>
-                                <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-                                    {['CPU', 'GPU', 'RAM', 'SSD', 'PSU', 'COOLER'].map(type => (
-                                        <div key={type} style={{ flex: '1 1 220px', minWidth: '180px' }}>
-                                            <ComponentPreview type={type} model={null} size="large" />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        ) : appMode === 'lab' ? (
-                            <div style={{ display: 'flex', gap: '16px', width: '100%' }}>
-                                <PartPickerSidebar lang={lang} onSelect={handlePartSelect} placedCounts={placedCounts} />
-                                <div style={{ flex: 1, position: 'relative' }}>
-                                    <h2 style={{ color: '#0097A7', marginTop: 0, fontSize: '18px' }}>Phòng AI Lab</h2>
-                                    <p style={{ color: '#64748B', fontSize: '13px', marginBottom: '12px' }}>Thí nghiệm cấu hình với sự hỗ trợ của AI Guru — gợi ý linh kiện, tối ưu hiệu năng.</p>
-                                    <GameEngine
-                                        ref={gameEngineRef}
-                                        landmarks={landmarks}
-                                        onHover={handleHover}
-                                        onGameEvent={handleGameEvent}
-                                        trackingSensitivity={trackingSensitivity}
-                                    />
-                                    <div style={{ marginTop: '12px', padding: '12px', borderRadius: '8px', background: '#F8FAFC', border: '1px solid #E2E8F0' }}>
-                                        <p style={{ fontSize: '12px', color: '#64748B', margin: 0, fontStyle: 'italic' }}>
-                                            💡 Mẹo: AI Guru sẽ gợi ý linh kiện phù hợp với ngân sách và nhu cầu của bạn. Hãy bật AI ở menu bên trái.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
                         ) : null}
                     </div>
 
@@ -633,6 +634,13 @@ function Home(props) {
         )}
 
       </main>
+
+      {showWindowsSim && (
+        <WindowsSimulator
+          cart={placedItemsList.map(type => ({ type, name: type }))}
+          onExit={() => { setShowWindowsSim(false); setAppMode('menu'); setPlacedItemsList([]); }}
+        />
+      )}
 
       <LoginModal isOpen={showLoginModal} onClose={() => { setShowLoginModal(false); setLoginRedirectTo(null); }} redirectTo={loginRedirectTo} />
 

@@ -18,21 +18,25 @@ export default function LoginPage() {
   const [adminLoading, setAdminLoading] = useState(false)
   const router = useRouter()
 
-  function handleAdminLogin() {
+  async function handleAdminLogin() {
     if (!adminPass.trim()) { setAdminError('Vui lòng nhập mật khẩu admin'); return }
     setAdminLoading(true)
     setAdminError('')
 
-    setTimeout(() => {
-      if (adminPass === 'nguyen200113') {
-        localStorage.setItem('admin_auth', 'true')
-        localStorage.setItem('admin_login_time', Date.now().toString())
-        router.push('/admin')
-      } else {
+    try {
+      const formData = new FormData()
+      formData.set('email', 'admin')
+      formData.set('password', adminPass)
+      const res = await login(formData)
+      if (res?.error) {
         setAdminError('Mật khẩu admin không chính xác')
-        setAdminLoading(false)
+      } else if (res?.success && res.redirectUrl) {
+        router.push(res.redirectUrl)
       }
-    }, 500)
+    } catch {
+      setAdminError('Có lỗi xảy ra, vui lòng thử lại')
+    }
+    setAdminLoading(false)
   }
 
   async function handleGoogleLogin() {
@@ -41,10 +45,13 @@ export default function LoginPage() {
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
+    const redirectTo = process.env.NEXT_PUBLIC_SITE_URL
+      ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`
+      : `${window.location.origin}/auth/callback`
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo,
         queryParams: { prompt: 'select_account' },
       },
     })
@@ -72,9 +79,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', background: 'var(--bg-base)' }}>
+    <div className="login-page-root" style={{ minHeight: '100vh', display: 'flex', background: 'var(--bg-base)' }}>
       {/* Left Panel - Animated Illustration */}
-      <div style={{
+      <div className="login-left-panel" style={{
         flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
         background: 'linear-gradient(160deg, #031f3b 0%, #1a2f53 80%)',
         padding: '64px', position: 'relative', overflow: 'hidden',
@@ -189,7 +196,7 @@ export default function LoginPage() {
       </div>
 
       {/* Right Panel - Login Form */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px' }}>
+      <div className="login-right-panel" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px' }}>
         <div style={{ maxWidth: '440px', width: '100%' }}>
           <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '14px', fontWeight: 500, marginBottom: '32px', textDecoration: 'none' }}>
             <ArrowLeft size={18} /> Quay lại trang chủ
@@ -203,7 +210,7 @@ export default function LoginPage() {
             <p style={{ color: 'var(--text-muted)', fontSize: '15px' }}>Chào mừng bạn trở lại! Đăng nhập để tiếp tục học tập.</p>
           </div>
 
-          <button onClick={handleGoogleLogin} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', background: 'var(--bg-surface)', border: '1px solid var(--border-default)', padding: '14px', borderRadius: '10px', fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer', transition: 'all 0.2s', marginBottom: '16px' }}>
+          <button onClick={handleGoogleLogin} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', background: 'var(--bg-surface)', border: '1px solid var(--border-default)', padding: '14px', borderRadius: '10px', fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer', transition: 'all 0.2s', marginBottom: '8px' }}>
             <svg viewBox="0 0 24 24" style={{ width: '20px', height: '20px' }}>
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -212,6 +219,9 @@ export default function LoginPage() {
             </svg>
             Tiếp tục với Google
           </button>
+          <p style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center', marginBottom: '16px', marginTop: 0 }}>
+            Lần đầu đăng nhập: Email tự động lưu, bạn chỉ cần nhập Họ tên + chọn vai trò. Không cần mật khẩu!
+          </p>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
             <div style={{ flex: 1, height: '1px', background: 'var(--border-default)' }}></div>
@@ -336,6 +346,21 @@ export default function LoginPage() {
         @keyframes floatRotate {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
+        }
+
+        /* === MOBILE RESPONSIVE === */
+        @media (max-width: 768px) {
+          .login-left-panel { display: none !important; }
+          .login-right-panel {
+            flex: none !important;
+            width: 100% !important;
+            padding: 24px 16px !important;
+            align-items: flex-start !important;
+          }
+          .login-right-panel > div { max-width: 100% !important; }
+        }
+        @media (max-width: 480px) {
+          .login-right-panel { padding: 16px 12px !important; }
         }
       `}</style>
     </div>

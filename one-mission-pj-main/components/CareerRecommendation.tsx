@@ -87,6 +87,7 @@ const CAREERS = [
 export default function CareerRecommendation({ lang = 'vn' }) {
   const [scores, setScores] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
+  const [realtimeKey, setRealtimeKey] = useState(0)
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -94,6 +95,19 @@ export default function CareerRecommendation({ lang = 'vn' }) {
 
   useEffect(() => {
     fetchScores()
+  }, [realtimeKey])
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('career_realtime')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'quiz_attempts' }, async (payload) => {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user && (payload.new as any).user_id === user.id) {
+          setRealtimeKey(k => k + 1)
+        }
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
   }, [])
 
   async function fetchScores() {
@@ -109,7 +123,10 @@ export default function CareerRecommendation({ lang = 'vn' }) {
       const scoreMap: Record<string, number> = {}
       attempts?.forEach(a => {
         if (a.total_questions > 0) {
-          scoreMap[a.quiz_id] = Math.round((a.score / (a.total_questions * 10)) * 100)
+          const pct = Math.round((a.score / (a.total_questions * 10)) * 100)
+          scoreMap[a.quiz_id] = Math.max(pct, scoreMap[a.quiz_id] || 0)
+        } else if (a.score > 0) {
+          scoreMap[a.quiz_id] = Math.min(a.score, 100)
         }
       })
       setScores(scoreMap)

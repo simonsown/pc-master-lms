@@ -8,11 +8,13 @@ interface GuruState {
   silentMessage: string;
   silentTrigger: number;
   lang: string;
+  openTrigger: number;
   setMessage: (msg: string) => void;
   setSilentMessage: (msg: string) => void;
   setLang: (l: string) => void;
   incrementTrigger: () => void;
   incrementSilentTrigger: () => void;
+  openChat: () => void;
 }
 
 const GuruContext = createContext<GuruState | null>(null);
@@ -23,6 +25,7 @@ export function GuruProvider({ children }: { children: ReactNode }) {
   const [silentMessage, setSilentMessageState] = useState('');
   const [silentTrigger, setSilentTrigger] = useState(0);
   const [lang, setLangState] = useState('vn');
+  const [openTrigger, setOpenTrigger] = useState(0);
 
   const setMessage = useCallback((msg: string) => {
     setMessageState(msg);
@@ -40,12 +43,13 @@ export function GuruProvider({ children }: { children: ReactNode }) {
 
   const incrementTrigger = useCallback(() => setTrigger(t => t + 1), []);
   const incrementSilentTrigger = useCallback(() => setSilentTrigger(t => t + 1), []);
+  const openChat = useCallback(() => setOpenTrigger(t => t + 1), []);
 
   return (
     <GuruContext.Provider value={{
-      message, trigger, silentMessage, silentTrigger, lang,
+      message, trigger, silentMessage, silentTrigger, lang, openTrigger,
       setMessage, setSilentMessage, setLang,
-      incrementTrigger, incrementSilentTrigger
+      incrementTrigger, incrementSilentTrigger, openChat
     }}>
       {children}
     </GuruContext.Provider>

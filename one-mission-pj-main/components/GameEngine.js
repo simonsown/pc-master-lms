@@ -71,13 +71,13 @@ const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems }, ref) 
         stateRef.current = {
             components: initialComponents,
             sockets: [
-                { id: 'socket-cpu', type: 'CPU', x: 615, y: 190, width: 80, height: 80 },
-                { id: 'socket-cooler', type: 'COOLER', x: 610, y: 185, width: 90, height: 90 },
-                { id: 'socket-ram-1', type: 'RAM', x: 800, y: 120, width: 25, height: 260, vertical: true },
-                { id: 'socket-ram-2', type: 'RAM', x: 870, y: 120, width: 25, height: 260, vertical: true },
-                { id: 'socket-gpu', type: 'GPU', x: 455, y: 560, width: 320, height: 130 },
+                { id: 'socket-cpu', type: 'CPU', x: 615, y: 270, width: 80, height: 80 },
+                { id: 'socket-cooler', type: 'COOLER', x: 610, y: 265, width: 90, height: 90 },
+                { id: 'socket-ram-1', type: 'RAM', x: 800, y: 200, width: 25, height: 260, vertical: true },
+                { id: 'socket-ram-2', type: 'RAM', x: 870, y: 200, width: 25, height: 260, vertical: true },
+                { id: 'socket-gpu', type: 'GPU', x: 455, y: 640, width: 320, height: 130 },
                 { id: 'socket-psu', type: 'PSU', x: 135, y: 620, width: 200, height: 160 },
-                { id: 'socket-ssd', type: 'SSD', x: 515, y: 480, width: 140, height: 35 }
+                { id: 'socket-ssd', type: 'SSD', x: 515, y: 560, width: 140, height: 35 }
             ]
         };
     }
@@ -114,7 +114,8 @@ const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems }, ref) 
     // Input States
     const mouseRef = useRef({ x: 0, y: 0, isDown: false });
     const landmarksRef = useRef(null);
-    const cursorFilterRef = useRef({ x: null, y: null, alpha: 0.1 }); // Ultra-strong smoothing filter for zero jitter
+    const cursorFilterRef = useRef({ x: null, y: null, alpha: 0.35 }); // Smooth but responsive cursor filter
+    const grabLockRef = useRef({ x: null, y: null, active: false }); // Freeze cursor when pinching
 
     useEffect(() => {
         landmarksRef.current = landmarks;
@@ -246,6 +247,10 @@ const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems }, ref) 
             oCtx.strokeStyle = '#334155'; oCtx.lineWidth = 4;
             oCtx.strokeRect(250, 610, 220, 180);
 
+
+            // Shift all motherboard drawing down by 80px so all components are visible above it
+            oCtx.save();
+            oCtx.translate(0, 80);
 
             // --- 1. Draw Elite Dark Motherboard Base ---
             const mainboardGrad = oCtx.createLinearGradient(480, 50, 1150, 770);
@@ -444,7 +449,8 @@ const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems }, ref) 
             drawScrew(520, 410);
             drawScrew(1130, 410);
 
-            oCtx.restore();
+            oCtx.restore(); // end mainboard translate shift
+            oCtx.restore(); // outer save (case translate)
             bgCacheRef.current = offCanvas;
         };
 
@@ -460,6 +466,7 @@ const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems }, ref) 
             // Glowing Circuit Traces (Animated)
             ctx.save();
             ctx.translate(-125, 0);
+            ctx.translate(0, 80);
 
             ctx.strokeStyle = '#d97706';
             ctx.lineWidth = 1.5;
@@ -810,7 +817,7 @@ const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems }, ref) 
                 const distance = Math.hypot(indexTip.x - thumbTip.x, indexTip.y - thumbTip.y);
 
                 // Add sensitivity multiplier to make the cursor feel extremely fast and responsive
-                const SENSITIVITY = 1.6;
+                const SENSITIVITY = 1.0;
                 const offsetX = (indexTip.x - 0.5) * SENSITIVITY + 0.5;
                 const offsetY = (indexTip.y - 0.5) * SENSITIVITY + 0.5;
 
@@ -830,6 +837,20 @@ const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems }, ref) 
                 activeCursorY = filter.y;
                 isGrabbing = distance < GRAB_DISTANCE;
                 showHandCursor = true;
+
+                // Freeze cursor lúc bắt đầu pinch để nắm chính xác, khi đã nắm rồi thì cho kéo
+                if (isGrabbing) {
+                  const hasGrabbed = state.components.some(c => c.isGrabbed);
+                  if (!hasGrabbed) {
+                    if (!grabLockRef.current.active) {
+                      grabLockRef.current = { x: activeCursorX, y: activeCursorY, active: true };
+                    }
+                    activeCursorX = grabLockRef.current.x;
+                    activeCursorY = grabLockRef.current.y;
+                  }
+                } else {
+                  grabLockRef.current = { x: null, y: null, active: false };
+                }
             } else {
                 cursorFilterRef.current.x = null;
             }

@@ -20,12 +20,29 @@ export default function TeacherLessonsPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { window.location.href = '/login'; return }
     setCurrentUser(user)
-    const { data } = await supabase
+    const { data: lessonsData } = await supabase
       .from('lessons')
       .select('*, lesson_sections(count)')
       .eq('teacher_id', user.id)
       .order('created_at', { ascending: false })
-    setLessons(data || [])
+    if (lessonsData) {
+      const lessonIds = lessonsData.map(l => l.id)
+      const { data: assignments } = await supabase
+        .from('lesson_class_assignments')
+        .select('lesson_id, class_id')
+        .in('lesson_id', lessonIds)
+      const { data: allClasses } = await supabase
+        .from('classes')
+        .select('id, name')
+        .eq('teacher_id', user.id)
+      const classMap = Object.fromEntries((allClasses || []).map(c => [c.id, c.name]))
+      const assignmentMap = {}
+      ;(assignments || []).forEach(a => {
+        if (!assignmentMap[a.lesson_id]) assignmentMap[a.lesson_id] = []
+        if (classMap[a.class_id]) assignmentMap[a.lesson_id].push(classMap[a.class_id])
+      })
+      setLessons(lessonsData.map(l => ({ ...l, classNames: assignmentMap[l.id] || [] })))
+    }
     setLoading(false)
   }
 
@@ -113,6 +130,13 @@ export default function TeacherLessonsPage() {
                   <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: '0 0 16px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: '1.5' }}>
                     {lesson.description || 'Chưa có mô tả'}
                   </p>
+                  {lesson.classNames?.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '12px' }}>
+                      {lesson.classNames.map((name, i) => (
+                        <span key={i} style={{ fontSize: '10px', padding: '2px 8px', background: 'rgba(59,130,246,0.12)', color: 'var(--accent-blue)', borderRadius: '99px', fontWeight: 600 }}>{name}</span>
+                      ))}
+                    </div>
+                  )}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 500 }}>
                       {lesson.lesson_sections?.[0]?.count || 0} mục

@@ -13,19 +13,17 @@ export async function login(formData: FormData) {
     return { error: 'Vui lòng nhập đầy đủ email và mật khẩu' }
   }
 
-  // Logic Admin đặc biệt theo yêu cầu của USER
-  if (email === 'admin' && password === 'nguyen200113') {
-    // Trong thực tế nên dùng auth.signIn, nhưng đây là yêu cầu hardcode cho Admin
-    // Ta sẽ redirect thẳng về /admin và middleware sẽ kiểm tra session sau
-    // Để middleware hoạt động, ta vẫn cần một session thật hoặc giả lập
-    // Ở đây ta giả sử đã có user admin trong DB
+  // Admin login via Supabase Auth
+  if (email === 'admin') {
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@pcmaster.com'
     const { error: adminError } = await supabase.auth.signInWithPassword({
-      email: 'admin@pcmaster.com', // Email thật của admin trong hệ thống
+      email: adminEmail,
       password: password,
     })
-    if (!adminError) {
-      return { success: true, redirectUrl: '/admin' }
+    if (adminError) {
+      return { error: 'Thông tin đăng nhập không chính xác' }
     }
+    return { success: true, redirectUrl: '/admin' }
   }
 
   // 1. Thực hiện đăng nhập thẳng bằng Supabase Auth
@@ -217,9 +215,10 @@ export async function getProfile() {
 
 export async function signInWithGoogle() {
   const supabase = await createClient()
-  const redirectUrl = process.env.NEXT_PUBLIC_SITE_URL 
-    ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`
-    : 'http://localhost:3000/auth/callback'
+  const origin = process.env.NEXT_PUBLIC_SITE_URL 
+    || process.env.VERCEL_URL 
+    || 'http://localhost:3000'
+  const redirectUrl = `${origin}/auth/callback`
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
@@ -227,6 +226,11 @@ export async function signInWithGoogle() {
       redirectTo: redirectUrl,
     },
   })
+  
+  if (error) {
+    console.error('Google OAuth error:', error)
+    return { error: error.message }
+  }
   
   if (data.url) {
     redirect(data.url)

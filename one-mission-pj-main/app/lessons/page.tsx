@@ -14,9 +14,33 @@ export default async function LessonsListPage() {
     redirect('/login')
   }
 
-  const { data: lessons } = await supabase
-    .from('lessons')
-    .select('*')
+  const { data: myClasses } = await supabase
+    .from('class_members')
+    .select('class_id')
+    .eq('student_id', user.id)
+
+  const classIds = (myClasses || []).map(c => c.class_id)
+
+  let lessonsQuery = supabase.from('lessons').select('*')
+
+  if (classIds.length > 0) {
+    const { data: assignedLessonIds } = await supabase
+      .from('lesson_class_assignments')
+      .select('lesson_id')
+      .in('class_id', classIds)
+
+    const lessonIds = (assignedLessonIds || []).map(a => a.lesson_id)
+    if (lessonIds.length > 0) {
+      lessonsQuery = lessonsQuery.in('id', lessonIds)
+    } else {
+      lessonsQuery = lessonsQuery.eq('id', null)
+    }
+  } else {
+    lessonsQuery = lessonsQuery.eq('id', null)
+  }
+
+  const { data: lessons } = await lessonsQuery
+    .eq('is_published', true)
     .order('created_at', { ascending: true })
 
   const { data: progressList } = await supabase

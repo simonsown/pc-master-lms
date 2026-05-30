@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect, useState, use, useCallback } from 'react';
+import React, { useEffect, useState, use, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Save, Trash2, Video, FileText, Image as ImageIcon, FileSearch, Loader2, ArrowLeft, GripVertical, Eye, EyeOff, Upload, PlusCircle, CheckCircle, AlertCircle } from 'lucide-react';
+import { Save, Trash2, Video, FileText, Image as ImageIcon, FileSearch, Code, Loader2, ArrowLeft, GripVertical, Eye, EyeOff, Upload, PlusCircle, CheckCircle, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { BackButton } from '@/components/ui/BackButton';
 
@@ -46,6 +46,27 @@ export default function LessonEditorPage({ params }) {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [toast, setToast] = useState(null);
+    const [classes, setClasses] = useState([]);
+    const [selectedClassIds, setSelectedClassIds] = useState([]);
+    const [showClassPicker, setShowClassPicker] = useState(false);
+    const textEditorRef = useRef(null);
+
+    const insertAtCursor = (text) => {
+        const ta = textEditorRef.current;
+        if (!ta) return;
+        const start = ta.selectionStart;
+        const end = ta.selectionEnd;
+        const val = ta.value;
+        const before = val.substring(0, start);
+        const after = val.substring(end);
+        const result = before + '\n\n' + text + '\n\n' + after;
+        updateSectionLocal({ ...activeSection, content: result });
+        requestAnimationFrame(() => {
+            ta.focus();
+            const pos = before.length + 2 + text.length + 2;
+            ta.setSelectionRange(pos, pos);
+        });
+    };
 
     const showToast = (message, type = 'success') => setToast({ message, type });
 
@@ -61,6 +82,16 @@ export default function LessonEditorPage({ params }) {
         setSections(sectionData || []);
         setBooks(bookData || []);
         if (sectionData?.length > 0) setActiveSection(sectionData[0]);
+
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            const { data: classData } = await supabase.from('classes').select('*').eq('teacher_id', user.id).order('name');
+            setClasses(classData || []);
+        }
+
+        const { data: assignmentData } = await supabase.from('lesson_class_assignments').select('class_id').eq('lesson_id', lessonId);
+        if (assignmentData) setSelectedClassIds(assignmentData.map(a => a.class_id));
+
         setLoading(false);
     };
 
@@ -75,9 +106,21 @@ export default function LessonEditorPage({ params }) {
             source_name: lesson.source_name || '',
             source_url: lesson.source_url || ''
         }).eq('id', lessonId);
+        if (error) { showToast('Lưu thất bại: ' + error.message, 'error'); setSaving(false); return; }
+
+        const { data: existing } = await supabase.from('lesson_class_assignments').select('class_id').eq('lesson_id', lessonId);
+        const existingIds = (existing || []).map(a => a.class_id);
+        const toRemove = existingIds.filter(id => !selectedClassIds.includes(id));
+        const toAdd = selectedClassIds.filter(id => !existingIds.includes(id));
+        if (toRemove.length > 0) {
+            await supabase.from('lesson_class_assignments').delete().eq('lesson_id', lessonId).in('class_id', toRemove);
+        }
+        if (toAdd.length > 0) {
+            await supabase.from('lesson_class_assignments').insert(toAdd.map(class_id => ({ lesson_id: lessonId, class_id })));
+        }
+
         setSaving(false);
-        if (error) { showToast('Lưu thất bại: ' + error.message, 'error'); }
-        else { showToast('Đã lưu bài giảng!'); }
+        showToast('Đã lưu bài giảng!');
     };
 
     const addSection = async (type) => {
@@ -120,6 +163,16 @@ export default function LessonEditorPage({ params }) {
         return id ? `https://drive.google.com/file/d/${id}/preview` : (url.includes('/preview') ? url : '');
     };
 
+    const getPdfEmbedUrl = (url) => {
+        if (!url) return '';
+        const id = url.match(/\/d\/(.+?)\/(?:view|preview)/)?.[1];
+        if (id) {
+            const downloadUrl = `https://drive.google.com/uc?export=download&id=${id}`;
+            return `https://docs.google.com/viewer?url=${encodeURIComponent(downloadUrl)}&embedded=true`;
+        }
+        return url;
+    };
+
     if (loading) return (
         <div style={{ background: 'var(--bg-base)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Loader2 style={{ animation: 'spin 1s linear infinite' }} color="var(--brand-primary)" size={48} />
@@ -138,15 +191,28 @@ export default function LessonEditorPage({ params }) {
 
     return (
         <div style={{ background: 'var(--bg-base)', minHeight: '100vh', color: 'var(--text-primary)', display: 'flex', flexDirection: 'column' }}>
-            <style>{`@keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }`}</style>
+            <style>{`
+                @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+                @media (max-width: 768px) {
+                    .editor-sidebar { width: 100% !important; min-width: 100% !important; max-height: 50vh !important; border-right: none !important; border-bottom: 1px solid var(--border-default); }
+                    .editor-content { padding: 16px !important; }
+                    .editor-header { padding: 12px 16px !important; flex-wrap: wrap !important; gap: 8px !important; }
+                    .editor-header-title { width: 100% !important; max-width: 100% !important; }
+                    .editor-section-grid { grid-template-columns: 1fr !important; }
+                }
+                @media (min-width: 769px) and (max-width: 1024px) {
+                    .editor-sidebar { width: 280px !important; min-width: 280px !important; }
+                    .editor-content { padding: 24px !important; }
+                }
+            `}</style>
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-            <header style={{ padding: '16px 32px', background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-default)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
+            <header className="editor-header" style={{ padding: '16px 32px', background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-default)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <BackButton href="/teacher/lessons" label="" className="flex items-center text-[#636678] hover:text-[#dde0ed] transition-colors" />
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                         <span style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}>Tên bài giảng</span>
-                        <input
+                        <input className="editor-header-title"
                             value={lesson.title}
                             onChange={(e) => setLesson({ ...lesson, title: e.target.value })}
                             placeholder="Nhập tên bài giảng..."
@@ -168,7 +234,7 @@ export default function LessonEditorPage({ params }) {
             </header>
 
             <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-                <div style={{ width: '340px', minWidth: '340px', background: 'var(--bg-surface)', borderRight: '1px solid var(--border-default)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+                <div className="editor-sidebar" style={{ width: '340px', minWidth: '340px', background: 'var(--bg-surface)', borderRight: '1px solid var(--border-default)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
                     <div style={{ padding: '20px', borderBottom: '1px solid var(--border-default)' }}>
                         <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>Ảnh Thumbnail</p>
                         <div style={{ width: '100%', height: '140px', background: 'var(--bg-elevated)', borderRadius: '10px', overflow: 'hidden', marginBottom: '10px', border: '1px dashed var(--border-default)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -222,7 +288,42 @@ export default function LessonEditorPage({ params }) {
                                 </div>
                             </div>
                         </div>
-                    </div>
+                        </div>
+
+                        <div style={{ marginTop: '20px', padding: '16px', background: 'var(--bg-elevated)', borderRadius: '12px', border: '1px solid var(--border-default)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                                <p style={{ fontSize: '11px', color: 'var(--accent-blue)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>Lớp học</p>
+                                <button onClick={() => setShowClassPicker(!showClassPicker)}
+                                    style={{ background: 'none', border: 'none', color: 'var(--accent-blue)', cursor: 'pointer', fontSize: '12px', fontWeight: 700, fontFamily: 'inherit' }}>
+                                    {showClassPicker ? 'Thu gọn' : selectedClassIds.length > 0 ? `Đã chọn ${selectedClassIds.length} lớp` : 'Chọn lớp'}
+                                </button>
+                            </div>
+                            {showClassPicker && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '180px', overflowY: 'auto' }}>
+                                    {classes.length === 0 ? (
+                                        <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Chưa có lớp học nào.</p>
+                                    ) : classes.map(cls => (
+                                        <label key={cls.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', cursor: 'pointer', background: selectedClassIds.includes(cls.id) ? 'rgba(59,130,246,0.1)' : 'transparent', transition: 'background 0.2s', fontSize: '13px', color: 'var(--text-primary)', fontWeight: 500 }}>
+                                            <input type="checkbox" checked={selectedClassIds.includes(cls.id)}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) setSelectedClassIds(prev => [...prev, cls.id]);
+                                                    else setSelectedClassIds(prev => prev.filter(id => id !== cls.id));
+                                                }}
+                                                style={{ accentColor: 'var(--accent-blue)', width: '16px', height: '16px', cursor: 'pointer' }} />
+                                            <span>{cls.name}</span>
+                                            <span style={{ marginLeft: 'auto', fontSize: '10px', color: 'var(--text-muted)', background: 'var(--bg-base)', padding: '2px 6px', borderRadius: '4px' }}>{cls.grade}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            )}
+                            {!showClassPicker && selectedClassIds.length > 0 && (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                    {classes.filter(c => selectedClassIds.includes(c.id)).map(cls => (
+                                        <span key={cls.id} style={{ fontSize: '11px', padding: '3px 8px', background: 'rgba(59,130,246,0.15)', color: 'var(--accent-blue)', borderRadius: '99px', fontWeight: 600 }}>{cls.name}</span>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
 
                     <div style={{ display: 'flex', borderBottom: '1px solid var(--border-default)' }}>
                         {['content', 'books'].map(tab => (
@@ -248,7 +349,7 @@ export default function LessonEditorPage({ params }) {
                                                 {s.type === 'video' && <Video size={14} />}
                                                 {s.type === 'text' && <FileText size={14} />}
                                                 {s.type === 'image' && <ImageIcon size={14} />}
-                                                {s.type === 'pdf' && <FileSearch size={14} />}
+                                                {s.type === 'pdf' && <FileSearch size={14} />}{s.type === 'embed' && <Code size={14} />}
                                             </div>
                                             <div style={{ flex: 1, overflow: 'hidden' }}>
                                                 <p style={{ margin: 0, fontSize: '13px', fontWeight: 600, color: activeSection?.id === s.id ? 'var(--text-primary)' : 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.title}</p>
@@ -258,7 +359,7 @@ export default function LessonEditorPage({ params }) {
                                     ))}
                                 </div>
                                 <div style={{ marginTop: '16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                                    {[['video', <Video size={13} />, '+Video'], ['text', <FileText size={13} />, '+Chữ'], ['image', <ImageIcon size={13} />, '+Ảnh'], ['pdf', <FileSearch size={13} />, '+PDF']].map(([type, icon, label]) => (
+                                    {[['video', <Video size={13} />, '+Video'], ['text', <FileText size={13} />, '+Chữ'], ['image', <ImageIcon size={13} />, '+Ảnh'], ['pdf', <FileSearch size={13} />, '+PDF'], ['embed', <Code size={13} />, '+Nhúng']].map(([type, icon, label]) => (
                                         <button key={type} onClick={() => addSection(type)} style={{ padding: '8px', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', borderRadius: '8px', color: 'var(--text-muted)', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontFamily: 'inherit' }}>
                                             {icon} {label}
                                         </button>
@@ -287,7 +388,7 @@ export default function LessonEditorPage({ params }) {
                     </div>
                 </div>
 
-                <div style={{ flex: 1, overflowY: 'auto', padding: '40px', background: 'var(--bg-base)' }}>
+                <div className="editor-content" style={{ flex: 1, overflowY: 'auto', padding: '40px', background: 'var(--bg-base)' }}>
                     {activeSection ? (
                         <div style={{ maxWidth: '820px', margin: '0 auto' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px' }}>
@@ -317,10 +418,22 @@ export default function LessonEditorPage({ params }) {
                                 </>}
 
                                 {activeSection.type === 'text' && (
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                    <div className="editor-section-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                                         <div>
                                             <label style={{ display: 'block', color: 'var(--text-muted)', fontSize: '12px', fontWeight: 700, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Markdown</label>
-                                            <textarea value={activeSection.content} onChange={(e) => updateSectionLocal({ ...activeSection, content: e.target.value })}
+                                            <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
+                                                {[
+                                                    { icon: <ImageIcon size={14} />, label: 'Ảnh', getText: () => { const u = prompt('URL hình ảnh:'); return u ? `![Image](${u})` : null; } },
+                                                    { icon: <Video size={14} />, label: 'Video', getText: () => { const u = prompt('URL YouTube:'); return u ? `<div class="video-embed">${u}</div>` : null; } },
+                                                    { icon: <FileSearch size={14} />, label: 'PDF', getText: () => { const u = prompt('URL Google Drive PDF:'); return u ? `<div class="pdf-embed">${u}</div>` : null; } },
+                                                ].map(({ icon, label, getText }) => (
+                                                    <button key={label} type="button" onClick={() => { const t = getText(); if (t) insertAtCursor(t); }}
+                                                        style={{ padding: '6px 10px', borderRadius: '6px', background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontFamily: 'inherit' }}>
+                                                        {icon} {label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <textarea ref={textEditorRef} value={activeSection.content} onChange={(e) => updateSectionLocal({ ...activeSection, content: e.target.value })}
                                                 style={{ ...inputStyle, height: '360px', fontFamily: 'monospace', resize: 'vertical' }}
                                                 placeholder="## Tiêu đề" />
                                         </div>
@@ -343,15 +456,33 @@ export default function LessonEditorPage({ params }) {
 
                                 {activeSection.type === 'pdf' && <>
                                     <div style={{ background: 'rgba(var(--brand-primary-rgb),0.05)', border: '1px solid rgba(var(--brand-primary-rgb),0.15)', borderRadius: '12px', padding: '16px', fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                                        Hướng dẫn lấy link Drive: Vào Google Drive  Chuột phải file PDF  <em>Chia sẻ</em>  Sao chép link  Đổi <code>/view</code> thành <code>/preview</code>
+                                        Hướng dẫn lấy link Drive: Vào Google Drive  Chuột phải file PDF  <em>Chia sẻ</em>  Sao chép link  Dán vào ô bên dưới
                                     </div>
                                     <div>
-                                        <label style={{ display: 'block', color: 'var(--text-muted)', fontSize: '12px', fontWeight: 700, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Google Drive Embed URL</label>
-                                        <input placeholder="https://drive.google.com/file/d/FILE_ID/preview" value={activeSection.content} onChange={(e) => updateSectionLocal({ ...activeSection, content: e.target.value })} style={inputStyle} />
+                                        <label style={{ display: 'block', color: 'var(--text-muted)', fontSize: '12px', fontWeight: 700, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Google Drive URL</label>
+                                        <input placeholder="https://drive.google.com/file/d/FILE_ID/view" value={activeSection.content} onChange={(e) => updateSectionLocal({ ...activeSection, content: e.target.value })} style={inputStyle} />
                                     </div>
-                                    {getDriveEmbed(activeSection.content) && (
+                                    {getPdfEmbedUrl(activeSection.content) && (
                                         <div style={{ width: '100%', height: '500px', background: 'white', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-default)' }}>
-                                            <iframe src={getDriveEmbed(activeSection.content)} style={{ width: '100%', height: '100%', border: 'none' }} allow="autoplay" />
+                                            <iframe src={getPdfEmbedUrl(activeSection.content)} style={{ width: '100%', height: '100%', border: 'none' }} allow="autoplay" />
+                                        </div>
+                                    )}
+                                </>}
+
+                                {activeSection.type === 'embed' && <>
+                                    <div style={{ background: 'rgba(167,139,250,0.05)', border: '1px solid rgba(167,139,250,0.15)', borderRadius: '12px', padding: '16px', fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                                        Dán mã nhúng (iframe) từ Google Slides, Canva, Genially,... 
+                                        Ví dụ: <code>{'<iframe src="https://..." width="100%" height="400px"></iframe>'}</code>
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', color: 'var(--text-muted)', fontSize: '12px', fontWeight: 700, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Mã nhúng (Embed Code)</label>
+                                        <textarea value={activeSection.content} onChange={(e) => updateSectionLocal({ ...activeSection, content: e.target.value })}
+                                            style={{ ...inputStyle, height: '140px', fontFamily: 'monospace', resize: 'vertical' }}
+                                            placeholder='<iframe src="https://www.canva.com/..." width="100%" height="400px"></iframe>' />
+                                    </div>
+                                    {activeSection.content && (
+                                        <div style={{ width: '100%', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-default)' }}>
+                                            <div dangerouslySetInnerHTML={{ __html: activeSection.content }} />
                                         </div>
                                     )}
                                 </>}

@@ -4,9 +4,10 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   BookOpen, Cpu, ShoppingCart, Users, BrainCircuit, Award, Globe, Sparkles, 
-  Menu, Webcam, X, Sun, Moon, BarChart2, Map, FileText, Trophy, Bell, MessageSquare, User 
+  Menu, Webcam, X, Sun, Moon, BarChart2, Map, FileText, Trophy, Bell, MessageSquare, User, Monitor 
 } from 'lucide-react';
 import JoinClassModal from './JoinClassModal';
+import ComponentPreview from './ComponentPreview';
 
 const BurgerMenu = ({ 
   lang, 
@@ -27,6 +28,7 @@ const BurgerMenu = ({
     const [hoveredBtn, setHoveredBtn] = useState(null);
     const [showCredits, setShowCredits] = useState(false);
     const [showJoinClass, setShowJoinClass] = useState(false);
+    const [showComponents, setShowComponents] = useState(false);
     const [hasClass, setHasClass] = useState(false);
     const unreadCount = 0;
     
@@ -207,6 +209,15 @@ const BurgerMenu = ({
                         >
                             <ShoppingCart style={iconStyle('market', appMode === 'market')} />
                             {lang === 'en' ? 'Marketplace' : 'Chợ Máy Tính'}
+                        </button>
+                        
+                        <button
+                            onMouseEnter={() => setHoveredBtn('components')} onMouseLeave={() => setHoveredBtn(null)}
+                            onClick={() => setShowComponents(true)}
+                            style={navItemStyle('components', false)}
+                        >
+                            <Monitor style={iconStyle('components', false)} />
+                            {lang === 'en' ? 'Component Library' : 'Tủ Linh Kiện'}
                         </button>
                         
                         <button
@@ -513,6 +524,38 @@ const BurgerMenu = ({
                     </div>
                 </div>
             )}
+            {/* Component Library Modal */}
+            {showComponents && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+                    background: 'rgba(12, 15, 20, 0.85)', backdropFilter: 'blur(8px)',
+                    zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '2rem'
+                }}>
+                    <div style={{
+                        background: 'var(--bg-surface)', border: '1px solid var(--border-strong)', borderRadius: '12px',
+                        padding: '24px', maxWidth: '900px', width: '100%', color: 'var(--text-primary)',
+                        position: 'relative', maxHeight: '90vh', overflowY: 'auto'
+                    }}>
+                        <button onClick={() => setShowComponents(false)}
+                            style={{ position: 'absolute', top: '16px', right: '16px', background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                        ><X size={20} /></button>
+                        <h2 style={{ marginTop: 0, fontSize: '22px', fontWeight: 800, marginBottom: '8px' }}>
+                            {lang === 'en' ? 'Component Library' : 'Tủ Linh Kiện'}
+                        </h2>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginBottom: '24px' }}>
+                            {lang === 'en' ? 'Browse all components, specs, and prices.' : 'Tra cứu toàn bộ linh kiện, thông số kỹ thuật, và giá tham khảo.'}
+                        </p>
+                        <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                            {['CPU', 'GPU', 'RAM', 'SSD', 'PSU', 'COOLER'].map(type => (
+                                <div key={type} style={{ flex: '1 1 220px', minWidth: '180px', maxWidth: '280px' }}>
+                                    <ComponentPreview type={type} model={null} size="large" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <JoinClassModal 
                 isOpen={showJoinClass} 
                 onClose={() => setShowJoinClass(false)} 

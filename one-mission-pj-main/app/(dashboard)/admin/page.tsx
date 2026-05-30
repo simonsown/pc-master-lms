@@ -44,16 +44,6 @@ type RealtimeEvent = {
   time: string
 }
 
-const weeklyData = [
-  { day: 'T2', users: 12, lessons: 4, exams: 2 },
-  { day: 'T3', users: 19, lessons: 7, exams: 3 },
-  { day: 'T4', users: 8, lessons: 2, exams: 1 },
-  { day: 'T5', users: 24, lessons: 9, exams: 5 },
-  { day: 'T6', users: 15, lessons: 5, exams: 2 },
-  { day: 'T7', users: 32, lessons: 11, exams: 7 },
-  { day: 'CN', users: 7, lessons: 1, exams: 0 },
-]
-
 export default function AdminDashboard() {
   const router = useRouter()
   const [users, setUsers] = useState<any[]>([])
@@ -64,6 +54,15 @@ export default function AdminDashboard() {
   const [latency, setLatency] = useState<number | null>(null)
   const [uptime, setUptime] = useState('')
   const [autoRefresh, setAutoRefresh] = useState(true)
+  const [weeklyData, setWeeklyData] = useState([
+    { day: 'T2', users: 0, lessons: 0, exams: 0 },
+    { day: 'T3', users: 0, lessons: 0, exams: 0 },
+    { day: 'T4', users: 0, lessons: 0, exams: 0 },
+    { day: 'T5', users: 0, lessons: 0, exams: 0 },
+    { day: 'T6', users: 0, lessons: 0, exams: 0 },
+    { day: 'T7', users: 0, lessons: 0, exams: 0 },
+    { day: 'CN', users: 0, lessons: 0, exams: 0 },
+  ])
   const pollRef = useRef<NodeJS.Timeout | null>(null)
   const latencyRef = useRef<number[]>([])
   const eventsRef = useRef<HTMLDivElement>(null)
@@ -176,6 +175,31 @@ export default function AdminDashboard() {
       const { count: lessonsCount } = await supabase.from('lessons').select('*', { count: 'exact', head: true })
       const { count: examsCount } = await supabase.from('exams').select('*', { count: 'exact', head: true })
       setStats({ totalUsers: profiles?.length || 0, teachers, students, activeClasses: classesCount || 0, totalLessons: lessonsCount || 0, totalExams: examsCount || 0 })
+
+      const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString()
+      const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
+      const weeklyMap: Record<string, { users: number; lessons: number; exams: number }> = {}
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(Date.now() - i * 86400000)
+        const key = dayNames[d.getDay()]
+        weeklyMap[key] = { users: 0, lessons: 0, exams: 0 }
+      }
+      const { data: recentProfiles } = await supabase.from('profiles').select('created_at').gte('created_at', sevenDaysAgo)
+      recentProfiles?.forEach(p => {
+        const key = dayNames[new Date(p.created_at).getDay()]
+        if (weeklyMap[key]) weeklyMap[key].users++
+      })
+      const { data: recentLessons } = await supabase.from('lessons').select('created_at').gte('created_at', sevenDaysAgo)
+      recentLessons?.forEach(l => {
+        const key = dayNames[new Date(l.created_at).getDay()]
+        if (weeklyMap[key]) weeklyMap[key].lessons++
+      })
+      const { data: recentExams } = await supabase.from('exams').select('created_at').gte('created_at', sevenDaysAgo)
+      recentExams?.forEach(e => {
+        const key = dayNames[new Date(e.created_at).getDay()]
+        if (weeklyMap[key]) weeklyMap[key].exams++
+      })
+      setWeeklyData(dayNames.map(day => ({ day, ...weeklyMap[day] || { users: 0, lessons: 0, exams: 0 } })))
     } catch (err) { console.error('fetchAdminData error:', err) }
     finally { setLoading(false) }
   }
@@ -312,8 +336,8 @@ export default function AdminDashboard() {
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
             {[
-              { icon: Cpu, label: 'CPU Server', value: `${Math.floor(Math.random() * 30 + 15)}%`, status: 'ok' as const },
-              { icon: HardDrive, label: 'RAM', value: `${(1.5 + Math.random() * 0.8).toFixed(1)}GB / 4GB`, status: 'ok' as const },
+              { icon: Cpu, label: 'CPU Server', value: 'N/A', status: 'ok' as const },
+              { icon: HardDrive, label: 'RAM', value: 'N/A', status: 'ok' as const },
               { icon: Database, label: 'Database', value: latency ? `${latency}ms latency` : 'Đo...', status: latency !== null && latency < 200 ? 'ok' as const : 'warn' as const },
               { icon: Globe, label: 'Uptime', value: uptime || 'Đang tính...', status: 'ok' as const },
               { icon: Wifi, label: 'API', value: latency ? `${latency}ms` : 'Đo...', status: latency !== null && latency < 300 ? 'ok' as const : 'warn' as const },

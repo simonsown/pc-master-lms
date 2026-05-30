@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion } from 'framer-motion'
 import { HelpCircle, Zap, Star, Loader2, Search, Award, Flame, Play, ArrowLeft, BrainCircuit, RotateCcw } from 'lucide-react'
@@ -12,7 +12,7 @@ function Flashcards() {
   const [cards] = useState(() => {
     const all = QUIZ_BANK.slice(0, 15).map(q => ({
       front: q.title,
-      back: `${q.questions.length} câu hỏi về ${q.lessonTitle} - ${q.difficulty}`
+      back: `${Math.min(q.questions.length, 10)} câu hỏi về ${q.lessonTitle} - ${q.difficulty}`
     }))
     return all
   })
@@ -70,42 +70,83 @@ export default function StudentQuizPage() {
   const [accuracy, setAccuracy] = useState('Đang tải...')
   const [streak, setStreak] = useState('Đang tải...')
   const [xpBoost, setXpBoost] = useState(false)
-  const [unlockedCount, setUnlockedCount] = useState(5)
+  const [unlockedCount, setUnlockedCount] = useState(0)
+  const [daysSinceRegister, setDaysSinceRegister] = useState(0)
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 
+  const channelRef = useRef<any>(null)
+
   useEffect(() => {
-    fetchQuizzes()
+    setQuizzes(QUIZ_BANK.map(q => ({
+      id: q.id,
+      title: q.title,
+      lessons: { title: q.lessonTitle },
+      estimated_minutes: q.estimated_minutes,
+      difficulty: q.difficulty,
+      xp: q.xp,
+      totalQuestions: Math.min(q.questions.length, 10)
+    })))
     fetchRealTimeStats()
+    setLoading(false)
 
-    const channel = supabase
-      .channel('quiz-page-realtime')
-      .on('postgres_changes',
-        { event: '*', schema: 'public', table: 'quiz_attempts' },
-        () => fetchRealTimeStats()
-      )
-      .subscribe()
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        channelRef.current = supabase
+          .channel('quiz-page-realtime')
+          .on('postgres_changes',
+            { event: '*', schema: 'public', table: 'quiz_attempts', filter: `student_id=eq.${user.id}` },
+            () => fetchRealTimeStats()
+          )
+          .subscribe()
+      }
+    })
 
-    return () => { supabase.removeChannel(channel) }
+    return () => {
+      if (channelRef.current) supabase.removeChannel(channelRef.current)
+    }
   }, [])
 
   async function fetchRealTimeStats() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user) {
+        setAccuracy('Đăng nhập để xem')
+        setMotivation('Đăng nhập để làm quiz!')
+        setStreak('0 Ngày')
+        setUnlockedCount(3)
+        setDaysSinceRegister(0)
+        return
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('total_score, created_at')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (profile?.created_at) {
+        const created = new Date(profile.created_at)
+        const now = new Date()
+        const diff = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24))
+        setDaysSinceRegister(diff)
+        setUnlockedCount(Math.min(3 + diff, QUIZ_BANK.length))
+      } else {
+        setUnlockedCount(3)
+      }
 
       const { data: attempts } = await supabase
         .from('quiz_attempts')
-        .select('score, total_questions, created_at')
-        .eq('user_id', user.id)
+        .select('score, total_questions, created_at, student_id')
+        .eq('student_id', user.id)
 
       if (attempts && attempts.length > 0) {
         const totalScore = attempts.reduce((s, a) => s + (a.score || 0), 0)
         const totalQ = attempts.reduce((s, a) => s + (a.total_questions || 0), 0)
-        const avg = totalQ > 0 ? Math.round((totalScore / totalQ) * 100) : 0
+        const avg = totalQ > 0 ? Math.round(totalScore / (totalQ * 10) * 100) : 0
         setAccuracy(`${avg}%`)
 
         const today = new Date().toISOString().split('T')[0]
@@ -123,7 +164,7 @@ export default function StudentQuizPage() {
       const { data: progress } = await supabase
         .from('lesson_progress')
         .select('completed_at')
-        .eq('user_id', user.id)
+        .eq('student_id', user.id)
         .order('completed_at', { ascending: false })
 
       if (progress && progress.length > 0) {
@@ -141,62 +182,12 @@ export default function StudentQuizPage() {
       } else {
         setStreak('0 Ngày')
       }
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('total_score')
-        .eq('id', user.id)
-        .maybeSingle()
-
-      const xp = (profile?.total_score as number) || 0
-      const unlocked = Math.min(5 + Math.floor(xp / 100), QUIZ_BANK.length)
-      setUnlockedCount(unlocked)
     } catch (err) {
       console.error('Error fetching stats:', err)
-    }
-  }
-
-  async function fetchQuizzes() {
-    try {
-      setLoading(true)
-
-      const { data: sections } = await supabase
-        .from('lesson_sections')
-        .select(`*, lessons (title)`)
-        .eq('content_type', 'quiz')
-
-      if (sections && sections.length > 0) {
-        setQuizzes(sections.map(s => ({
-          ...s,
-          id: s.id,
-          title: s.title,
-          lessons: s.lessons,
-          estimated_minutes: s.estimated_minutes || 15,
-          difficulty: s.difficulty || 'Trung bình',
-          xp: s.xp || 100
-        })))
-      } else {
-        setQuizzes(QUIZ_BANK.map(q => ({
-          id: q.id,
-          title: q.title,
-          lessons: { title: q.lessonTitle },
-          estimated_minutes: q.estimated_minutes,
-          difficulty: q.difficulty,
-          xp: q.xp
-        })))
-      }
-    } catch (err) {
-      console.error('Error fetching student quizzes:', err)
-      setQuizzes(QUIZ_BANK.map(q => ({
-        id: q.id,
-        title: q.title,
-        lessons: { title: q.lessonTitle },
-        estimated_minutes: q.estimated_minutes,
-        difficulty: q.difficulty,
-        xp: q.xp
-      })))
-    } finally {
-      setLoading(false)
+      setAccuracy('0%')
+      setMotivation('Làm quiz ngay!')
+      setStreak('0 Ngày')
+      setUnlockedCount(3)
     }
   }
 
@@ -222,7 +213,7 @@ export default function StudentQuizPage() {
               <h1 className="text-xl md:text-2xl font-black tracking-tight uppercase flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
                 Ngân Hàng <span style={{ color: 'var(--brand-primary)' }}>Đề Thi & Quiz</span>
               </h1>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{unlockedCount}/{QUIZ_BANK.length} bài đã mở khóa</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{unlockedCount}/{QUIZ_BANK.length} bài đã mở khóa · Mỗi ngày mở thêm 1 bài</p>
             </div>
           </div>
 
@@ -303,7 +294,9 @@ export default function StudentQuizPage() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredQuizzes.map((quiz, index) => {
-                const isUnlocked = index < unlockedCount
+                const realIndex = QUIZ_BANK.findIndex(q => q.id === quiz.id)
+                const isUnlocked = realIndex < unlockedCount
+                const daysUntilUnlock = realIndex - unlockedCount + 1
                 return (
                   <motion.div
                     key={quiz.id}
@@ -327,13 +320,14 @@ export default function StudentQuizPage() {
                         </span>
                       </div>
 
-                      <h3 className={`text-lg font-bold mb-6 line-clamp-2 ${isUnlocked ? 'group-hover:text-[var(--brand-primary)] transition-colors' : ''}`} style={{ color: isUnlocked ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                      <h3 className={`text-lg font-bold mb-4 line-clamp-2 ${isUnlocked ? 'group-hover:text-[var(--brand-primary)] transition-colors' : ''}`} style={{ color: isUnlocked ? 'var(--text-primary)' : 'var(--text-muted)' }}>
                         {quiz.title}
                       </h3>
                     </div>
 
                     <div className="space-y-4">
                       <div className="flex items-center justify-between text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
+                        <span>📝 {quiz.totalQuestions || 10} câu hỏi</span>
                         <span>⏱️ {quiz.estimated_minutes || 15} phút</span>
                         <span className="font-bold" style={{ color: 'var(--brand-primary)' }}>⚡ +{quiz.xp || 100} XP</span>
                       </div>
@@ -349,7 +343,7 @@ export default function StudentQuizPage() {
                         </Link>
                       ) : (
                         <div className="w-full py-3 border font-bold rounded-2xl flex items-center justify-center gap-2 text-sm" style={{ background: 'color-mix(in srgb, var(--bg-base) 50%, transparent)', color: 'var(--text-muted)', borderColor: 'color-mix(in srgb, var(--border-default) 50%, transparent)' }}>
-                          🔒 Mở khóa sau {index - unlockedCount + 1} ngày
+                          🔒 Mở khóa sau {daysUntilUnlock} ngày
                         </div>
                       )}
                     </div>

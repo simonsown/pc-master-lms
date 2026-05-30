@@ -98,8 +98,8 @@ function RegisterForm() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-base)', padding: '16px', position: 'relative' }}>
-      <div style={{ position: 'absolute', top: '32px', left: '32px' }}>
+    <div className="register-page" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-base)', padding: '16px', position: 'relative' }}>
+      <div className="register-back-btn" style={{ position: 'absolute', top: '32px', left: '32px' }}>
         <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '14px', fontWeight: 500, textDecoration: 'none' }}>
           <ArrowLeft size={18} /> Quay lại
         </Link>
@@ -183,7 +183,7 @@ function RegisterForm() {
           {/* Step 2: Role Selection */}
           {step === 2 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+              <div className="register-role-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
                 {[
                   { role: 'student', icon: <GraduationCap size={20} />, title: 'Học sinh', desc: 'Học & thực hành' },
                   { role: 'teacher', icon: <User size={20} />, title: 'Giáo viên', desc: 'Dạy & quản lý' },
@@ -317,10 +317,19 @@ function RegisterForm() {
           </div>
         </form>
 
-        <p style={{ textAlign: 'center', marginTop: '20px', color: 'var(--text-muted)', fontSize: '13px' }}>
+                <p style={{ textAlign: 'center', marginTop: '20px', color: 'var(--text-muted)', fontSize: '13px' }}>
           Đã có tài khoản? <Link href="/login" style={{ color: 'var(--brand-primary)', fontWeight: 700, textDecoration: 'none' }}>Đăng nhập</Link>
         </p>
       </div>
+
+      <style>{`
+        @media (max-width: 640px) {
+          .register-page { padding: 12px !important; }
+          .register-page > div { padding: 20px 16px !important; }
+          .register-role-grid { grid-template-columns: 1fr !important; }
+          .register-back-btn { top: 12px !important; left: 12px !important; }
+        }
+      `}</style>
     </div>
   )
 }

@@ -1,23 +1,82 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
+import { QUIZ_BANK } from '../data/quiz-bank';
 
-const QuizModal = ({ onClose, lang, topic, level, onSuccess }) => {
+const TOPIC_MAP = {
+  'CPU': ['quiz-cpu-arch'],
+  'RAM': ['quiz-ram-deep'],
+  'GPU': ['quiz-gpu-advanced'],
+  'PSU': ['quiz-psu-cooling', 'quiz-cooling-advanced'],
+  'Mainboard': ['quiz-motherboard'],
+  'Storage': ['quiz-storage'],
+  'SSD': ['quiz-storage'],
+  'Computer Case': ['quiz-case'],
+  'Cooler': ['quiz-case', 'quiz-cooling-advanced'],
+  'general': ['quiz-cpu-arch', 'quiz-ram-deep', 'quiz-gpu-advanced', 'quiz-psu-cooling', 'quiz-motherboard', 'quiz-storage', 'quiz-assembly']
+};
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function getQuestionsForTopic(topic, count = 10) {
+  const quizIds = TOPIC_MAP[topic] || TOPIC_MAP['general'];
+  let allQuestions = [];
+  for (const qid of quizIds) {
+    const quiz = QUIZ_BANK.find(q => q.id === qid);
+    if (quiz) {
+      allQuestions.push(...quiz.questions.map((qq, idx) => ({
+        id: `${qid}-${idx}`,
+        ...qq
+      })));
+    }
+  }
+  if (allQuestions.length === 0) {
+    allQuestions = QUIZ_BANK.flatMap(q =>
+      q.questions.map((qq, idx) => ({ id: `${q.id}-${idx}`, ...qq }))
+    );
+  }
+  const shuffled = shuffleArray(allQuestions);
+  return shuffled.slice(0, Math.min(count, shuffled.length));
+}
+
+function formatQuestion(q) {
+  const letters = ['A', 'B', 'C', 'D'];
+  return {
+    question: q.q,
+    options: q.options.map((opt, i) => `${letters[i]}. ${opt}`),
+    correctAnswer: letters[q.answer],
+    explanation: `Đáp án đúng là ${letters[q.answer]}: ${q.options[q.answer]}`
+  };
+}
+
+const QuizModal = ({ onClose, lang, topic, level, onSuccess, onScore }) => {
     const [questions, setQuestions] = useState([]);
-    const [nextBatch, setNextBatch] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [score, setScore] = useState(0);
-    const [loading, setLoading] = useState(false);
-    const [preFetching, setPreFetching] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [selectedOption, setSelectedOption] = useState(null);
-    const [result, setResult] = useState(null); // 'correct' | 'incorrect'
-    const [view, setView] = useState('quiz'); // 'quiz' | 'score'
+    const [result, setResult] = useState(null);
+    const [view, setView] = useState('quiz');
 
-    // Lưu kết quả vào DB khi hoàn thành
+    useEffect(() => {
+      const raw = getQuestionsForTopic(topic || 'general', 10);
+      const formatted = raw.map(formatQuestion);
+      setQuestions(formatted);
+      setLoading(false);
+    }, [topic]);
+
     useEffect(() => {
         if (view === 'score') {
+            if (onScore) onScore(score);
             const saveResult = async () => {
                 const { data: { user } } = await supabase.auth.getUser();
                 if (user) {
@@ -34,54 +93,15 @@ const QuizModal = ({ onClose, lang, topic, level, onSuccess }) => {
         }
     }, [view]);
 
-    const fetchBatch = async (isInitial = false) => {
-        if (isInitial) setLoading(true);
-        else setPreFetching(true);
-
-        try {
-            const res = await fetch('/api/quiz', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ lang, topic, level }),
-            });
-            const data = await res.json();
-            if (data.error) {
-                console.error("Batch Error:", data.error);
-                if (isInitial) setQuestions([{ error: data.error }]);
-            } else {
-                if (isInitial) setQuestions(data);
-                else setNextBatch(data);
-            }
-        } catch (err) {
-            console.error(err);
-            if (isInitial) setQuestions([{ error: err.message }]);
-        } finally {
-            if (isInitial) setLoading(false);
-            else setPreFetching(false);
-        }
-    };
-
-    // Load initial batch
-    useEffect(() => {
-        fetchBatch(true);
-    }, []);
-
     const handleAnswer = (option) => {
         if (selectedOption || view === 'score') return;
-
         setSelectedOption(option);
         const currentQ = questions[currentIndex];
-
         if (option === currentQ.correctAnswer) {
             setResult('correct');
             setScore(prev => prev + 1);
         } else {
             setResult('incorrect');
-        }
-
-        // Pre-fetch logic: Trigger when reaching Q8 (index 7)
-        if (currentIndex === 7 && nextBatch.length === 0 && !preFetching) {
-            fetchBatch(false);
         }
     };
 
@@ -95,18 +115,15 @@ const QuizModal = ({ onClose, lang, topic, level, onSuccess }) => {
         }
     };
 
-    const startNextBatch = () => {
-        if (nextBatch.length > 0) {
-            setQuestions(nextBatch);
-            setNextBatch([]);
-        } else {
-            fetchBatch(true); // Fallback if pre-fetch failed or was too slow
-        }
-        setCurrentIndex(0);
-        setScore(0);
-        setSelectedOption(null);
-        setResult(null);
-        setView('quiz');
+    const retryQuiz = () => {
+      setCurrentIndex(0);
+      setScore(0);
+      setSelectedOption(null);
+      setResult(null);
+      setView('quiz');
+      const raw = getQuestionsForTopic(topic || 'general', 10);
+      const formatted = raw.map(formatQuestion);
+      setQuestions(formatted);
     };
 
     const currentQuestion = questions[currentIndex];
@@ -154,12 +171,12 @@ const QuizModal = ({ onClose, lang, topic, level, onSuccess }) => {
                 {loading ? (
                     <div style={{ textAlign: 'center', padding: '3rem' }}>
                         <div className="neon-text-purple" style={{ animation: 'pulse 1.5s infinite', fontSize: '1.2rem' }}>
-                            {lang === 'en' ? 'AI ANALYZING HARDWARE DATABASE...' : 'AI ĐANG TRUY XUẤT DỮ LIỆU...'}
+                            {lang === 'en' ? 'Loading questions...' : 'ĐANG TẢI CÂU HỎI...'}
                         </div>
                     </div>
-                ) : questions[0]?.error ? (
+                ) : questions.length === 0 ? (
                     <div style={{ color: 'red', textAlign: 'center', padding: '1rem' }}>
-                        Error: {questions[0].error}
+                        {lang === 'en' ? 'No questions available for this topic.' : 'Không có câu hỏi cho chủ đề này.'}
                     </div>
                 ) : view === 'score' ? (
                     <motion.div
@@ -170,13 +187,12 @@ const QuizModal = ({ onClose, lang, topic, level, onSuccess }) => {
                         <h2 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '32px', margin: 0 }}>
                             {lang === 'en' ? 'QUIZ COMPLETED' : 'HOÀN THÀNH BÀI KIỂM TRA'}
                         </h2>
-                        
-                        {/* Progress Ring */}
+
                         <div style={{ position: 'relative', width: '160px', height: '160px', marginBottom: '24px' }}>
                             <svg width="160" height="160" viewBox="0 0 160 160" style={{ transform: 'rotate(-90deg)' }}>
                                 <circle cx="80" cy="80" r="70" fill="none" stroke="var(--border-strong)" strokeWidth="12" />
-                                <circle cx="80" cy="80" r="70" fill="none" stroke={score >= 8 ? 'var(--success)' : 'var(--brand-primary)'} strokeWidth="12" 
-                                    strokeDasharray="439.8" strokeDashoffset={439.8 - (439.8 * score) / 10} 
+                                <circle cx="80" cy="80" r="70" fill="none" stroke={score >= 8 ? 'var(--success)' : 'var(--brand-primary)'} strokeWidth="12"
+                                    strokeDasharray="439.8" strokeDashoffset={439.8 - (439.8 * score) / 10}
                                     strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s ease-out' }} />
                             </svg>
                             <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
@@ -191,11 +207,13 @@ const QuizModal = ({ onClose, lang, topic, level, onSuccess }) => {
                                 : (lang === 'en' ? 'Good effort! Keep learning to improve your score.' : 'Nỗ lực tốt! Hãy tiếp tục học để cải thiện nhé.')}
                         </p>
 
+                        <p style={{ color: 'var(--success)', fontSize: '14px', fontWeight: 700, marginBottom: '24px' }}>
+                            +{(score * 100000).toLocaleString()} ₫ {lang === 'en' ? 'added to your budget!' : 'đã thêm vào ngân sách!'}
+                        </p>
+
                         <div style={{ display: 'flex', gap: '16px', width: '100%', justifyContent: 'center' }}>
                             <button
-                                onClick={() => {
-                                    startNextBatch();
-                                }}
+                                onClick={retryQuiz}
                                 style={{
                                     padding: '12px 24px', background: 'var(--bg-elevated)', color: 'var(--text-primary)',
                                     border: '1px solid var(--border-default)', borderRadius: '8px', fontWeight: 600,
@@ -205,28 +223,6 @@ const QuizModal = ({ onClose, lang, topic, level, onSuccess }) => {
                                 onMouseOut={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
                             >
                                 {lang === 'en' ? 'Retry' : 'Thử lại'}
-                            </button>
-                            <button
-                                onClick={() => {
-                                    if (navigator.share) {
-                                        navigator.share({
-                                            title: 'PC Master Builder',
-                                            text: `I scored ${score}/10 on PC Master Builder quiz!`,
-                                            url: window.location.href,
-                                        });
-                                    } else {
-                                        alert(lang === 'en' ? 'Share link copied!' : 'Đã copy link chia sẻ!');
-                                    }
-                                }}
-                                style={{
-                                    padding: '12px 24px', background: 'var(--brand-subtle)', color: 'var(--brand-light)',
-                                    border: '1px solid var(--brand-primary)', borderRadius: '8px', fontWeight: 600,
-                                    cursor: 'pointer', transition: 'all 0.2s'
-                                }}
-                                onMouseOver={e => e.currentTarget.style.background = 'var(--brand-primary)'}
-                                onMouseOut={e => e.currentTarget.style.background = 'var(--brand-subtle)'}
-                            >
-                                {lang === 'en' ? 'Share' : 'Chia sẻ'}
                             </button>
                             <button
                                 onClick={() => {
@@ -259,11 +255,11 @@ const QuizModal = ({ onClose, lang, topic, level, onSuccess }) => {
                             </div>
 
                             <h2 className="neon-text-blue" style={{ marginBottom: '2rem', fontSize: '1.4rem', lineHeight: '1.5' }}>
-                                {currentQuestion?.question || (currentQuestion?.error ? 'Error loading question' : 'Loading...')}
+                                {currentQuestion.question}
                             </h2>
 
                             <div style={{ display: 'grid', gap: '1rem' }}>
-                                {currentQuestion?.options && currentQuestion.options.map((opt, idx) => {
+                                {currentQuestion.options.map((opt, idx) => {
                                     let bgColor = 'rgba(255,255,255,0.05)';
                                     let borderColor = 'rgba(255,255,255,0.1)';
 
@@ -335,7 +331,6 @@ const QuizModal = ({ onClose, lang, topic, level, onSuccess }) => {
                     </AnimatePresence>
                 ) : null}
             </motion.div>
-
         </div>
     );
 };

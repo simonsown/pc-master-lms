@@ -69,7 +69,7 @@ const VirtualAssistant = ({ lang = 'vi', appMode, cartItems = [], remainingBudge
     const historyForAPI = newMessages.filter(m => m.content !== WELCOME_MESSAGE.content).slice(-10);
 
     try {
-      const res = await fetch('/api/chat', {
+      const res = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

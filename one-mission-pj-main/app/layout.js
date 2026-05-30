@@ -27,7 +27,7 @@ export const metadata = {
 
 import SessionManager from "@/components/SessionManager";
 import { GuruProvider } from "@/lib/guru-state";
-import AIGuru from "@/components/AIGuru";
+import AIGuruGlobal from "@/components/AIGuruGlobal";
 
 export default function RootLayout({ children }) {
   return (
@@ -45,8 +45,8 @@ export default function RootLayout({ children }) {
       <body className="font-sans">
         <SessionManager />
         <GuruProvider>
-          <AIGuru />
           {children}
+          <AIGuruGlobal />
         </GuruProvider>
         <Analytics />
         <Script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js" strategy="afterInteractive" />

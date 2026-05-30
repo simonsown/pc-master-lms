@@ -10,19 +10,16 @@ export async function GET(request: Request) {
     const { data: { user } } = await supabase.auth.exchangeCodeForSession(code)
 
     if (user) {
-      // Kiểm tra profile đã có chưa (lần đầu đăng nhập Google)
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
         .single()
 
-      // Nếu chưa có profile hoặc chưa chọn vai trò → redirect onboarding
       if (!profile || !profile.role) {
         return NextResponse.redirect(new URL('/onboarding', requestUrl.origin))
       }
 
-      // Redirect theo role (đối với học sinh sẽ về /builder như yêu cầu)
       const dashboardUrl = {
         teacher: '/teacher',
         admin: '/admin',

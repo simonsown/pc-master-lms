@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import {
-    BookOpen, Video, FileText, Image as ImageIcon, FileSearch,
+    BookOpen, Video, FileText, Image as ImageIcon, FileSearch, Code,
     Loader2, ArrowLeft, Book, Maximize2, X, Clock, Eye,
     GraduationCap, Lightbulb, CheckCircle, Circle
 } from 'lucide-react';
@@ -31,6 +31,28 @@ const getDriveEmbed = (url) => {
     if (!url) return '';
     const id = url.match(/\/d\/(.+?)\/(?:view|preview)/)?.[1];
     return id ? `https://drive.google.com/file/d/${id}/preview` : (url.includes('/preview') ? url : '');
+};
+const getPdfEmbedUrl = (url) => {
+    if (!url) return '';
+    const id = url.match(/\/d\/(.+?)\/(?:view|preview)/)?.[1];
+    if (id) {
+        const downloadUrl = `https://drive.google.com/uc?export=download&id=${id}`;
+        return `https://docs.google.com/viewer?url=${encodeURIComponent(downloadUrl)}&embedded=true`;
+    }
+    return url;
+};
+const parseRichContent = (content) => {
+    const parts = [];
+    const regex = /<div class="(video-embed|pdf-embed)">([\s\S]*?)<\/div>/g;
+    let lastIndex = 0, match;
+    while ((match = regex.exec(content)) !== null) {
+        if (match.index > lastIndex) parts.push({ type: 'markdown', content: content.substring(lastIndex, match.index) });
+        parts.push({ type: match[1] === 'video-embed' ? 'video' : 'pdf', url: match[2].trim() });
+        lastIndex = match.index + match[0].length;
+    }
+    if (lastIndex < content.length) parts.push({ type: 'markdown', content: content.substring(lastIndex) });
+    if (parts.length === 0) parts.push({ type: 'markdown', content });
+    return parts;
 };
 
 // ─── Lesson Detail View ───────────────────────────────────────────────────────
@@ -127,6 +149,7 @@ function LessonDetail({ lesson, onBack, completedIds, onToggleComplete, complete
                                             {s.type === 'text' && <FileText size={18} />}
                                             {s.type === 'image' && <ImageIcon size={18} />}
                                             {s.type === 'pdf' && <FileSearch size={18} />}
+                                            {s.type === 'embed' && <Code size={18} />}
                                         </div>
                                         <h2 style={{ fontSize: '1.3rem', fontWeight: 800, margin: 0 }}>{s.title}</h2>
                                     </div>
@@ -137,17 +160,35 @@ function LessonDetail({ lesson, onBack, completedIds, onToggleComplete, complete
                                     )}
                                     {s.type === 'text' && (
                                         <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '20px', padding: '2rem' }}>
-                                            <SimpleMarkdown text={s.content} />
+                                            {parseRichContent(s.content).map((part, i) => {
+                                                if (part.type === 'video') {
+                                                    const embedUrl = getYouTubeEmbed(part.url);
+                                                    return embedUrl ? (
+                                                        <div key={i} style={{ width: '100%', aspectRatio: '16/9', borderRadius: '12px', overflow: 'hidden', background: '#000', margin: '12px 0' }}>
+                                                            <iframe src={embedUrl} style={{ width: '100%', height: '100%', border: 'none' }} allowFullScreen title="Video" />
+                                                        </div>
+                                                    ) : null;
+                                                }
+                                                if (part.type === 'pdf') {
+                                                    const embedUrl = getPdfEmbedUrl(part.url);
+                                                    return embedUrl ? (
+                                                        <div key={i} style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', margin: '12px 0' }}>
+                                                            <iframe src={embedUrl} style={{ width: '100%', height: '540px', border: 'none' }} allow="autoplay" title="PDF" />
+                                                        </div>
+                                                    ) : null;
+                                                }
+                                                return <SimpleMarkdown key={i} text={part.content} />;
+                                            })}
                                         </div>
                                     )}
                                     {s.type === 'image' && s.content && (
                                         <div style={{ borderRadius: '20px', overflow: 'hidden' }}>
-                                            <img src={s.content} style={{ width: '100%', display: 'block' }} />
+                                            <img src={s.content} style={{ maxWidth: '100%', height: 'auto', display: 'block' }} />
                                         </div>
                                     )}
-                                    {s.type === 'pdf' && getDriveEmbed(s.content) && (
+                                    {s.type === 'pdf' && getPdfEmbedUrl(s.content) && (
                                         <div style={{ background: '#0a0f1a', borderRadius: '20px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                            <iframe src={getDriveEmbed(s.content)} style={{ width: '100%', height: '540px', border: 'none' }} allow="autoplay" />
+                                            <iframe src={getPdfEmbedUrl(s.content)} style={{ width: '100%', height: '540px', border: 'none' }} allow="autoplay" />
                                             <div style={{ padding: '12px 20px', display: 'flex', justifyContent: 'flex-end' }}>
                                                 <a href={s.content} target="_blank" style={{ color: '#00d2a0', textDecoration: 'none', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
                                                     <Maximize2 size={13} /> Toàn màn hình
@@ -155,10 +196,51 @@ function LessonDetail({ lesson, onBack, completedIds, onToggleComplete, complete
                                             </div>
                                         </div>
                                     )}
+
+                                    {s.type === 'embed' && s.content && (
+                                        <div style={{ borderRadius: '20px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <div dangerouslySetInnerHTML={{ __html: s.content }} />
+                                        </div>
+                                    )}
                                 </section>
                             ))}
                         </div>
                     )}
+
+                    {/* Video mở rộng */}
+                    {(() => {
+                        const EXTRA_VIDEOS = {
+                            'cpu': [{ title: 'CPU là gì? - Giải thích chi tiết', id: 'cWzB7GvN6vs' }, { title: 'Cách chọn CPU phù hợp', id: '7j3I7X7Gz6M' }],
+                            'mainboard': [{ title: 'Bo mạch chủ là gì?', id: 'Q_sBq0-iV4I' }],
+                            'ram': [{ title: 'RAM là gì? DDR4 vs DDR5', id: 'qTQ7vg1JFDA' }],
+                            'gpu': [{ title: 'Card đồ họa hoạt động thế nào?', id: 'OQ6fMGMiVPE' }],
+                            'ổ cứng': [{ title: 'SSD vs HDD - Nên chọn loại nào?', id: 'YQEjGKYXjw8' }],
+                            'nguồn': [{ title: 'Nguồn máy tính - Hướng dẫn chọn', id: 'Pco0vPjV0wk' }],
+                            'case': [{ title: 'Case máy tính - Các loại và cách chọn', id: 'O8HQzP3QwL8' }],
+                        }
+                        const matchKey = Object.keys(EXTRA_VIDEOS).find(k => lesson.title?.toLowerCase().includes(k))
+                        const videos = matchKey ? EXTRA_VIDEOS[matchKey] : null
+                        if (!videos) return null
+                        return (
+                            <div style={{ marginTop: '60px', paddingTop: '40px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                                <h3 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: '#ef4444' }}>
+                                    <Video size={22} /> Video kiến thức mở rộng
+                                </h3>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px,1fr))', gap: '20px' }}>
+                                    {videos.map((v, i) => (
+                                        <div key={i} style={{ borderRadius: '16px', overflow: 'hidden', background: '#0a0f1a', border: '1px solid rgba(255,255,255,0.06)' }}>
+                                            <div style={{ aspectRatio: '16/9' }}>
+                                                <iframe src={`https://www.youtube-nocookie.com/embed/${v.id}`} style={{ width: '100%', height: '100%', border: 'none' }} allowFullScreen title={v.title} loading="lazy" />
+                                            </div>
+                                            <div style={{ padding: '12px 14px' }}>
+                                                <p style={{ color: '#e0e6ed', fontWeight: 600, fontSize: '13px', margin: 0 }}>{v.title}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )
+                    })()}
 
                     {/* Books */}
                     {books.length > 0 && (

@@ -376,9 +376,15 @@ img { max-width: 100%; height: auto; }
   .product-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 768px) {
-  .product-grid { grid-template-columns: 1fr; }
-  .practice-layout { grid-template-columns: 1fr; }
-  .camera-panel { position: relative; top: auto; order: -1; }
+  .login-modal-content { padding: 24px 20px !important; }
+  .student-dashboard-grid { grid-template-columns: 1fr !important; }
+  .teacher-dashboard-grid { grid-template-columns: 1fr !important; }
+}
+@media (max-width: 480px) {
+  .login-modal-content { padding: 20px 16px !important; }
+}
+@media (max-width: 480px) {
+  .login-modal-content { padding: 20px 16px !important; }
 }
 
 /* ─── Container Helper ─── */
@@ -477,4 +483,43 @@ img { max-width: 100%; height: auto; }
 .lms-tag-blue {
   background: rgba(40,156,249,0.1); color: var(--accent-blue);
   border-color: rgba(40,156,249,0.2);
+}
+
+/* ─── Student Layout Mobile ─── */
+.student-hamburger-btn {
+  display: none; position: fixed; top: 12px; left: 12px; z-index: 1001;
+  width: 44px; height: 44px; border-radius: 12px;
+  background: linear-gradient(180deg, #031f3b 0%, #1a2f53 100%);
+  border: none; cursor: pointer; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+  color: #fff; transition: transform 0.2s;
+}
+.student-hamburger-btn:active { transform: scale(0.92); }
+.student-drawer-backdrop {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+  z-index: 1002;
+}
+.student-drawer {
+  display: none; position: fixed; top: 0; left: 0; bottom: 0;
+  width: 280px; z-index: 1003; overflow-y: auto;
+  background: linear-gradient(180deg, #031f3b 0%, #1a2f53 100%);
+  flex-direction: column;
+  box-shadow: 4px 0 24px rgba(0,0,0,0.45);
+}
+.student-drawer::-webkit-scrollbar { display: none; }
+
+@media (max-width: 768px) {
+  .student-sidebar-desktop { display: none !important; }
+  .student-hamburger-btn { display: flex !important; }
+  .student-drawer-backdrop { display: block !important; }
+  .student-drawer { display: flex !important; }
+  .student-main-content { padding: 16px !important; padding-top: 68px !important; }
+}
+
+/* ─── Student Dashboard Mobile ─── */
+@media (max-width: 768px) {
+  .student-dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
 }

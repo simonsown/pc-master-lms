@@ -2,25 +2,69 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { BookOpen, Users, Cpu, ArrowRight, Plus, Loader2, GraduationCap, Bot, Sparkles } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { BookOpen, Users, Cpu, ArrowRight, Plus, Loader2, GraduationCap, Bot, Sparkles, Bell, Megaphone, ExternalLink } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import JoinClassModal from '../../../components/JoinClassModal';
 import CareerRecommendation from '../../../components/CareerRecommendation';
 import { supabase } from '@/lib/supabase';
+import { useGuru } from '@/lib/guru-state';
+import { createBrowserClient } from '@supabase/ssr'
 
 const fadeUp = (delay = 0) => ({ initial: { opacity: 0, y: 24 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.5, delay, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] } })
 
 export default function StudentDashboard() {
+  const { openChat } = useGuru()
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [classes, setClasses] = useState([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifLoading, setNotifLoading] = useState(true);
   const [stats, setStats] = useState([
     { label: 'Lớp học', value: '0', icon: <Users size={20} />, color: 'var(--accent-blue)' },
     { label: 'Bài tập', value: '0', icon: <BookOpen size={20} />, color: 'var(--brand-primary)' },
     { label: 'Linh kiện', value: '45+', icon: <Cpu size={20} />, color: '#8b5cf6' },
   ]);
+  const supabaseNotif = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
   useEffect(() => { fetchData(); }, []);
+
+  useEffect(() => {
+    let currentUserId: string | null = null
+
+    const init = async () => {
+      const { data: { user } } = await supabaseNotif.auth.getUser()
+      if (!user) { setNotifLoading(false); return }
+      currentUserId = user.id
+
+      const { data } = await supabaseNotif
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(5)
+      if (data) setNotifications(data)
+      setNotifLoading(false)
+    }
+    init()
+
+    const channel = supabaseNotif
+      .channel('notifications_realtime')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications' }, async (payload) => {
+        const notif = payload.new as any
+        if (notif.user_id === currentUserId) {
+          setNotifications(prev => {
+            if (prev.some(n => n.id === notif.id)) return prev
+            return [notif, ...prev].slice(0, 5)
+          })
+        }
+      })
+      .subscribe()
+
+    return () => { supabaseNotif.removeChannel(channel) }
+  }, [])
 
   async function fetchData() {
     try {
@@ -73,7 +117,7 @@ export default function StudentDashboard() {
         ))}
       </motion.div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '28px' }}>
+      <div className="student-dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '28px' }}>
         <section style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <motion.div {...fadeUp(0.2)}
             className="lms-card" style={{ padding: '32px', position: 'relative', overflow: 'hidden', borderRadius: '16px', background: 'linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-elevated) 100%)', boxShadow: '0 8px 30px var(--shadow-color)' }}>
@@ -134,7 +178,8 @@ export default function StudentDashboard() {
 
         <aside style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <motion.div {...fadeUp(0.25)}
-            className="lms-card" style={{ padding: '28px', background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-dark))', color: '#fff', position: 'relative', overflow: 'hidden', borderRadius: '16px', boxShadow: '0 8px 30px rgba(8,158,96,0.3)' }}>
+            onClick={openChat}
+            className="lms-card" style={{ padding: '28px', background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-dark))', color: '#fff', position: 'relative', overflow: 'hidden', borderRadius: '16px', boxShadow: '0 8px 30px rgba(8,158,96,0.3)', cursor: 'pointer' }}>
             <motion.div animate={{ rotate: [0, 15, 0] }} transition={{ repeat: Infinity, duration: 6, ease: 'easeInOut' }}
               style={{ position: 'absolute', top: -20, right: -20, opacity: 0.08 }}>
               <Sparkles size={120} />
@@ -143,17 +188,51 @@ export default function StudentDashboard() {
               <Bot size={36} style={{ marginBottom: '16px', opacity: 0.9 }} />
               <h3 style={{ fontSize: '20px', fontWeight: 800, marginBottom: '10px', color: '#fff' }}>AI Guru đang chờ</h3>
               <p style={{ fontSize: '14px', opacity: 0.9, marginBottom: '24px', lineHeight: 1.6 }}>Gặp khó khăn khi chọn linh kiện? Chat với AI để được tư vấn ngay.</p>
-              <Link href="/builder" style={{ display: 'block', textAlign: 'center', padding: '14px', background: '#fff', color: 'var(--brand-primary)', borderRadius: '12px', fontWeight: 700, textDecoration: 'none', fontSize: '14px', boxShadow: '0 4px 14px rgba(0,0,0,0.15)' }}>
+              <div style={{ display: 'block', textAlign: 'center', padding: '14px', background: '#fff', color: 'var(--brand-primary)', borderRadius: '12px', fontWeight: 700, textDecoration: 'none', fontSize: '14px', boxShadow: '0 4px 14px rgba(0,0,0,0.15)', transition: 'transform 0.2s' }}
+                onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.02)' }}
+                onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)' }}>
                 Bắt đầu trò chuyện
-              </Link>
+              </div>
             </div>
           </motion.div>
 
           <motion.div {...fadeUp(0.35)} className="lms-card" style={{ padding: '24px', borderRadius: '16px' }}>
-            <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)' }}>Thông báo mới</h3>
-            <div style={{ fontSize: '13px', color: 'var(--text-muted)', textAlign: 'center', padding: '20px 0' }}>
-              Chưa có thông báo nào từ giáo viên.
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '15px', fontWeight: 700, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Bell size={16} style={{ color: 'var(--accent-amber)' }} /> Thông báo mới
+              </h3>
+              {notifications.some(n => !n.is_read) && (
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#EF4444' }} />
+              )}
             </div>
+            {notifLoading ? (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '16px' }}><Loader2 size={20} style={{ animation: 'spin 1s linear infinite', color: 'var(--text-muted)' }} /></div>
+            ) : notifications.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {notifications.map((n, i) => (
+                  <motion.div key={n.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
+                    style={{
+                      padding: '12px', borderRadius: '10px', background: n.is_read ? 'var(--bg-surface)' : 'color-mix(in srgb, var(--brand-primary) 8%, transparent)',
+                      border: `1px solid ${n.is_read ? 'var(--border-subtle)' : 'color-mix(in srgb, var(--brand-primary) 20%, transparent)'}`,
+                      position: 'relative'
+                    }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '2px' }}>{n.title}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{n.message}</div>
+                      </div>
+                      <div style={{ fontSize: '10px', color: 'var(--text-muted)', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                        {new Date(n.created_at).toLocaleDateString('vi-VN', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ fontSize: '13px', color: 'var(--text-muted)', textAlign: 'center', padding: '20px 0' }}>
+                Chưa có thông báo nào từ giáo viên.
+              </div>
+            )}
           </motion.div>
         </aside>
       </div>
@@ -162,15 +241,7 @@ export default function StudentDashboard() {
 
       <JoinClassModal isOpen={showJoinModal} onClose={() => { setShowJoinModal(false); fetchData(); }} lang="vn" />
 
-      <Link href="/builder" style={{ 
-        position: 'fixed', bottom: '32px', right: '32px', width: '60px', height: '60px', borderRadius: '50%', 
-        background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-dark))', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        boxShadow: '0 8px 28px rgba(8,158,96,0.4)', cursor: 'pointer', zIndex: 100, textDecoration: 'none',
-        transition: 'transform 0.3s cubic-bezier(0.4,0,0.2,1), box-shadow 0.3s'
-      }} onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.12)'; e.currentTarget.style.boxShadow = '0 12px 36px rgba(8,158,96,0.5)'; }}
-         onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(8,158,96,0.4)'; }}>
-        <Bot size={28} color="#fff" />
-      </Link>
+
     </div>
   )
 }

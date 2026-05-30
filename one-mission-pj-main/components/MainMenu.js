@@ -227,9 +227,7 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
                     {[
                         { id: 'exams', title: 'Kỳ Thi', desc: 'Kiểm tra kiến thức định kỳ', Icon: ShieldCheck, color: s.teal },
-                        { id: 'lab', title: 'Phòng AI Lab', desc: 'Thí nghiệm cấu hình với AI Guru', Icon: Bot, color: s.navy },
                         { id: 'challenge', title: 'Thử Thách', desc: 'Nhiệm vụ hàng ngày', Icon: Swords, color: s.orange },
-                        { id: 'components', title: 'Tủ Linh Kiện', desc: 'Tra cứu thông số linh kiện', Icon: Trophy, color: s.red },
                     ].map((mode) => (
                         <motion.button
                             key={mode.id}

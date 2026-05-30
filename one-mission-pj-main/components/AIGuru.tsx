@@ -15,9 +15,7 @@ export default function AIGuru() {
   const [toast, setToast] = useState<{ show: boolean; text: string }>({ show: false, text: '' })
   const [unreadCount, setUnreadCount] = useState(0)
   const toastTimer = useRef<any>(null)
-  const abortRef = useRef<AbortController | null>(null)
   const endRef = useRef<HTMLDivElement>(null)
-  const [streamingMsgIdx, setStreamingMsgIdx] = useState(-1)
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
@@ -28,65 +26,28 @@ export default function AIGuru() {
     setInput('')
     setIsTyping(true)
 
-    abortRef.current?.abort()
-    const controller = new AbortController()
-    abortRef.current = controller
-
     try {
-      const res = await fetch('/api/ai/chat/stream', {
+      const history = messages.map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.content }))
+
+      const res = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: inputText }),
-        signal: controller.signal
+        body: JSON.stringify({ message: inputText, history }),
       })
 
-      if (!res.ok || !res.body) {
-        const data = await res.json().catch(() => ({}))
-        setMessages(prev => [...prev, userMsg, { role: 'bot', content: data?.error || 'Xin lỗi, tôi gặp sự cố kết nối.' }])
+      if (!res.ok) {
+        setMessages(prev => [...prev, userMsg, { role: 'bot', content: 'Xin lỗi, tôi gặp sự cố kết nối.' }])
         setIsTyping(false)
         return
       }
 
-      const reader = res.body.getReader()
-      const decoder = new TextDecoder()
-      let botReply = ''
-
-      setMessages(prev => [...prev, userMsg, { role: 'bot', content: '' }])
-      setStreamingMsgIdx(messages.length + 1)
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        const chunk = decoder.decode(value, { stream: true })
-        const lines = chunk.split('\n').filter(l => l.trim())
-        for (const line of lines) {
-          try {
-            const json = JSON.parse(line)
-            if (json.done) break
-            if (json.text) {
-              botReply += json.text
-              setMessages(prev => {
-                const updated = [...prev]
-                updated[updated.length - 1] = { role: 'bot', content: botReply }
-                return updated
-              })
-            }
-          } catch {}
-        }
-      }
-    } catch (err: any) {
-      if (err?.name !== 'AbortError') {
-        setMessages(prev => {
-          const hasBotMsg = prev[prev.length - 1]?.role === 'bot'
-          if (!hasBotMsg) {
-            return [...prev, { role: 'bot', content: 'Xin lỗi, tôi gặp sự cố kết nối.' }]
-          }
-          return prev
-        })
-      }
+      const data = await res.json()
+      const reply = data?.reply || 'Xin lỗi, tôi chưa thể trả lời câu hỏi này ngay bây giờ.'
+      setMessages(prev => [...prev, userMsg, { role: 'bot', content: reply }])
+    } catch {
+      setMessages(prev => [...prev, userMsg, { role: 'bot', content: 'Xin lỗi, tôi gặp sự cố kết nối.' }])
     } finally {
       setIsTyping(false)
-      setStreamingMsgIdx(-1)
     }
   }
 
@@ -219,18 +180,13 @@ export default function AIGuru() {
                     color: m.role === 'user' ? '#fff' : styles.text,
                     borderTopLeftRadius: m.role === 'user' ? '16px' : '4px',
                     borderTopRightRadius: m.role === 'user' ? '4px' : '16px',
+                    wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'pre-wrap',
                   }}>
                     {m.content}
-                    {i === streamingMsgIdx && (
-                      <span className="inline-block w-1.5 h-4 ml-0.5" style={{
-                        background: styles.text,
-                        animation: 'terminal-blink 0.8s infinite'
-                      }} />
-                    )}
                   </div>
                 </div>
               ))}
-              {isTyping && streamingMsgIdx === -1 && (
+              {isTyping && (
                 <div className="flex justify-start">
                   <div className="flex gap-1.5 p-3 rounded-2xl" style={{ background: styles.elevated, borderTopLeftRadius: '4px' }}>
                     {[0, 1, 2].map(i => (

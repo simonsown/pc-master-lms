@@ -40,8 +40,8 @@ export default function StudentHistoryPage() {
 
     const [lessonsRes, quizRes, achieveRes] = await Promise.all([
       supabase.from('lesson_progress')
-        .select('lesson_id, status, completed_at, last_accessed, time_spent_seconds, score, lessons(title)')
-        .eq('user_id', u.id)
+        .select('lesson_id, status, completed_at, last_accessed, time_spent_seconds, score, completion_percentage, lessons(title)')
+        .eq('student_id', u.id)
         .not('last_accessed', 'is', null)
         .order('last_accessed', { ascending: false })
         .limit(20),
@@ -75,7 +75,7 @@ export default function StudentHistoryPage() {
         id: `quiz-${q.quiz_id}-${q.submitted_at}`,
         type: 'quiz',
         title: 'Bài kiểm tra',
-        desc: q.status === 'graded' ? `Điểm: ${q.score}/100` : 'Chưa chấm',
+        desc: q.status === 'graded' || q.status === 'passed' || q.status === 'failed' ? `Điểm: ${q.score}/100` : 'Chưa chấm',
         time: q.submitted_at,
         score: q.score
       });
@@ -104,7 +104,7 @@ export default function StudentHistoryPage() {
     const channel = supabase
       .channel('student-history-realtime')
       .on('postgres_changes',
-        { event: '*', schema: 'public', table: 'lesson_progress', filter: `user_id=eq.${userId}` },
+        { event: '*', schema: 'public', table: 'lesson_progress', filter: `student_id=eq.${userId}` },
         () => fetchHistory()
       )
       .on('postgres_changes',

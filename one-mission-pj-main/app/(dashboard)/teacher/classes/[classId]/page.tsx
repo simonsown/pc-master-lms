@@ -4,7 +4,7 @@ import React, { useEffect, useState, use } from 'react';
 import { supabase } from '@/lib/supabase';
 import { 
   Users, ClipboardList, Plus, Loader2, ArrowLeft, 
-  Settings, UserPlus, Info, Calendar, BookOpen
+  Settings, UserPlus, Info, Calendar, BookOpen, Bell, Send, Megaphone
 } from 'lucide-react';
 import Link from 'next/link';
 import AssignmentCard from '@/components/classes/AssignmentCard';
@@ -25,6 +25,12 @@ export default function ClassDetailsPage({ params }: { params: Promise<{ classId
   const [editMaxStudents, setEditMaxStudents] = useState(40);
   const [editSubject, setEditSubject] = useState('Tin học');
   const [updating, setUpdating] = useState(false);
+
+  // Notification Modal states
+  const [showNotifModal, setShowNotifModal] = useState(false);
+  const [notifTitle, setNotifTitle] = useState('');
+  const [notifMessage, setNotifMessage] = useState('');
+  const [sendingNotif, setSendingNotif] = useState(false);
 
   useEffect(() => {
     fetchClassInfo();
@@ -146,6 +152,13 @@ export default function ClassDetailsPage({ params }: { params: Promise<{ classId
           </div>
           <div style={{ display: 'flex', gap: '12px' }}>
             <button 
+              onClick={() => setShowNotifModal(true)}
+              style={{ padding: '12px', borderRadius: '12px', background: 'rgba(249,168,37,0.1)', border: '1px solid rgba(249,168,37,0.2)', color: '#f9a825', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '13px' }}
+              title="Gửi thông báo đến lớp"
+            >
+              <Megaphone size={18} /> Thông báo
+            </button>
+            <button 
               onClick={() => setShowSettingsModal(true)}
               style={{ padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', cursor: 'pointer' }}
             >
@@ -249,6 +262,92 @@ export default function ClassDetailsPage({ params }: { params: Promise<{ classId
               )}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Send Notification Modal */}
+      {showNotifModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(5, 10, 20, 0.85)', backdropFilter: 'blur(8px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'rgba(20, 28, 48, 0.95)', border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '24px', width: '100%', maxWidth: '500px', padding: '32px',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', gap: '20px'
+          }}>
+            <div>
+              <h2 style={{ margin: '0 0 4px 0', fontSize: '22px', fontWeight: 800, color: '#fff', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Megaphone size={22} color="#f9a825" /> Gửi thông báo
+              </h2>
+              <p style={{ margin: 0, fontSize: '13px', color: '#8899a6' }}>Thông báo sẽ được gửi đến tất cả học sinh trong lớp <strong style={{ color: '#fff' }}>{classData.name}</strong>.</p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#8899a6', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>Tiêu đề</label>
+                <input 
+                  type="text" 
+                  value={notifTitle}
+                  onChange={e => setNotifTitle(e.target.value)}
+                  placeholder="VD: Lịch thi giữa kỳ"
+                  style={{ width: '100%', background: 'rgba(5, 10, 20, 0.6)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '12px 16px', color: '#fff', outline: 'none', fontFamily: 'inherit' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#8899a6', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>Nội dung</label>
+                <textarea 
+                  value={notifMessage}
+                  onChange={e => setNotifMessage(e.target.value)}
+                  rows={4}
+                  placeholder="Nhập nội dung thông báo..."
+                  style={{ width: '100%', background: 'rgba(5, 10, 20, 0.6)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '12px 16px', color: '#fff', outline: 'none', resize: 'vertical', fontFamily: 'inherit', minHeight: '100px' }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px' }}>
+              <button 
+                onClick={() => { setShowNotifModal(false); setNotifTitle(''); setNotifMessage(''); }}
+                style={{ background: 'transparent', color: '#8899a6', border: '1px solid rgba(255,255,255,0.1)', padding: '12px 20px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+              >
+                Hủy
+              </button>
+              <button 
+                onClick={async () => {
+                  if (!notifTitle.trim() || !notifMessage.trim()) return
+                  setSendingNotif(true)
+                  try {
+                    const res = await fetch('/api/notifications/send-class', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ class_id: classId, title: notifTitle, message: notifMessage, type: 'info' })
+                    })
+                    const data = await res.json()
+                    if (data.success) {
+                      alert(`Đã gửi thông báo thành công đến ${data.count} học sinh!`)
+                      setShowNotifModal(false)
+                      setNotifTitle('')
+                      setNotifMessage('')
+                    } else {
+                      alert(data.error || 'Có lỗi xảy ra')
+                    }
+                  } catch (err) {
+                    alert('Lỗi kết nối đến máy chủ')
+                  } finally {
+                    setSendingNotif(false)
+                  }
+                }}
+                disabled={sendingNotif || !notifTitle.trim() || !notifMessage.trim()}
+                style={{ background: 'var(--brand-primary)', color: '#000', border: 'none', padding: '12px 24px', borderRadius: '12px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '8px', opacity: sendingNotif || !notifTitle.trim() || !notifMessage.trim() ? 0.6 : 1 }}
+              >
+                {sendingNotif ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+                Gửi thông báo
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

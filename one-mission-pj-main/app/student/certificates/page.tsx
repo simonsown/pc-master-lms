@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { issueStudentCertificate } from '@/actions/certificates'
-import { Award, FileText, CheckCircle, Copy, ExternalLink, RefreshCw, Lock, ShieldCheck, Target, ArrowLeft } from 'lucide-react'
+import { Award, FileText, CheckCircle, Copy, ExternalLink, RefreshCw, Lock, ShieldCheck, Target, ArrowLeft, Sparkles } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 
@@ -37,6 +37,7 @@ export default function StudentCertificatesPage() {
   const [activePath, setActivePath] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [issuing, setIssuing] = useState(false)
+  const [justEarnedId, setJustEarnedId] = useState<string | null>(null)
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -47,23 +48,30 @@ export default function StudentCertificatesPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
-    // Lấy chứng chỉ đã được cấp
     const { data: c } = await supabase
       .from('certificates')
       .select('*')
       .eq('student_id', user.id)
       .eq('is_revoked', false)
-    
-    if (c) setCerts(c)
 
-    // Lấy lộ trình hiện tại
+    if (c) {
+      const newIds = c.filter(cert => !certs.some(old => old.id === cert.id)).map(cert => cert.id)
+      if (newIds.length > 0) {
+        const lastNew = newIds[newIds.length - 1]
+        const matched = CERTIFICATE_TYPES.find(ct => ct.title === c.find(cc => cc.id === lastNew)?.course_title)
+        if (matched) setJustEarnedId(matched.id)
+        toast.success('🎉 Chúc mừng! Bạn đã nhận được chứng chỉ mới!')
+      }
+      setCerts(c)
+    }
+
     const { data: path } = await supabase
       .from('learning_paths')
       .select('id, title')
       .eq('is_active', true)
       .limit(1)
       .maybeSingle()
-    
+
     if (path) setActivePath(path)
 
     setLoading(false)
@@ -72,6 +80,48 @@ export default function StudentCertificatesPage() {
   useEffect(() => {
     loadData()
   }, [])
+
+  useEffect(() => {
+    const sub = supabase
+      .channel('certs-realtime')
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'quiz_attempts' },
+        () => { autoCheckAndIssue() }
+      )
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'lesson_progress' },
+        () => { autoCheckAndIssue() }
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(sub) }
+  }, [])
+
+  const autoCheckAndIssue = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const { data: existing } = await supabase
+      .from('certificates')
+      .select('course_title')
+      .eq('student_id', user.id)
+      .eq('is_revoked', false)
+
+    const existingTitles = (existing || []).map(e => e.course_title)
+
+    const pathId = activePath?.id
+    if (!pathId) return
+
+    for (const certType of CERTIFICATE_TYPES) {
+      if (existingTitles.includes(certType.title)) continue
+      try {
+        await issueStudentCertificate(pathId)
+        await loadData()
+        return
+      } catch {
+        // Not yet eligible
+      }
+    }
+  }
 
   const handleRequestCertificate = async () => {
     if (!activePath) return
@@ -103,13 +153,11 @@ export default function StudentCertificatesPage() {
 
   return (
     <div className="min-h-screen bg-[#161F38] text-white pt-24 pb-12 px-4 sm:px-6 relative overflow-hidden">
-      {/* High-tech overlays */}
       <div className="absolute inset-0 bg-grid-pattern opacity-[0.02] pointer-events-none" />
       <div className="absolute top-1/4 left-1/4 w-[350px] h-[350px] bg-[#00d4aa]/5 rounded-full filter blur-[100px] pointer-events-none" />
 
       <div className="max-w-4xl mx-auto relative z-10">
-        
-        {/* Header Title & Exit Button */}
+
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-4 border-b border-white/10">
           <div className="flex items-center gap-3">
             <div className="p-2.5 bg-[#00d4aa]/10 border border-[#00d4aa]/25 text-[#00d4aa] rounded-2xl">
@@ -117,11 +165,11 @@ export default function StudentCertificatesPage() {
             </div>
             <div>
               <h1 className="text-xl md:text-2xl font-black tracking-tight text-white uppercase">Chứng chỉ & Danh hiệu</h1>
-              <p className="text-xs text-gray-400 mt-0.5">Hoàn thành nhiệm vụ để thu thập các chứng chỉ danh giá</p>
+              <p className="text-xs text-gray-400 mt-0.5">Hoàn thành nhiệm vụ → tự động nhận chứng chỉ ngay!</p>
             </div>
           </div>
 
-          <button 
+          <button
             onClick={() => router.push('/builder')}
             className="relative z-50 pointer-events-auto flex items-center gap-2 px-4 py-2 bg-gray-900/90 hover:bg-gray-850 border border-gray-800 hover:border-gray-700 text-xs font-bold text-slate-300 hover:text-white rounded-xl transition-all shadow-md group cursor-pointer"
           >
@@ -134,12 +182,16 @@ export default function StudentCertificatesPage() {
           {CERTIFICATE_TYPES.map((certType) => {
             const earnedCert = certs.find(c => c.course_title === certType.title || c.certificate_number?.includes(certType.id))
             const isEarned = !!earnedCert
+            const isJustEarned = justEarnedId === certType.id
 
             return (
-              <div 
-                key={certType.id} 
-                className={`bg-[#11121d]/80 border rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl relative overflow-hidden backdrop-blur-md transition-all ${isEarned ? 'border-[#00d4aa]/50' : 'border-[#1e293b]'}`}
+              <div
+                key={certType.id}
+                className={`bg-[#11121d]/80 border rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl relative overflow-hidden backdrop-blur-md transition-all ${isEarned ? 'border-[#00d4aa]/50' : 'border-[#1e293b]'} ${isJustEarned ? 'animate-pulse' : ''}`}
               >
+                {isJustEarned && (
+                  <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(circle at center, rgba(0,212,170,0.1) 0%, transparent 70%)' }} />
+                )}
                 <div className={`absolute left-0 top-0 bottom-0 w-2 ${isEarned ? 'bg-[#00d4aa]' : 'bg-gray-800'}`}></div>
 
                 <div className="flex items-start gap-4 w-full md:w-auto flex-1">
@@ -150,9 +202,10 @@ export default function StudentCertificatesPage() {
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className={`text-lg font-black uppercase ${isEarned ? 'text-white' : 'text-gray-400'}`}>{certType.title}</h3>
                       {isEarned && <CheckCircle size={16} className="text-[#00d4aa]" />}
+                      {isJustEarned && <Sparkles size={16} className="text-yellow-400" />}
                     </div>
                     <p className="text-sm text-gray-400 mb-3">{certType.description}</p>
-                    
+
                     <div className="bg-[#161F38] p-3 rounded-xl border border-[#1e293b]">
                       <p className="text-xs font-bold text-blue-400 mb-1 flex items-center gap-1.5"><Target size={14} /> Nhiệm vụ cần đạt:</p>
                       <p className="text-xs text-gray-300">{certType.mission}</p>
@@ -170,16 +223,16 @@ export default function StudentCertificatesPage() {
                   {isEarned ? (
                     <>
                       {earnedCert.pdf_url && (
-                        <a 
-                          href={earnedCert.pdf_url} 
-                          target="_blank" 
+                        <a
+                          href={earnedCert.pdf_url}
+                          target="_blank"
                           rel="noreferrer"
                           className="flex-1 text-center md:w-44 px-4 py-2.5 bg-[#00d4aa] text-[#0d0e13] font-bold text-xs rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(0,212,170,0.15)]"
                         >
                           <FileText size={14} /> Tải PDF
                         </a>
                       )}
-                      <button 
+                      <button
                         onClick={() => handleCopyLink(earnedCert.verify_url)}
                         className="flex-1 md:w-44 px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-white font-bold text-xs rounded-xl transition-colors flex items-center justify-center gap-2"
                       >
@@ -187,7 +240,7 @@ export default function StudentCertificatesPage() {
                       </button>
                     </>
                   ) : (
-                    <button 
+                    <button
                       onClick={handleRequestCertificate}
                       disabled={issuing}
                       className="flex-1 md:w-44 px-4 py-2.5 bg-gray-800 text-gray-400 font-bold text-xs rounded-xl hover:bg-gray-700 transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"

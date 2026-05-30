@@ -16,8 +16,8 @@ export default function AboutPage() {
                 setTeam(data);
             } else {
                 setTeam([
-                    { id: '1', full_name: 'Nguyễn Phúc Khánh Sơn', image_url: 'https://scontent.fsgn19-1.fna.fbcdn.net/v/t39.30808-6/653957156_910112394987079_1645940152965631_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=1d70fc&_nc_eui2=AeGcOn7lF_53vWDQ-Vm4HA-Zxh00KoWXF2_GHTQqhZcXb66BK2PZ-bAy85JWF903T0ML7wNOmj0rrdLT7FgXVo0G&_nc_ohc=oPV_VC9f0bgQ7kNvwGN2Xbg&_nc_oc=Ado-QlXjWwlHOvO2PZRrAEVpxCb6oDZnJQ9RgU-_RqcEKTCwr_HzhKrZiqzKciBwZGo&_nc_zt=23&_nc_ht=scontent.fsgn19-1.fna&_nc_gid=Z6IoA877no7BMXiKsZXEBQ&_nc_ss=7b2a8&oh=00_Af0Vhd1dco0JSm43oNviiG02WyrADuZnkoXGz9uT5DZaag&oe=69F7AECB' },
-                    { id: '2', full_name: 'Dương Vũ Minh Đức', image_url: 'https://scontent.fsgn19-1.fna.fbcdn.net/v/t39.30808-6/629272107_1436246731626695_125407128577002054_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=1d70fc&_nc_eui2=AeEm31tqBaGoJmAaFTDom5bN6LM02P2Oqr7oszTY_Y6qvgACNGpDIQsO1bnUd91EEbwVTSq_71zEmwyErAOtYc5b&_nc_ohc=UTW3o8qfpEoQ7kNvwG_NXRY&_nc_oc=AdqHhtKiK9gbRtYuHYcR-JderB4hJ3PRgt8ptJJpIwcm1wPeRXRJayGxt0o5O3-Irsw&_nc_zt=23&_nc_ht=scontent.fsgn19-1.fna&_nc_gid=GCK21wvQWxPtJlpzYnNx5g&_nc_ss=7b2a8&oh=00_Af2OInKNSlzcdLshnwzaoxAgJN8BcPl24tVoCdjzfZKy0g&oe=69F796F6' }
+                    { id: '1', full_name: 'Nguyễn Phúc Khánh Sơn', image_url: '/son.png', role: 'Lập trình viên & Phát triển sản phẩm' },
+                    { id: '2', full_name: 'Dương Vũ Minh Đức', image_url: '/duc.png', role: 'Lập trình viên & Thiết kế hệ thống' }
                 ]);
             }
             setLoading(false);
@@ -26,7 +26,7 @@ export default function AboutPage() {
     }, []);
 
     return (
-        <div style={{ minHeight: '100vh', background: '#050507', color: '#fff', fontFamily: 'var(--font-sans)', overflowX: 'hidden' }}>
+        <div style={{ minHeight: '100vh', background: 'var(--bg-base)', color: 'var(--text-primary)', fontFamily: 'var(--font-sans)', overflowX: 'hidden' }}>
             
             <header style={{ 
                 height: '50vh', position: 'relative', overflow: 'hidden', 
@@ -170,7 +170,8 @@ export default function AboutPage() {
                                     }}>
                                         <img src={member.image_url} alt={member.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     </div>
-                                    <h3 style={{ fontSize: '28px', fontWeight: 800, margin: '0' }}>{member.full_name}</h3>
+                                    <h3 style={{ fontSize: '24px', fontWeight: 800, margin: '0 0 6px' }}>{member.full_name}</h3>
+                                    {member.role && <p style={{ fontSize: '14px', color: 'var(--brand-primary)', margin: 0, fontWeight: 600 }}>{member.role}</p>}
                                 </div>
                             ))}
                         </div>

@@ -34,10 +34,13 @@ export default function LoginModal({ isOpen, onClose, redirectTo }: LoginModalPr
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
+    const redirectTo = process.env.NEXT_PUBLIC_SITE_URL
+      ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`
+      : `${window.location.origin}/auth/callback`
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo,
         queryParams: { prompt: 'select_account' },
       },
     })
@@ -74,7 +77,7 @@ export default function LoginModal({ isOpen, onClose, redirectTo }: LoginModalPr
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.2 }}
-        className="relative w-full max-w-md bg-[#16213e] border border-[#1e293b] rounded-2xl shadow-2xl p-8 overflow-y-auto max-h-[90vh]"
+        className="login-modal-content relative w-full max-w-md bg-[#16213e] border border-[#1e293b] rounded-2xl shadow-2xl p-8 overflow-y-auto max-h-[90vh]"
       >
         <button
           onClick={onClose}

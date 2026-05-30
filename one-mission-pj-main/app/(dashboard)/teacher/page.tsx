@@ -62,7 +62,7 @@ export default function TeacherDashboard() {
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '32px' }}>
+      <div className="teacher-dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '32px' }}>
         <div>
           <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '16px' }}>Thao tác nhanh</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px', marginBottom: '32px' }}>
