@@ -343,7 +343,7 @@ export default function TeacherQuizPage() {
           position: 'fixed', top: '24px', right: '24px', zIndex: 1000,
           background: 'var(--brand-subtle)', color: 'var(--brand-primary)',
           border: '1px solid var(--brand-primary)', padding: '16px 24px', borderRadius: '16px',
-          backdropFilter: 'blur(10px)', boxShadow: '0 8px 32px rgba(0,243,255,0.15)',
+          backdropFilter: 'blur(10px)', boxShadow: '0 8px 32px var(--shadow-color)',
           display: 'flex', alignItems: 'center', gap: '12px', fontWeight: 600, fontSize: '14px'
         }}>
           <CheckCircle size={18} />
@@ -363,7 +363,7 @@ export default function TeacherQuizPage() {
           <button 
             onClick={handleGenerateAIQuiz}
             style={{
-              background: 'rgba(0, 243, 255, 0.1)', color: '#00f3ff', border: '1px solid rgba(0,243,255,0.2)',
+              background: 'var(--brand-subtle)', color: 'var(--accent-blue)', border: '1px solid var(--border-default)',
               padding: '12px 20px', borderRadius: '12px', fontWeight: 700,
               display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s'
             }}
@@ -375,7 +375,7 @@ export default function TeacherQuizPage() {
           <button 
             onClick={() => setShowCreateModal(true)}
             style={{
-              background: '#00f3ff', color: '#050a14', border: 'none',
+              background: 'var(--accent-blue)', color: '#fff', border: 'none',
               padding: '12px 24px', borderRadius: '12px', fontWeight: 700,
               display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s'
             }}
@@ -389,28 +389,28 @@ export default function TeacherQuizPage() {
 
       {/* Stats Summary Grid */}
       <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '40px' }}>
-        <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '24px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{ padding: '10px', borderRadius: '12px', background: 'rgba(0, 243, 255, 0.1)', color: '#00f3ff', width: 'fit-content', marginBottom: '16px' }}>
+        <div style={{ background: 'var(--bg-surface)', padding: '24px', borderRadius: '24px', border: '1px solid var(--border-default)' }}>
+          <div style={{ padding: '10px', borderRadius: '12px', background: 'var(--brand-subtle)', color: 'var(--accent-blue)', width: 'fit-content', marginBottom: '16px' }}>
             <FileText size={20} />
           </div>
-          <div style={{ fontSize: '13px', color: '#8899a6', fontWeight: 600, marginBottom: '4px' }}>Tổng số đề thi</div>
-          <div style={{ fontSize: '28px', fontWeight: 800, color: '#fff' }}>{quizzes.length}</div>
+          <div style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '4px' }}>Tổng số đề thi</div>
+          <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-primary)' }}>{quizzes.length}</div>
         </div>
 
-        <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '24px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{ padding: '10px', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', width: 'fit-content', marginBottom: '16px' }}>
+        <div style={{ background: 'var(--bg-surface)', padding: '24px', borderRadius: '24px', border: '1px solid var(--border-default)' }}>
+          <div style={{ padding: '10px', borderRadius: '12px', background: 'var(--brand-subtle)', color: 'var(--success)', width: 'fit-content', marginBottom: '16px' }}>
             <ClipboardCheck size={20} />
           </div>
-          <div style={{ fontSize: '13px', color: '#8899a6', fontWeight: 600, marginBottom: '4px' }}>Bài nộp từ học sinh</div>
-          <div style={{ fontSize: '28px', fontWeight: 800, color: '#fff' }}>{attempts.length}</div>
+          <div style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '4px' }}>Bài nộp từ học sinh</div>
+          <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-primary)' }}>{attempts.length}</div>
         </div>
 
-        <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '24px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{ padding: '10px', borderRadius: '12px', background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', width: 'fit-content', marginBottom: '16px' }}>
+        <div style={{ background: 'var(--bg-surface)', padding: '24px', borderRadius: '24px', border: '1px solid var(--border-default)' }}>
+          <div style={{ padding: '10px', borderRadius: '12px', background: 'var(--brand-subtle)', color: 'var(--warning)', width: 'fit-content', marginBottom: '16px' }}>
             <Award size={20} />
           </div>
-          <div style={{ fontSize: '13px', color: '#8899a6', fontWeight: 600, marginBottom: '4px' }}>Điểm số trung bình</div>
-          <div style={{ fontSize: '28px', fontWeight: 800, color: '#fff' }}>
+          <div style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '4px' }}>Điểm số trung bình</div>
+          <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-primary)' }}>
             {attempts.length > 0 
               ? `${(attempts.reduce((sum, a) => sum + (a.score || 0), 0) / attempts.length).toFixed(1)}%`
               : 'N/A'
@@ -420,13 +420,13 @@ export default function TeacherQuizPage() {
       </section>
 
       {/* Tabs Menu */}
-      <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid rgba(255,255,255,0.08)', marginBottom: '32px', paddingBottom: '12px' }}>
+      <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--border-default)', marginBottom: '32px', paddingBottom: '12px' }}>
         <button 
           onClick={() => setActiveTab('list')}
           style={{
-            background: 'none', border: 'none', color: activeTab === 'list' ? '#00f3ff' : '#8899a6',
+            background: 'none', border: 'none', color: activeTab === 'list' ? 'var(--accent-blue)' : 'var(--text-muted)',
             fontSize: '15px', fontWeight: 700, padding: '8px 16px', cursor: 'pointer',
-            borderBottom: activeTab === 'list' ? '2px solid #00f3ff' : '2px solid transparent'
+            borderBottom: activeTab === 'list' ? '2px solid var(--accent-blue)' : '2px solid transparent'
           }}
         >
           Danh sách Đề thi ({quizzes.length})
@@ -434,9 +434,9 @@ export default function TeacherQuizPage() {
         <button 
           onClick={() => setActiveTab('results')}
           style={{
-            background: 'none', border: 'none', color: activeTab === 'results' ? '#00f3ff' : '#8899a6',
+            background: 'none', border: 'none', color: activeTab === 'results' ? 'var(--accent-blue)' : 'var(--text-muted)',
             fontSize: '15px', fontWeight: 700, padding: '8px 16px', cursor: 'pointer',
-            borderBottom: activeTab === 'results' ? '2px solid #00f3ff' : '2px solid transparent'
+            borderBottom: activeTab === 'results' ? '2px solid var(--accent-blue)' : '2px solid transparent'
           }}
         >
           Bài làm của học sinh ({attempts.length})
@@ -444,9 +444,9 @@ export default function TeacherQuizPage() {
         <button 
           onClick={() => setActiveTab('announce')}
           style={{
-            background: 'none', border: 'none', color: activeTab === 'announce' ? '#00f3ff' : '#8899a6',
+            background: 'none', border: 'none', color: activeTab === 'announce' ? 'var(--accent-blue)' : 'var(--text-muted)',
             fontSize: '15px', fontWeight: 700, padding: '8px 16px', cursor: 'pointer',
-            borderBottom: activeTab === 'announce' ? '2px solid #00f3ff' : '2px solid transparent'
+            borderBottom: activeTab === 'announce' ? '2px solid var(--accent-blue)' : '2px solid transparent'
           }}
         >
           <Bell size={14} style={{ display: 'inline-block', marginRight: '6px', transform: 'translateY(-1px)' }} />
@@ -458,13 +458,13 @@ export default function TeacherQuizPage() {
       {activeTab === 'list' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {quizzes.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '80px 0', border: '2px dashed rgba(255,255,255,0.05)', borderRadius: '24px', color: '#8899a6' }}>
+            <div style={{ textAlign: 'center', padding: '80px 0', border: '2px dashed rgba(255,255,255,0.05)', borderRadius: '24px', color: 'var(--text-muted)' }}>
               <HelpCircle size={48} style={{ marginBottom: '16px', opacity: 0.3 }} />
               <h3>Chưa có đề thi trắc nghiệm nào.</h3>
               <p style={{ fontSize: '13px', margin: '0 0 24px 0' }}>Bắt đầu bằng cách tạo đề thủ công hoặc tự động bằng trí tuệ nhân tạo AI.</p>
               <button 
                 onClick={() => setShowCreateModal(true)}
-                style={{ background: 'rgba(0, 243, 255, 0.1)', color: '#00f3ff', border: '1px solid #00f3ff', padding: '10px 24px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}
+                style={{ background: 'var(--brand-subtle)', color: 'var(--accent-blue)', border: '1px solid var(--accent-blue)', padding: '10px 24px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}
               >
                 Tạo đề ngay
               </button>
@@ -472,7 +472,7 @@ export default function TeacherQuizPage() {
           ) : (
             quizzes.map((quiz) => (
               <div key={quiz.id} style={{
-                background: 'rgba(255, 255, 255, 0.01)', border: '1px solid rgba(255,255,255,0.05)',
+                background: 'var(--bg-surface)', border: '1px solid var(--border-default)',
                 borderRadius: '24px', padding: '24px', display: 'grid', gridTemplateColumns: '1fr 300px', gap: '32px',
                 alignItems: 'start'
               }}>
@@ -480,31 +480,31 @@ export default function TeacherQuizPage() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
                     <span style={{
                       fontSize: '11px', fontWeight: 800, padding: '4px 10px', borderRadius: '20px',
-                      background: quiz.is_published ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255, 255, 255, 0.05)',
-                      color: quiz.is_published ? '#10b981' : '#8899a6', textTransform: 'uppercase', letterSpacing: '0.5px'
+                      background: quiz.is_published ? 'var(--brand-subtle)' : 'var(--bg-elevated)',
+                      color: quiz.is_published ? 'var(--success)' : 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px'
                     }}>
                       {quiz.is_published ? 'Đang mở (Published)' : 'Bản nháp (Draft)'}
                     </span>
-                    <span style={{ fontSize: '13px', color: '#8899a6' }}>Thời gian: {quiz.time_limit_minutes} phút</span>
+                    <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Thời gian: {quiz.time_limit_minutes} phút</span>
                   </div>
-                  <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#fff', margin: '0 0 8px 0' }}>{quiz.title}</h3>
-                  <p style={{ fontSize: '14px', color: '#8899a6', margin: '0 0 24px 0', lineHeight: 1.5 }}>{quiz.description}</p>
+                  <h3 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px 0' }}>{quiz.title}</h3>
+                  <p style={{ fontSize: '14px', color: 'var(--text-muted)', margin: '0 0 24px 0', lineHeight: 1.5 }}>{quiz.description}</p>
 
                   {/* Question Mini List */}
-                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '16px' }}>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff', marginBottom: '12px' }}>
+                  <div style={{ borderTop: '1px solid var(--border-default)', paddingTop: '16px' }}>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '12px' }}>
                       Danh sách câu hỏi ({quiz.questions?.length || 0})
                     </div>
                     {quiz.questions && quiz.questions.length > 0 ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         {quiz.questions.map((q: any, index: number) => (
-                          <div key={q.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '10px 16px', borderRadius: '12px' }}>
-                            <span style={{ fontSize: '13px', color: '#e0e6ed' }}>
-                              <strong style={{ color: '#00f3ff', marginRight: '6px' }}>Q{index + 1}.</strong> {q.content}
+                          <div key={q.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-elevated)', padding: '10px 16px', borderRadius: '12px' }}>
+                            <span style={{ fontSize: '13px', color: 'var(--text-primary)' }}>
+                              <strong style={{ color: 'var(--accent-blue)', marginRight: '6px' }}>Q{index + 1}.</strong> {q.content}
                             </span>
                             <button 
                               onClick={() => handleDeleteQuestion(q.id)}
-                              style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}
+                              style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '4px' }}
                             >
                               <Trash2 size={14} />
                             </button>
@@ -512,19 +512,19 @@ export default function TeacherQuizPage() {
                         ))}
                       </div>
                     ) : (
-                      <div style={{ color: '#8899a6', fontSize: '13px', fontStyle: 'italic' }}>Chưa có câu hỏi nào trong đề thi này. Hãy thêm câu hỏi bên phải.</div>
+                      <div style={{ color: 'var(--text-muted)', fontSize: '13px', fontStyle: 'italic' }}>Chưa có câu hỏi nào trong đề thi này. Hãy thêm câu hỏi bên phải.</div>
                     )}
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', borderLeft: '1px solid rgba(255,255,255,0.05)', paddingLeft: '32px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', borderLeft: '1px solid var(--border-default)', paddingLeft: '32px' }}>
                   <button 
                     onClick={() => {
                       setSelectedQuizForQuestion(quiz)
                       setShowQuestionModal(true)
                     }}
                     style={{
-                      background: 'rgba(0, 243, 255, 0.1)', color: '#00f3ff', border: '1px solid rgba(0,243,255,0.2)',
+                      background: 'var(--brand-subtle)', color: 'var(--accent-blue)', border: '1px solid var(--border-default)',
                       padding: '12px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
                     }}
@@ -535,9 +535,9 @@ export default function TeacherQuizPage() {
                   <button 
                     onClick={() => handleTogglePublish(quiz.id, quiz.is_published)}
                     style={{
-                      background: quiz.is_published ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)',
-                      color: quiz.is_published ? '#ef4444' : '#10b981',
-                      border: quiz.is_published ? '1px solid rgba(239,68,68,0.2)' : '1px solid rgba(16,185,129,0.2)',
+                      background: quiz.is_published ? 'var(--brand-subtle)' : 'var(--brand-subtle)',
+                      color: quiz.is_published ? 'var(--danger)' : 'var(--success)',
+                      border: quiz.is_published ? '1px solid var(--border-default)' : '1px solid var(--border-default)',
                       padding: '12px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
                     }}
@@ -549,7 +549,7 @@ export default function TeacherQuizPage() {
                   <button 
                     onClick={() => handleDeleteQuiz(quiz.id)}
                     style={{
-                      background: 'transparent', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)',
+                      background: 'transparent', color: 'var(--danger)', border: '1px solid var(--danger)',
                       padding: '12px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
                     }}
@@ -564,36 +564,36 @@ export default function TeacherQuizPage() {
       )}
 
       {activeTab === 'results' && (
-        <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', overflow: 'hidden' }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: '24px', overflow: 'hidden' }}>
           {attempts.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '60px 0', color: '#8899a6' }}>Chưa có học sinh nào làm bài kiểm tra.</div>
+            <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>Chưa có học sinh nào làm bài kiểm tra.</div>
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
               <thead>
-                <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                  <th style={{ padding: '16px 24px', color: '#8899a6', fontWeight: 600 }}>Tên học sinh</th>
-                  <th style={{ padding: '16px 24px', color: '#8899a6', fontWeight: 600 }}>Đề thi</th>
-                  <th style={{ padding: '16px 24px', color: '#8899a6', fontWeight: 600 }}>Điểm đạt được</th>
-                  <th style={{ padding: '16px 24px', color: '#8899a6', fontWeight: 600 }}>Trạng thái</th>
-                  <th style={{ padding: '16px 24px', color: '#8899a6', fontWeight: 600 }}>Thời gian nộp</th>
+                <tr style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-default)' }}>
+                  <th style={{ padding: '16px 24px', color: 'var(--text-muted)', fontWeight: 600 }}>Tên học sinh</th>
+                  <th style={{ padding: '16px 24px', color: 'var(--text-muted)', fontWeight: 600 }}>Đề thi</th>
+                  <th style={{ padding: '16px 24px', color: 'var(--text-muted)', fontWeight: 600 }}>Điểm đạt được</th>
+                  <th style={{ padding: '16px 24px', color: 'var(--text-muted)', fontWeight: 600 }}>Trạng thái</th>
+                  <th style={{ padding: '16px 24px', color: 'var(--text-muted)', fontWeight: 600 }}>Thời gian nộp</th>
                 </tr>
               </thead>
               <tbody>
                 {attempts.map((att) => (
-                  <tr key={att.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', color: '#e0e6ed' }}>
+                  <tr key={att.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', color: 'var(--text-primary)' }}>
                     <td style={{ padding: '16px 24px', fontWeight: 700 }}>{att.profiles?.full_name || 'Học viên PC Master'}</td>
                     <td style={{ padding: '16px 24px' }}>{att.quizzes?.title}</td>
-                    <td style={{ padding: '16px 24px', color: '#00f3ff', fontWeight: 800 }}>{att.score?.toFixed(1)}%</td>
+                    <td style={{ padding: '16px 24px', color: 'var(--accent-blue)', fontWeight: 800 }}>{att.score?.toFixed(1)}%</td>
                     <td style={{ padding: '16px 24px' }}>
                       <span style={{
                         padding: '4px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 800,
-                        background: att.status === 'submitted' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                        color: att.status === 'submitted' ? '#10b981' : '#ef4444'
+                        background: att.status === 'submitted' ? 'var(--brand-subtle)' : 'var(--brand-subtle)',
+                        color: att.status === 'submitted' ? 'var(--success)' : 'var(--danger)'
                       }}>
                         {att.status === 'submitted' ? 'Đã nộp bài' : 'Hết giờ/Lỗi'}
                       </span>
                     </td>
-                    <td style={{ padding: '16px 24px', color: '#8899a6' }}>{new Date(att.submitted_at).toLocaleString('vi-VN')}</td>
+                    <td style={{ padding: '16px 24px', color: 'var(--text-muted)' }}>{new Date(att.submitted_at).toLocaleString('vi-VN')}</td>
                   </tr>
                 ))}
               </tbody>
@@ -604,26 +604,26 @@ export default function TeacherQuizPage() {
 
       {activeTab === 'announce' && (
         <div style={{ 
-          background: 'rgba(255, 255, 255, 0.01)', border: '1px solid rgba(255,255,255,0.05)', 
+          background: 'var(--bg-surface)', border: '1px solid var(--border-default)', 
           borderRadius: '24px', padding: '32px', maxWidth: '800px', margin: '0 auto' 
         }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#fff', marginBottom: '8px' }}>Gửi Thông báo & Đề thi tới Học sinh</h2>
-          <p style={{ color: '#8899a6', fontSize: '14px', marginBottom: '32px' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>Gửi Thông báo & Đề thi tới Học sinh</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginBottom: '32px' }}>
             Soạn một tin nhắn/thông báo kèm đường dẫn. Hệ thống sẽ tự động gửi thông báo trực tiếp (Realtime) vào tài khoản của tất cả học sinh thuộc lớp học được chọn.
           </p>
 
           {classes.length === 0 ? (
-            <div style={{ color: '#ef4444', fontWeight: 600 }}>Bạn chưa có lớp học nào để gửi thông báo! Hãy tạo lớp trước.</div>
+            <div style={{ color: 'var(--danger)', fontWeight: 600 }}>Bạn chưa có lớp học nào để gửi thông báo! Hãy tạo lớp trước.</div>
           ) : (
             <form onSubmit={handleSendAnnouncement} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#8899a6', marginBottom: '8px' }}>Chọn lớp nhận thông báo</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Chọn lớp nhận thông báo</label>
                 <select 
                   value={selectedClassId}
                   onChange={(e) => setSelectedClassId(e.target.value)}
                   style={{
-                    width: '100%', background: '#090e1a', border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: '12px', padding: '12px 16px', color: '#fff', fontSize: '14px'
+                    width: '100%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)',
+                    borderRadius: '12px', padding: '12px 16px', color: 'var(--text-primary)', fontSize: '14px'
                   }}
                 >
                   {classes.map(c => (
@@ -633,7 +633,7 @@ export default function TeacherQuizPage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#8899a6', marginBottom: '8px' }}>Tiêu đề thông báo</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Tiêu đề thông báo</label>
                 <input 
                   type="text"
                   placeholder="Ví dụ: Có đề ôn tập Chương 1 mới!"
@@ -641,14 +641,14 @@ export default function TeacherQuizPage() {
                   onChange={(e) => setAnnTitle(e.target.value)}
                   required
                   style={{
-                    width: '100%', background: '#090e1a', border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: '12px', padding: '12px 16px', color: '#fff', fontSize: '14px'
+                    width: '100%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)',
+                    borderRadius: '12px', padding: '12px 16px', color: 'var(--text-primary)', fontSize: '14px'
                   }}
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#8899a6', marginBottom: '8px' }}>Nội dung thông báo</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Nội dung thông báo</label>
                 <textarea 
                   rows={4}
                   placeholder="Nhập hướng dẫn chi tiết dành cho học sinh..."
@@ -656,22 +656,22 @@ export default function TeacherQuizPage() {
                   onChange={(e) => setAnnBody(e.target.value)}
                   required
                   style={{
-                    width: '100%', background: '#090e1a', border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: '12px', padding: '12px 16px', color: '#fff', fontSize: '14px', resize: 'vertical'
+                    width: '100%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)',
+                    borderRadius: '12px', padding: '12px 16px', color: 'var(--text-primary)', fontSize: '14px', resize: 'vertical'
                   }}
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#8899a6', marginBottom: '8px' }}>Đường dẫn hành động (URL)</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Đường dẫn hành động (URL)</label>
                 <input 
                   type="text"
                   value={annUrl}
                   onChange={(e) => setAnnUrl(e.target.value)}
                   placeholder="Học sinh sẽ được chuyển hướng tới trang này khi nhấn thông báo"
                   style={{
-                    width: '100%', background: '#090e1a', border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: '12px', padding: '12px 16px', color: '#fff', fontSize: '14px'
+                    width: '100%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)',
+                    borderRadius: '12px', padding: '12px 16px', color: 'var(--text-primary)', fontSize: '14px'
                   }}
                 />
               </div>
@@ -680,7 +680,7 @@ export default function TeacherQuizPage() {
                 type="submit"
                 disabled={isSendingAnn}
                 style={{
-                  background: '#00f3ff', color: '#050a14', border: 'none',
+                  background: 'var(--accent-blue)', color: '#fff', border: 'none',
                   padding: '14px 28px', borderRadius: '12px', fontWeight: 700,
                   fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center',
                   justifyContent: 'center', gap: '8px', marginTop: '12px', transition: 'all 0.2s'
@@ -702,13 +702,13 @@ export default function TeacherQuizPage() {
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px'
         }}>
           <div style={{
-            background: '#0a0e17', border: '1px solid rgba(255,255,255,0.08)',
+            background: 'var(--bg-surface)', border: '1px solid var(--border-default)',
             borderRadius: '24px', width: '100%', maxWidth: '550px', padding: '32px'
           }}>
-            <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#fff', marginBottom: '24px' }}>Tạo đề thi mới</h2>
+            <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '24px' }}>Tạo đề thi mới</h2>
             <form onSubmit={handleCreateQuiz} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#8899a6', marginBottom: '8px' }}>Tên đề thi</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Tên đề thi</label>
                 <input 
                   type="text" 
                   value={newTitle}
@@ -716,34 +716,34 @@ export default function TeacherQuizPage() {
                   required
                   placeholder="Ví dụ: Đề kiểm tra RAM & CPU"
                   style={{
-                    width: '100%', background: '#050a14', border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: '12px', padding: '12px 16px', color: '#fff', fontSize: '14px'
+                    width: '100%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)',
+                    borderRadius: '12px', padding: '12px 16px', color: 'var(--text-primary)', fontSize: '14px'
                   }}
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#8899a6', marginBottom: '8px' }}>Mô tả ngắn</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Mô tả ngắn</label>
                 <input 
                   type="text" 
                   value={newDesc}
                   onChange={(e) => setNewDesc(e.target.value)}
                   placeholder="Tóm tắt yêu cầu hoặc phạm vi kiến thức..."
                   style={{
-                    width: '100%', background: '#050a14', border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: '12px', padding: '12px 16px', color: '#fff', fontSize: '14px'
+                    width: '100%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)',
+                    borderRadius: '12px', padding: '12px 16px', color: 'var(--text-primary)', fontSize: '14px'
                   }}
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#8899a6', marginBottom: '8px' }}>Giao cho lớp học</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Giao cho lớp học</label>
                 <select 
                   value={selectedClassIdForNewQuiz}
                   onChange={(e) => setSelectedClassIdForNewQuiz(e.target.value)}
                   style={{
-                    width: '100%', background: '#050a14', border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: '12px', padding: '12px 16px', color: '#fff', fontSize: '14px'
+                    width: '100%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)',
+                    borderRadius: '12px', padding: '12px 16px', color: 'var(--text-primary)', fontSize: '14px'
                   }}
                 >
                   <option value="">Không giao (Tự do/Ngân hàng đề)</option>
@@ -755,7 +755,7 @@ export default function TeacherQuizPage() {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#8899a6', marginBottom: '8px' }}>Thời gian làm bài (Phút)</label>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Thời gian làm bài (Phút)</label>
                   <input 
                     type="number" 
                     value={newTimeLimit}
@@ -763,13 +763,13 @@ export default function TeacherQuizPage() {
                     required
                     min={1}
                     style={{
-                      width: '100%', background: '#050a14', border: '1px solid rgba(255,255,255,0.08)',
-                      borderRadius: '12px', padding: '12px 16px', color: '#fff', fontSize: '14px'
+                      width: '100%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)',
+                      borderRadius: '12px', padding: '12px 16px', color: 'var(--text-primary)', fontSize: '14px'
                     }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#8899a6', marginBottom: '8px' }}>Lượt làm bài tối đa</label>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Lượt làm bài tối đa</label>
                   <input 
                     type="number" 
                     value={newMaxAttempts}
@@ -777,23 +777,23 @@ export default function TeacherQuizPage() {
                     required
                     min={1}
                     style={{
-                      width: '100%', background: '#050a14', border: '1px solid rgba(255,255,255,0.08)',
-                      borderRadius: '12px', padding: '12px 16px', color: '#fff', fontSize: '14px'
+                      width: '100%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)',
+                      borderRadius: '12px', padding: '12px 16px', color: 'var(--text-primary)', fontSize: '14px'
                     }}
                   />
                 </div>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', margin: '8px 0' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: '#e0e6ed', cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: 'var(--text-primary)', cursor: 'pointer' }}>
                   <input type="checkbox" checked={randomizeQs} onChange={(e) => setRandomizeQs(e.target.checked)} />
                   Xáo trộn vị trí các câu hỏi
                 </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: '#e0e6ed', cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: 'var(--text-primary)', cursor: 'pointer' }}>
                   <input type="checkbox" checked={randomizeOpts} onChange={(e) => setRandomizeOpts(e.target.checked)} />
                   Xáo trộn vị trí các đáp án lựa chọn
                 </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: '#e0e6ed', cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: 'var(--text-primary)', cursor: 'pointer' }}>
                   <input type="checkbox" checked={requireCamera} onChange={(e) => setRequireCamera(e.target.checked)} />
                   Yêu cầu bật Camera khi thi (Proctoring)
                 </label>
@@ -804,7 +804,7 @@ export default function TeacherQuizPage() {
                   type="button" 
                   onClick={() => setShowCreateModal(false)}
                   style={{
-                    flex: 1, background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none',
+                    flex: 1, background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: 'none',
                     padding: '12px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer'
                   }}
                 >
@@ -814,7 +814,7 @@ export default function TeacherQuizPage() {
                   type="submit" 
                   disabled={isSubmittingQuiz}
                   style={{
-                    flex: 1, background: '#00f3ff', color: '#050a14', border: 'none',
+                    flex: 1, background: 'var(--accent-blue)', color: '#fff', border: 'none',
                     padding: '12px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
                   }}
@@ -836,15 +836,15 @@ export default function TeacherQuizPage() {
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px'
         }}>
           <div style={{
-            background: '#0a0e17', border: '1px solid rgba(255,255,255,0.08)',
+            background: 'var(--bg-surface)', border: '1px solid var(--border-default)',
             borderRadius: '24px', width: '100%', maxWidth: '550px', padding: '32px'
           }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#fff', marginBottom: '24px' }}>
-              Thêm câu hỏi vào <span style={{ color: '#00f3ff' }}>{selectedQuizForQuestion.title}</span>
+            <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '24px' }}>
+              Thêm câu hỏi vào <span style={{ color: 'var(--accent-blue)' }}>{selectedQuizForQuestion.title}</span>
             </h2>
             <form onSubmit={handleAddQuestion} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#8899a6', marginBottom: '8px' }}>Nội dung câu hỏi</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Nội dung câu hỏi</label>
                 <textarea 
                   rows={2}
                   required
@@ -852,21 +852,21 @@ export default function TeacherQuizPage() {
                   value={qContent}
                   onChange={(e) => setQContent(e.target.value)}
                   style={{
-                    width: '100%', background: '#050a14', border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: '12px', padding: '12px 16px', color: '#fff', fontSize: '14px', resize: 'none'
+                    width: '100%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)',
+                    borderRadius: '12px', padding: '12px 16px', color: 'var(--text-primary)', fontSize: '14px', resize: 'none'
                   }}
                 />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#8899a6', marginBottom: '8px' }}>Loại câu hỏi</label>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Loại câu hỏi</label>
                   <select 
                     value={qType}
                     onChange={(e) => setQType(e.target.value as any)}
                     style={{
-                      width: '100%', background: '#050a14', border: '1px solid rgba(255,255,255,0.08)',
-                      borderRadius: '12px', padding: '12px 16px', color: '#fff', fontSize: '14px'
+                      width: '100%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)',
+                      borderRadius: '12px', padding: '12px 16px', color: 'var(--text-primary)', fontSize: '14px'
                     }}
                   >
                     <option value="multiple_choice">Nhiều lựa chọn (Single Choice)</option>
@@ -874,7 +874,7 @@ export default function TeacherQuizPage() {
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#8899a6', marginBottom: '8px' }}>Số điểm</label>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Số điểm</label>
                   <input 
                     type="number"
                     required
@@ -882,8 +882,8 @@ export default function TeacherQuizPage() {
                     value={qPoints}
                     onChange={(e) => setQPoints(Number(e.target.value))}
                     style={{
-                      width: '100%', background: '#050a14', border: '1px solid rgba(255,255,255,0.08)',
-                      borderRadius: '12px', padding: '12px 16px', color: '#fff', fontSize: '14px'
+                      width: '100%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)',
+                      borderRadius: '12px', padding: '12px 16px', color: 'var(--text-primary)', fontSize: '14px'
                     }}
                   />
                 </div>
@@ -891,7 +891,7 @@ export default function TeacherQuizPage() {
 
               {qType === 'multiple_choice' ? (
                 <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#8899a6', marginBottom: '12px' }}>Các phương án trả lời & đáp án đúng</label>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '12px' }}>Các phương án trả lời & đáp án đúng</label>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {qOptions.map((opt, idx) => (
                       <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -917,8 +917,8 @@ export default function TeacherQuizPage() {
                             setQOptions(newOpts)
                           }}
                           style={{
-                            flex: 1, background: '#050a14', border: '1px solid rgba(255,255,255,0.08)',
-                            borderRadius: '12px', padding: '10px 16px', color: '#fff', fontSize: '13px'
+                            flex: 1, background: 'var(--bg-elevated)', border: '1px solid var(--border-default)',
+                            borderRadius: '12px', padding: '10px 16px', color: 'var(--text-primary)', fontSize: '13px'
                           }}
                         />
                       </div>
@@ -927,9 +927,9 @@ export default function TeacherQuizPage() {
                 </div>
               ) : (
                 <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#8899a6', marginBottom: '8px' }}>Chọn câu trả lời Đúng</label>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px' }}>Chọn câu trả lời Đúng</label>
                   <div style={{ display: 'flex', gap: '24px' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', fontSize: '14px', cursor: 'pointer' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)', fontSize: '14px', cursor: 'pointer' }}>
                       <input 
                         type="radio" 
                         name="tf_correct" 
@@ -942,7 +942,7 @@ export default function TeacherQuizPage() {
                       />
                       Đúng là câu trả lời ĐÚNG
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', fontSize: '14px', cursor: 'pointer' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)', fontSize: '14px', cursor: 'pointer' }}>
                       <input 
                         type="radio" 
                         name="tf_correct"
@@ -964,7 +964,7 @@ export default function TeacherQuizPage() {
                   type="button" 
                   onClick={() => setShowQuestionModal(false)}
                   style={{
-                    flex: 1, background: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none',
+                    flex: 1, background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: 'none',
                     padding: '12px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer'
                   }}
                 >
@@ -974,7 +974,7 @@ export default function TeacherQuizPage() {
                   type="submit" 
                   disabled={isSubmittingQ}
                   style={{
-                    flex: 1, background: '#00f3ff', color: '#050a14', border: 'none',
+                    flex: 1, background: 'var(--accent-blue)', color: '#fff', border: 'none',
                     padding: '12px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
                   }}
