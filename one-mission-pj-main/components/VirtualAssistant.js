@@ -35,6 +35,7 @@ const VirtualAssistant = ({ lang = 'vi', appMode, cartItems = [], remainingBudge
   const [copiedIndex, setCopiedIndex] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const sendingRef = useRef(false);
 
   // Auto-scroll
   useEffect(() => {
@@ -58,15 +59,17 @@ const VirtualAssistant = ({ lang = 'vi', appMode, cartItems = [], remainingBudge
 
   const sendMessage = useCallback(async (text) => {
     const trimmed = (text || input).trim();
-    if (!trimmed || isLoading) return;
+    if (!trimmed || sendingRef.current) return;
+    sendingRef.current = true;
 
     const userMsg = { role: 'user', content: trimmed };
-    const newMessages = [...messages, userMsg];
-    setMessages(newMessages);
+
+    setMessages(prev => [...prev, userMsg]);
     setInput('');
     setIsLoading(true);
 
-    const historyForAPI = newMessages.filter(m => m.content !== WELCOME_MESSAGE.content).slice(-10);
+    const prevMessages = messages.concat(userMsg);
+    const historyForAPI = prevMessages.filter(m => m.content !== WELCOME_MESSAGE.content).slice(-10);
 
     try {
       const res = await fetch('/api/ai/chat', {
@@ -90,8 +93,9 @@ const VirtualAssistant = ({ lang = 'vi', appMode, cartItems = [], remainingBudge
       }]);
     } finally {
       setIsLoading(false);
+      sendingRef.current = false;
     }
-  }, [input, isLoading, messages, appMode, cartItems, remainingBudget, missionTitle]);
+  }, [input, appMode, cartItems, remainingBudget, missionTitle]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -213,7 +217,7 @@ const VirtualAssistant = ({ lang = 'vi', appMode, cartItems = [], remainingBudge
 
               {/* Quick Actions */}
               <div className="px-3 pb-2 pt-1 flex gap-2 overflow-x-auto scrollbar-hide shrink-0">
-                {QUICK_ACTIONS?.slice(0, 4).map((qa, i) => (
+                {QUICK_ACTIONS?.map((qa, i) => (
                   <button
                     key={i}
                     onClick={() => sendMessage(qa.prompt)}

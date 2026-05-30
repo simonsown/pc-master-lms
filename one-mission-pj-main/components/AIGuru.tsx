@@ -16,11 +16,13 @@ export default function AIGuru() {
   const [unreadCount, setUnreadCount] = useState(0)
   const toastTimer = useRef<any>(null)
   const endRef = useRef<HTMLDivElement>(null)
+  const sendingRef = useRef(false)
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
   const handleSend = async () => {
-    if (!input.trim()) return
+    if (!input.trim() || sendingRef.current) return
+    sendingRef.current = true
     const userMsg = { role: 'user', content: input }
     const inputText = input
     setInput('')
@@ -38,6 +40,7 @@ export default function AIGuru() {
       if (!res.ok) {
         setMessages(prev => [...prev, userMsg, { role: 'bot', content: 'Xin lỗi, tôi gặp sự cố kết nối.' }])
         setIsTyping(false)
+        sendingRef.current = false
         return
       }
 
@@ -48,6 +51,7 @@ export default function AIGuru() {
       setMessages(prev => [...prev, userMsg, { role: 'bot', content: 'Xin lỗi, tôi gặp sự cố kết nối.' }])
     } finally {
       setIsTyping(false)
+      sendingRef.current = false
     }
   }
 
@@ -205,7 +209,12 @@ export default function AIGuru() {
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                      e.preventDefault()
+                      handleSend()
+                    }
+                  }}
                   placeholder="Hỏi AI Guru điều gì đó..."
                   className="flex-1 bg-transparent border-none outline-none text-sm"
                   style={{ padding: '8px 12px', color: styles.text, fontFamily: 'inherit' }}

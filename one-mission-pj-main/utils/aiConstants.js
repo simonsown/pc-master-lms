@@ -27,6 +27,14 @@ export const QUICK_ACTIONS = [
         prompt: 'Website PC Master Builder có những tính năng gì? Hướng dẫn tôi cách sử dụng.'
     },
     {
+        label: '🎯 Tính năng nổi bật',
+        prompt: 'Các tính năng nổi bật của website PC Master Builder là gì? Tôi là học sinh mới, hãy giới thiệu chi tiết.'
+    },
+    {
+        label: '📖 Hướng dẫn sử dụng',
+        prompt: 'Hướng dẫn tôi cách sử dụng website PC Master Builder từ đầu. Tôi muốn biết cách học bài giảng, làm quiz, thực hành lắp ráp và theo dõi tiến độ.'
+    },
+    {
         label: '💰 Tư vấn cấu hình 10 triệu',
         prompt: 'Tôi có ngân sách 10 triệu VNĐ, hãy tư vấn cấu hình PC phù hợp từ danh sách linh kiện trong chợ. Mục đích sử dụng: học online và văn phòng.'
     },
