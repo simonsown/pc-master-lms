@@ -81,9 +81,9 @@ function FlashcardPanel({ lessonId, lessonTitle, sections }) {
                 </div>
             </div>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                <button onClick={() => { setIdx(i => Math.max(0, i-1)); setFlipped(false); }} disabled={idx === 0} style={{ padding: '10px 20px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: 'white', cursor: 'pointer' }}><ChevronLeft size={18} /></button>
-                <button onClick={() => { setIdx(0); setFlipped(false); setGenerated(false); }} style={{ padding: '10px 16px', background: 'transparent', border: '1px solid #4b5563', borderRadius: '10px', color: '#8899a6', cursor: 'pointer' }}><RotateCcw size={16} /></button>
-                <button onClick={() => { setIdx(i => Math.min(cards.length-1, i+1)); setFlipped(false); }} disabled={idx === cards.length-1} style={{ padding: '10px 20px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: 'white', cursor: 'pointer' }}><ChevronRight size={18} /></button>
+                                <button onClick={() => { setIdx(i => Math.max(0, i-1)); setFlipped(false); }} disabled={idx === 0} style={{ padding: '10px 20px', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', borderRadius: '10px', color: 'var(--text-primary)', cursor: 'pointer' }}><ChevronLeft size={18} /></button>
+                                <button onClick={() => { setIdx(0); setFlipped(false); setGenerated(false); }} style={{ padding: '10px 16px', background: 'transparent', border: '1px solid var(--border-default)', borderRadius: '10px', color: 'var(--text-muted)', cursor: 'pointer' }}><RotateCcw size={16} /></button>
+                                <button onClick={() => { setIdx(i => Math.min(cards.length-1, i+1)); setFlipped(false); }} disabled={idx === cards.length-1} style={{ padding: '10px 20px', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', borderRadius: '10px', color: 'var(--text-primary)', cursor: 'pointer' }}><ChevronRight size={18} /></button>
             </div>
         </div>
     );
@@ -137,11 +137,11 @@ function QuizPanel({ lessonTitle, sections }) {
                 const chosen = answers[qi];
                 const isCorrect = chosen === q.correctIndex;
                 return (
-                    <div key={qi} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px', padding: '20px' }}>
+                    <div key={qi} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: '16px', padding: '20px' }}>
                         <p style={{ fontWeight: 700, marginBottom: '16px', fontSize: '15px' }}>Câu {qi+1}: {q.question}</p>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             {q.options.map((opt, oi) => {
-                                let bg = 'rgba(255,255,255,0.03)', border = 'rgba(255,255,255,0.06)', color = '#e0e6ed';
+                                let bg = 'var(--bg-elevated)', border = 'var(--border-default)', color = 'var(--text-primary)';
                                 if (submitted) {
                                     if (oi === q.correctIndex) { bg = 'rgba(16,185,129,0.1)'; border = '#10b981'; color = '#10b981'; }
                                     else if (chosen === oi) { bg = 'rgba(239,68,68,0.1)'; border = '#ef4444'; color = '#f87171'; }
@@ -170,7 +170,7 @@ function QuizPanel({ lessonTitle, sections }) {
                     Nộp bài ({Object.keys(answers).length}/{questions.length} câu)
                 </button>
             ) : (
-                <button onClick={() => { setGenerated(false); setAnswers({}); setSubmitted(false); }} style={{ padding: '14px', background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>
+                                <button onClick={() => { setGenerated(false); setAnswers({}); setSubmitted(false); }} style={{ padding: '14px', background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '1px solid var(--border-default)', borderRadius: '12px', fontWeight: 700, cursor: 'pointer' }}>
                     🔄 Tạo quiz mới
                 </button>
             )}
@@ -189,7 +189,7 @@ export default function LessonInteractive({ lessonId, lessonTitle, sections, com
     ];
     return (
         <div>
-            <div style={{ display: 'flex', gap: '4px', marginBottom: '28px', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0' }}>
+            <div style={{ display: 'flex', gap: '4px', marginBottom: '28px', borderBottom: '1px solid var(--border-default)', paddingBottom: '0' }}>
                 {tabs.map(t => (
                     <button key={t.key} onClick={() => setTab(t.key)} style={{ padding: '10px 20px', background: tab === t.key ? 'rgba(0,243,255,0.08)' : 'transparent', color: tab === t.key ? '#00f3ff' : '#4b5563', border: 'none', borderBottom: tab === t.key ? '2px solid #00f3ff' : '2px solid transparent', cursor: 'pointer', fontWeight: 700, fontSize: '13px', borderRadius: '0', transition: 'all 0.2s' }}>
                         {t.label}

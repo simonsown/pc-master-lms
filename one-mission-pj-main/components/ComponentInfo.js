@@ -15,15 +15,15 @@ const ComponentInfo = ({ type, lang = 'en', onOpenLesson }) => {
             width: '300px',
             padding: '1.5rem',
             borderLeft: '4px solid var(--primary-neon)',
-            backgroundColor: '#ffffff',
+            background: 'var(--bg-surface)',
             boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
             animation: 'fadeIn 0.3s ease-out'
         }}>
             <h3 className="neon-text-blue" style={{ marginBottom: '0.5rem', fontSize: '1.2rem' }}>{info.title}</h3>
-            <p style={{ color: 'var(--text-main)', marginBottom: '1rem', lineHeight: '1.5', fontSize: '0.95rem' }}>{info.desc}</p>
+            <p style={{ color: 'var(--text-primary)', marginBottom: '1rem', lineHeight: '1.5', fontSize: '0.95rem' }}>{info.desc}</p>
             <div style={{ backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '6px', border: '1px solid #e2e8f0', marginBottom: '1rem' }}>
-                <strong style={{ color: 'var(--secondary-neon)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Did you know?</strong>
-                <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', fontStyle: 'italic', marginTop: '0.25rem' }}>{info.funFact}</p>
+                <strong style={{ color: 'var(--brand-primary)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Did you know?</strong>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontStyle: 'italic', marginTop: '0.25rem' }}>{info.funFact}</p>
             </div>
 
             <button

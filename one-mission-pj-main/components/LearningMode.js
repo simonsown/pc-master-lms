@@ -186,7 +186,7 @@ const LearningMode = ({
                 <h2 className="neon-text-blue" style={{ margin: 0, fontSize: '2.5rem', letterSpacing: '2px', textTransform: 'uppercase' }}>
                     {lang === 'en' ? 'Practice Mode' : 'Chế độ Luyện Tập'}
                 </h2>
-                <p style={{ color: 'var(--text-dim)', textAlign: 'center', fontSize: '1.1rem' }}>
+                    <p style={{ color: 'var(--text-muted)', textAlign: 'center', fontSize: '1.1rem' }}>
                     {lang === 'en' ? 'Choose how you want to practice:' : 'Chọn phương thức luyện tập:'}
                 </p>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', width: '100%' }}>
@@ -196,22 +196,22 @@ const LearningMode = ({
                         className="glass-panel"
                         style={{
                             display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '3rem 2rem', gap: '1.5rem',
-                            cursor: 'pointer', border: '1px solid var(--primary-neon)', background: 'rgba(10,20,40,0.4)',
-                            borderRadius: '16px', transition: 'all 0.2s', color: 'white'
+                            cursor: 'pointer', border: '1px solid var(--accent-blue)', background: 'var(--bg-surface)',
+                            borderRadius: '16px', transition: 'all 0.2s', color: 'var(--text-primary)'
                         }}
                         onMouseOver={e => { e.currentTarget.style.boxShadow = '0 15px 40px rgba(0,255,255,0.2)'; }}
                         onMouseOut={e => { e.currentTarget.style.boxShadow = 'none'; }}
                     >
                         <span style={{ fontSize: '3.5rem' }}>🗺️</span>
                         <div style={{ textAlign: 'center' }}>
-                            <h3 style={{ color: 'var(--primary-neon)', marginBottom: '0.5rem', fontSize: '1.5rem' }}>
+                            <h3 style={{ color: 'var(--accent-blue)', marginBottom: '0.5rem', fontSize: '1.5rem' }}>
                                 {lang === 'en' ? 'Learning Roadmap' : 'Lộ Trình Học Tập'}
                             </h3>
-                            <p style={{ color: 'var(--text-dim)', fontSize: '0.95rem' }}>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
                                 {lang === 'en' ? 'Step-by-step guided missions with quizzes.' : 'Làm thực hành từng cấp độ và trả lời bài kiểm tra.'}
                             </p>
                         </div>
-                        <div style={{ height: '4px', width: '100%', background: 'var(--primary-neon)', boxShadow: '0 0 8px var(--primary-neon)', borderRadius: '2px' }} />
+                        <div style={{ height: '4px', width: '100%', background: 'var(--accent-blue)', boxShadow: '0 0 8px var(--accent-blue)', borderRadius: '2px' }} />
                     </button>
 
                     {/* Free Practice */}
@@ -220,22 +220,22 @@ const LearningMode = ({
                         className="glass-panel"
                         style={{
                             display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '3rem 2rem', gap: '1.5rem',
-                            cursor: 'pointer', border: '1px solid var(--accent-green)', background: 'rgba(10,20,40,0.4)',
-                            borderRadius: '16px', transition: 'all 0.2s', color: 'white'
+                            cursor: 'pointer', border: '1px solid var(--brand-primary)', background: 'var(--bg-surface)',
+                            borderRadius: '16px', transition: 'all 0.2s', color: 'var(--text-primary)'
                         }}
                         onMouseOver={e => { e.currentTarget.style.boxShadow = '0 15px 40px rgba(52,211,153,0.2)'; }}
                         onMouseOut={e => { e.currentTarget.style.boxShadow = 'none'; }}
                     >
                         <span style={{ fontSize: '3.5rem' }}>🛠️</span>
                         <div style={{ textAlign: 'center' }}>
-                            <h3 style={{ color: 'var(--accent-green)', marginBottom: '0.5rem', fontSize: '1.5rem' }}>
+                            <h3 style={{ color: 'var(--brand-primary)', marginBottom: '0.5rem', fontSize: '1.5rem' }}>
                                 {lang === 'en' ? 'Free Practice' : 'Luyện Tập Tự Do'}
                             </h3>
-                            <p style={{ color: 'var(--text-dim)', fontSize: '0.95rem' }}>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
                                 {lang === 'en' ? 'Freely assemble components with no restrictions.' : 'Lắp ráp linh kiện thoải mái, không giới hạn.'}
                             </p>
                         </div>
-                        <div style={{ height: '4px', width: '100%', background: 'var(--accent-green)', boxShadow: '0 0 8px var(--accent-green)', borderRadius: '2px' }} />
+                        <div style={{ height: '4px', width: '100%', background: 'var(--brand-primary)', boxShadow: '0 0 8px var(--brand-primary)', borderRadius: '2px' }} />
                     </button>
                 </div>
             </div>
@@ -251,8 +251,8 @@ const LearningMode = ({
                         {lang === 'en' ? '🛠️ Free Practice' : '🛠️ Luyện Tập Tự Do'}
                     </h2>
                     <button onClick={() => setSubMode('select')} style={{
-                        padding: '8px 18px', background: 'transparent', color: 'white',
-                        border: '1px solid #334155', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold'
+                        padding: '8px 18px', background: 'transparent', color: 'var(--text-primary)',
+                        border: '1px solid var(--border-default)', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold'
                     }}>
                         {lang === 'en' ? '← Back' : '← Quay lại'}
                     </button>
@@ -276,8 +276,8 @@ const LearningMode = ({
                         {lang === 'en' ? 'Interactive Learning Roadmap' : 'Lộ Trình Học Tập Tương Tác'}
                     </h2>
                     <button onClick={() => setSubMode('select')} style={{
-                        padding: '8px 18px', background: 'transparent', color: 'white',
-                        border: '1px solid #334155', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold'
+                        padding: '8px 18px', background: 'transparent', color: 'var(--text-primary)',
+                        border: '1px solid var(--border-default)', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold'
                     }}>
                         {lang === 'en' ? '← Back' : '← Quay lại'}
                     </button>
@@ -304,7 +304,7 @@ const LearningMode = ({
                     <h2 className="neon-text-green" style={{ margin: 0 }}>
                         {lang === 'en' ? `Level ${currentLevelId}: Action` : `Level ${currentLevelId}: Thực hành`}
                     </h2>
-                    <button onClick={() => setView('roadmap')} style={{ padding: '0.5rem 1rem', background: 'transparent', color: 'white', border: '1px solid var(--accent-purple)', borderRadius: '8px', cursor: 'pointer' }}>
+                    <button onClick={() => setView('roadmap')} style={{ padding: '0.5rem 1rem', background: 'transparent', color: 'var(--text-primary)', border: '1px solid var(--accent-blue)', borderRadius: '8px', cursor: 'pointer' }}>
                         {lang === 'en' ? '⬅ Back to Roadmap' : '⬅ Về Lộ Trình'}
                     </button>
                 </div>
@@ -318,13 +318,13 @@ const LearningMode = ({
                     />
                 </div>
 
-                <div className="glass-panel" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', background: 'rgba(10, 20, 40, 0.6)' }}>
+                <div className="glass-panel" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     <h3 className="neon-text-blue">{targetHardware}</h3>
-                    <p style={{ color: '#ccc', lineHeight: '1.6', fontSize: '1rem' }}>
+                    <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6', fontSize: '1rem' }}>
                         {HARDWARE_DATA[targetHardware === 'Screws' ? 'Screws' : targetHardware]?.[lang]}
                     </p>
 
-                    <p style={{ color: 'var(--accent-green)', fontWeight: 'bold' }}>
+                    <p style={{ color: 'var(--brand-primary)', fontWeight: 'bold' }}>
                         {lang === 'en'
                             ? (targetHardware === 'Screws' ? "Click below or assemble components to trigger the quiz!" : `Please assemble the ${targetHardware} to the proper location.`)
                             : (targetHardware === 'Screws' ? "Click nút dưới hoặc lắp đúng linh kiện để mở bài kiểm tra!" : `Vui lòng lắp đặt ${targetHardware} vào vị trí chính xác.`)}
@@ -333,9 +333,9 @@ const LearningMode = ({
                     <button
                         onClick={() => triggerQuizForLevel(currentLevelId, targetHardware)}
                         style={{
-                            padding: '1rem', background: 'var(--primary-neon)', color: 'black',
+                            padding: '1rem', background: 'var(--accent-blue)', color: 'white',
                             border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer',
-                            boxShadow: '0 0 15px var(--primary-neon)'
+                            boxShadow: '0 0 15px var(--accent-blue)'
                         }}
                     >
                         {lang === 'en' ? 'Manually Trigger Quiz ➜' : 'Chạy Bài Kiểm Tra ➜'}

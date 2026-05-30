@@ -249,7 +249,7 @@ const QuizModal = ({ onClose, lang, topic, level, onSuccess, onScore }) => {
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -20 }}
                         >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem', color: 'var(--text-dim)', fontSize: '0.9rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                                 <span>{lang === 'en' ? `Question ${currentIndex + 1} of 10` : `Câu hỏi ${currentIndex + 1} trên 10`}</span>
                                 <span>{lang === 'en' ? `Score: ${score}` : `Điểm: ${score}`}</span>
                             </div>
@@ -260,8 +260,8 @@ const QuizModal = ({ onClose, lang, topic, level, onSuccess, onScore }) => {
 
                             <div style={{ display: 'grid', gap: '1rem' }}>
                                 {currentQuestion.options.map((opt, idx) => {
-                                    let bgColor = 'rgba(255,255,255,0.05)';
-                                    let borderColor = 'rgba(255,255,255,0.1)';
+                                    let bgColor = 'var(--bg-elevated)';
+                                    let borderColor = 'var(--border-default)';
 
                                     if (selectedOption) {
                                         const optionLetter = opt.charAt(0);
@@ -285,7 +285,7 @@ const QuizModal = ({ onClose, lang, topic, level, onSuccess, onScore }) => {
                                                 textAlign: 'left',
                                                 background: bgColor,
                                                 border: `1px solid ${borderColor}`,
-                                                color: 'white',
+                                                color: 'var(--text-primary)',
                                                 borderRadius: '8px',
                                                 cursor: selectedOption ? 'default' : 'pointer',
                                                 transition: 'background-color 0.2s, border-color 0.2s',
@@ -307,7 +307,7 @@ const QuizModal = ({ onClose, lang, topic, level, onSuccess, onScore }) => {
                                     <strong style={{ color: result === 'correct' ? 'var(--accent-green)' : '#ff0055', fontSize: '1.1rem', textShadow: `0 0 10px ${result === 'correct' ? 'var(--accent-green)' : '#ff0055'}` }}>
                                         {result === 'correct' ? (lang === 'en' ? 'CORRECT!' : 'CHÍNH XÁC!') : (lang === 'en' ? 'INCORRECT' : 'CHƯA ĐÚNG')}
                                     </strong>
-                                    <p style={{ marginTop: '0.5rem', color: '#ccc', fontSize: '0.95rem', lineHeight: '1.4' }}>{currentQuestion.explanation}</p>
+                                    <p style={{ marginTop: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.4' }}>{currentQuestion.explanation}</p>
                                     <motion.button
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
