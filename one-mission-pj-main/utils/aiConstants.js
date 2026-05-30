@@ -23,6 +23,10 @@ export const SYSTEM_PROMPT = `Bạn là **PC Master AI**, trợ lý chuyên nghi
 
 export const QUICK_ACTIONS = [
     {
+        label: '📚 Web có những gì?',
+        prompt: 'Website PC Master Builder có những tính năng gì? Hướng dẫn tôi cách sử dụng.'
+    },
+    {
         label: '💰 Tư vấn cấu hình 10 triệu',
         prompt: 'Tôi có ngân sách 10 triệu VNĐ, hãy tư vấn cấu hình PC phù hợp từ danh sách linh kiện trong chợ. Mục đích sử dụng: học online và văn phòng.'
     },

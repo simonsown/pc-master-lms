@@ -31,7 +31,7 @@ function fallbackReply(message: string): string {
   const lower = message.toLowerCase().trim()
 
   if (lower.includes('xin chào') || lower.includes('hello') || lower.includes('hi') || lower.includes('bạn là ai')) {
-    return `Xin chào! Tôi là **AI Guru** 🤖 - trợ lý học tập của **PC Master Builder**.\n\nTôi có thể giúp bạn:\n- 📚 Hướng dẫn sử dụng các tính năng trên website\n- 🔧 Giải thích kiến thức phần cứng máy tính\n- 💰 Tư vấn cấu hình PC\n- 📝 Hướng dẫn làm quiz và bài tập\n\nBạn cần tôi giúp gì nào?`
+    return `Chào bạn! 😊 Có điều gì tôi có thể giúp bạn hôm nay không?\n\nBạn có thể hỏi tôi về:\n- 📚 Các bài giảng phần cứng PC\n- 🔧 Hướng dẫn lắp ráp & kiểm tra tương thích\n- 💰 Tư vấn cấu hình máy tính\n- 🎮 Cách làm quiz kiếm ngân sách\n- 🖥️ Các tính năng trên website`
   }
 
   if (lower.includes('quiz') || lower.includes('thi') || lower.includes('trắc nghiệm') || lower.includes('bài kiểm tra')) {
