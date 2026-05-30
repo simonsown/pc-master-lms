@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-const PINCH_THRESHOLD = 0.05;
+const PINCH_THRESHOLD = 0.07; // Pinch to click
+const PINCH_RELEASE = 0.10; // Release threshold (hysteresis prevents jitter)
 
 const WebcamCursor = ({ landmarks, enabled, trackingSensitivity = 1.0 }) => {
     const [cursorPos, setCursorPos] = useState({ x: -100, y: -100 });
@@ -50,7 +51,10 @@ const WebcamCursor = ({ landmarks, enabled, trackingSensitivity = 1.0 }) => {
         const thumbTip = hand[4];
         const indexTip = hand[8];
         const distance = Math.hypot(indexTip.x - thumbTip.x, indexTip.y - thumbTip.y);
-        const currentPinch = distance < PINCH_THRESHOLD;
+        // Hysteresis: easier to pinch, harder to release
+        const currentPinch = wasPinchingRef.current
+          ? distance < PINCH_RELEASE
+          : distance < PINCH_THRESHOLD;
         setIsPinching(currentPinch);
 
         if (currentPinch && !wasPinchingRef.current) {

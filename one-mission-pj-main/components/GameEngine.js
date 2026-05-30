@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState, useImperativeHandle, forwardRef, useCallback } from 'react';
 import confetti from 'canvas-confetti';
 
-const GRAB_DISTANCE = 0.05; // Threshold for pinch detection
+const GRAB_THRESHOLD = 0.07; // Pinch to grab (lower = easier to grab)
+const RELEASE_THRESHOLD = 0.10; // Release when fingers open wider (hysteresis prevents jitter)
 
 const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems }, ref) => {
     const canvasRef = useRef(null);
@@ -116,6 +117,7 @@ const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems }, ref) 
     const landmarksRef = useRef(null);
     const cursorFilterRef = useRef({ x: null, y: null, alpha: 0.35 }); // Smooth but responsive cursor filter
     const grabLockRef = useRef({ x: null, y: null, active: false }); // Freeze cursor when pinching
+    const pinchStateRef = useRef(false); // Hysteresis: track actual pinch state
 
     useEffect(() => {
         landmarksRef.current = landmarks;
@@ -835,7 +837,14 @@ const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems }, ref) 
 
                 activeCursorX = filter.x;
                 activeCursorY = filter.y;
-                isGrabbing = distance < GRAB_DISTANCE;
+                // Hysteresis: easier to grab, harder to release (anti-jitter)
+                if (pinchStateRef.current) {
+                  isGrabbing = distance < RELEASE_THRESHOLD;
+                  if (!isGrabbing) pinchStateRef.current = false;
+                } else {
+                  isGrabbing = distance < GRAB_THRESHOLD;
+                  if (isGrabbing) pinchStateRef.current = true;
+                }
                 showHandCursor = true;
 
                 // Freeze cursor lúc bắt đầu pinch để nắm chính xác, khi đã nắm rồi thì cho kéo

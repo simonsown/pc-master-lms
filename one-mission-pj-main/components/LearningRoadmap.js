@@ -32,6 +32,7 @@ const LearningRoadmap = ({ lang, unlockedLevels = [1], completedLevels = [], onN
 
     const [cursorPos, setCursorPos] = useState({ x: -100, y: -100, isPinching: false });
     const [hoveredNode, setHoveredNode] = useState(null);
+    const pinchActiveRef = useRef(false);
 
     useEffect(() => {
         if (!containerRef.current || !landmarks || landmarks.length === 0) return;
@@ -50,7 +51,11 @@ const LearningRoadmap = ({ lang, unlockedLevels = [1], completedLevels = [], onN
         const smoothY = filterY.current.filter(rawY);
 
         const distance = Math.hypot(indexTip.x - thumbTip.x, indexTip.y - thumbTip.y);
-        const isPinching = distance < 0.05;
+        // Hysteresis: easier to pinch, harder to release
+        const isPinching = pinchActiveRef.current
+          ? distance < 0.10
+          : distance < 0.07;
+        pinchActiveRef.current = isPinching;
 
         setCursorPos({ x: smoothX, y: smoothY, isPinching });
 
