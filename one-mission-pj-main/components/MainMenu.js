@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Cpu, ShoppingCart, Users, ArrowRight, Info, LogIn, LogOut, User, Award, Swords, Star, Trophy, GraduationCap, Zap, ShieldCheck, Bot } from 'lucide-react';
+import { BookOpen, Cpu, ShoppingCart, Users, ArrowRight, Info, LogIn, LogOut, User, Award, Swords, Star, Trophy, GraduationCap, Zap, ShieldCheck, Bot, Cable, Thermometer, Wrench, LayoutDashboard, Monitor, Building2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -257,6 +257,56 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                                 <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{mode.desc}</div>
                             </div>
                         </motion.button>
+                    ))}
+                </div>
+            </motion.div>
+
+            {/* PRO LEARNING SYSTEM */}
+            <motion.div {...fadeUp(0.2)} style={{ marginBottom: '24px' }}>
+                <div style={{
+                    fontSize: '11px', fontWeight: 700, color: 'var(--accent-amber)',
+                    textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '12px',
+                    display: 'flex', alignItems: 'center', gap: '6px'
+                }}>
+                    <Zap size={13} /> Pro Learning System
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                    {[
+                        { id: '/builder/scenarios', title: 'Kịch Bản Build', desc: 'Thử thách lắp ráp theo yêu cầu', Icon: LayoutDashboard, color: '#6366f1' },
+                        { id: '/builder/cable-game', title: 'Cable Management', desc: 'Nối dây nguồn chuẩn chỉnh', Icon: Cable, color: '#22c55e' },
+                        { id: '/builder/os-install', title: 'Cài Windows 11', desc: 'Mô phỏng cài đặt OS thực tế', Icon: Monitor, color: '#3b82f6' },
+                        { id: '/builder/diagnosis', title: 'Chuẩn Đoán', desc: 'Tìm lỗi và sửa PC', Icon: Wrench, color: '#f59e0b' },
+                        { id: '/builder/thermal', title: 'Thermal View', desc: 'Xem nhiệt & luồng khí', Icon: Thermometer, color: '#ef4444' },
+                        { id: '/builder/scenarios', title: 'So Sánh Build', desc: 'Đối chiếu cấu hình', Icon: Building2, color: '#8b5cf6' },
+                        { id: '/builder/mac-check', title: 'Mac Tương Thích', desc: 'Kiểm tra app trên Mac', Icon: Monitor, color: '#555' },
+                    ].map((mode) => (
+                        <motion.a
+                            key={mode.id}
+                            href={mode.id}
+                            whileHover={{ y: -2, boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '10px',
+                                padding: '14px', borderRadius: '10px',
+                                border: '1px solid var(--border-default)',
+                                background: 'var(--bg-surface)',
+                                cursor: 'pointer', textDecoration: 'none',
+                                transition: 'border-color 0.2s, box-shadow 0.2s'
+                            }}
+                            onMouseOver={e => { e.currentTarget.style.borderColor = mode.color; e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                            onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.background = 'var(--bg-surface)'; }}
+                        >
+                            <div style={{
+                                width: '36px', height: '36px', borderRadius: '8px',
+                                background: `${mode.color}15`, color: mode.color,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                            }}>
+                                <mode.Icon size={18} />
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)' }}>{mode.title}</div>
+                                <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{mode.desc}</div>
+                            </div>
+                        </motion.a>
                     ))}
                 </div>
             </motion.div>

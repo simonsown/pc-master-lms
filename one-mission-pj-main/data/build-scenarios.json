@@ -1,0 +1,182 @@
+[
+  {
+    "id": "office-budget",
+    "name": "Office Budget PC",
+    "name_vn": "Máy Văn Phòng Tiết Kiệm",
+    "description": "Build a reliable office PC for under 10 million VND. Perfect for Word, Excel, web browsing, and video calls.",
+    "description_vn": "Lắp một PC văn phòng đáng tin cậy dưới 10 triệu. Phù hợp cho Word, Excel, lướt web và gọi video.",
+    "icon": "💼",
+    "difficulty": "easy",
+    "budget_min": 3000000,
+    "budget_max": 10000000,
+    "requirements": {
+      "min_ram_gb": 8,
+      "min_storage_gb": 240,
+      "require_igpu": true,
+      "use_case": "office",
+      "max_tdp": 150
+    },
+    "weight_components": {
+      "cpu": 10,
+      "gpu": 0,
+      "ram": 20,
+      "storage": 15,
+      "psu": 10
+    }
+  },
+  {
+    "id": "budget-gaming",
+    "name": "Budget Gaming Rig",
+    "name_vn": "PC Gaming Cơ Bản",
+    "description": "Build a capable gaming PC for ~15 million VND. Should run Valorant, LOL, and CS2 at 1080p.",
+    "description_vn": "Lắp PC gaming cơ bản ~15 triệu. Chơi được Valorant, LOL, CS2 ở 1080p.",
+    "icon": "🎮",
+    "difficulty": "easy",
+    "budget_min": 10000000,
+    "budget_max": 18000000,
+    "requirements": {
+      "min_ram_gb": 16,
+      "min_gpu_power": 6000,
+      "min_storage_gb": 480,
+      "use_case": "gaming",
+      "min_cores": 6
+    },
+    "weight_components": {
+      "cpu": 30,
+      "gpu": 40,
+      "ram": 10,
+      "storage": 5,
+      "psu": 15
+    }
+  },
+  {
+    "id": "mainstream-gaming",
+    "name": "Mainstream Gaming",
+    "name_vn": "PC Gaming Tầm Trung",
+    "description": "Build a balanced high-end gaming PC around 25 million. Handles AAA titles at 1440p ultra settings.",
+    "description_vn": "Lắp PC gaming cao cấp tầm trung ~25 triệu. Xử lý AAA 1440p ultra.",
+    "icon": "⚡",
+    "difficulty": "medium",
+    "budget_min": 18000000,
+    "budget_max": 30000000,
+    "requirements": {
+      "min_ram_gb": 16,
+      "min_gpu_power": 15000,
+      "min_storage_gb": 1000,
+      "use_case": "gaming",
+      "min_cores": 8,
+      "min_cinebench_multi": 18000
+    },
+    "weight_components": {
+      "cpu": 35,
+      "gpu": 40,
+      "ram": 10,
+      "storage": 5,
+      "psu": 10
+    }
+  },
+  {
+    "id": "workstation",
+    "name": "Content Creator Workstation",
+    "name_vn": "Máy Làm Video & Đồ Họa",
+    "description": "Build a powerful workstation for video editing, 3D rendering, and graphic design.",
+    "description_vn": "Lắp PC mạnh mẽ cho dựng video, render 3D và thiết kế đồ họa.",
+    "icon": "🎬",
+    "difficulty": "hard",
+    "budget_min": 25000000,
+    "budget_max": 50000000,
+    "requirements": {
+      "min_ram_gb": 32,
+      "min_gpu_power": 25000,
+      "min_storage_gb": 2000,
+      "use_case": "workstation",
+      "min_cores": 12,
+      "min_cinebench_multi": 30000,
+      "max_tdp": 400
+    },
+    "weight_components": {
+      "cpu": 35,
+      "gpu": 30,
+      "ram": 15,
+      "storage": 10,
+      "psu": 10
+    }
+  },
+  {
+    "id": "mini-itx",
+    "name": "Mini ITX Build",
+    "name_vn": "PC Mini ITX Cao Cấp",
+    "description": "Build a compact Mini ITX system in a small form factor case under 20L volume.",
+    "description_vn": "Lắp PC Mini ITX trong case nhỏ gọn dưới 20L.",
+    "icon": "📦",
+    "difficulty": "expert",
+    "budget_min": 15000000,
+    "budget_max": 40000000,
+    "requirements": {
+      "min_ram_gb": 16,
+      "min_gpu_power": 12000,
+      "min_storage_gb": 1000,
+      "use_case": "gaming",
+      "max_tdp": 250
+    },
+    "weight_components": {
+      "cpu": 25,
+      "gpu": 30,
+      "ram": 10,
+      "storage": 10,
+      "psu": 15
+    }
+  },
+  {
+    "id": "silent-pc",
+    "name": "Silent Build",
+    "name_vn": "PC Siêu Yên Tĩnh",
+    "description": "Build a near-silent PC with excellent cooling and low noise levels for home theater or office.",
+    "description_vn": "PC gần như im lặng với tản nhiệt tốt cho rạp hát hoặc văn phòng.",
+    "icon": "🔇",
+    "difficulty": "medium",
+    "budget_min": 12000000,
+    "budget_max": 30000000,
+    "requirements": {
+      "min_ram_gb": 16,
+      "min_storage_gb": 480,
+      "require_igpu": true,
+      "use_case": "productivity",
+      "max_tdp": 100
+    },
+    "weight_components": {
+      "cpu": 20,
+      "gpu": 0,
+      "ram": 15,
+      "storage": 10,
+      "psu": 15
+    }
+  },
+  {
+    "id": "ultimate-battlestation",
+    "name": "Ultimate Battlestation",
+    "name_vn": "Dàn PC Đỉnh Cao",
+    "description": "No budget limit. Build the absolute best PC money can buy. 4K gaming, extreme VR, AI workloads.",
+    "description_vn": "Không giới hạn ngân sách. Lắp PC đắt nhất có thể. Gaming 4K, VR, AI.",
+    "icon": "👑",
+    "difficulty": "hard",
+    "budget_min": 40000000,
+    "budget_max": 100000000,
+    "requirements": {
+      "min_ram_gb": 32,
+      "min_gpu_power": 35000,
+      "min_storage_gb": 2000,
+      "use_case": "workstation",
+      "min_cores": 16,
+      "min_cinebench_multi": 35000,
+      "max_tdp": 600
+    },
+    "weight_components": {
+      "cpu": 30,
+      "gpu": 35,
+      "ram": 10,
+      "storage": 10,
+      "psu": 15
+    }
+  }
+]
