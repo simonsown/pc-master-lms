@@ -1,4 +1,4 @@
-// Path: middleware.ts
+// Path: proxy.ts
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
@@ -27,7 +27,7 @@ const PUBLIC_ROUTES = [
   '/api',
 ]
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   let response = NextResponse.next({ request })
 

@@ -10,6 +10,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://pc-master-lms.vercel.app'),
   title: "PC Master Builder | Học Lắp Ráp & Tin Học",
   description: "Ứng dụng học tập tin học và lắp ráp máy tính với công nghệ Hand Tracking.",
   icons: {
