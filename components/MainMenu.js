@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Cpu, ShoppingCart, Users, ArrowRight, Info, LogIn, LogOut, User, Award, Swords, Star, Trophy, GraduationCap, Zap, ShieldCheck, Bot, Cable, Thermometer, Wrench, LayoutDashboard, Monitor, Building2 } from 'lucide-react';
+import { BookOpen, Cpu, ShoppingCart, Users, ArrowRight, Info, LogIn, LogOut, User, Award, Swords, Star, Trophy, GraduationCap, Zap, ShieldCheck, Bot, Cable, Wrench, Monitor, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -272,13 +272,13 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
                     {[
-                        { id: '/builder/scenarios', title: 'Kịch Bản Build', desc: 'Thử thách lắp ráp theo yêu cầu', Icon: LayoutDashboard, color: '#6366f1' },
                         { id: '/builder/cable-game', title: 'Cable Management', desc: 'Nối dây nguồn chuẩn chỉnh', Icon: Cable, color: '#22c55e' },
                         { id: '/builder/os-install', title: 'Cài Windows 11', desc: 'Mô phỏng cài đặt OS thực tế', Icon: Monitor, color: '#3b82f6' },
                         { id: '/builder/diagnosis', title: 'Chuẩn Đoán', desc: 'Tìm lỗi và sửa PC', Icon: Wrench, color: '#f59e0b' },
-                        { id: '/builder/thermal', title: 'Thermal View', desc: 'Xem nhiệt & luồng khí', Icon: Thermometer, color: '#ef4444' },
-                        { id: '/builder/scenarios', title: 'So Sánh Build', desc: 'Đối chiếu cấu hình', Icon: Building2, color: '#8b5cf6' },
-                        { id: '/builder/mac-check', title: 'Mac Tương Thích', desc: 'Kiểm tra app trên Mac', Icon: Monitor, color: '#555' },
+
+                        { id: '/builder/pc-builder', title: 'PC Builder 3D', desc: 'Build PC trực quan với 3D', Icon: Cpu, color: '#6366f1' },
+                        { id: '/builder/common-mistakes', title: 'Lỗi Thường Gặp', desc: '8 lỗi build PC phổ biến kèm video', Icon: AlertTriangle, color: '#ef4444' },
+                        { id: '/builder/mac-check', title: 'Gợi Ý Máy Tính', desc: 'Tìm PC phù hợp với nhu cầu & ngân sách', Icon: Monitor, color: '#8b5cf6' },
                     ].map((mode) => (
                         <motion.a
                             key={mode.id}

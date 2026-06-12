@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase-ssr-server'
 import { redirect } from 'next/navigation'
 import React from 'react'
 
-export type UserRole = 'student' | 'teacher' | 'admin' | 'parent' | 'guest'
+export type UserRole = 'student' | 'teacher' | 'admin' | 'parent' | 'component_creator' | 'guest'
 
 export interface AuthUser {
   id: string
@@ -61,6 +61,7 @@ export function getDashboardByRole(role: UserRole): string {
     teacher: '/teacher/dashboard',
     parent: '/parent/dashboard',
     student: '/student/dashboard',
+    component_creator: '/creator',
     guest: '/login',
   }
   return map[role] ?? '/login'

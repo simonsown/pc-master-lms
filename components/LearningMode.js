@@ -90,6 +90,7 @@ const LearningMode = ({
     const [currentLevelId, setCurrentLevelId] = useState(null);
     const [unlockedLevels, setUnlockedLevels] = useState([1]);
     const [completedLevels, setCompletedLevels] = useState([]);
+    const [viewFull, setViewFull] = useState(false);
 
     const processedPlacementRef = useRef(null);
 
@@ -267,6 +268,34 @@ const LearningMode = ({
         );
     }
 
+    // --- Full PC View (pre-assembled, full screen) ---
+    if (viewFull) {
+        return (
+            <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: '#030712' }}>
+                <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 10, display: 'flex', gap: 8 }}>
+                    <button onClick={() => setViewFull(false)} style={{
+                        padding: '6px 14px', background: 'rgba(255,255,255,0.08)', color: '#fff',
+                        border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, cursor: 'pointer',
+                        fontSize: 12, fontWeight: 600, fontFamily: 'inherit', backdropFilter: 'blur(8px)',
+                    }}>
+                        ← {lang === 'en' ? 'Back' : 'Quay lại'}
+                    </button>
+                    <div style={{
+                        padding: '6px 14px', background: 'rgba(0,212,170,0.1)',
+                        border: '1px solid rgba(0,212,170,0.2)', borderRadius: 8,
+                        color: '#00d4aa', fontSize: 11, fontWeight: 600, fontFamily: 'inherit',
+                        backdropFilter: 'blur(8px)',
+                    }}>
+                        🖥️ {lang === 'en' ? 'Full PC View' : 'Xem Full PC'}
+                    </div>
+                </div>
+                <div style={{ width: '100vw', height: '100vh' }}>
+                    <GameEngine defaultPlaced={true} />
+                </div>
+            </div>
+        );
+    }
+
     // --- Roadmap sub-mode: show roadmap or level assembly ---
     if (subMode === 'roadmap' && view === 'roadmap') {
         return (
@@ -275,12 +304,21 @@ const LearningMode = ({
                     <h2 className="neon-text-green" style={{ margin: 0 }}>
                         {lang === 'en' ? 'Interactive Learning Roadmap' : 'Lộ Trình Học Tập Tương Tác'}
                     </h2>
-                    <button onClick={() => setSubMode('select')} style={{
-                        padding: '8px 18px', background: 'transparent', color: 'var(--text-primary)',
-                        border: '1px solid var(--border-default)', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold'
-                    }}>
-                        {lang === 'en' ? '← Back' : '← Quay lại'}
-                    </button>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                        <button onClick={() => setViewFull(true)} style={{
+                            padding: '8px 18px', background: 'rgba(0,212,170,0.1)', color: '#00d4aa',
+                            border: '1px solid rgba(0,212,170,0.3)', borderRadius: 8, cursor: 'pointer',
+                            fontWeight: 600, fontSize: 12, fontFamily: 'inherit',
+                        }}>
+                            🖥️ {lang === 'en' ? 'Full PC' : 'Xem Full PC'}
+                        </button>
+                        <button onClick={() => setSubMode('select')} style={{
+                            padding: '8px 18px', background: 'transparent', color: 'var(--text-primary)',
+                            border: '1px solid var(--border-default)', borderRadius: 8, cursor: 'pointer', fontWeight: 'bold'
+                        }}>
+                            {lang === 'en' ? '← Back' : '← Quay lại'}
+                        </button>
+                    </div>
                 </div>
                 <LearningRoadmap
                     lang={lang}

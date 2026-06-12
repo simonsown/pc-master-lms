@@ -4,1095 +4,625 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 
 const LANG = {
   vn: {
-    title: 'Quản lý Cáp',
-    subtitle: 'Kéo cáp vào đúng cổng trên bo mạch chủ',
-    timer: 'Thời gian',
-    score: 'Điểm',
-    mistakes: 'Lỗi',
-    level: 'Cấp độ',
-    easy: 'Dễ',
-    medium: 'Trung bình',
-    hard: 'Khó',
-    exit: 'Thoát',
-    cablesLeft: 'Cáp còn lại',
-    connected: 'Đã kết nối',
-    wrongCable: 'Sai cổng! Hãy thử lại.',
-    dropHere: 'Thả vào cổng tương thích',
-    congrats: 'Chúc mừng!',
-    completed: 'Đã hoàn thành',
-    yourTime: 'Thời gian',
-    yourScore: 'Điểm số',
-    yourMistakes: 'Số lỗi',
-    stars: 'Sao',
-    retry: 'Chơi lại',
-    perfect: 'Hoàn hảo - Không lỗi nào!',
-    goodJob: 'Tốt - Chỉ {n} lỗi',
-    completedText: 'Đã hoàn thành',
-    selectLevel: 'Chọn cấp độ để bắt đầu',
-    start: 'Bắt đầu',
-    atx24: '24-pin ATX',
-    cpu8: '8-pin CPU',
-    pcie: 'PCIe GPU',
-    sata: 'SATA',
-    frontpanel: 'Front Panel',
-    usb: 'USB Header',
-    fan: 'Fan Cable',
+    title: 'Lắp ráp PC', timer: 'Thời gian', score: 'Điểm', mistakes: 'Lỗi',
+    level: 'Cấp độ', easy: 'Dễ', medium: 'Trung bình', hard: 'Khó', exit: 'Thoát',
+    cablesLeft: 'Còn', connected: 'Xong', wrongCable: 'Sai cổng!',
+    congrats: 'Chúc mừng!', completed: 'Hoàn thành',
+    yourTime: 'Thời gian', yourScore: 'Điểm', yourMistakes: 'Lỗi', stars: 'Sao',
+    retry: 'Chơi lại', perfect: 'Hoàn hảo!',
+    goodJob: 'Tốt! {n} lỗi', hint: 'Kéo cáp từ khay → thả vào cổng',
   },
   en: {
-    title: 'Cable Management',
-    subtitle: 'Drag cables to correct ports on the motherboard',
-    timer: 'Time',
-    score: 'Score',
-    mistakes: 'Mistakes',
-    level: 'Level',
-    easy: 'Easy',
-    medium: 'Medium',
-    hard: 'Hard',
-    exit: 'Exit',
-    cablesLeft: 'Cables left',
-    connected: 'Connected',
-    wrongCable: 'Wrong port! Try again.',
-    dropHere: 'Drop onto a compatible port',
-    congrats: 'Congratulations!',
-    completed: 'Completed',
-    yourTime: 'Time',
-    yourScore: 'Score',
-    yourMistakes: 'Mistakes',
-    stars: 'Stars',
-    retry: 'Retry',
-    perfect: 'Perfect - No mistakes!',
-    goodJob: 'Good - Only {n} mistakes',
-    completedText: 'Completed',
-    selectLevel: 'Select a level to start',
-    start: 'Start',
-    atx24: '24-pin ATX',
-    cpu8: '8-pin CPU',
-    pcie: 'PCIe GPU',
-    sata: 'SATA',
-    frontpanel: 'Front Panel',
-    usb: 'USB Header',
-    fan: 'Fan Cable',
+    title: 'PC Assembly', timer: 'Time', score: 'Score', mistakes: 'Mistakes',
+    level: 'Level', easy: 'Easy', medium: 'Medium', hard: 'Hard', exit: 'Exit',
+    cablesLeft: 'Left', connected: 'Done', wrongCable: 'Wrong port!',
+    congrats: 'Congratulations!', completed: 'Completed',
+    yourTime: 'Time', yourScore: 'Score', yourMistakes: 'Mistakes', stars: 'Stars',
+    retry: 'Retry', perfect: 'Perfect!', goodJob: 'Good! {n} mistakes', hint: 'Drag cable from tray → drop on port',
   },
 };
 
 const CABLES = [
-  { id: 'atx24', labelKey: 'atx24', color: '#FFD700', level: 'easy', portLabel: 'ATX_24V' },
-  { id: 'cpu8', labelKey: 'cpu8', color: '#FF4757', level: 'easy', portLabel: 'CPU_PWR' },
-  { id: 'pcie', labelKey: 'pcie', color: '#3742FA', level: 'easy', portLabel: 'PCIe_x16' },
-  { id: 'sata', labelKey: 'sata', color: '#FF6348', level: 'medium', portLabel: 'SATA' },
-  { id: 'frontpanel', labelKey: 'frontpanel', color: '#A29BFE', level: 'medium', portLabel: 'F_PANEL' },
-  { id: 'usb', labelKey: 'usb', color: '#00CEC9', level: 'hard', portLabel: 'USB_HD' },
-  { id: 'fan', labelKey: 'fan', color: '#55E6C1', level: 'hard', portLabel: 'FAN' },
+  {
+    id: 'atx24', label: 'ATX 24-pin', portLabel: 'ATX24', correctPort: 'atx24_p',
+    pins: 24, rows: 2, cols: 12, pinW: 1.8, pinH: 2.8, gap: 0.8,
+    bodyW: 32, bodyH: 12, bodyR: 1.5, color: '#3d3d3d', accent: '#d4a030',
+    wireColor: '#5a5a5a', hasClip: true,
+    tooltip: 'Nguồn chính cho mainboard', diff: 1,
+    entry: { x: 92, y: 50 }, cp1: { x: 15, y: -25 }, cp2: { x: -15, y: -15 },
+  },
+  {
+    id: 'cpu8', label: 'CPU 8-pin EPS', portLabel: 'CPU_PWR', correctPort: 'cpu_pwr',
+    pins: 8, rows: 2, cols: 4, pinW: 2, pinH: 3, gap: 1,
+    bodyW: 16, bodyH: 14, bodyR: 1.2, color: '#333', accent: '#ccc',
+    wireColor: '#4a4a4a', split: 4,
+    tooltip: 'Nguồn cho CPU', diff: 1,
+    entry: { x: 10, y: -2 }, cp1: { x: -5, y: 10 }, cp2: { x: 0, y: 10 },
+  },
+  {
+    id: 'pcie', label: 'PCIe 6+2', portLabel: 'GPU_PWR', correctPort: 'gpu_pwr',
+    pins: 8, rows: 2, cols: [6, 2], pinW: 1.8, pinH: 2.8, gap: 0.8,
+    bodyW: [26, 12], bodyH: 12, bodyR: 1.2, color: '#2a2525', accent: '#cc4444',
+    wireColor: '#4a3a3a',
+    tooltip: 'Nguồn cho card đồ họa', diff: 1,
+    entry: { x: 50, y: 104 }, cp1: { x: 8, y: -18 }, cp2: { x: -5, y: -10 },
+  },
+  {
+    id: 'sata_data', label: 'SATA Data', portLabel: 'SATA_D', correctPort: 'sata_d',
+    pins: 7, rows: 1, cols: 7, pinW: 1.5, pinH: 2, gap: 0.6,
+    bodyW: 20, bodyH: 6, bodyR: 0.5, color: '#222', accent: '#888',
+    wireColor: '#3a3a3a',
+    tooltip: 'Dữ liệu ổ cứng / SSD', diff: 1,
+    entry: { x: 75, y: 104 }, cp1: { x: 5, y: -20 }, cp2: { x: -5, y: -10 },
+  },
+  {
+    id: 'sata_power', label: 'SATA Power', portLabel: 'SATA_P', correctPort: 'sata_p',
+    pins: 15, rows: 3, cols: 5, pinW: 1.2, pinH: 2, gap: 0.5,
+    bodyW: 22, bodyH: 10, bodyR: 0.5, color: '#1a1a1a', accent: '#cc8800',
+    wireColor: '#3a3a2a',
+    tooltip: 'Nguồn cho ổ cứng / SSD', diff: 2,
+    entry: { x: 80, y: 104 }, cp1: { x: 3, y: -18 }, cp2: { x: -3, y: -8 },
+  },
+  {
+    id: 'frontpanel', label: 'Front Panel', portLabel: 'F_PANEL', correctPort: 'fp',
+    pins: 9, rows: 2, cols: [5, 4], pinW: 1.2, pinH: 1.8, gap: 0.6,
+    bodyW: 14, bodyH: 10, bodyR: 0.8, color: '#2a2a3a', accent: '#9a8acc',
+    wireColor: '#3a3a4a', multiWire: true,
+    tooltip: 'Nút nguồn, LED từ case', diff: 1,
+    entry: { x: 35, y: 104 }, cp1: { x: 2, y: -20 }, cp2: { x: -2, y: -8 },
+  },
+  {
+    id: 'usb3', label: 'USB 3.0', portLabel: 'USB3', correctPort: 'usb3_h',
+    pins: 19, rows: 2, cols: 10, pinW: 1.2, pinH: 2, gap: 0.5,
+    bodyW: 22, bodyH: 10, bodyR: 1, color: '#1a2a4a', accent: '#4a8acc',
+    wireColor: '#2a3a5a',
+    tooltip: 'Cổng USB mặt trước', diff: 2,
+    entry: { x: 5, y: 104 }, cp1: { x: 5, y: -20 }, cp2: { x: 0, y: -12 },
+  },
+  {
+    id: 'hd_audio', label: 'HD Audio', portLabel: 'HD_AUDIO', correctPort: 'hd_au',
+    pins: 9, rows: 2, cols: 5, pinW: 1.2, pinH: 2, gap: 0.6,
+    bodyW: 14, bodyH: 10, bodyR: 0.8, color: '#1a1a1a', accent: '#66bb77',
+    wireColor: '#2a2a2a',
+    tooltip: 'Âm thanh HD từ case', diff: 3,
+    entry: { x: 60, y: -2 }, cp1: { x: -5, y: 10 }, cp2: { x: -3, y: 8 },
+  },
 ];
 
-const PORT_POSITIONS = {
-  atx24: { top: '46%', left: '74%', w: 72, h: 34 },
-  cpu8: { top: '5%', left: '4%', w: 68, h: 30 },
-  pcie: { top: '40%', left: '3%', w: 68, h: 30 },
-  sata: { top: '78%', left: '62%', w: 62, h: 28 },
-  frontpanel: { top: '78%', left: '32%', w: 66, h: 28 },
-  usb: { top: '78%', left: '2%', w: 62, h: 28 },
-  fan: { top: '5%', left: '60%', w: 62, h: 28 },
+const PORT_POS = {
+  atx24_p: { t: 43, l: 70, w: 18, h: 8 },
+  cpu_pwr: { t: 3, l: 4, w: 15, h: 7 },
+  gpu_pwr: { t: 52, l: 4, w: 11, h: 6 },
+  sata_d: { t: 75, l: 60, w: 12, h: 5 },
+  sata_p: { t: 78, l: 60, w: 14, h: 5 },
+  fp: { t: 76, l: 28, w: 15, h: 6 },
+  usb3_h: { t: 75, l: 2, w: 14, h: 6 },
+  hd_au: { t: 3, l: 66, w: 10, h: 5 },
 };
 
-const LEVEL_CONFIG = {
-  easy: { cables: ['atx24', 'cpu8', 'pcie'], labelKey: 'easy' },
-  medium: { cables: ['atx24', 'cpu8', 'pcie', 'sata', 'frontpanel'], labelKey: 'medium' },
-  hard: { cables: ['atx24', 'cpu8', 'pcie', 'sata', 'frontpanel', 'usb', 'fan'], labelKey: 'hard' },
+const LEVEL_CONF = {
+  easy: { cables: ['atx24', 'cpu8', 'pcie', 'sata_data', 'frontpanel'], showNames: true, showTooltip: true },
+  medium: { cables: ['atx24', 'cpu8', 'pcie', 'sata_data', 'sata_power', 'frontpanel', 'usb3'], showNames: false, showTooltip: true },
+  hard: { cables: ['atx24', 'cpu8', 'pcie', 'sata_data', 'sata_power', 'frontpanel', 'usb3', 'hd_audio'], showNames: false, showTooltip: false },
 };
 
-const SNAP_DISTANCE = 50;
+function PSUArea() {
+  return (
+    <svg style={{ position: 'absolute', right: '0%', top: '55%', width: '18%', height: '18%', zIndex: 1 }} viewBox="0 0 40 40">
+      <rect x={2} y={2} width={36} height={36} rx={3} fill="#111" stroke="rgba(255,255,255,0.06)" strokeWidth={0.5} />
+      <text x={20} y={20} fill="rgba(255,255,255,0.06)" fontSize={5} textAnchor="middle" fontFamily="monospace" fontWeight={700}>PSU</text>
+      <text x={20} y={28} fill="rgba(255,255,255,0.04)" fontSize={3} textAnchor="middle">RM750x</text>
+      <rect x={10} y={4} width={6} height={2} rx={0.5} fill="#222" stroke="rgba(255,255,255,0.04)" strokeWidth={0.3} />
+      <rect x={24} y={4} width={6} height={2} rx={0.5} fill="#222" stroke="rgba(255,255,255,0.04)" strokeWidth={0.3} />
+      <rect x={30} y={24} width={8} height={10} rx={1} fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.03)" strokeWidth={0.3} />
+      <circle cx={34} cy={29} r={2} fill="rgba(255,255,255,0.03)" />
+    </svg>
+  );
+}
+
+function GPUCard() {
+  return (
+    <svg style={{ position: 'absolute', bottom: '20%', left: '2%', width: '36%', height: 'auto', zIndex: 2 }} viewBox="0 0 120 28">
+      <defs>
+        <linearGradient id="gpc" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#111" />
+          <stop offset="100%" stopColor="#0a0a0a" />
+        </linearGradient>
+      </defs>
+      <rect x={0} y={3} width={120} height={22} rx={2.5} fill="url(#gpc)" stroke="rgba(255,255,255,0.04)" strokeWidth={0.4} />
+      <rect x={0} y={3} width={120} height={3} rx={0.5} fill="rgba(255,255,255,0.015)" />
+      <text x={60} y={17} fill="rgba(255,255,255,0.08)" fontSize={4.5} textAnchor="middle" fontFamily="monospace" fontWeight={700}>RTX 4060 GIGABYTE</text>
+      <rect x={42} y={12} width={32} height={11} rx={1.5} fill="#151515" stroke="rgba(255,255,255,0.04)" strokeWidth={0.3} />
+      <circle cx={50} cy={17} r={3} fill="rgba(255,255,255,0.03)" />
+      <circle cx={58} cy={17} r={4.5} fill="rgba(255,255,255,0.03)" />
+      <circle cx={66} cy={17} r={3} fill="rgba(255,255,255,0.03)" />
+      <rect x={12} y={16} width={14} height={6} rx={0.8} fill="#2a2020" stroke="#cc4444" strokeWidth={0.6} />
+      <text x={19} y={20.5} fill="#cc4444" fontSize={2.5} textAnchor="middle" fontWeight={700}>6+2</text>
+      <rect x={104} y={16} width={12} height={6} rx={0.4} fill="#111" stroke="rgba(255,255,255,0.04)" strokeWidth={0.2} />
+      <text x={110} y={20} fill="rgba(255,255,255,0.05)" fontSize={2} textAnchor="middle">PCIe</text>
+      <rect x={0} y={14} width={6} height={10} rx={0.5} fill="#181818" stroke="rgba(255,255,255,0.03)" strokeWidth={0.2} />
+    </svg>
+  );
+}
+
+function ConnectorSVG({ cfg, size = 1, showPins = true }) {
+  const s = size;
+  const bodyW = (Array.isArray(cfg.bodyW) ? cfg.bodyW[0] : cfg.bodyW) * s;
+  const bodyH = cfg.bodyH * s;
+  const pinW = cfg.pinW * s;
+  const pinH = cfg.pinH * s;
+  const gap = cfg.gap * s;
+  const r = cfg.bodyR * s;
+
+  const renderPins = () => {
+    if (Array.isArray(cfg.cols)) {
+      return cfg.cols.flatMap((n, ri) => {
+        const offsetY = ri * (pinH + gap * (ri === 1 ? 2.5 : 0.5));
+        const rowY = (bodyH - pinH) / 2 + offsetY;
+        const totalW = n * (pinW + gap) - gap;
+        const rowOffsetX = ri === 1 && n < cfg.cols[0] ? (cfg.cols[0] - n) * (pinW + gap) / 2 : 0;
+        return Array.from({ length: n }, (_, c) => {
+          const x = (bodyW - totalW) / 2 + c * (pinW + gap) + rowOffsetX;
+          return (
+            <rect key={`p${ri}-${c}`} x={x} y={rowY} width={pinW} height={pinH}
+              rx={0.5 * s} fill="#0a0a0a" stroke="rgba(255,255,255,0.2)" strokeWidth={0.3} />
+          );
+        });
+      });
+    }
+    const perRow = Math.ceil(cfg.pins / cfg.rows);
+    return Array.from({ length: cfg.rows }, (_, r) => {
+      const n = r < cfg.rows - 1 ? perRow : cfg.pins - r * perRow;
+      const totalW = n * (pinW + gap) - gap;
+      return Array.from({ length: n }, (_, c) => {
+        const x = (bodyW - totalW) / 2 + c * (pinW + gap);
+        const y = (bodyH - cfg.rows * pinH - (cfg.rows - 1) * gap * 0.5) / 2 + r * (pinH + gap * 0.5);
+        return (
+          <rect key={`p${r}-${c}`} x={x} y={y} width={pinW} height={pinH}
+            rx={0.5 * s} fill="#0a0a0a" stroke="rgba(255,255,255,0.2)" strokeWidth={0.3} />
+        );
+      });
+    });
+  };
+
+  const gId = `g${cfg.id.replace(/[^a-z0-9]/g, '')}`;
+
+  return (
+    <svg width={bodyW} height={bodyH} viewBox={`0 0 ${bodyW} ${bodyH}`}>
+      <defs>
+        <linearGradient id={gId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={cfg.color} />
+          <stop offset="40%" stopColor={lighten(cfg.color, 10)} />
+          <stop offset="100%" stopColor={cfg.color} />
+        </linearGradient>
+      </defs>
+      <rect x={0} y={0} width={bodyW} height={bodyH} rx={r}
+        fill={`url(#${gId})`} stroke="rgba(255,255,255,0.06)" strokeWidth={0.5} />
+      <rect x={0.5 * s} y={0.5 * s} width={bodyW - 1 * s} height={bodyH - 1 * s} rx={Math.max(0.2, r - 0.2 * s)}
+        fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth={0.3} />
+      {cfg.hasClip && (
+        <rect x={bodyW / 2 - 3 * s} y={0} width={6 * s} height={1.5 * s}
+          rx={0.5 * s} fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.08)" strokeWidth={0.3} />
+      )}
+      {cfg.split && (
+        <line x1={bodyW / 2} y1={0.5 * s} x2={bodyW / 2} y2={bodyH - 0.5 * s}
+          stroke="rgba(0,0,0,0.3)" strokeWidth={0.5} strokeDasharray="1 2" />
+      )}
+      {showPins && renderPins()}
+      {cfg.multiWire && (
+        <g>
+          {[{ color: '#e84855' }, { color: '#4a90e2' }, { color: '#f59e0b' }, { color: '#00d4aa' }].map((w, i) => (
+            <line key={i} x1={-1.5 * s} y1={2.5 + i * 2.2 * s} x2={0.5 * s} y2={2.5 + i * 2.2 * s}
+              stroke={w.color} strokeWidth={1.5 * s} strokeLinecap="round" />
+          ))}
+        </g>
+      )}
+    </svg>
+  );
+}
+
+function lighten(hex, amt) {
+  let c = parseInt(hex.replace('#',''), 16);
+  return `rgb(${Math.min(255,(c>>16)+amt)},${Math.min(255,((c>>8)&0xff)+amt)},${Math.min(255,(c&0xff)+amt)})`;
+}
+
+function CablePathSVG({ cfg, port, dims }) {
+  if (!dims || !cfg.entry || !port) return null;
+  const w = dims.width, h = dims.height;
+  const x1 = (cfg.entry.x / 100) * w;
+  const y1 = (cfg.entry.y / 100) * h;
+  const x2 = (port.l / 100) * w + (port.w / 100) * w / 2;
+  const y2 = (port.t / 100) * h + (port.h / 100) * h / 2;
+  const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+  const cx1 = mx + (cfg.cp1.x / 100) * w, cy1 = my + (cfg.cp1.y / 100) * h;
+  const cx2 = x2 + (cfg.cp2?.x ?? 0) / 100 * w, cy2 = y2 + (cfg.cp2?.y ?? 0) / 100 * h;
+  const d = `M ${x1} ${y1} C ${(x1+cx1)/2} ${(y1+cy1)/2}, ${cx2} ${cy2}, ${x2} ${y2}`;
+  const col = cfg.wireColor || '#555';
+  const acc = cfg.accent || '#888';
+
+  return (
+    <g>
+      <path d={d} fill="none" stroke="#000" strokeWidth="5" strokeLinecap="round" opacity={0.4} />
+      <path d={d} fill="none" stroke={col} strokeWidth="3.5" strokeLinecap="round" opacity={0.85} />
+      <path d={d} fill="none" stroke={acc} strokeWidth="1.5" strokeLinecap="round"
+        strokeDasharray="4 4" opacity={0.4} style={{ animation: 'flow 1.2s linear infinite' }} />
+      <path d={d} fill="none" stroke={acc} strokeWidth="0.5" strokeLinecap="round" opacity={0.2} />
+    </g>
+  );
+}
 
 function StarRating({ stars, size }) {
   const s = size || 28;
   return (
     <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
       {[1, 2, 3].map(i => (
-        <span
-          key={i}
-          style={{
-            fontSize: s,
-            color: i <= stars ? '#FFD700' : 'rgba(255,255,255,0.2)',
-            textShadow: i <= stars ? '0 0 12px rgba(255,215,0,0.6)' : 'none',
-            transition: 'all 0.3s',
-          }}
-        >
-          ★
-        </span>
+        <span key={i} style={{
+          fontSize: s, color: i <= stars ? '#FFD700' : 'rgba(255,255,255,0.2)',
+          textShadow: i <= stars ? '0 0 12px rgba(255,215,0,0.6)' : 'none',
+        }}>★</span>
       ))}
-    </div>
-  );
-}
-
-function MotherboardDiagram({ connectedCables, hoveredPort, cables, connectionLines }) {
-  return (
-    <div
-      style={{
-        position: 'relative',
-        width: '100%',
-        aspectRatio: '4/3',
-        background: '#1a3a1a',
-        borderRadius: 12,
-        border: '2px solid #2a5a2a',
-        boxShadow: 'inset 0 0 60px rgba(0,0,0,0.5), 0 0 30px rgba(0,212,170,0.08)',
-        overflow: 'hidden',
-        padding: '12px',
-      }}
-    >
-      <div style={{
-        position: 'absolute', inset: 4,
-        background: 'rgba(0,0,0,0.15)',
-        borderRadius: 8,
-        backgroundImage: `
-          linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)
-        `,
-        backgroundSize: '20px 20px',
-        pointerEvents: 'none',
-      }} />
-
-      {/* CPU Socket */}
-      <div style={{
-        position: 'absolute',
-        top: '12%', left: '28%',
-        width: '26%', height: '28%',
-        background: '#0d0d0d',
-        border: '2px solid #3a3a3a',
-        borderRadius: 6,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexDirection: 'column',
-        gap: 2,
-      }}>
-        <div style={{
-          width: '60%', height: '60%',
-          background: '#1a1a1a',
-          border: '1px solid #444',
-          borderRadius: 4,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          <div style={{
-            width: '40%', height: '40%',
-            background: 'linear-gradient(135deg, #2a2a2a, #444)',
-            borderRadius: 2,
-          }} />
-        </div>
-        <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 8, fontWeight: 600, letterSpacing: '0.5px' }}>
-          CPU
-        </span>
-      </div>
-
-      {/* RAM Slots */}
-      {[0, 1, 2, 3].map(i => (
-        <div key={`ram-${i}`} style={{
-          position: 'absolute',
-          top: `${13 + i * 7}%`,
-          left: '58%',
-          width: '8%', height: '5.5%',
-          background: i % 2 === 0 ? '#1a2a3a' : '#152535',
-          border: '1px solid #2a4a6a',
-          borderRadius: 2,
-        }} />
-      ))}
-      <span style={{
-        position: 'absolute', top: '5%', left: '58%',
-        color: 'rgba(255,255,255,0.2)', fontSize: 7, fontWeight: 600,
-        letterSpacing: '0.5px',
-      }}>DIMM</span>
-
-      {/* Chipset */}
-      <div style={{
-        position: 'absolute',
-        top: '52%', left: '30%',
-        width: '16%', height: '12%',
-        background: '#0d0d0d',
-        border: '1px solid #3a3a3a',
-        borderRadius: 4,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-        <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: 7, fontWeight: 600 }}>Z790</span>
-      </div>
-
-      {/* PCIe Slots */}
-      {[0, 1, 2].map(i => (
-        <div key={`pcie-${i}`} style={{
-          position: 'absolute',
-          top: `${48 + i * 10}%`,
-          left: '4%',
-          width: '30%', height: '4%',
-          background: i === 0 ? '#1a2a2a' : '#111',
-          border: `1px solid ${i === 0 ? '#3a5a3a' : '#2a2a2a'}`,
-          borderRadius: 2,
-        }} />
-      ))}
-
-      {/* PSU Area indicator */}
-      <div style={{
-        position: 'absolute', bottom: '8%', right: '8%',
-        width: '20%', height: '10%',
-        border: '1px dashed rgba(255,255,255,0.08)',
-        borderRadius: 4,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-        <span style={{ color: 'rgba(255,255,255,0.12)', fontSize: 7 }}>PSU</span>
-      </div>
-
-      {/* Ports */}
-      {cables.map(cable => {
-        const pos = PORT_POSITIONS[cable.id];
-        const isConnected = connectedCables.includes(cable.id);
-        const isHovered = hoveredPort === cable.id;
-        return (
-          <div
-            key={cable.id}
-            id={`port-${cable.id}`}
-            data-port-id={cable.id}
-            style={{
-              position: 'absolute',
-              top: pos.top,
-              left: pos.left,
-              width: pos.w,
-              height: pos.h,
-              background: isConnected
-                ? `linear-gradient(135deg, ${cable.color}44, ${cable.color}22)`
-                : isHovered
-                  ? `linear-gradient(135deg, ${cable.color}66, ${cable.color}33)`
-                  : 'rgba(255,255,255,0.04)',
-              border: `2px solid ${isConnected
-                ? cable.color
-                : isHovered
-                  ? cable.color + '88'
-                  : 'rgba(255,255,255,0.12)'}`,
-              borderRadius: 6,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.2s',
-              boxShadow: isConnected
-                ? `0 0 16px ${cable.color}66, inset 0 0 12px ${cable.color}33`
-                : isHovered
-                  ? `0 0 12px ${cable.color}44`
-                  : 'none',
-              pointerEvents: 'auto',
-              zIndex: isConnected ? 5 : 2,
-              animation: isConnected ? 'cmg-glow-pulse 1.5s ease-in-out infinite' : 'none',
-            }}
-          >
-            {isConnected ? (
-              <div style={{
-                width: 10, height: 10,
-                borderRadius: '50%',
-                background: cable.color,
-                boxShadow: `0 0 10px ${cable.color}`,
-              }} />
-            ) : (
-              <div style={{
-                width: 8, height: 8,
-                border: '2px dashed rgba(255,255,255,0.2)',
-                borderRadius: '50%',
-              }} />
-            )}
-            <span style={{
-              color: isConnected ? cable.color : 'rgba(255,255,255,0.4)',
-              fontSize: 7,
-              fontWeight: 700,
-              letterSpacing: '0.3px',
-              marginTop: 1,
-              textShadow: isConnected ? `0 0 8px ${cable.color}88` : 'none',
-            }}>
-              {cable.portLabel}
-            </span>
-          </div>
-        );
-      })}
-
-      {/* Connection indicators - colored dots at port for connected cables */}
-      {connectedCables.length > 0 && connectionLines.map(line => {
-        const cable = CABLES.find(c => c.id === line.cableId);
-        if (!cable) return null;
-        const pos = PORT_POSITIONS[line.cableId];
-        return (
-          <div
-            key={line.cableId}
-            style={{
-              position: 'absolute',
-              left: `calc(${pos.left} + ${pos.w / 2 - 3}px)`,
-              bottom: '4%',
-              width: 6, height: '4%',
-              background: `linear-gradient(to top, ${cable.color}, transparent)`,
-              borderRadius: '0 0 3px 3px',
-              opacity: 0.5,
-              pointerEvents: 'none',
-              zIndex: 3,
-              animation: 'cmg-line-appear 0.4s ease-out',
-            }}
-          />
-        );
-      })}
-
-      {/* Labels */}
-      <div style={{
-        position: 'absolute', top: '2%', left: '2%',
-        color: 'rgba(255,255,255,0.08)', fontSize: 10, fontWeight: 800,
-        letterSpacing: '1px', fontFamily: 'monospace',
-      }}>
-        PCB-24ATX v1.0
-      </div>
-    </div>
-  );
-}
-
-function CableItem({ cable, isConnected, isDragging, onMouseDown, lang }) {
-  const t = LANG[lang];
-  return (
-    <div
-      onMouseDown={(e) => { if (!isConnected) onMouseDown(cable.id, e); }}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        padding: '8px 14px',
-        borderRadius: 8,
-        background: isConnected
-          ? 'rgba(0,255,0,0.08)'
-          : isDragging
-            ? 'rgba(255,255,255,0.05)'
-            : 'rgba(255,255,255,0.06)',
-        border: `2px solid ${isConnected
-          ? '#00d4aa'
-          : isDragging
-            ? 'rgba(255,255,255,0.15)'
-            : 'rgba(255,255,255,0.1)'}`,
-        cursor: isConnected ? 'default' : 'grab',
-        opacity: isConnected ? 0.7 : isDragging ? 0.4 : 1,
-        transition: 'all 0.2s',
-        userSelect: 'none',
-        minWidth: 0,
-        flexShrink: 0,
-      }}
-      onMouseOver={e => {
-        if (!isConnected && !isDragging) {
-          e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
-          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
-        }
-      }}
-      onMouseOut={e => {
-        if (!isConnected && !isDragging) {
-          e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
-          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
-        }
-      }}
-    >
-      <div style={{
-        width: 14, height: 14,
-        borderRadius: '50%',
-        background: cable.color,
-        boxShadow: `0 0 8px ${cable.color}66`,
-        flexShrink: 0,
-      }} />
-      <span style={{
-        color: isConnected ? '#00d4aa' : 'var(--text-primary, #dde0ed)',
-        fontSize: 12,
-        fontWeight: 600,
-        whiteSpace: 'nowrap',
-      }}>
-        {cable.labelKey ? t[cable.labelKey] : cable.id}
-      </span>
-      {isConnected && (
-        <span style={{ color: '#00d4aa', fontSize: 12, marginLeft: 'auto' }}>✓</span>
-      )}
     </div>
   );
 }
 
 export default function CableManagementGame({ lang = 'vn', onComplete, onExit }) {
   const t = LANG[lang];
-  const gameRef = useRef(null);
+  const boardRef = useRef(null);
   const [level, setLevel] = useState(null);
   const [started, setStarted] = useState(false);
-  const [connectedCables, setConnectedCables] = useState([]);
+  const [connected, setConnected] = useState([]);
   const [errors, setErrors] = useState(0);
   const [time, setTime] = useState(0);
   const [score, setScore] = useState(0);
-  const [isComplete, setIsComplete] = useState(false);
+  const [complete, setComplete] = useState(false);
   const [stars, setStars] = useState(0);
+  const [dragItem, setDragItem] = useState(null);
+  const [dragPos, setDragPos] = useState(null);
+  const [hoverPort, setHoverPort] = useState(null);
+  const [errId, setErrId] = useState(null);
+  const [okId, setOkId] = useState(null);
+  const [dims, setDims] = useState(null);
+  const [tooltip, setTooltip] = useState(null);
 
-  const [dragState, setDragState] = useState(null);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [errorCableId, setErrorCableId] = useState(null);
-  const [flashCableId, setFlashCableId] = useState(null);
-  const [hoveredPort, setHoveredPort] = useState(null);
-  const [connectionLines, setConnectionLines] = useState([]);
-
-  const dragPosRef = useRef({ x: 0, y: 0 });
-  const dragOffsetRef = useRef({ x: 0, y: 0 });
-  const [, forceRender] = useState(0);
   const timerRef = useRef(null);
-  const startTimeRef = useRef(null);
-  const shakeTimeoutRef = useRef(null);
-  const flashTimeoutRef = useRef(null);
+  const startRef = useRef(null);
+  const t2 = useRef(null);
+  const t3 = useRef(null);
+  const boardRect = useRef(null);
 
-  const activeCables = level ? CABLES.filter(c => LEVEL_CONFIG[level].cables.includes(c.id)) : [];
-  const availableCables = activeCables.filter(c => !connectedCables.includes(c.id));
+  const lvlConf = level ? LEVEL_CONF[level] : null;
+  const active = level ? CABLES.filter(c => lvlConf.cables.includes(c.id)) : [];
+  const avail = active.filter(c => !connected.includes(c.id));
 
   useEffect(() => {
-    if (!document.getElementById('cmg-styles')) {
-      const style = document.createElement('style');
-      style.id = 'cmg-styles';
-      style.textContent = `
-        @keyframes cmg-shake {
-          0%, 100% { transform: translateX(0); }
-          10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
-          20%, 40%, 60%, 80% { transform: translateX(4px); }
-        }
-        @keyframes cmg-flash {
-          0% { box-shadow: 0 0 0 0 rgba(0, 212, 170, 0.6); }
-          50% { box-shadow: 0 0 30px 10px rgba(0, 212, 170, 0.3); }
-          100% { box-shadow: 0 0 0 0 rgba(0, 212, 170, 0); }
-        }
-        @keyframes cmg-glow-pulse {
-          0%, 100% { box-shadow: 0 0 16px var(--c, #00d4aa)66, inset 0 0 12px var(--c, #00d4aa)33; }
-          50% { box-shadow: 0 0 24px var(--c, #00d4aa)88, inset 0 0 16px var(--c, #00d4aa)44; }
-        }
-        @keyframes cmg-line-appear {
-          from { stroke-dashoffset: 200; opacity: 0; }
-          to { stroke-dashoffset: 0; opacity: 0.7; }
-        }
-        @keyframes cmg-fade-in {
-          from { opacity: 0; transform: scale(0.9); }
-          to { opacity: 1; transform: scale(1); }
-        }
-        @keyframes cmg-slide-up {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `;
-      document.head.appendChild(style);
-    }
+    if (document.getElementById('cmg-s')) return;
+    const s = document.createElement('style');
+    s.id = 'cmg-s';
+    s.textContent = `
+      @keyframes flow { 0%{stroke-dashoffset:16} 100%{stroke-dashoffset:0} }
+      @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 50%{transform:translateX(4px)} 75%{transform:translateX(-2px)} }
+      @keyframes pop { 0%{transform:scale(1)} 40%{transform:scale(1.06)} 100%{transform:scale(1)} }
+      @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+      @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+      @keyframes glowPulse { 0%,100%{box-shadow:0 0 6px rgba(0,212,170,0.4)} 50%{box-shadow:0 0 14px rgba(0,212,170,0.8)} }
+    `;
+    document.head.appendChild(s);
   }, []);
 
   useEffect(() => {
-    if (started && !isComplete) {
-      startTimeRef.current = Date.now();
-      timerRef.current = setInterval(() => {
-        setTime(Math.floor((Date.now() - startTimeRef.current) / 1000));
-      }, 1000);
-      return () => clearInterval(timerRef.current);
-    }
-  }, [started, isComplete]);
+    if (!boardRef.current) return;
+    const ro = new ResizeObserver(entries => {
+      const r = entries[0].contentRect;
+      setDims({ width: r.width, height: r.height });
+      boardRect.current = r;
+    });
+    ro.observe(boardRef.current);
+    return () => ro.disconnect();
+  }, [started]);
 
   useEffect(() => {
-    const total = LEVEL_CONFIG[level]?.cables.length || 0;
-    if (started && total > 0 && connectedCables.length === total) {
-      clearInterval(timerRef.current);
-      const finalTime = Math.floor((Date.now() - startTimeRef.current) / 1000);
-      setTime(finalTime);
-
-      const baseScore = 1000;
-      const timeBonus = Math.max(0, 500 - finalTime * 5);
-      const accuracyPenalty = errors * 100;
-      const finalScore = Math.max(0, baseScore + timeBonus - accuracyPenalty);
-      setScore(finalScore);
-
-      let finalStars = 1;
-      if (errors === 0) finalStars = 3;
-      else if (errors <= 2) finalStars = 2;
-      setStars(finalStars);
-
-      setIsComplete(true);
-
-      if (onComplete) {
-        onComplete({
-          score: finalScore,
-          timeSeconds: finalTime,
-          errors,
-          level,
-          stars: finalStars,
-        });
-      }
+    if (started && !complete) {
+      startRef.current = Date.now();
+      timerRef.current = setInterval(() => setTime(Math.floor((Date.now() - startRef.current) / 1000)), 1000);
+      return () => clearInterval(timerRef.current);
     }
-  }, [connectedCables, level, started, errors, onComplete]);
+  }, [started, complete]);
 
-  const handleStartLevel = useCallback((lvl) => {
-    setLevel(lvl);
-    setStarted(true);
-    setConnectedCables([]);
-    setErrors(0);
-    setTime(0);
-    setScore(0);
-    setIsComplete(false);
-    setDragState(null);
-    setErrorMsg('');
-    setErrorCableId(null);
-    setFlashCableId(null);
-    setHoveredPort(null);
-    setConnectionLines([]);
-    setStars(0);
+  useEffect(() => {
+    const total = lvlConf?.cables.length || 0;
+    if (started && total > 0 && connected.length === total) {
+      clearInterval(timerRef.current);
+      const ft = Math.floor((Date.now() - startRef.current) / 1000);
+      setTime(ft);
+      setScore(Math.max(0, 1000 + Math.max(0, 500 - ft * 5) - errors * 100));
+      setStars(errors === 0 ? 3 : errors <= 2 ? 2 : 1);
+      setComplete(true);
+      onComplete?.({ score: Math.max(0, 1000 + Math.max(0, 500 - ft * 5) - errors * 100), timeSeconds: ft, errors, level, stars: errors === 0 ? 3 : errors <= 2 ? 2 : 1 });
+    }
+  }, [connected, level, started, errors, onComplete, lvlConf]);
+
+  const startLevel = useCallback((lvl) => {
+    setLevel(lvl); setStarted(true); setConnected([]); setErrors(0);
+    setTime(0); setScore(0); setComplete(false); setStars(0);
+    setDragItem(null); setDragPos(null); setHoverPort(null);
+    setErrId(null); setOkId(null);
     if (timerRef.current) clearInterval(timerRef.current);
   }, []);
 
-  const handleCableMouseDown = useCallback((cableId, e) => {
+  const handleDragStart = useCallback((e, cfg) => {
+    if (connected.includes(cfg.id)) return;
+    setDragItem(cfg);
+    setDragPos({ x: e.clientX - 40, y: e.clientY - 16 });
+    const img = new Image();
+    img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    e.dataTransfer.setDragImage(img, 0, 0);
+  }, [connected]);
+
+  const handleDrag = useCallback((e) => {
+    if (!dragItem) return;
     e.preventDefault();
-    const rect = e.currentTarget.getBoundingClientRect();
-    dragOffsetRef.current = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    };
-    dragPosRef.current = { x: e.clientX, y: e.clientY };
-    setDragState({ cableId });
-    setErrorMsg('');
-    setErrorCableId(null);
-  }, []);
-
-  const handleMouseMove = useCallback((e) => {
-    if (!dragState) return;
-    dragPosRef.current = { x: e.clientX, y: e.clientY };
-    forceRender(n => n + 1);
-
-    if (gameRef.current) {
-      const gameRect = gameRef.current.getBoundingClientRect();
-      const mouseX = e.clientX - gameRect.left;
-      const mouseY = e.clientY - gameRect.top;
-
-      const cableCfg = CABLES.find(c => c.id === dragState.cableId);
-      if (cableCfg) {
-        const pos = PORT_POSITIONS[cableCfg.id];
-        const portEl = document.querySelector(`[data-port-id="${cableCfg.id}"]`);
-        if (portEl) {
-          const portRect = portEl.getBoundingClientRect();
-          const portCX = portRect.left + portRect.width / 2;
-          const portCY = portRect.top + portRect.height / 2;
-          const dist = Math.sqrt(
-            Math.pow(e.clientX - portCX, 2) + Math.pow(e.clientY - portCY, 2)
-          );
-          setHoveredPort(dist < 60 ? cableCfg.id : null);
-        }
-      }
+    setDragPos({ x: e.clientX - 40, y: e.clientY - 16 });
+    if (boardRect.current) {
+      const bw = boardRect.current.width, bh = boardRect.current.height;
+      const mx = e.clientX - boardRect.current.left, my = e.clientY - boardRect.current.top;
+      const pX = mx / bw * 100, pY = my / bh * 100;
+      const found = Object.entries(PORT_POS).find(([id]) => {
+        if (connected.some(c => CABLES.find(x => x.id === c)?.correctPort === id)) return false;
+        const pos = id;
+        const p = PORT_POS[id];
+        return pX >= p.l && pX <= p.l + p.w && pY >= p.t && pY <= p.t + p.h;
+      });
+      setHoverPort(found ? found[0] : null);
+      if (found && dragItem && lvlConf?.showTooltip) {
+        const pc = CABLES.find(c => c.correctPort === found[0]);
+        setTooltip(pc ? { cable: pc, x: e.clientX, y: e.clientY } : null);
+      } else setTooltip(null);
     }
-  }, [dragState]);
+  }, [dragItem, connected, lvlConf]);
 
-  const handleMouseUp = useCallback((e) => {
-    if (!dragState) return;
-    const cableId = dragState.cableId;
-    setDragState(null);
-    setHoveredPort(null);
-
-    if (connectedCables.includes(cableId)) return;
-
-    const cableCfg = CABLES.find(c => c.id === cableId);
-    if (!cableCfg) return;
-
-    if (gameRef.current) {
-      const gameRect = gameRef.current.getBoundingClientRect();
-      const pos = PORT_POSITIONS[cableId];
-      const portEl = document.querySelector(`[data-port-id="${cableId}"]`);
-      if (portEl) {
-        const portRect = portEl.getBoundingClientRect();
-        const portCX = portRect.left + portRect.width / 2;
-        const portCY = portRect.top + portRect.height / 2;
-        const dist = Math.sqrt(
-          Math.pow(e.clientX - portCX, 2) + Math.pow(e.clientY - portCY, 2)
-        );
-
-        if (dist <= SNAP_DISTANCE) {
-          setConnectedCables(prev => [...prev, cableId]);
-          setConnectionLines(prev => [...prev, { cableId }]);
-          setFlashCableId(cableId);
-          if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
-          flashTimeoutRef.current = setTimeout(() => setFlashCableId(null), 600);
-          return;
-        }
-      }
+  const handleDrop = useCallback(() => {
+    if (!dragItem) { setDragItem(null); setDragPos(null); return; }
+    if (hoverPort && dragItem.correctPort === hoverPort) {
+      setConnected(p => [...p, dragItem.id]);
+      setOkId(dragItem.id);
+      if (t2.current) clearTimeout(t2.current);
+      t2.current = setTimeout(() => setOkId(null), 500);
+    } else {
+      setErrors(p => p + 1);
+      setErrId(dragItem.id);
+      if (t3.current) clearTimeout(t3.current);
+      t3.current = setTimeout(() => setErrId(null), 600);
     }
+    setDragItem(null); setDragPos(null); setHoverPort(null); setTooltip(null);
+  }, [dragItem, hoverPort]);
 
-    setErrors(prev => prev + 1);
-    setErrorCableId(cableId);
-    setErrorMsg(t.wrongCable);
-    if (shakeTimeoutRef.current) clearTimeout(shakeTimeoutRef.current);
-    shakeTimeoutRef.current = setTimeout(() => {
-      setErrorCableId(null);
-      setErrorMsg('');
-    }, 800);
-  }, [dragState, connectedCables, t.wrongCable]);
-
-  useEffect(() => {
-    if (!dragState) return;
-    const onMove = (e) => handleMouseMove(e);
-    const onUp = (e) => handleMouseUp(e);
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-    return () => {
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-    };
-  }, [dragState, handleMouseMove, handleMouseUp]);
-
-  const retry = useCallback(() => {
-    if (level) handleStartLevel(level);
-  }, [level, handleStartLevel]);
+  const retry = useCallback(() => { if (level) startLevel(level); }, [level, startLevel]);
 
   if (!started) {
     return (
-      <div
-        style={{
-          position: 'fixed', inset: 0, zIndex: 9999,
-          background: 'var(--bg-base, #0d0e13)',
-          display: 'flex', flexDirection: 'column',
-          fontFamily: 'var(--font-sans, Montserrat, sans-serif)',
-        }}
-      >
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '16px 24px',
-          background: 'var(--bg-surface, #0f0f1a)',
-          borderBottom: '1px solid var(--border-default, rgba(255,255,255,0.08))',
-        }}>
-          <h2 style={{ color: 'var(--text-primary, #dde0ed)', fontSize: 18, fontWeight: 700, margin: 0 }}>
-            ⚡ {t.title}
-          </h2>
-          <button
-            onClick={onExit}
-            style={{
-              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-              color: 'var(--text-muted, #636678)', padding: '6px 16px',
-              borderRadius: 8, cursor: 'pointer', fontSize: 13, fontWeight: 600,
-              fontFamily: 'inherit',
-            }}
-            type="button"
-          >
-            {t.exit} ✕
-          </button>
+      <div style={{ position:'fixed', inset:0, zIndex:9999, background:'#0d0e13', display:'flex', flexDirection:'column', fontFamily:'system-ui,sans-serif' }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'16px 24px', background:'#0f0f1a', borderBottom:'1px solid rgba(255,255,255,0.08)' }}>
+          <h2 style={{ color:'#dde0ed', fontSize:18, fontWeight:700, margin:0 }}>⚡ {t.title}</h2>
+          <button onClick={onExit} style={{ background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', color:'#636678', padding:'6px 16px', borderRadius:8, cursor:'pointer', fontSize:13, fontWeight:600 }}>{t.exit} ✕</button>
         </div>
-
-        <div style={{
-          flex: 1, display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center', gap: 32,
-          padding: 40,
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 64, marginBottom: 16 }}>🔌</div>
-            <h1 style={{ color: 'var(--text-primary, #dde0ed)', fontSize: 28, fontWeight: 800, margin: 0 }}>
-              {t.title}
-            </h1>
-            <p style={{ color: 'var(--text-muted, #636678)', fontSize: 14, marginTop: 8, maxWidth: 400 }}>
-              {t.subtitle}
-            </p>
+        <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:28, padding:40 }}>
+          <div style={{ textAlign:'center' }}>
+            <div style={{ fontSize:56, marginBottom:12 }}>🖥️</div>
+            <h1 style={{ color:'#dde0ed', fontSize:26, fontWeight:800, margin:0 }}>{t.title}</h1>
+            <p style={{ color:'#636678', fontSize:13, marginTop:6 }}>Kéo cáp từ khay → thả vào cổng trên mainboard</p>
           </div>
-
-          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
-            {['easy', 'medium', 'hard'].map(lvl => (
-              <button
-                key={lvl}
-                onClick={() => handleStartLevel(lvl)}
-                style={{
-                  padding: '20px 32px',
-                  borderRadius: 12,
-                  background: 'var(--bg-surface, #0f0f1a)',
-                  border: '1px solid var(--border-default, rgba(255,255,255,0.08))',
-                  cursor: 'pointer',
-                  textAlign: 'center',
-                  minWidth: 160,
-                  transition: 'all 0.25s',
-                  fontFamily: 'inherit',
-                  color: 'var(--text-primary, #dde0ed)',
-                }}
-                onMouseOver={e => {
-                  e.currentTarget.style.borderColor = 'var(--brand-primary, #00d4aa)';
-                  e.currentTarget.style.transform = 'translateY(-4px)';
-                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,212,170,0.15)';
-                }}
-                onMouseOut={e => {
-                  e.currentTarget.style.borderColor = 'var(--border-default, rgba(255,255,255,0.08))';
-                  e.currentTarget.style.transform = 'none';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-                type="button"
-              >
-                <div style={{ fontSize: 32, marginBottom: 8 }}>
-                  {lvl === 'easy' ? '🟢' : lvl === 'medium' ? '🟡' : '🔴'}
-                </div>
-                <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>
-                  {t[lvl]}
-                </div>
-                <div style={{ color: 'var(--text-muted, #636678)', fontSize: 12 }}>
-                  {LEVEL_CONFIG[lvl].cables.length} {t.cablesLeft.toLowerCase()}
-                </div>
-              </button>
-            ))}
+          <div style={{ display:'flex', gap:14, flexWrap:'wrap', justifyContent:'center' }}>
+            {['easy','medium','hard'].map(lvl => {
+              const lc = LEVEL_CONF[lvl];
+              const lvC = CABLES.filter(c => lc.cables.includes(c.id));
+              return (
+                <button key={lvl} onClick={() => startLevel(lvl)}
+                  onMouseOver={e => { e.currentTarget.style.borderColor='#00d4aa'; e.currentTarget.style.transform='translateY(-3px)'; e.currentTarget.style.boxShadow='0 8px 24px rgba(0,212,170,0.15)'; }}
+                  onMouseOut={e => { e.currentTarget.style.borderColor='rgba(255,255,255,0.08)'; e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='none'; }}
+                  style={{ padding:'14px 18px', borderRadius:12, background:'#0f0f1a', border:'1px solid rgba(255,255,255,0.08)', cursor:'pointer', textAlign:'center', minWidth:160, transition:'all 0.25s', color:'#dde0ed', fontFamily:'inherit' }}>
+                  <div style={{ display:'flex', gap:4, justifyContent:'center', marginBottom:8, flexWrap:'wrap' }}>
+                    {lvC.slice(0,4).map(c => (
+                      <div key={c.id} style={{ width:22, height:14 }}><ConnectorSVG cfg={c} size={0.4} /></div>
+                    ))}
+                  </div>
+                  <div style={{ fontSize:15, fontWeight:700, marginBottom:2 }}>{t[lvl]}</div>
+                  <div style={{ color:'#636678', fontSize:10 }}>{lvC.length} loại cáp</div>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
     );
   }
 
-  const dragCable = dragState ? CABLES.find(c => c.id === dragState.cableId) : null;
-
   return (
-    <div
-      style={{
-        position: 'fixed', inset: 0, zIndex: 9999,
-        background: 'var(--bg-base, #0d0e13)',
-        display: 'flex', flexDirection: 'column',
-        fontFamily: 'var(--font-sans, Montserrat, sans-serif)',
-        userSelect: 'none',
-      }}
-      ref={gameRef}
-    >
-      {/* Top Bar */}
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '12px 24px',
-        background: 'var(--bg-surface, #0f0f1a)',
-        borderBottom: '1px solid var(--border-default, rgba(255,255,255,0.08))',
-        gap: 12, flexWrap: 'wrap',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 20 }}>⚡</span>
-          <span style={{ color: 'var(--text-primary, #dde0ed)', fontSize: 16, fontWeight: 700 }}>
-            {t.title}
-          </span>
-          <span style={{
-            background: 'var(--brand-subtle, rgba(0,212,170,0.12))',
-            color: 'var(--brand-primary, #00d4aa)',
-            padding: '2px 10px', borderRadius: 99,
-            fontSize: 11, fontWeight: 700,
-          }}>
-            {t[level]}
-          </span>
+    <div style={{ position:'fixed', inset:0, zIndex:9999, background:'#0d0e13', display:'flex', flexDirection:'column', fontFamily:'system-ui,sans-serif', userSelect:'none' }}
+      onDragOver={handleDrag} onDrop={handleDrop} onDragEnd={() => { setDragItem(null); setDragPos(null); setHoverPort(null); setTooltip(null); }}>
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 20px', background:'#0f0f1a', borderBottom:'1px solid rgba(255,255,255,0.08)', gap:10 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+          <span style={{ fontSize:16 }}>⚡</span>
+          <span style={{ color:'#dde0ed', fontSize:14, fontWeight:700 }}>{t.title}</span>
+          <span style={{ background:'rgba(0,212,170,0.12)', color:'#00d4aa', padding:'1px 8px', borderRadius:99, fontSize:10, fontWeight:700 }}>{t[level]}</span>
         </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ color: 'var(--text-muted, #636678)', fontSize: 10, fontWeight: 600 }}>
-              {t.timer}
+        <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+          {[
+            { l:t.timer, v:`${String(Math.floor(time/60)).padStart(2,'0')}:${String(time%60).padStart(2,'0')}`, c:'#dde0ed' },
+            { l:t.score, v:score||0, c:'#00d4aa' },
+            { l:t.mistakes, v:errors, c:errors>0?'#e84855':'#636678' },
+            { l:t.cablesLeft, v:`${avail.length}/${active.length}`, c:'#4a90e2' },
+          ].map(item => (
+            <div key={item.l} style={{ textAlign:'center' }}>
+              <div style={{ color:'#636678', fontSize:8, fontWeight:600 }}>{item.l}</div>
+              <div style={{ color:item.c, fontSize:14, fontWeight:700 }}>{item.v}</div>
             </div>
-            <div style={{ color: 'var(--text-primary, #dde0ed)', fontSize: 18, fontWeight: 700, fontFamily: 'monospace' }}>
-              {String(Math.floor(time / 60)).padStart(2, '0')}:{String(time % 60).padStart(2, '0')}
-            </div>
-          </div>
-
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ color: 'var(--text-muted, #636678)', fontSize: 10, fontWeight: 600 }}>
-              {t.score}
-            </div>
-            <div style={{ color: 'var(--brand-primary, #00d4aa)', fontSize: 18, fontWeight: 700 }}>
-              {score || 0}
-            </div>
-          </div>
-
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ color: 'var(--text-muted, #636678)', fontSize: 10, fontWeight: 600 }}>
-              {t.mistakes}
-            </div>
-            <div style={{ color: errors > 0 ? 'var(--danger, #e84855)' : 'var(--text-muted, #636678)', fontSize: 18, fontWeight: 700 }}>
-              {errors}
-            </div>
-          </div>
-
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ color: 'var(--text-muted, #636678)', fontSize: 10, fontWeight: 600 }}>
-              {t.cablesLeft}
-            </div>
-            <div style={{ color: 'var(--accent-blue, #4a90e2)', fontSize: 18, fontWeight: 700 }}>
-              {availableCables.length}/{activeCables.length}
-            </div>
-          </div>
-
-          <button
-            onClick={onExit}
-            style={{
-              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-              color: 'var(--text-muted, #636678)', padding: '6px 16px',
-              borderRadius: 8, cursor: 'pointer', fontSize: 13, fontWeight: 600,
-              fontFamily: 'inherit',
-            }}
-            type="button"
-          >
-            {t.exit} ✕
-          </button>
+          ))}
+          <button onClick={onExit} style={{ background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', color:'#636678', padding:'4px 12px', borderRadius:7, cursor:'pointer', fontSize:11, fontWeight:600, fontFamily:'inherit' }}>{t.exit} ✕</button>
         </div>
       </div>
 
-      {/* Main Area */}
-      <div style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 16,
-        padding: '16px 24px',
-        overflow: 'auto',
-        position: 'relative',
-        maxWidth: 900,
-        width: '100%',
-        margin: '0 auto',
-      }}>
-        {/* Motherboard */}
-        <MotherboardDiagram
-          connectedCables={connectedCables}
-          hoveredPort={hoveredPort}
-          cables={activeCables}
-          connectionLines={connectionLines}
-        />
-
-        {/* Error message */}
-        {errorMsg && (
-          <div style={{
-            textAlign: 'center',
-            color: 'var(--danger, #e84855)',
-            fontSize: 13,
-            fontWeight: 600,
-            padding: '6px 16px',
-            background: 'rgba(232,72,85,0.1)',
-            borderRadius: 8,
-            animation: 'cmg-shake 0.4s ease-in-out',
-            border: '1px solid rgba(232,72,85,0.2)',
-          }}>
-            ⚠ {errorMsg}
-          </div>
-        )}
-
-        {/* Cable Tray */}
-        <div style={{
-          background: 'var(--bg-surface, #0f0f1a)',
-          border: '1px solid var(--border-default, rgba(255,255,255,0.08))',
-          borderRadius: 12,
-          padding: 16,
-        }}>
-          <div style={{
-            display: 'flex', justifyContent: 'space-between',
-            alignItems: 'center', marginBottom: 12,
-          }}>
-            <span style={{ color: 'var(--text-muted, #636678)', fontSize: 11, fontWeight: 600 }}>
-              📦 {t.cablesLeft} ({availableCables.length})
-            </span>
-            {isComplete && (
-              <button
-                onClick={retry}
-                style={{
-                  background: 'var(--brand-subtle, rgba(0,212,170,0.12))',
-                  border: '1px solid rgba(0,212,170,0.2)',
-                  color: 'var(--brand-primary, #00d4aa)',
-                  padding: '4px 14px', borderRadius: 8, cursor: 'pointer',
-                  fontSize: 12, fontWeight: 700, fontFamily: 'inherit',
-                }}
-                type="button"
-              >
-                🔄 {t.retry}
-              </button>
-            )}
-          </div>
-          <div style={{
-            display: 'flex', gap: 10,
-            flexWrap: 'wrap',
-          }}>
-            {activeCables.map(cable => {
-              const isConnected = connectedCables.includes(cable.id);
-              const isDragging = dragState?.cableId === cable.id;
-              const isShaking = errorCableId === cable.id;
-              const isFlashing = flashCableId === cable.id;
+      <div style={{ flex:1, display:'flex', flexDirection:'column', padding:'10px 16px', overflow:'hidden', maxWidth:960, width:'100%', margin:'0 auto' }}>
+        <div style={{ flex:1, position:'relative', minHeight:0 }}>
+          <div ref={boardRef} style={{ position:'absolute', inset:0, borderRadius:6, overflow:'hidden', background:'#060606' }}>
+            <img src="/chỗ-cần-cắm-cáp.png" alt="" style={{ width:'100%', height:'100%', objectFit:'cover', opacity:0.45 }} />
+            <PSUArea />
+            <GPUCard />
+            <svg style={{ position:'absolute', inset:0, width:'100%', height:'100%', pointerEvents:'none', zIndex:4 }}>
+              {connected.map(id => {
+                const c = CABLES.find(x => x.id === id);
+                if (!c) return null;
+                return <CablePathSVG key={id} cfg={c} port={PORT_POS[c.correctPort]} dims={dims} />;
+              })}
+            </svg>
+            {active.map(c => {
+              const p = PORT_POS[c.correctPort];
+              if (!p) return null;
+              const con = connected.includes(c.id);
+              const err = errId === c.id;
+              const ok = okId === c.id;
+              const hover = hoverPort === c.correctPort;
               return (
-                <div
-                  key={cable.id}
+                <div key={c.correctPort}
                   style={{
-                    animation: isShaking
-                      ? 'cmg-shake 0.4s ease-in-out'
-                      : isFlashing
-                        ? 'cmg-flash 0.5s ease-out'
-                        : 'none',
-                    display: 'flex',
-                  }}
-                >
-                  <CableItem
-                    cable={cable}
-                    isConnected={isConnected}
-                    isDragging={isDragging}
-                    onMouseDown={handleCableMouseDown}
-                    lang={lang}
-                  />
+                    position:'absolute', top:`${p.t}%`, left:`${p.l}%`,
+                    width:`${p.w}%`, height:`${p.h}%`,
+                    zIndex: con ? 6 : 3, display:'flex', alignItems:'center', justifyContent:'center',
+                    animation: err?'shake 0.3s ease-in-out':ok?'pop 0.3s ease-out':'none',
+                    transition:'all 0.2s',
+                  }}>
+                  <div style={{
+                    width:'100%', height:'100%',
+                    border: con ? '1.5px solid #00d4aa' : err ? '1.5px solid #e84855' : hover ? `1.5px solid ${dragItem?.accent||'#00d4aa'}` : '1px solid transparent',
+                    borderRadius:3, background: con ? 'rgba(0,212,170,0.06)' : err ? 'rgba(232,72,85,0.06)' : hover ? 'rgba(0,212,170,0.04)' : 'rgba(255,255,255,0.01)',
+                    display:'flex', alignItems:'center', justifyContent:'center', gap:1,
+                    boxShadow: con ? '0 0 10px rgba(0,212,170,0.15)' : hover ? '0 0 6px rgba(0,212,170,0.1)' : 'none',
+                    opacity: con ? 1 : 0.55,
+                    transition:'all 0.2s',
+                  }}>
+                    {con ? (
+                      <div style={{ display:'flex', alignItems:'center', gap:2 }}>
+                        <ConnectorSVG cfg={c} size={0.22} showPins={false} />
+                        <span style={{ color:'#00d4aa', fontSize:4.5, fontWeight:700 }}>✓</span>
+                      </div>
+                    ) : (
+                      <>
+                        <ConnectorSVG cfg={c} size={0.22} />
+                        {lvlConf?.showNames && (
+                          <span style={{ color:'rgba(255,255,255,0.2)', fontSize:4, fontWeight:600 }}>{c.portLabel}</span>
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
               );
             })}
-            {availableCables.length === 0 && !isComplete && (
+            {tooltip && lvlConf?.showTooltip && (
               <div style={{
-                color: 'var(--brand-primary, #00d4aa)',
-                fontSize: 13, fontWeight: 600, padding: 8,
-                animation: 'cmg-fade-in 0.3s',
+                position:'fixed', left:tooltip.x+10, top:tooltip.y-8, zIndex:9999,
+                background:'rgba(10,10,20,0.92)', backdropFilter:'blur(6px)',
+                border:`1px solid ${tooltip.cable.accent}55`, borderRadius:6,
+                padding:'6px 10px', pointerEvents:'none', animation:'fadeIn 0.12s',
+                boxShadow:'0 4px 16px rgba(0,0,0,0.5)',
               }}>
-                ✅ {t.connected}
+                <div style={{ color:tooltip.cable.accent, fontSize:11, fontWeight:700 }}>{tooltip.cable.portLabel}</div>
+                <div style={{ color:'rgba(255,255,255,0.45)', fontSize:9 }}>{tooltip.cable.tooltip}</div>
               </div>
             )}
           </div>
         </div>
 
-        {/* Drop hint */}
-        {dragState && (
+        {dragItem && dragPos && (
           <div style={{
-            position: 'fixed', bottom: 20, left: '50%', transform: 'translateX(-50%)',
-            background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
-            padding: '8px 20px', borderRadius: 99,
-            color: 'rgba(255,255,255,0.6)',
-            fontSize: 12, fontWeight: 600,
-            zIndex: 100,
-            border: '1px solid rgba(255,255,255,0.1)',
+            position:'fixed', pointerEvents:'none', zIndex:9999,
+            left:dragPos.x, top:dragPos.y, transform:'scale(1.15)',
+            filter:'drop-shadow(0 10px 28px rgba(0,0,0,0.8))',
+            transition:'transform 0.05s',
           }}>
-            {t.dropHere}
+            <ConnectorSVG cfg={dragItem} size={2} />
           </div>
         )}
+
+        <div style={{ height:74, flexShrink:0, marginTop:8 }}>
+          <div style={{
+            background:'#0f0f1a', border:'1px solid rgba(255,255,255,0.05)', borderRadius:6,
+            height:'100%', display:'flex', alignItems:'center', padding:'6px 12px', gap:8,
+          }}>
+            <span style={{ color:'#636678', fontSize:9, fontWeight:600, whiteSpace:'nowrap', marginRight:2 }}>
+              🔌 {avail.length}
+            </span>
+            <div style={{ flex:1, display:'flex', gap:8, overflowX:'auto', alignItems:'center', justifyContent:'center', padding:'2px 0' }}>
+              {active.map(c => {
+                if (connected.includes(c.id)) return null;
+                const err = errId === c.id;
+                const ok = okId === c.id;
+                return (
+                  <div key={c.id} draggable onDragStart={e => handleDragStart(e, c)}
+                    style={{
+                      display:'flex', flexDirection:'column', alignItems:'center', gap:1,
+                      padding:'4px 10px', borderRadius:5, cursor:'grab',
+                      border:`1px solid ${c.accent}33`, background:`${c.accent}08`,
+                      transition:'all 0.12s', minWidth:50,
+                      animation: err?'shake 0.3s ease-in-out':ok?'pop 0.3s ease-out':'none',
+                    }}>
+                    <ConnectorSVG cfg={c} size={0.6} />
+                    {lvlConf?.showNames && (
+                      <span style={{ color:'#636678', fontSize:6, fontWeight:600 }}>{c.portLabel}</span>
+                    )}
+                    {!lvlConf?.showNames && (
+                      <span style={{ width:10, height:1.5, borderRadius:0.5, background:c.accent }} />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <span style={{ color:'#636678', fontSize:8 }}>{connected.length}/{active.length}</span>
+          </div>
+        </div>
       </div>
 
-      {/* Drag ghost */}
-      {dragCable && (
-        <div
-          style={{
-            position: 'fixed',
-            left: dragPosRef.current.x - dragOffsetRef.current.x,
-            top: dragPosRef.current.y - dragOffsetRef.current.y,
-            zIndex: 10000,
-            pointerEvents: 'none',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            padding: '8px 14px',
-            borderRadius: 8,
-            background: `linear-gradient(135deg, ${dragCable.color}33, ${dragCable.color}11)`,
-            border: `2px solid ${dragCable.color}`,
-            boxShadow: `0 8px 32px rgba(0,0,0,0.4), 0 0 20px ${dragCable.color}44`,
-            opacity: 0.9,
-          }}
-        >
-          <div style={{
-            width: 14, height: 14, borderRadius: '50%',
-            background: dragCable.color,
-            boxShadow: `0 0 10px ${dragCable.color}`,
-          }} />
-          <span style={{ color: 'white', fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap' }}>
-            {dragCable.labelKey ? t[dragCable.labelKey] : dragCable.id}
-          </span>
+      {dragItem && hoverPort && (
+        <div style={{
+          position:'fixed', bottom:86, left:'50%', transform:'translateX(-50%)',
+          zIndex:100, animation:'fadeIn 0.1s',
+          color: dragItem.correctPort === hoverPort ? '#00d4aa' : '#e84855',
+          fontSize:10, fontWeight:700, background:'rgba(0,0,0,0.7)', padding:'4px 14px', borderRadius:99,
+        }}>
+          {dragItem.correctPort === hoverPort ? `✓ ${dragItem.portLabel}` : `✕ ${t.wrongCable}`}
         </div>
       )}
 
-      {/* Completion Overlay */}
-      {isComplete && (
+      {complete && (
         <div style={{
-          position: 'fixed', inset: 0, zIndex: 10000,
-          background: 'rgba(0,0,0,0.7)',
-          backdropFilter: 'blur(8px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          animation: 'cmg-fade-in 0.3s',
+          position:'fixed', inset:0, zIndex:10000, background:'rgba(0,0,0,0.7)',
+          backdropFilter:'blur(8px)', display:'flex', alignItems:'center', justifyContent:'center',
+          animation:'fadeIn 0.3s',
         }}>
           <div style={{
-            background: 'var(--bg-surface, #0f0f1a)',
-            border: '1px solid var(--border-default, rgba(255,255,255,0.08))',
-            borderRadius: 16,
-            padding: '40px',
-            textAlign: 'center',
-            maxWidth: 420,
-            width: '90%',
-            animation: 'cmg-slide-up 0.4s ease-out',
-            boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
+            background:'#0f0f1a', border:'1px solid rgba(255,255,255,0.08)',
+            borderRadius:14, padding:32, textAlign:'center', maxWidth:360, width:'90%',
+            animation:'slideUp 0.4s ease-out', boxShadow:'0 24px 80px rgba(0,0,0,0.6)',
           }}>
-            <div style={{ fontSize: 48, marginBottom: 8 }}>🎉</div>
-            <h2 style={{ color: 'var(--text-primary, #dde0ed)', fontSize: 24, fontWeight: 800, margin: '0 0 4px' }}>
-              {t.congrats}
-            </h2>
-            <p style={{ color: 'var(--text-muted, #636678)', fontSize: 14, margin: '0 0 20px' }}>
-              {t.completed} - {t[level]}
-            </p>
-
-            <StarRating stars={stars} size={36} />
-
-            <div style={{
-              color: stars === 3
-                ? 'var(--brand-primary, #00d4aa)'
-                : stars === 2
-                  ? 'var(--accent-amber, #f59e0b)'
-                  : 'var(--accent-blue, #4a90e2)',
-              fontSize: 13, fontWeight: 600, margin: '12px 0 20px',
-            }}>
-              {stars === 3 ? t.perfect : stars === 2 ? t.goodJob.replace('{n}', errors) : t.completedText}
-            </div>
-
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: 12,
-              marginBottom: 24,
-            }}>
-              <div style={{
-                background: 'rgba(255,255,255,0.04)',
-                borderRadius: 8, padding: '12px 8px',
-              }}>
-                <div style={{ color: 'var(--text-muted, #636678)', fontSize: 10, fontWeight: 600 }}>{t.yourTime}</div>
-                <div style={{ color: 'var(--text-primary, #dde0ed)', fontSize: 20, fontWeight: 700, fontFamily: 'monospace' }}>
-                  {String(Math.floor(time / 60)).padStart(2, '0')}:{String(time % 60).padStart(2, '0')}
+            <div style={{ fontSize:40, marginBottom:4 }}>🎉</div>
+            <h2 style={{ color:'#dde0ed', fontSize:20, fontWeight:800, margin:'0 0 2px' }}>{t.congrats}</h2>
+            <p style={{ color:'#636678', fontSize:12, margin:'0 0 12px' }}>{t.completed} - {t[level]}</p>
+            <StarRating stars={stars} size={28} />
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8, margin:'14px 0' }}>
+              {[
+                { l:t.yourTime, v:`${String(Math.floor(time/60)).padStart(2,'0')}:${String(time%60).padStart(2,'0')}`, c:'#dde0ed' },
+                { l:t.yourScore, v:score, c:'#00d4aa' },
+                { l:t.yourMistakes, v:errors, c:errors>0?'#e84855':'#00d4aa' },
+              ].map(item => (
+                <div key={item.l} style={{ background:'rgba(255,255,255,0.04)', borderRadius:6, padding:'8px 4px' }}>
+                  <div style={{ color:'#636678', fontSize:8, fontWeight:600 }}>{item.l}</div>
+                  <div style={{ color:item.c, fontSize:16, fontWeight:700 }}>{item.v}</div>
                 </div>
-              </div>
-              <div style={{
-                background: 'rgba(255,255,255,0.04)',
-                borderRadius: 8, padding: '12px 8px',
-              }}>
-                <div style={{ color: 'var(--text-muted, #636678)', fontSize: 10, fontWeight: 600 }}>{t.yourScore}</div>
-                <div style={{ color: 'var(--brand-primary, #00d4aa)', fontSize: 20, fontWeight: 700 }}>{score}</div>
-              </div>
-              <div style={{
-                background: 'rgba(255,255,255,0.04)',
-                borderRadius: 8, padding: '12px 8px',
-              }}>
-                <div style={{ color: 'var(--text-muted, #636678)', fontSize: 10, fontWeight: 600 }}>{t.yourMistakes}</div>
-                <div style={{
-                  color: errors > 0 ? 'var(--danger, #e84855)' : 'var(--brand-primary, #00d4aa)',
-                  fontSize: 20, fontWeight: 700,
-                }}>
-                  {errors}
-                </div>
-              </div>
+              ))}
             </div>
-
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-              <button
-                onClick={retry}
-                style={{
-                  padding: '12px 28px',
-                  borderRadius: 10,
-                  background: 'var(--brand-subtle, rgba(0,212,170,0.12))',
-                  border: '1px solid var(--brand-primary, #00d4aa)',
-                  color: 'var(--brand-primary, #00d4aa)',
-                  cursor: 'pointer',
-                  fontSize: 14, fontWeight: 700,
-                  fontFamily: 'inherit',
-                  transition: 'all 0.2s',
-                }}
-                onMouseOver={e => { e.currentTarget.style.background = 'rgba(0,212,170,0.2)'; }}
-                onMouseOut={e => { e.currentTarget.style.background = 'rgba(0,212,170,0.12)'; }}
-                type="button"
-              >
-                🔄 {t.retry}
-              </button>
-              <button
-                onClick={onExit}
-                style={{
-                  padding: '12px 28px',
-                  borderRadius: 10,
-                  background: 'rgba(255,255,255,0.06)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  color: 'var(--text-muted, #636678)',
-                  cursor: 'pointer',
-                  fontSize: 14, fontWeight: 600,
-                  fontFamily: 'inherit',
-                  transition: 'all 0.2s',
-                }}
-                type="button"
-              >
-                {t.exit}
-              </button>
+            <div style={{ display:'flex', gap:8, justifyContent:'center' }}>
+              <button onClick={retry}
+                style={{ padding:'8px 20px', borderRadius:8, background:'rgba(0,212,170,0.12)', border:'1px solid #00d4aa', color:'#00d4aa', cursor:'pointer', fontSize:12, fontWeight:700, fontFamily:'inherit' }}>🔄 {t.retry}</button>
+              <button onClick={onExit}
+                style={{ padding:'8px 20px', borderRadius:8, background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', color:'#636678', cursor:'pointer', fontSize:12, fontWeight:600, fontFamily:'inherit' }}>{t.exit}</button>
             </div>
           </div>
         </div>

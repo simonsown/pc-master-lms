@@ -6,7 +6,7 @@ import confetti from 'canvas-confetti';
 const GRAB_THRESHOLD = 0.07; // Pinch to grab (lower = easier to grab)
 const RELEASE_THRESHOLD = 0.10; // Release when fingers open wider (hysteresis prevents jitter)
 
-const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems }, ref) => {
+const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems, defaultPlaced }, ref) => {
     const canvasRef = useRef(null);
 
     // Offscreen Canvas for caching static heavy elements
@@ -55,6 +55,16 @@ const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems }, ref) 
                     pushComp('RAM');
                 }
             });
+        } else if (defaultPlaced) {
+            initialComponents = [
+                { id: 1, type: 'CPU', x: 615, y: 230, width: 80, height: 80, isGrabbed: false, isPlaced: true },
+                { id: 2, type: 'RAM', x: 800, y: 160, width: 25, height: 260, isGrabbed: false, isPlaced: true },
+                { id: 4, type: 'RAM', x: 870, y: 160, width: 25, height: 260, isGrabbed: false, isPlaced: true },
+                { id: 5, type: 'PSU', x: 135, y: 620, width: 180, height: 160, isGrabbed: false, isPlaced: true },
+                { id: 3, type: 'GPU', x: 455, y: 600, width: 320, height: 130, isGrabbed: false, isPlaced: true },
+                { id: 6, type: 'SSD', x: 515, y: 520, width: 140, height: 35, isGrabbed: false, isPlaced: true },
+                { id: 7, type: 'COOLER', x: 610, y: 225, width: 90, height: 90, isGrabbed: false, isPlaced: true }
+            ];
         } else {
             initialComponents = [
                 // Left Side staging:
@@ -72,13 +82,13 @@ const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems }, ref) 
         stateRef.current = {
             components: initialComponents,
             sockets: [
-                { id: 'socket-cpu', type: 'CPU', x: 615, y: 270, width: 80, height: 80 },
-                { id: 'socket-cooler', type: 'COOLER', x: 610, y: 265, width: 90, height: 90 },
-                { id: 'socket-ram-1', type: 'RAM', x: 800, y: 200, width: 25, height: 260, vertical: true },
-                { id: 'socket-ram-2', type: 'RAM', x: 870, y: 200, width: 25, height: 260, vertical: true },
-                { id: 'socket-gpu', type: 'GPU', x: 455, y: 640, width: 320, height: 130 },
+                { id: 'socket-cpu', type: 'CPU', x: 615, y: 230, width: 80, height: 80 },
+                { id: 'socket-cooler', type: 'COOLER', x: 610, y: 225, width: 90, height: 90 },
+                { id: 'socket-ram-1', type: 'RAM', x: 800, y: 160, width: 25, height: 260, vertical: true },
+                { id: 'socket-ram-2', type: 'RAM', x: 870, y: 160, width: 25, height: 260, vertical: true },
+                { id: 'socket-gpu', type: 'GPU', x: 455, y: 600, width: 320, height: 130 },
                 { id: 'socket-psu', type: 'PSU', x: 135, y: 620, width: 200, height: 160 },
-                { id: 'socket-ssd', type: 'SSD', x: 515, y: 560, width: 140, height: 35 }
+                { id: 'socket-ssd', type: 'SSD', x: 515, y: 520, width: 140, height: 35 }
             ]
         };
     }
@@ -127,18 +137,17 @@ const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems }, ref) 
         const canvas = canvasRef.current;
         if (!canvas) return;
         const rect = canvas.getBoundingClientRect();
-        mouseRef.current.x = (e.clientX - rect.left) * (canvas.width / rect.width);
-        mouseRef.current.y = (e.clientY - rect.top) * (canvas.height / rect.height);
+        const scale = canvas.width / rect.width;
+        mouseRef.current.x = (e.clientX - rect.left) * scale;
+        mouseRef.current.y = (e.clientY - rect.top) * scale;
     };
 
     const handleMouseDown = useCallback((e) => {
         if (!canvasRef.current) return;
         const rect = canvasRef.current.getBoundingClientRect();
-        // Calculate true coordinates respecting CSS scaling and aspect ratio bounding
-        const scaleX = 1400 / rect.width;
-        const scaleY = 800 / rect.height;
-        const x = (e.clientX - rect.left) * scaleX;
-        const y = (e.clientY - rect.top) * scaleY;
+        const scale = canvasRef.current.width / rect.width;
+        const x = (e.clientX - rect.left) * scale;
+        const y = (e.clientY - rect.top) * scale;
 
         mouseRef.current = { x, y, isDown: true };
         canvasRef.current.style.cursor = 'grabbing';
@@ -250,9 +259,9 @@ const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems }, ref) 
             oCtx.strokeRect(250, 610, 220, 180);
 
 
-            // Shift all motherboard drawing down by 80px so all components are visible above it
+            // Shift mainboard down slightly to center components
             oCtx.save();
-            oCtx.translate(0, 80);
+            oCtx.translate(0, 40);
 
             // --- 1. Draw Elite Dark Motherboard Base ---
             const mainboardGrad = oCtx.createLinearGradient(480, 50, 1150, 770);
@@ -468,7 +477,7 @@ const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems }, ref) 
             // Glowing Circuit Traces (Animated)
             ctx.save();
             ctx.translate(-125, 0);
-            ctx.translate(0, 80);
+            ctx.translate(0, 40);
 
             ctx.strokeStyle = '#d97706';
             ctx.lineWidth = 1.5;

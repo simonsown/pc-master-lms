@@ -1,0 +1,64 @@
+CÁCH LÀM VIỆC NHÓM TRÁNH XUNG ĐỘT
+====================================
+
+1. GIT BRANCHING
+   - Nhánh chính: main (production) https://pc-master-lms.vercel.app
+   - Mỗi người tạo nhánh riêng:
+     * Bạn (A): feature/3d-viewer (xử lý 3D)
+     * Người kia (B): feature/2d-renderer (xử lý 2D)
+   - Khi xong: tạo Pull Request → review → merge vào main
+
+2. AI CHỊU TRÁCH NHIỆM PHẦN NÀO
+
+   NGƯỜI 1 (BẠN) — 3D VIEWER:
+   ──────────────────────────
+   File: components/builder/ComponentViewer3D.tsx
+   Công việc cần làm tiếp:
+   [ ] Thêm nhiều mesh chi tiết: fan blades, heatsink fins, capacitors
+   [ ] Thêm highlight khi hover connector trong 3D
+   [ ] Thêm click vào connector → zoom đến điểm đó
+   [ ] Thêm OutlinePass cho selected component
+   [ ] Tối ưu hiệu năng (instanced mesh cho pins)
+   [ ] Button "Top | Front | Side | 3D Free" để xoay camera
+   [ ] Text label trên mặt linh kiện (brand, model)
+   
+   NGƯỜI 2 — 2D RENDERER + ERROR ANIMATION:
+   ──────────────────────────────────────
+   File: components/builder/ComponentRenderer2D.tsx
+   Công việc cần làm tiếp:
+   [ ] Render chi tiết cho Mainboard (CPU socket, RAM slots, PCIe, VRM)
+   [ ] Render chi tiết GPU (fan circles, PCIe slot, display ports)
+   [ ] Render chi tiết CPU (IHS, PCB viền, chân vàng dots)
+   [ ] Thêm fan animation quay trong 2D
+   [ ] Thêm mũi tên hướng lắp ráp
+   [ ] Tooltip khi hover connector
+   [ ] Neon glow khi selected
+   [ ] Kéo thả connector để kết nối dây
+   
+   CẢ 2 — BUILDER LAB:
+   ───────────────────
+   File: components/builder/BuilderLab.tsx
+   [ ] Tích hợp 2D & 3D vào cùng UI
+   [ ] Split mode: kéo thả 2D bên trái, preview 3D bên phải
+   [ ] Khi click linh kiện 2D → 3D auto load và xoay
+
+3. CÁCH DEPLOY KHÔNG XUNG ĐỘT
+   - Mỗi người deploy từ nhánh của mình lên Vercel preview:
+     git push origin feature/3d-viewer
+     npx vercel --yes
+   - Vercel tự tạo URL preview riêng (vd: pc-master-lms-git-feature-3d-viewer.vercel.app)
+   - Chỉ merge vào main khi cả 2 tính năng hoàn thành
+   - Deploy production: merge vào main → push → Vercel auto-deploy
+
+4. LỆNH NHANH
+   git checkout -b feature/3d-viewer    # tạo nhánh mới
+   git add . && git commit -m "msg"     # commit
+   git push origin feature/3d-viewer    # push lên GitHub
+   npx vercel --prod                    # deploy lên Vercel preview (từ nhánh hiện tại)
+
+5. KIỂM TRA XUNG ĐỘT TRƯỚC KHI MERGE
+   git checkout main
+   git pull
+   git checkout feature/3d-viewer
+   git merge main      # merge main vào nhánh, fix conflict nếu có
+   # test kỹ trước khi tạo PR

@@ -22,6 +22,7 @@ const WIFI_NETWORKS = [
 ];
 
 const SETUP_STEPS = [
+  { label: 'Giới thiệu', icon: '📖' },
   { label: 'Ngôn ngữ', icon: '🌐' },
   { label: 'Cài đặt', icon: '⚙️' },
   { label: 'Tài khoản', icon: '👤' },
@@ -882,6 +883,79 @@ function DesktopPhase({ build, username, onExit }) {
   );
 }
 
+function IntroStep({ onNext }) {
+  const [phase, setPhase] = useState(0);
+  const phases = [
+    { icon: '📦', title: 'Bạn vừa mua một bộ PC mới!', desc: 'Linh kiện đã lắp ráp xong, BIOS đã nhận đầy đủ thiết bị.' },
+    { icon: '💿', title: 'Nhưng máy tính chưa có hệ điều hành', desc: 'Không có Windows = không thể sử dụng. Cần cài đặt Windows để bắt đầu.' },
+    { icon: '🪟', title: 'Cài Windows 11 bản quyền — an toàn, bảo mật', desc: 'Dùng bản chính hãng từ Microsoft, tránh bản cài sẵn chứa mã độc.' },
+  ];
+
+  useEffect(() => {
+    if (phase < phases.length - 1) {
+      const t = setTimeout(() => setPhase(p => p + 1), 2500);
+      return () => clearTimeout(t);
+    }
+  }, [phase]);
+
+  return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      justifyContent: 'center', gap: 20, padding: '40px 20px',
+      minHeight: 400, maxWidth: 600, margin: '0 auto',
+    }}>
+      <div style={{
+        fontSize: 72, animation: 'ospulse 2s ease-in-out infinite',
+        transition: 'all 0.4s',
+      }}>{phases[phase].icon}</div>
+      <h2 style={{ color: 'white', fontSize: 22, fontWeight: 300, margin: 0, textAlign: 'center' }}>
+        {phases[phase].title}
+      </h2>
+      <p style={{ color: '#aaa', fontSize: 14, textAlign: 'center', lineHeight: 1.6, margin: 0 }}>
+        {phases[phase].desc}
+      </p>
+
+      {phase === phases.length - 1 && (
+        <div style={{
+          animation: 'osfadein 0.5s', display: 'flex', flexDirection: 'column',
+          gap: 14, width: '100%', marginTop: 8,
+        }}>
+          <div style={{
+            background: 'rgba(0,120,212,0.1)', border: '1px solid rgba(0,120,212,0.2)',
+            borderRadius: 10, padding: '14px 18px',
+          }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#0078d4', marginBottom: 6 }}>
+              📥 Tải Windows 11 bản quyền (chính thống)
+            </div>
+            <ul style={{ margin: 0, padding: '0 0 0 16px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <li style={{ fontSize: 12, color: '#aaa' }}>
+                <a href="https://www.microsoft.com/software-download/windows11" target="_blank" rel="noopener noreferrer"
+                  style={{ color: '#3b82f6' }}>
+                  Microsoft.com — Tạo USB cài Win chính thức
+                </a>
+              </li>
+              <li style={{ fontSize: 12, color: '#aaa' }}>
+                <a href="https://www.microsoft.com/en-us/evalcenter/evaluate-windows-11-enterprise" target="_blank" rel="noopener noreferrer"
+                  style={{ color: '#3b82f6' }}>
+                  Trung tâm đánh giá — Windows 11 Enterprise Evaluation
+                </a>
+              </li>
+            </ul>
+          </div>
+          <button onClick={onNext}
+            style={{
+              padding: '12px 48px', borderRadius: 8, fontSize: 15, fontWeight: 600,
+              background: '#0078d4', border: 'none', color: 'white', cursor: 'pointer',
+              fontFamily: 'inherit', alignSelf: 'center',
+            }}>
+            Bắt đầu cài đặt →
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function OSInstallationSimulator({ build, onComplete, onExit }) {
   const [step, setStep] = useState(0);
   const [lang, setLang] = useState('Tiếng Việt');
@@ -897,13 +971,13 @@ export default function OSInstallationSimulator({ build, onComplete, onExit }) {
   const [desktopReady, setDesktopReady] = useState(false);
 
   useEffect(() => {
-    if (step === 1) {
+    if (step === 2) {
       setInstallProgress(0);
       const timer = setInterval(() => {
         setInstallProgress(p => {
           if (p >= 100) {
             clearInterval(timer);
-            setTimeout(() => setStep(2), 500);
+            setTimeout(() => setStep(3), 500);
             return 100;
           }
           const increment = p < 80 ? 1.5 : p < 95 ? 0.8 : 0.3;
@@ -934,7 +1008,7 @@ export default function OSInstallationSimulator({ build, onComplete, onExit }) {
   }, []);
 
   const handleNext = () => {
-    setStep(s => Math.min(s + 1, 5));
+    setStep(s => Math.min(s + 1, 6));
   };
 
   const handleBack = () => {
@@ -948,11 +1022,11 @@ export default function OSInstallationSimulator({ build, onComplete, onExit }) {
   const handleNetworkSkip = () => {
     setIsConnected(false);
     setSelectedNetwork(null);
-    setStep(5);
+    setStep(6);
   };
 
   useEffect(() => {
-    if (step === 5 && !desktopReady) {
+    if (step === 6 && !desktopReady) {
       setDesktopReady(true);
       if (onComplete) {
         setTimeout(() => onComplete(), 1000);
@@ -963,6 +1037,8 @@ export default function OSInstallationSimulator({ build, onComplete, onExit }) {
   const renderStep = () => {
     switch (step) {
       case 0:
+        return <IntroStep onNext={handleNext} />;
+      case 1:
         return (
           <LanguageRegionStep
             lang={lang}
@@ -974,9 +1050,9 @@ export default function OSInstallationSimulator({ build, onComplete, onExit }) {
             onNext={handleNext}
           />
         );
-      case 1:
-        return <InstallingStep progress={installProgress} />;
       case 2:
+        return <InstallingStep progress={installProgress} />;
+      case 3:
         return (
           <AccountSetupStep
             username={username}
@@ -989,7 +1065,7 @@ export default function OSInstallationSimulator({ build, onComplete, onExit }) {
             onBack={handleBack}
           />
         );
-      case 3:
+      case 4:
         return (
           <PrivacySettingsStep
             settings={privacySettings}
@@ -998,7 +1074,7 @@ export default function OSInstallationSimulator({ build, onComplete, onExit }) {
             onBack={handleBack}
           />
         );
-      case 4:
+      case 5:
         return (
           <NetworkSetupStep
             selectedNetwork={selectedNetwork}
@@ -1009,7 +1085,7 @@ export default function OSInstallationSimulator({ build, onComplete, onExit }) {
             onBack={handleBack}
           />
         );
-      case 5:
+      case 6:
         return <DesktopPhase build={build} username={username} onExit={onExit} />;
       default:
         return null;
@@ -1026,7 +1102,7 @@ export default function OSInstallationSimulator({ build, onComplete, onExit }) {
         overflow: 'auto',
       }}
     >
-      {step < 5 && (
+      {step < 6 && (
         <div
           style={{
             display: 'flex', alignItems: 'center', gap: '12px',
@@ -1042,7 +1118,7 @@ export default function OSInstallationSimulator({ build, onComplete, onExit }) {
         </div>
       )}
 
-      {step < 5 && <StepIndicator currentStep={step} steps={SETUP_STEPS} />}
+      {step < 6 && <StepIndicator currentStep={step} steps={SETUP_STEPS} />}
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', animation: 'osslideup 0.3s ease-out' }}>
         {renderStep()}

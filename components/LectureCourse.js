@@ -1,25 +1,36 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
 import {
     BookOpen, Video, FileText, Image as ImageIcon, FileSearch, Code,
-    Loader2, ArrowLeft, Book, Maximize2, X, Clock, Eye,
-    GraduationCap, Lightbulb, CheckCircle, Circle
+    Loader2, ArrowLeft, Book, Maximize2, X, Clock, CheckCircle, Circle,
+    GraduationCap, Lightbulb, ChevronRight, Sparkles, Play, Trophy,
+    BookMarked, Flame, Star, Compass
 } from 'lucide-react';
 import { BadgesPanel } from './LessonInteractive';
 import NotificationBar from './NotificationBar';
 import LessonComments from './LessonComments';
 
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.08 } }
+};
+const itemVariants = {
+    hidden: { opacity: 0, y: 24 },
+    visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100, damping: 15 } }
+};
+
 function SimpleMarkdown({ text }) {
     const html = (text || '')
-        .replace(/^## (.+)$/gm, '<h2 style="color:#00d2a0;font-size:1.25rem;margin:20px 0 10px">$1</h2>')
-        .replace(/^# (.+)$/gm, '<h1 style="color:#00d2a0;font-size:1.6rem;margin:24px 0 12px">$1</h1>')
-        .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#e0e6ed">$1</strong>')
+        .replace(/^## (.+)$/gm, '<h2 style="color:#2563EB;font-size:1.25rem;margin:20px 0 10px;font-weight:700">$1</h2>')
+        .replace(/^# (.+)$/gm, '<h1 style="color:#2563EB;font-size:1.6rem;margin:24px 0 12px;font-weight:800">$1</h1>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#0F172A">$1</strong>')
         .replace(/\*(.+?)\*/g, '<em>$1</em>')
         .replace(/^- (.+)$/gm, '<li style="margin:6px 0">$1</li>')
         .replace(/\n/g, '<br/>');
-    return <div dangerouslySetInnerHTML={{ __html: html }} style={{ color: '#ced4da', lineHeight: 1.8 }} />;
+    return <div dangerouslySetInnerHTML={{ __html: html }} style={{ color: '#475569', lineHeight: 1.8 }} />;
 }
 
 const getYouTubeEmbed = (url) => {
@@ -87,93 +98,142 @@ function LessonDetail({ lesson, onBack, completedIds, onToggleComplete, complete
     };
 
     return (
-        <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
+        <div className="flex h-full overflow-hidden bg-slate-50">
             {/* Left sidebar: section nav */}
-            <aside style={{ width: '220px', flexShrink: 0, background: '#16213e', borderRight: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', overflowY: 'auto', padding: '20px 14px' }}>
-                <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'transparent', border: 'none', color: '#8899a6', cursor: 'pointer', marginBottom: '24px', fontSize: '14px' }}>
+            <motion.aside
+                initial={{ x: -260 }}
+                animate={{ x: 0 }}
+                transition={{ type: 'spring', stiffness: 120, damping: 20 }}
+                className="w-[240px] flex-shrink-0 bg-white border-r border-slate-200 flex flex-col overflow-y-auto p-5 shadow-sm"
+            >
+                <motion.button
+                    whileHover={{ x: -4 }}
+                    onClick={onBack}
+                    className="flex items-center gap-2 text-slate-500 hover:text-slate-700 mb-6 text-sm font-medium transition-colors"
+                >
                     <ArrowLeft size={16} /> Quay lại
-                </button>
-                <h4 style={{ color: '#4b5563', fontSize: '11px', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '1px', margin: '0 0 12px 0' }}>Nội dung bài</h4>
-                {loading ? <Loader2 className="animate-spin" color="#00d2a0" size={20} /> : sections.map((s, i) => (
-                    <a key={s.id} href={`#sec-${s.id}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '10px', color: '#e0e6ed', textDecoration: 'none', fontSize: '13px', marginBottom: '4px', transition: 'background 0.2s' }}
-                        onMouseOver={e => e.currentTarget.style.background = 'rgba(0,210,160,0.08)'}
-                        onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                        <span style={{ color: '#00d2a0', fontWeight: 800, fontSize: '11px', minWidth: '18px' }}>{i + 1}</span>
-                        {s.title}
-                    </a>
-                ))}
+                </motion.button>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">Nội dung bài</h4>
+                {loading ? (
+                    <div className="flex justify-center py-8">
+                        <Loader2 className="animate-spin text-blue-600" size={20} />
+                    </div>
+                ) : (
+                    <nav className="flex flex-col gap-1">
+                        {sections.map((s, i) => (
+                            <a
+                                key={s.id}
+                                href={`#sec-${s.id}`}
+                                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-700 hover:bg-blue-50 hover:text-blue-700 text-sm font-medium transition-all no-underline group"
+                            >
+                                <span className="w-6 h-6 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-[11px] font-extrabold group-hover:bg-blue-200 transition-colors shrink-0">
+                                    {i + 1}
+                                </span>
+                                <span className="truncate">{s.title}</span>
+                            </a>
+                        ))}
+                    </nav>
+                )}
 
-                {/* Complete button in sidebar */}
-                <div style={{ marginTop: 'auto', paddingTop: '24px' }}>
-                    <button onClick={handleComplete} disabled={completing}
-                        style={{ width: '100%', padding: '12px', borderRadius: '12px', border: 'none', cursor: completing ? 'not-allowed' : 'pointer', fontWeight: 700, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.3s',
-                            background: isCompleted ? 'rgba(16,185,129,0.15)' : 'rgba(0,210,160,0.1)',
-                            color: isCompleted ? '#10b981' : '#00d2a0',
-                            border: `1px solid ${isCompleted ? '#10b981' : '#00d2a0'}` }}>
-                        {completing ? <Loader2 className="animate-spin" size={16} /> : isCompleted ? <><CheckCircle size={16} /> Đã hoàn thành</> : <><Circle size={16} /> Đánh dấu hoàn thành</>}
-                    </button>
+                <div className="mt-auto pt-6">
+                    <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.97 }}
+                        onClick={handleComplete}
+                        disabled={completing}
+                        className={`w-full py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all border ${
+                            isCompleted
+                                ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                                : 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200'
+                        }`}
+                    >
+                        {completing ? (
+                            <Loader2 className="animate-spin" size={16} />
+                        ) : isCompleted ? (
+                            <><CheckCircle size={16} /> Đã hoàn thành</>
+                        ) : (
+                            <><Circle size={16} /> Đánh dấu hoàn thành</>
+                        )}
+                    </motion.button>
                 </div>
-            </aside>
+            </motion.aside>
 
-            {/* Main content - split: lesson content | interactive panel */}
-            <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-                {/* Content */}
-                <div style={{ flex: 1, overflowY: 'auto', padding: '32px 40px' }}>
+            {/* Main content */}
+            <div className="flex-1 overflow-y-auto">
+                <div className="max-w-4xl mx-auto px-8 py-8">
                     {lesson.thumbnail_url && (
-                        <div style={{ width: '100%', height: '220px', borderRadius: '20px', overflow: 'hidden', marginBottom: '2rem' }}>
-                            <img src={lesson.thumbnail_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        </div>
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="w-full h-[260px] rounded-2xl overflow-hidden mb-8 shadow-lg"
+                        >
+                            <img src={lesson.thumbnail_url} className="w-full h-full object-cover" />
+                        </motion.div>
                     )}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                    <motion.div
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="flex justify-between items-start mb-6"
+                    >
                         <div>
-                            <h1 style={{ fontSize: '2rem', fontWeight: 900, margin: '0 0 0.5rem 0' }}>{lesson.title}</h1>
-                            {lesson.description && <p style={{ color: 'var(--text-muted)', fontSize: '1rem', margin: 0, lineHeight: 1.6 }}>{lesson.description}</p>}
+                            <h1 className="text-3xl font-extrabold text-slate-900 mb-2">{lesson.title}</h1>
+                            {lesson.description && (
+                                <p className="text-slate-500 text-base leading-relaxed">{lesson.description}</p>
+                            )}
                         </div>
                         {isCompleted && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(16,185,129,0.1)', color: '#10b981', padding: '8px 16px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, flexShrink: 0 }}>
+                            <div className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-2 rounded-full text-sm font-bold border border-emerald-200 shrink-0">
                                 <CheckCircle size={16} /> Đã hoàn thành
                             </div>
                         )}
-                    </div>
-                    <div style={{ height: '3px', width: '60px', background: '#00d2a0', marginBottom: '3rem', borderRadius: '2px' }} />
+                    </motion.div>
+                    <div className="h-1 w-16 bg-gradient-to-r from-blue-500 to-emerald-400 rounded-full mb-10" />
 
                     {loading ? (
-                        <div style={{ display: 'flex', justifyContent: 'center', padding: '60px' }}><Loader2 className="animate-spin" color="#00d2a0" size={40} /></div>
+                        <div className="flex justify-center py-20">
+                            <Loader2 className="animate-spin text-blue-600" size={40} />
+                        </div>
                     ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '52px' }}>
+                        <motion.div
+                            variants={containerVariants}
+                            initial="hidden"
+                            animate="visible"
+                            className="flex flex-col gap-12"
+                        >
                             {sections.map(s => (
-                                <section key={s.id} id={`sec-${s.id}`}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '18px' }}>
-                                        <div style={{ padding: '8px', background: 'rgba(0,210,160,0.1)', color: '#00d2a0', borderRadius: '8px' }}>
+                                <motion.section key={s.id} id={`sec-${s.id}`} variants={itemVariants}>
+                                    <div className="flex items-center gap-3 mb-5">
+                                        <div className="p-2.5 rounded-xl bg-blue-100 text-blue-700">
                                             {s.type === 'video' && <Video size={18} />}
                                             {s.type === 'text' && <FileText size={18} />}
                                             {s.type === 'image' && <ImageIcon size={18} />}
                                             {s.type === 'pdf' && <FileSearch size={18} />}
                                             {s.type === 'embed' && <Code size={18} />}
                                         </div>
-                                        <h2 style={{ fontSize: '1.3rem', fontWeight: 800, margin: 0 }}>{s.title}</h2>
+                                        <h2 className="text-xl font-bold text-slate-900">{s.title}</h2>
                                     </div>
                                     {s.type === 'video' && getYouTubeEmbed(s.content) && (
-                                        <div style={{ width: '100%', aspectRatio: '16/9', borderRadius: '20px', overflow: 'hidden', background: '#000' }}>
-                                            <iframe src={getYouTubeEmbed(s.content)} style={{ width: '100%', height: '100%', border: 'none' }} allowFullScreen />
+                                        <div className="w-full aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-xl">
+                                            <iframe src={getYouTubeEmbed(s.content)} className="w-full h-full border-none" allowFullScreen />
                                         </div>
                                     )}
                                     {s.type === 'text' && (
-                                        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '20px', padding: '2rem' }}>
+                                        <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
                                             {parseRichContent(s.content).map((part, i) => {
                                                 if (part.type === 'video') {
                                                     const embedUrl = getYouTubeEmbed(part.url);
                                                     return embedUrl ? (
-                                                        <div key={i} style={{ width: '100%', aspectRatio: '16/9', borderRadius: '12px', overflow: 'hidden', background: '#000', margin: '12px 0' }}>
-                                                            <iframe src={embedUrl} style={{ width: '100%', height: '100%', border: 'none' }} allowFullScreen title="Video" />
+                                                        <div key={i} className="w-full aspect-video rounded-xl overflow-hidden bg-slate-900 my-4 shadow-lg">
+                                                            <iframe src={embedUrl} className="w-full h-full border-none" allowFullScreen title="Video" />
                                                         </div>
                                                     ) : null;
                                                 }
                                                 if (part.type === 'pdf') {
                                                     const embedUrl = getPdfEmbedUrl(part.url);
                                                     return embedUrl ? (
-                                                        <div key={i} style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', margin: '12px 0' }}>
-                                                            <iframe src={embedUrl} style={{ width: '100%', height: '540px', border: 'none' }} allow="autoplay" title="PDF" />
+                                                        <div key={i} className="rounded-xl overflow-hidden border border-slate-200 my-4">
+                                                            <iframe src={embedUrl} className="w-full h-[540px] border-none" allow="autoplay" title="PDF" />
                                                         </div>
                                                     ) : null;
                                                 }
@@ -182,29 +242,28 @@ function LessonDetail({ lesson, onBack, completedIds, onToggleComplete, complete
                                         </div>
                                     )}
                                     {s.type === 'image' && s.content && (
-                                        <div style={{ borderRadius: '20px', overflow: 'hidden' }}>
-                                            <img src={s.content} style={{ maxWidth: '100%', height: 'auto', display: 'block' }} />
+                                        <div className="rounded-2xl overflow-hidden shadow-lg">
+                                            <img src={s.content} className="w-full h-auto block" />
                                         </div>
                                     )}
                                     {s.type === 'pdf' && getPdfEmbedUrl(s.content) && (
-                                        <div style={{ background: '#0a0f1a', borderRadius: '20px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                            <iframe src={getPdfEmbedUrl(s.content)} style={{ width: '100%', height: '540px', border: 'none' }} allow="autoplay" />
-                                            <div style={{ padding: '12px 20px', display: 'flex', justifyContent: 'flex-end' }}>
-                                                <a href={s.content} target="_blank" style={{ color: '#00d2a0', textDecoration: 'none', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                    <Maximize2 size={13} /> Toàn màn hình
+                                        <div className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
+                                            <iframe src={getPdfEmbedUrl(s.content)} className="w-full h-[540px] border-none" allow="autoplay" />
+                                            <div className="px-6 py-3 flex justify-end border-t border-slate-100">
+                                                <a href={s.content} target="_blank" className="text-blue-600 hover:text-blue-800 text-sm font-bold flex items-center gap-2 no-underline transition-colors">
+                                                    <Maximize2 size={14} /> Toàn màn hình
                                                 </a>
                                             </div>
                                         </div>
                                     )}
-
                                     {s.type === 'embed' && s.content && (
-                                        <div style={{ borderRadius: '20px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <div className="rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-sm">
                                             <div dangerouslySetInnerHTML={{ __html: s.content }} />
                                         </div>
                                     )}
-                                </section>
+                                </motion.section>
                             ))}
-                        </div>
+                        </motion.div>
                     )}
 
                     {/* Video mở rộng */}
@@ -222,59 +281,94 @@ function LessonDetail({ lesson, onBack, completedIds, onToggleComplete, complete
                         const videos = matchKey ? EXTRA_VIDEOS[matchKey] : null
                         if (!videos) return null
                         return (
-                            <div style={{ marginTop: '60px', paddingTop: '40px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                                <h3 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: '#ef4444' }}>
-                                    <Video size={22} /> Video kiến thức mở rộng
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.3 }}
+                                className="mt-16 pt-10 border-t border-slate-200"
+                            >
+                                <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+                                    <Sparkles size={22} className="text-amber-500" /> Video kiến thức mở rộng
                                 </h3>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px,1fr))', gap: '20px' }}>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                     {videos.map((v, i) => (
-                                        <div key={i} style={{ borderRadius: '16px', overflow: 'hidden', background: '#0a0f1a', border: '1px solid rgba(255,255,255,0.06)' }}>
-                                            <div style={{ aspectRatio: '16/9' }}>
-                                                <iframe src={`https://www.youtube-nocookie.com/embed/${v.id}`} style={{ width: '100%', height: '100%', border: 'none' }} allowFullScreen title={v.title} loading="lazy" />
+                                        <motion.div
+                                            key={i}
+                                            whileHover={{ y: -4 }}
+                                            className="rounded-xl overflow-hidden bg-white border border-slate-200 shadow-sm hover:shadow-lg transition-all"
+                                        >
+                                            <div className="aspect-video">
+                                                <iframe src={`https://www.youtube-nocookie.com/embed/${v.id}`} className="w-full h-full border-none" allowFullScreen title={v.title} loading="lazy" />
                                             </div>
-                                            <div style={{ padding: '12px 14px' }}>
-                                                <p style={{ color: '#e0e6ed', fontWeight: 600, fontSize: '13px', margin: 0 }}>{v.title}</p>
+                                            <div className="p-4">
+                                                <p className="text-slate-800 font-semibold text-sm">{v.title}</p>
                                             </div>
-                                        </div>
+                                        </motion.div>
                                     ))}
                                 </div>
-                            </div>
+                            </motion.div>
                         )
                     })()}
 
                     {/* Books */}
                     {books.length > 0 && (
-                        <div style={{ marginTop: '72px', paddingTop: '44px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                            <h3 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <Book size={22} color="#00d2a0" /> Sách & Tài liệu
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.4 }}
+                            className="mt-16 pt-10 border-t border-slate-200"
+                        >
+                            <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+                                <Book size={22} className="text-blue-600" /> Sách & Tài liệu
                             </h3>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px,1fr))', gap: '18px' }}>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                                 {books.map(book => (
-                                    <div key={book.id} onClick={() => setSelectedBook(book)}
-                                        style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '14px', padding: '14px', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', transition: 'border-color 0.2s' }}
-                                        onMouseOver={e => e.currentTarget.style.borderColor = '#00d2a0'}
-                                        onMouseOut={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'}>
-                                        {book.cover_image_url && <img src={book.cover_image_url} style={{ width: '100%', aspectRatio: '3/4', objectFit: 'cover', borderRadius: '8px', marginBottom: '10px' }} />}
-                                        <p style={{ margin: 0, fontSize: '13px', fontWeight: 700, textAlign: 'center' }}>{book.title}</p>
-                                    </div>
+                                    <motion.div
+                                        key={book.id}
+                                        whileHover={{ y: -6, scale: 1.02 }}
+                                        onClick={() => setSelectedBook(book)}
+                                        className="bg-white rounded-xl p-4 border border-slate-200 cursor-pointer hover:border-blue-300 hover:shadow-lg transition-all"
+                                    >
+                                        {book.cover_image_url && (
+                                            <img src={book.cover_image_url} className="w-full aspect-[3/4] object-cover rounded-lg mb-3 shadow-sm" />
+                                        )}
+                                        <p className="text-sm font-bold text-slate-800 text-center line-clamp-2">{book.title}</p>
+                                    </motion.div>
                                 ))}
                             </div>
-                        </div>
+                        </motion.div>
                     )}
 
                     {/* Bottom complete button */}
-                    <div style={{ marginTop: '60px', paddingTop: '40px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'center' }}>
-                        <button onClick={handleComplete} disabled={completing}
-                            style={{ padding: '16px 48px', borderRadius: '14px', border: 'none', cursor: completing ? 'not-allowed' : 'pointer', fontWeight: 800, fontSize: '16px', display: 'flex', alignItems: 'center', gap: '10px', transition: 'all 0.3s',
-                                background: isCompleted ? 'rgba(16,185,129,0.2)' : '#00f3ff',
-                                color: isCompleted ? '#10b981' : '#050a14',
-                                boxShadow: isCompleted ? '0 0 20px rgba(16,185,129,0.2)' : '0 0 30px rgba(0,243,255,0.4)' }}>
-                            {completing ? <Loader2 className="animate-spin" size={20} /> : isCompleted ? <><CheckCircle size={20} /> Đã hoàn thành bài này!</> : <><Circle size={20} /> Đánh dấu hoàn thành bài học</>}
-                        </button>
-                    </div>
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.5 }}
+                        className="mt-16 pt-10 border-t border-slate-200 flex justify-center"
+                    >
+                        <motion.button
+                            whileHover={{ scale: 1.03 }}
+                            whileTap={{ scale: 0.97 }}
+                            onClick={handleComplete}
+                            disabled={completing}
+                            className={`px-12 py-4 rounded-2xl font-extrabold text-lg flex items-center gap-3 transition-all border-2 ${
+                                isCompleted
+                                    ? 'bg-emerald-50 text-emerald-600 border-emerald-300 shadow-lg shadow-emerald-100'
+                                    : 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-200'
+                            }`}
+                        >
+                            {completing ? (
+                                <Loader2 className="animate-spin" size={22} />
+                            ) : isCompleted ? (
+                                <><CheckCircle size={22} /> Đã hoàn thành bài này!</>
+                            ) : (
+                                <><Circle size={22} /> Đánh dấu hoàn thành bài học</>
+                            )}
+                        </motion.button>
+                    </motion.div>
 
                     {!loading && (
-                        <div style={{ marginTop: '80px', paddingTop: '40px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '60px' }}>
+                        <div className="mt-20 pt-10 border-t border-slate-200 flex flex-col gap-12">
                             <BadgesPanel completedCount={completedCount} />
                             <LessonComments lessonId={lesson.id} />
                         </div>
@@ -283,46 +377,136 @@ function LessonDetail({ lesson, onBack, completedIds, onToggleComplete, complete
             </div>
 
             {/* Book Modal */}
-            {selectedBook && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.96)', zIndex: 2000, display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ padding: '16px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0a0f1a', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                        <h3 style={{ margin: 0, color: 'white' }}>{selectedBook.title}</h3>
-                        <button onClick={() => setSelectedBook(null)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><X size={28} /></button>
-                    </div>
-                    <div style={{ flex: 1 }}>
-                        <iframe src={getDriveEmbed(selectedBook.drive_embed_url)} style={{ width: '100%', height: '100%', border: 'none' }} allow="autoplay" />
-                    </div>
-                </div>
-            )}
+            <AnimatePresence>
+                {selectedBook && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/90 z-[2000] flex flex-col"
+                    >
+                        <div className="px-6 py-4 flex justify-between items-center bg-slate-900 border-b border-slate-700">
+                            <h3 className="text-white font-bold text-lg truncate">{selectedBook.title}</h3>
+                            <motion.button
+                                whileHover={{ scale: 1.1, rotate: 90 }}
+                                onClick={() => setSelectedBook(null)}
+                                className="bg-slate-800 hover:bg-slate-700 border-none text-white p-2 rounded-xl cursor-pointer transition-colors"
+                            >
+                                <X size={24} />
+                            </motion.button>
+                        </div>
+                        <div className="flex-1">
+                            <iframe src={getDriveEmbed(selectedBook.drive_embed_url)} className="w-full h-full border-none" allow="autoplay" />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
 
 // ─── Lesson Card ──────────────────────────────────────────────────────────────
+const DIFFICULTY_COLORS = {
+    easy: 'bg-emerald-100 text-emerald-700',
+    medium: 'bg-amber-100 text-amber-700',
+    hard: 'bg-red-100 text-red-700',
+};
+
 function LessonCard({ lesson, isCompleted, onClick }) {
-    const [hovered, setHovered] = useState(false);
+    const diff = lesson.difficulty || 'easy';
+    const diffLabel = { easy: 'Dễ', medium: 'Trung bình', hard: 'Khó' }[diff] || 'Dễ';
     return (
-        <div onClick={onClick}
-            onMouseOver={() => setHovered(true)} onMouseOut={() => setHovered(false)}
-            style={{ background: '#16213e', border: `1px solid ${hovered ? '#00f3ff' : isCompleted ? 'rgba(16,185,129,0.3)' : 'var(--border-subtle)'}`, borderRadius: '20px', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.3s', transform: hovered ? 'translateY(-5px)' : 'translateY(0)', boxShadow: hovered ? '0 12px 40px rgba(0,243,255,0.12)' : '0 4px 20px rgba(0,0,0,0.2)', position: 'relative' }}>
+        <motion.div
+            variants={itemVariants}
+            whileHover={{ y: -8, scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={onClick}
+            className={`bg-white rounded-2xl overflow-hidden cursor-pointer border-2 transition-all shadow-sm hover:shadow-xl relative ${
+                isCompleted ? 'border-emerald-200' : 'border-slate-200 hover:border-blue-300'
+            }`}
+        >
             {isCompleted && (
-                <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 2, background: 'rgba(16,185,129,0.9)', color: 'white', borderRadius: '100px', padding: '4px 10px', fontSize: '11px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <div className="absolute top-3 right-3 z-10 bg-emerald-500 text-white rounded-full px-3 py-1 text-xs font-bold flex items-center gap-1.5 shadow-lg">
                     <CheckCircle size={12} /> Hoàn thành
                 </div>
             )}
-            <div style={{ height: '170px', background: '#0a0f1a', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                {lesson.thumbnail_url ? <img src={lesson.thumbnail_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <BookOpen size={44} color="rgba(255,255,255,0.07)" />}
-            </div>
-            <div style={{ padding: '16px' }}>
-                <h3 style={{ fontSize: '1rem', fontWeight: 800, margin: '0 0 8px 0', lineHeight: 1.3 }}>{lesson.title}</h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', margin: '0 0 10px 0', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                    {lesson.description || 'Nhấn để xem nội dung.'}
-                </p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '11px' }}>
-                    <Clock size={11} /> {new Date(lesson.created_at).toLocaleDateString('vi-VN')}
+            <div className="h-44 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center overflow-hidden relative">
+                {lesson.thumbnail_url ? (
+                    <img src={lesson.thumbnail_url} className="w-full h-full object-cover" />
+                ) : (
+                    <div className="flex flex-col items-center gap-2 text-slate-400">
+                        <BookOpen size={40} strokeWidth={1.5} />
+                        <span className="text-xs font-medium">{lesson.category === 'textbook' ? 'SGK' : 'MR'}</span>
+                    </div>
+                )}
+                <div className="absolute top-3 left-3 flex gap-1.5">
+                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${DIFFICULTY_COLORS[diff]}`}>
+                        {diffLabel}
+                    </span>
                 </div>
             </div>
-        </div>
+            <div className="p-5">
+                <h3 className="text-base font-bold text-slate-900 mb-2 line-clamp-2 leading-snug">{lesson.title}</h3>
+                <p className="text-sm text-slate-500 mb-4 line-clamp-2 leading-relaxed">
+                    {lesson.description || 'Nhấn để xem nội dung bài học.'}
+                </p>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-slate-400 text-xs">
+                        <Clock size={12} />
+                        <span>{new Date(lesson.created_at).toLocaleDateString('vi-VN')}</span>
+                    </div>
+                    <motion.div
+                        whileHover={{ x: 4 }}
+                        className={`text-xs font-bold flex items-center gap-1 transition-colors ${
+                            isCompleted ? 'text-emerald-600' : 'text-blue-600'
+                        }`}
+                    >
+                        {isCompleted ? 'Xem lại' : 'Bắt đầu học'} <ChevronRight size={14} />
+                    </motion.div>
+                </div>
+            </div>
+        </motion.div>
+    );
+}
+
+// ─── Empty State ──────────────────────────────────────────────────────────────
+function EmptyState({ tabKey, onExplore }) {
+    const isTextbook = tabKey === 'textbook';
+    return (
+        <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center justify-center py-20 px-6"
+        >
+            <motion.div
+                animate={{ y: [0, -10, 0] }}
+                transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
+                className="w-32 h-32 mb-8 rounded-full bg-gradient-to-br from-blue-100 to-emerald-100 flex items-center justify-center shadow-lg"
+            >
+                {isTextbook ? (
+                    <BookMarked size={56} className="text-blue-500" strokeWidth={1.5} />
+                ) : (
+                    <Sparkles size={56} className="text-amber-500" strokeWidth={1.5} />
+                )}
+            </motion.div>
+            <h3 className="text-xl font-extrabold text-slate-800 mb-3">
+                {isTextbook ? 'Chưa có sách giáo khoa' : 'Chưa có bài mở rộng'}
+            </h3>
+            <p className="text-slate-500 text-base text-center max-w-md mb-8 leading-relaxed">
+                {isTextbook
+                    ? 'Các bài học trong sách giáo khoa sẽ xuất hiện tại đây khi giáo viên cập nhật nội dung.'
+                    : 'Bài viết kiến thức mở rộng sẽ được thêm vào để giúp bạn hiểu sâu hơn về các chủ đề Tin học.'
+                }
+            </p>
+            <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={onExplore}
+                className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-emerald-500 text-white font-bold text-sm rounded-2xl shadow-lg shadow-blue-200 hover:shadow-xl transition-all flex items-center gap-2"
+            >
+                <Compass size={18} /> Khám phá lộ trình học
+            </motion.button>
+        </motion.div>
     );
 }
 
@@ -369,13 +553,13 @@ export default function LectureCourse({ lang, onBack }) {
     };
 
     const tabs = [
-        { key: 'textbook', label: lang === 'en' ? 'Textbooks' : 'Sách Giáo Khoa', icon: <GraduationCap size={16} />, color: '#3b82f6' },
-        { key: 'extended', label: lang === 'en' ? 'Extended' : 'Kiến Thức Mở Rộng', icon: <Lightbulb size={16} />, color: '#f59e0b' }
+        { key: 'textbook', label: lang === 'en' ? 'Textbooks' : 'Sách Giáo Khoa', icon: <GraduationCap size={16} /> },
+        { key: 'extended', label: lang === 'en' ? 'Extended' : 'Kiến Thức Mở Rộng', icon: <Lightbulb size={16} /> }
     ];
 
     if (selectedLesson) {
         return (
-            <div style={{ width: '100%', height: '100%', background: '#0f0f1a', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div className="w-full h-full bg-slate-50 flex flex-col overflow-hidden">
                 <NotificationBar />
                 <LessonDetail
                     lesson={selectedLesson}
@@ -390,73 +574,183 @@ export default function LectureCourse({ lang, onBack }) {
 
     const currentLessons = lessons[activeTab] || [];
     const completedCount = currentLessons.filter(l => completedIds.has(l.id)).length;
+    const totalCompleted = completedIds.size;
+    const totalLessons = lessons.textbook.length + lessons.extended.length;
 
     return (
-        <div style={{ width: '100%', height: '100%', background: '#0f0f1a', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            {/* Header */}
-            <header style={{ padding: '20px 32px', background: '#16213e', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
-                <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', borderRadius: '10px', cursor: 'pointer', color: 'var(--text-primary)' }}>
-                    <ArrowLeft size={20} />
-                </button>
-                <div style={{ flex: 1 }}>
-                    <h1 style={{ fontSize: '1.6rem', fontWeight: 900, margin: 0 }}>{lang === 'en' ? 'Course Library' : 'Thư Viện Bài Giảng'}</h1>
-                </div>
-                {userId && (
-                    <div style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', padding: '8px 16px', borderRadius: '10px', fontSize: '13px', color: '#10b981', fontWeight: 700 }}>
-                        ✅ {completedIds.size} bài hoàn thành
+        <div className="w-full h-full bg-slate-50 flex flex-col overflow-hidden">
+            <NotificationBar />
+
+            {/* Hero Header */}
+            <div className="bg-gradient-to-br from-slate-50 via-white to-blue-50 border-b border-slate-200 px-6 md:px-10 pt-6 pb-8 flex-shrink-0">
+                <div className="max-w-7xl mx-auto">
+                    <motion.button
+                        whileHover={{ x: -4 }}
+                        onClick={onBack}
+                        className="flex items-center gap-2 text-slate-500 hover:text-slate-700 text-sm font-medium mb-4 transition-colors"
+                    >
+                        <ArrowLeft size={18} />
+                        <span>{lang === 'en' ? 'Back' : 'Quay lại'}</span>
+                    </motion.button>
+
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                        <div>
+                            <motion.h1
+                                initial={{ opacity: 0, y: 16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="text-3xl md:text-4xl font-black text-slate-900 flex items-center gap-3"
+                            >
+                                <span className="bg-gradient-to-br from-blue-600 to-emerald-500 text-white w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-md">
+                                    📚
+                                </span>
+                                <span>Thư Viện Bài Giảng</span>
+                            </motion.h1>
+                            <motion.p
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.1 }}
+                                className="text-slate-500 mt-2 text-base max-w-xl"
+                            >
+                                Khám phá các bài học Tin học thông qua mô phỏng tương tác, AI hướng dẫn và thực hành trực quan.
+                            </motion.p>
+                        </div>
+
+                        {userId && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.2 }}
+                                className="flex gap-3"
+                            >
+                                <div className="bg-white rounded-2xl px-5 py-3 border border-slate-200 shadow-sm flex items-center gap-3">
+                                    <Trophy size={20} className="text-amber-500" />
+                                    <div>
+                                        <div className="text-xs text-slate-500 font-medium">Đã hoàn thành</div>
+                                        <div className="text-lg font-extrabold text-slate-900">{totalCompleted}</div>
+                                    </div>
+                                </div>
+                                <div className="bg-white rounded-2xl px-5 py-3 border border-slate-200 shadow-sm flex items-center gap-3">
+                                    <BookOpen size={20} className="text-blue-500" />
+                                    <div>
+                                        <div className="text-xs text-slate-500 font-medium">Tổng số bài</div>
+                                        <div className="text-lg font-extrabold text-slate-900">{totalLessons}</div>
+                                    </div>
+                                </div>
+                                <div className="bg-gradient-to-br from-blue-600 to-emerald-500 rounded-2xl px-5 py-3 shadow-md flex items-center gap-3">
+                                    <Star size={20} className="text-white" />
+                                    <div>
+                                        <div className="text-xs text-white/80 font-medium">Tiến độ</div>
+                                        <div className="text-lg font-extrabold text-white">
+                                            {totalLessons > 0 ? Math.round((totalCompleted / totalLessons) * 100) : 0}%
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
                     </div>
-                )}
-            </header>
+                </div>
+            </div>
 
             {/* Tabs */}
-            <div style={{ display: 'flex', gap: '0', background: 'rgba(10,20,40,0.5)', borderBottom: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
-                {tabs.map(tab => (
-                    <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '14px 28px', background: activeTab === tab.key ? `${tab.color}18` : 'transparent', color: activeTab === tab.key ? tab.color : 'var(--text-muted)', border: 'none', borderBottom: activeTab === tab.key ? `3px solid ${tab.color}` : '3px solid transparent', cursor: 'pointer', fontWeight: 700, fontSize: '14px', transition: 'all 0.2s' }}>
-                        {tab.icon} {tab.label}
-                        <span style={{ background: activeTab === tab.key ? tab.color : 'rgba(255,255,255,0.1)', color: activeTab === tab.key ? 'white' : 'var(--text-muted)', padding: '2px 8px', borderRadius: '100px', fontSize: '11px', fontWeight: 800 }}>
-                            {loading ? '...' : lessons[tab.key].length}
-                        </span>
-                        {!loading && lessons[tab.key].some(l => completedIds.has(l.id)) && (
-                            <span style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981', padding: '2px 8px', borderRadius: '100px', fontSize: '11px', fontWeight: 800 }}>
-                                ✅ {lessons[tab.key].filter(l => completedIds.has(l.id)).length}
-                            </span>
-                        )}
-                    </button>
-                ))}
+            <div className="px-6 md:px-10 pt-4 pb-2 bg-white border-b border-slate-200 flex-shrink-0">
+                <div className="max-w-7xl mx-auto flex gap-2">
+                    {tabs.map(tab => {
+                        const isActive = activeTab === tab.key;
+                        return (
+                            <motion.button
+                                key={tab.key}
+                                layout
+                                onClick={() => setActiveTab(tab.key)}
+                                className={`relative flex items-center gap-2.5 px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
+                                    isActive
+                                        ? 'bg-gradient-to-r from-blue-600 to-emerald-500 text-white shadow-lg shadow-blue-200'
+                                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                }`}
+                            >
+                                {tab.icon}
+                                {tab.label}
+                                <span className={`px-2 py-0.5 rounded-full text-[11px] font-extrabold ${
+                                    isActive
+                                        ? 'bg-white/20 text-white'
+                                        : 'bg-slate-200 text-slate-500'
+                                }`}>
+                                    {loading ? '...' : lessons[tab.key].length}
+                                </span>
+                                {!loading && lessons[tab.key].some(l => completedIds.has(l.id)) && (
+                                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-extrabold ${
+                                        isActive ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-600'
+                                    }`}>
+                                        {lessons[tab.key].filter(l => completedIds.has(l.id)).length}
+                                    </span>
+                                )}
+                            </motion.button>
+                        );
+                    })}
+                </div>
             </div>
 
             {/* Content */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '28px 32px' }}>
-                {loading ? (
-                    <div style={{ display: 'flex', justifyContent: 'center', padding: '80px' }}>
-                        <Loader2 className="animate-spin" color="#00f3ff" size={44} />
-                    </div>
-                ) : currentLessons.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '80px 0', background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '2px dashed rgba(255,255,255,0.05)' }}>
-                        {activeTab === 'textbook' ? <GraduationCap size={52} color="rgba(255,255,255,0.07)" style={{ marginBottom: '16px' }} /> : <Lightbulb size={52} color="rgba(255,255,255,0.07)" style={{ marginBottom: '16px' }} />}
-                        <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>Chưa có bài giảng nào trong mục này.</p>
-                    </div>
-                ) : (
-                    <>
-                        {/* Progress bar */}
-                        {userId && currentLessons.length > 0 && (
-                            <div style={{ marginBottom: '24px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '16px 20px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px', fontWeight: 600 }}>
-                                    <span style={{ color: '#e0e6ed' }}>Tiến độ học tập</span>
-                                    <span style={{ color: '#10b981' }}>{completedCount}/{currentLessons.length} bài</span>
-                                </div>
-                                <div style={{ height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', overflow: 'hidden' }}>
-                                    <div style={{ height: '100%', width: `${(completedCount / currentLessons.length) * 100}%`, background: 'linear-gradient(90deg, #10b981, #00f3ff)', borderRadius: '3px', transition: 'width 0.5s ease' }} />
-                                </div>
+            <div className="flex-1 overflow-y-auto px-6 md:px-10 py-6">
+                <div className="max-w-7xl mx-auto">
+                    {loading ? (
+                        <div className="flex justify-center py-24">
+                            <div className="flex flex-col items-center gap-4">
+                                <Loader2 className="animate-spin text-blue-600" size={44} />
+                                <p className="text-slate-500 text-sm font-medium">Đang tải bài giảng...</p>
                             </div>
-                        )}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-                            {currentLessons.map(lesson => (
-                                <LessonCard key={lesson.id} lesson={lesson} isCompleted={completedIds.has(lesson.id)} onClick={() => setSelectedLesson(lesson)} />
-                            ))}
                         </div>
-                    </>
-                )}
+                    ) : currentLessons.length === 0 ? (
+                        <EmptyState
+                            tabKey={activeTab}
+                            onExplore={() => {
+                                const otherKey = activeTab === 'textbook' ? 'extended' : 'textbook';
+                                if (lessons[otherKey].length > 0) setActiveTab(otherKey);
+                            }}
+                        />
+                    ) : (
+                        <motion.div
+                            variants={containerVariants}
+                            initial="hidden"
+                            animate="visible"
+                        >
+                            {/* Progress bar */}
+                            {userId && (
+                                <motion.div
+                                    variants={itemVariants}
+                                    className="mb-8 bg-white rounded-2xl p-5 border border-slate-200 shadow-sm"
+                                >
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className="flex items-center gap-2">
+                                            <Flame size={18} className="text-orange-500" />
+                                            <span className="text-sm font-bold text-slate-800">Tiến độ học tập</span>
+                                        </div>
+                                        <span className="text-sm font-bold text-emerald-600">{completedCount}/{currentLessons.length} bài</span>
+                                    </div>
+                                    <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            animate={{ width: `${(completedCount / Math.max(currentLessons.length, 1)) * 100}%` }}
+                                            transition={{ duration: 0.8, ease: 'easeOut' }}
+                                            className="h-full bg-gradient-to-r from-blue-500 to-emerald-400 rounded-full"
+                                        />
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {/* Grid */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                                {currentLessons.map(lesson => (
+                                    <LessonCard
+                                        key={lesson.id}
+                                        lesson={lesson}
+                                        isCompleted={completedIds.has(lesson.id)}
+                                        onClick={() => setSelectedLesson(lesson)}
+                                    />
+                                ))}
+                            </div>
+                        </motion.div>
+                    )}
+                </div>
             </div>
         </div>
     );

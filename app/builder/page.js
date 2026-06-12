@@ -39,6 +39,8 @@ import StudentDashboardContent from '../../components/StudentDashboardContent';
 import { GURU_MESSAGES } from '../../utils/i18nData';
 import { useGuru } from '@/lib/guru-state';
 import { withTracking } from '@/lib/tracking';
+import BuilderLab from '@/components/builder/BuilderLab';
+import CollaborationStatus from '@/components/builder/CollaborationStatus';
 
 // Hoist camera state outside component or use persistent Context to ensure "only turn on once" stays on even if rerendered
 let globalCameraState = false;
@@ -378,6 +380,8 @@ function Home(props) {
                         </span>
                     </div>
 
+                    <CollaborationStatus />
+
                     <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                         {/* Hand Tracking Status Badge */}
                         <div style={{ 
@@ -596,6 +600,13 @@ function Home(props) {
                             </div>
                         ) : appMode === 'exams' ? (
                             <ExamsList lang={lang} onBack={() => setAppMode('menu')} />
+                        ) : appMode === 'components' ? (
+                            <div style={{ width: '100%', padding: '24px' }}>
+                                <h2 style={{ color: 'var(--brand-primary)', marginTop: 0, marginBottom: 16 }}>
+                                    {lang === 'en' ? 'Component Library' : 'Tủ Linh Kiện'}
+                                </h2>
+                                <BuilderLab />
+                            </div>
                         ) : appMode === 'challenge' ? (
                             <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
                                 <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#1A2F4A', marginBottom: '16px' }}>Thử Thách Hằng Ngày</h2>

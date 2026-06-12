@@ -832,4 +832,4 @@ export default function ComponentPreview3D({
   );
 }
 
-export { PART_COLORS, ErrorFallback, LoadingSpinner, DynamicComponentPreview3D };
+export { PART_COLORS, ErrorFallback, LoadingSpinner, DynamicComponentPreview3D, CPUModel, GPUModel, RAMModel, SSDModel, PSUModel, MainboardModel };
