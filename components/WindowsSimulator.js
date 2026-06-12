@@ -1,9 +1,11 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
+import { GLOSSARY } from '../data/glossary';
 
 const APPS = [
     { id: 'browser', icon: '🌐', name: 'Edge', color: '#0078d4' },
     { id: 'youtube', icon: '▶️', name: 'YouTube', color: '#ff0000' },
+    { id: 'wiki', icon: '📖', name: 'Wiki PC', color: '#10b981' },
     { id: 'music', icon: '🎵', name: 'Music Player', color: '#1db954' },
     { id: 'explorer', icon: '📁', name: 'File Explorer', color: '#ffb900' },
     { id: 'calculator', icon: '🔢', name: 'Calculator', color: '#0078d4' },
@@ -44,29 +46,34 @@ function CalculatorApp() {
 }
 
 function BrowserApp() {
-    const [url, setUrl] = useState('https://pc-master-lms.vercel.app');
+    const [url, setUrl] = useState('https://google.com');
     const [showIframe, setShowIframe] = useState(true);
+    const suggestions = [
+        { label: 'Google Search', url: 'https://google.com' },
+        { label: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/Personal_computer' },
+        { label: 'Tìm hiểu CPU', url: 'https://vi.wikipedia.org/wiki/B%E1%BB%99_vi_x%E1%BB%AD_l%C3%BD' },
+        { label: 'PC Master LMS', url: 'https://pc-master-lms.vercel.app' },
+    ];
     return (
-        <div style={{ width: '600px', maxWidth: '90vw' }}>
+        <div style={{ width: '650px', maxWidth: '90vw' }}>
             <div style={{ background: '#f3f3f3', padding: '8px 12px', display: 'flex', gap: '8px', alignItems: 'center', borderRadius: '6px 6px 0 0', flexWrap: 'wrap' }}>
-                <button onClick={() => setShowIframe(false)} style={{ background:'#ddd', border:'none', borderRadius:'4px', padding:'2px 8px', cursor:'pointer' }}>←</button>
-                <button onClick={() => setShowIframe(true)} style={{ background:'#ddd', border:'none', borderRadius:'4px', padding:'2px 8px', cursor:'pointer' }}>→</button>
-                <input value={url} onChange={e => setUrl(e.target.value)}
-                    style={{ flex: 1, borderRadius: '20px', padding: '4px 16px', fontSize: '13px', border: '1px solid #ddd', outline: 'none', color: '#333' }} />
-                <button onClick={() => setShowIframe(true)} style={{ background:'#0078d4', color:'white', border:'none', borderRadius:'4px', padding:'4px 12px', cursor:'pointer', fontSize:'12px', fontWeight:600 }}>Go</button>
+                <input value={url} onChange={e => setUrl(e.target.value)} onKeyDown={e => e.key === 'Enter' && setShowIframe(true)}
+                    placeholder="Nhập URL hoặc tìm kiếm..."
+                    style={{ flex: 1, borderRadius: '20px', padding: '6px 16px', fontSize: '13px', border: '1px solid #ddd', outline: 'none', color: '#333', minWidth: '150px' }} />
+                <button onClick={() => setShowIframe(true)} style={{ background:'#0078d4', color:'white', border:'none', borderRadius:'4px', padding:'6px 16px', cursor:'pointer', fontSize:'12px', fontWeight:600, fontFamily:'inherit' }}>🔍 Go</button>
             </div>
-            <div style={{ background: 'white', borderRadius: '0 0 6px 6px', minHeight: '400px', maxHeight: '60vh', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', gap: '4px', padding: '4px 8px', background: '#fafafa', borderBottom: '1px solid #eee', flexWrap: 'wrap' }}>
+                {suggestions.map((s, i) => (
+                    <button key={i} onClick={() => { setUrl(s.url); setShowIframe(true); }}
+                        style={{ background:'#e8e8e8', border:'none', borderRadius:'12px', padding:'2px 10px', fontSize:'11px', cursor:'pointer', color:'#333', fontFamily:'inherit' }}>
+                        {s.label}
+                    </button>
+                ))}
+            </div>
+            <div style={{ background: 'white', borderRadius: '0 0 6px 6px', minHeight: '420px', maxHeight: '65vh', overflow: 'hidden' }}>
                 {showIframe ? (
-                    <iframe src={url} style={{ width:'100%', height:'400px', border:'none' }} title="Browser" />
-                ) : (
-                    <div style={{ padding:'20px', color:'#333' }}>
-                        <h3 style={{ color:'#0078d4' }}>🌐 Edge — Web Search</h3>
-                        <p style={{ fontSize:'14px', color:'#666' }}>Nhập URL ở thanh địa chỉ để duyệt web thật.</p>
-                        <div style={{ background:'#f0f8ff', padding:'12px', borderRadius:'8px', marginTop:'12px', fontSize:'13px' }}>
-                            Gợi ý: https://google.com • https://youtube.com • https://pc-master-lms.vercel.app
-                        </div>
-                    </div>
-                )}
+                    <iframe key={url} src={url} style={{ width:'100%', height:'420px', border:'none' }} title="Browser" />
+                ) : null}
             </div>
         </div>
     );
@@ -80,7 +87,7 @@ function YouTubeApp() {
         { label: 'Cách chọn CPU 2026', id: 'y1F0pPvyFnA' },
         { label: 'Hướng dẫn build PC Gaming', id: 'P0YCHg0NOP4' },
         { label: 'Nhạc chill học tập', id: 'jfKfPfyJRdk' },
-        { label: 'Lofi hip hop radio', id: 'jfKfPfyJRdk' },
+        { label: 'Hướng dẫn ép xung RAM', id: 'd_OeO7D9FD8' },
     ];
     return (
         <div style={{ width: '640px', maxWidth: '90vw' }}>
@@ -113,6 +120,54 @@ function YouTubeApp() {
     );
 }
 
+function WikiApp() {
+    const [search, setSearch] = useState('');
+    const [selected, setSelected] = useState(null);
+    const entries = Object.entries(GLOSSARY);
+    const filtered = search ? entries.filter(([k, v]) => k.toLowerCase().includes(search.toLowerCase()) || v.toLowerCase().includes(search.toLowerCase())) : entries.slice(0, 20);
+
+    return (
+        <div style={{ width: '520px', maxWidth: '90vw', maxHeight: '70vh', display: 'flex', flexDirection: 'column', background: '#1a1a2e' }}>
+            <div style={{ padding: '12px', background: '#16213e', borderRadius: '6px 6px 0 0' }}>
+                <div className="flex items-center gap-2 mb-2">
+                    <span className="text-lg">📖</span>
+                    <span className="font-bold text-sm" style={{ color: '#00d4aa' }}>Wiki PC - Tra cứu linh kiện</span>
+                </div>
+                <input value={search} onChange={e => { setSearch(e.target.value); setSelected(null); }}
+                    placeholder="Tìm thuật ngữ (CPU, GPU, RAM...)"
+                    style={{ width: '100%', padding: '8px 14px', borderRadius: '8px', border: '1px solid #2a2a4a', background: '#0f0f23', color: 'white', outline: 'none', fontSize: '13px', boxSizing: 'border-box', fontFamily: 'inherit' }} />
+            </div>
+            <div className="flex flex-1 overflow-hidden">
+                <div style={{ width: '180px', overflowY: 'auto', borderRight: '1px solid rgba(255,255,255,0.05)', padding: '8px', background: '#16213e' }}>
+                    {filtered.map(([key, val]) => (
+                        <div key={key} onClick={() => setSelected(key)}
+                            style={{
+                                padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', marginBottom: '2px',
+                                background: selected === key ? 'rgba(0,212,170,0.15)' : 'transparent',
+                                color: selected === key ? '#00d4aa' : '#8a8aa0', fontWeight: selected === key ? 700 : 400
+                            }}>
+                            {key}
+                        </div>
+                    ))}
+                </div>
+                <div style={{ flex: 1, overflowY: 'auto', padding: '16px', color: '#c0c0d0' }}>
+                    {selected ? (
+                        <div>
+                            <h3 style={{ color: '#00d4aa', margin: '0 0 8px 0', fontSize: '18px' }}>{selected}</h3>
+                            <p style={{ fontSize: '14px', lineHeight: 1.6, color: '#a0a0b0' }}>{GLOSSARY[selected]}</p>
+                        </div>
+                    ) : (
+                        <div className="text-center py-8" style={{ color: '#6a6a80' }}>
+                            <div className="text-4xl mb-3">🔍</div>
+                            <p className="text-sm">Tìm kiếm thuật ngữ phần cứng<br/>hoặc chọn từ danh sách bên trái</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function MusicPlayerApp() {
     const [currentTrack, setCurrentTrack] = useState(null);
     const audioRef = useRef(null);
@@ -124,9 +179,7 @@ function MusicPlayerApp() {
         { title: 'Piano du dương 🎹', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3' },
     ];
     useEffect(() => {
-        if (currentTrack && audioRef.current) {
-            audioRef.current.play().catch(() => {});
-        }
+        if (currentTrack && audioRef.current) audioRef.current.play().catch(() => {});
     }, [currentTrack]);
     return (
         <div style={{ width: '380px', background: '#121212', borderRadius: '8px', padding: '24px', color: 'white' }}>
@@ -134,24 +187,15 @@ function MusicPlayerApp() {
             <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
                 {tracks.map((t,i) => (
                     <button key={i} onClick={() => setCurrentTrack(t)}
-                        style={{
-                            background: currentTrack?.title === t.title ? '#1db954' : '#282828',
-                            color: currentTrack?.title === t.title ? '#000' : '#fff',
-                            border: 'none', borderRadius: '8px', padding: '12px 16px',
-                            cursor: 'pointer', textAlign: 'left', fontSize: '13px', fontWeight: 600,
-                            display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit'
-                        }}>
+                        style={{ background: currentTrack?.title === t.title ? '#1db954' : '#282828', color: currentTrack?.title === t.title ? '#000' : '#fff',
+                            border: 'none', borderRadius: '8px', padding: '12px 16px', cursor: 'pointer', textAlign: 'left', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit' }}>
                         <span>{currentTrack?.title === t.title ? '🔊' : '🎵'}</span>
                         {t.title}
                     </button>
                 ))}
             </div>
-            {currentTrack && (
-                <audio ref={audioRef} src={currentTrack.url} controls style={{ width:'100%', marginTop:'16px', borderRadius:'8px' }} autoPlay />
-            )}
-            {!currentTrack && (
-                <p style={{ color:'#666', fontSize:'12px', marginTop:'16px', textAlign:'center' }}>Chọn bài hát để phát nhạc thật 🎶</p>
-            )}
+            {currentTrack && <audio ref={audioRef} src={currentTrack.url} controls style={{ width:'100%', marginTop:'16px', borderRadius:'8px' }} autoPlay />}
+            {!currentTrack && <p style={{ color:'#666', fontSize:'12px', marginTop:'16px', textAlign:'center' }}>Chọn bài hát để phát nhạc thật 🎶</p>}
         </div>
     );
 }
@@ -189,9 +233,15 @@ function NotepadApp() {
     );
 }
 
-function SpecsApp({ cart }) {
+function SpecsApp({ cart, scenarioName }) {
     return (
         <div style={{ width: '440px', background: '#1a1a2e', color: 'white', borderRadius: '8px', padding: '20px' }}>
+            {scenarioName && (
+                <div style={{ background: 'rgba(0,212,170,0.08)', border: '1px solid rgba(0,212,170,0.2)', borderRadius: '8px', padding: '10px 14px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span>💼</span>
+                    <span style={{ fontSize: '13px', color: '#00d4aa', fontWeight: 600 }}>{scenarioName}</span>
+                </div>
+            )}
             <h3 style={{ color: '#00f3ff', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>💻 System Information</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <div style={{ background: 'rgba(0,243,255,0.05)', border: '1px solid rgba(0,243,255,0.1)', borderRadius: '8px', padding: '12px' }}>
@@ -215,14 +265,15 @@ function SpecsApp({ cart }) {
     );
 }
 
-function WindowApp({ app, cart, onClose }) {
+function WindowApp({ app, cart, scenarioName, onClose }) {
     const AppComponent = app.id === 'calculator' ? CalculatorApp
         : app.id === 'browser' ? BrowserApp
         : app.id === 'youtube' ? YouTubeApp
+        : app.id === 'wiki' ? WikiApp
         : app.id === 'music' ? MusicPlayerApp
         : app.id === 'explorer' ? ExplorerApp
         : app.id === 'notepad' ? NotepadApp
-        : app.id === 'specs' ? SpecsApp
+        : app.id === 'specs' ? () => <SpecsApp cart={cart} scenarioName={scenarioName} />
         : null;
     return (
         <div style={{
@@ -238,17 +289,27 @@ function WindowApp({ app, cart, onClose }) {
                     <button onClick={onClose} style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ff5f57', border: 'none', cursor: 'pointer' }} />
                 </div>
             </div>
-            <div>{AppComponent && <AppComponent cart={cart} />}</div>
+            <div>{AppComponent && <AppComponent cart={cart} scenarioName={scenarioName} />}</div>
         </div>
     );
 }
 
-export default function WindowsSimulator({ cart, onExit }) {
-    const [phase, setPhase] = useState('boot');
+export default function WindowsSimulator({ cart, scenarioName, onExit }) {
+    const [phase, setPhase] = useState('post');
     const [progress, setProgress] = useState(0);
     const [openApp, setOpenApp] = useState(null);
     const [time, setTime] = useState('');
     const [startOpen, setStartOpen] = useState(false);
+    const [bootMsgs, setBootMsgs] = useState([]);
+
+    const counts = {};
+    (cart||[]).forEach(c => { const t = c.type || c; counts[t] = (counts[t]||0)+1; });
+    const hasCPU = counts['CPU'] >= 1;
+    const hasRAM = counts['RAM'] >= 1;
+    const hasGPU = counts['GPU'] >= 1;
+    const hasSSD = counts['SSD'] >= 1 || counts['Storage'] >= 1;
+    const hasPSU = counts['PSU'] >= 1;
+    const allOK = hasCPU && hasRAM && hasGPU && hasSSD && hasPSU;
 
     useEffect(() => {
         const t = setInterval(() => setTime(new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })), 1000);
@@ -256,35 +317,106 @@ export default function WindowsSimulator({ cart, onExit }) {
         return () => clearInterval(t);
     }, []);
 
+    // POST sequence
     useEffect(() => {
-        if (phase === 'boot') {
-            const t = setInterval(() => {
-                setProgress(p => {
-                    if (p >= 100) { clearInterval(t); setTimeout(() => setPhase('login'), 500); return 100; }
-                    return p + 2;
-                });
-            }, 60);
-            return () => clearInterval(t);
-        }
+        if (phase !== 'post') return;
+        const lines = [
+            { msg: '🖥️ PC Master BIOS v2.04 (UEFI)', delay: 200 },
+            { msg: `🧠 CPU: ${hasCPU ? 'Detected ✓' : 'NOT FOUND ✗'}`, delay: 600 },
+            { msg: `💾 RAM: ${hasRAM ? 'Detected ✓' : 'NOT FOUND ✗'}`, delay: 1000 },
+            { msg: `🎨 GPU: ${hasGPU ? 'Detected ✓' : 'NOT FOUND ✗'}`, delay: 1400 },
+            { msg: `💽 SSD: ${hasSSD ? 'Detected ✓' : 'NOT FOUND ✗'}`, delay: 1800 },
+            { msg: `🔌 PSU: ${hasPSU ? 'Detected ✓' : 'NOT FOUND ✗'}`, delay: 2200 },
+        ];
+        const timers = lines.map(({msg, delay}) => setTimeout(() => setBootMsgs(prev => [...prev, msg]), delay));
+        const finalTimer = setTimeout(() => {
+            if (allOK) {
+                setBootMsgs(prev => [...prev, '', '✅ POST OK - BEEP (ngắn)', '', 'Đang nạp BIOS...']);
+                setTimeout(() => setPhase('bios'), 1500);
+            } else {
+                setBootMsgs(prev => [...prev, '', '💥 POST FAILED - Kiểm tra linh kiện!']);
+                setTimeout(() => setPhase('error'), 1000);
+            }
+        }, 2800);
+        return () => { timers.forEach(clearTimeout); clearTimeout(finalTimer); };
     }, [phase]);
 
-    if (phase === 'boot') return (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: '#000', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '40px' }}>
-            <div style={{ fontSize: '80px' }}>🪟</div>
-            <div style={{ color: 'white', fontSize: '32px', fontWeight: 300, letterSpacing: '4px' }}>Windows 11</div>
-            <div style={{ width: '200px', height: '4px', background: '#333', borderRadius: '2px', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${progress}%`, background: 'white', borderRadius: '2px', transition: 'width 0.1s' }} />
+    useEffect(() => {
+        if (phase !== 'bios') return;
+        const t = setTimeout(() => setPhase('boot'), 2000);
+        return () => clearTimeout(t);
+    }, [phase]);
+
+    useEffect(() => {
+        if (phase !== 'boot') return;
+        const t = setInterval(() => setProgress(p => { if (p >= 100) { clearInterval(t); setTimeout(() => setPhase('login'), 500); return 100; } return p + 2; }), 60);
+        return () => clearInterval(t);
+    }, [phase]);
+
+    if (phase === 'post') return (
+        <div style={{ position:'fixed', inset:0, zIndex:9999, background:'#000', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'monospace' }}>
+            <div style={{ textAlign:'center' }}>
+                <pre style={{ color:'#00ff00', fontSize:'11px', lineHeight:1.4, marginBottom:'20px' }}>
+{`
+    ╔══════════════════════════════════════╗
+    ║    PC Master BIOS v2.04 (UEFI)       ║
+    ║    Power-On Self Test                ║
+    ╚══════════════════════════════════════╝`}
+                </pre>
+                <div style={{ color:'#c0c0c0', fontSize:'14px', lineHeight:1.8, textAlign:'left', display:'inline-block' }}>
+                    {bootMsgs.map((msg, i) => (
+                        <div key={i} style={{ color: msg.startsWith('💥') ? '#ef4444' : msg.startsWith('✅') ? '#10b981' : '#c0c0c0' }}>{msg}</div>
+                    ))}
+                </div>
             </div>
-            <div style={{ color: '#666', fontSize: '13px' }}>Đang khởi động hệ thống...</div>
+        </div>
+    );
+
+    if (phase === 'error') return (
+        <div style={{ position:'fixed', inset:0, zIndex:9999, background:'#1a0000', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'20px', fontFamily:'monospace' }}>
+            <div style={{ fontSize:'72px' }}>💥</div>
+            <h2 style={{ color:'#ef4444', margin:0 }}>POST FAILED - LỖI HỆ THỐNG</h2>
+            <div style={{ color:'#ff6666', lineHeight:2 }}>
+                {!hasCPU && <div>✗ CPU: Không tìm thấy</div>}
+                {!hasRAM && <div>✗ RAM: Không tìm thấy</div>}
+                {!hasGPU && <div>✗ GPU: Không tìm thấy</div>}
+                {!hasSSD && <div>✗ SSD: Không tìm thấy</div>}
+                {!hasPSU && <div>✗ PSU: Không tìm thấy</div>}
+            </div>
+            <p style={{ color:'#ff8888', fontSize:'13px', maxWidth:'400px', textAlign:'center' }}>Hệ thống không thể boot. Kiểm tra lại các linh kiện bị thiếu.</p>
+            <button onClick={onExit} style={{ padding:'10px 30px', background:'#ef4444', color:'white', border:'none', borderRadius:'8px', cursor:'pointer', fontSize:'14px', fontWeight:600, fontFamily:'inherit' }}>
+                Quay lại
+            </button>
+        </div>
+    );
+
+    if (phase === 'bios') return (
+        <div style={{ position:'fixed', inset:0, zIndex:9999, background:'#000', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'16px' }}>
+            <div style={{ fontSize:'72px' }}>🖥️</div>
+            <h1 style={{ color:'#00d4aa', margin:0, fontSize:'28px' }}>PC Master Builder</h1>
+            <p style={{ color:'#6b7280', margin:0 }}>BIOS Version 2.04 (UEFI)</p>
+            <p style={{ color:'#4b5563', fontSize:'13px' }}>Press DEL to enter Setup</p>
+        </div>
+    );
+
+    if (phase === 'boot') return (
+        <div style={{ position:'fixed', inset:0, zIndex:9999, background:'#000', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'40px' }}>
+            <div style={{ fontSize:'80px' }}>🪟</div>
+            <div style={{ color:'white', fontSize:'32px', fontWeight:300, letterSpacing:'4px' }}>Windows 11</div>
+            <div style={{ width:'200px', height:'4px', background:'#333', borderRadius:'2px', overflow:'hidden' }}>
+                <div style={{ height:'100%', width:`${progress}%`, background:'white', borderRadius:'2px', transition:'width 0.1s' }} />
+            </div>
+            <div style={{ color:'#666', fontSize:'13px' }}>Đang khởi động hệ thống...</div>
         </div>
     );
 
     if (phase === 'login') return (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'linear-gradient(135deg,#0078d4,#003c6b)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '20px' }}>
-            <div style={{ fontSize: '72px' }}>👤</div>
-            <div style={{ color: 'white', fontSize: '22px', fontWeight: 300 }}>PC Master User</div>
+        <div style={{ position:'fixed', inset:0, zIndex:9999, background:'linear-gradient(135deg,#0078d4,#003c6b)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'20px' }}>
+            <div style={{ fontSize:'72px' }}>👤</div>
+            <div style={{ color:'white', fontSize:'22px', fontWeight:300 }}>PC Master User</div>
+            {scenarioName && <div style={{ color:'rgba(255,255,255,0.6)', fontSize:'14px' }}>💼 {scenarioName}</div>}
             <button onClick={() => setPhase('desktop')}
-                style={{ background: 'rgba(255,255,255,0.15)', color: 'white', border: '1px solid rgba(255,255,255,0.4)', padding: '10px 40px', borderRadius: '4px', cursor: 'pointer', fontSize: '15px', marginTop: '12px', fontFamily: 'inherit' }}>
+                style={{ background:'rgba(255,255,255,0.15)', color:'white', border:'1px solid rgba(255,255,255,0.4)', padding:'10px 40px', borderRadius:'4px', cursor:'pointer', fontSize:'15px', marginTop:'12px', fontFamily:'inherit' }}>
                 Đăng nhập →
             </button>
         </div>
@@ -292,58 +424,57 @@ export default function WindowsSimulator({ cart, onExit }) {
 
     const wallpaperColors = 'linear-gradient(135deg,#0f1b2d 0%,#0d2137 40%,#1a0533 100%)';
     return (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: wallpaperColors, fontFamily: "'Segoe UI',sans-serif", userSelect: 'none' }} onClick={() => setStartOpen(false)}>
-            <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px', width: '80px' }}>
+        <div style={{ position:'fixed', inset:0, zIndex:9999, background:wallpaperColors, fontFamily:"'Segoe UI',sans-serif", userSelect:'none' }} onClick={() => setStartOpen(false)}>
+            <div style={{ padding:'20px', display:'flex', flexDirection:'column', gap:'16px', width:'80px' }}>
                 {APPS.map(app => (
                     <div key={app.id} onDoubleClick={() => { setOpenApp(app); setStartOpen(false); }}
-                        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer', padding: '6px', borderRadius: '6px', color: 'white' }}
+                        style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'4px', cursor:'pointer', padding:'6px', borderRadius:'6px', color:'white' }}
                         onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
                         onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                        <span style={{ fontSize: '28px' }}>{app.icon}</span>
-                        <span style={{ fontSize: '11px', textAlign: 'center', textShadow: '1px 1px 2px black' }}>{app.name}</span>
+                        <span style={{ fontSize:'28px' }}>{app.icon}</span>
+                        <span style={{ fontSize:'11px', textAlign:'center', textShadow:'1px 1px 2px black' }}>{app.name}</span>
                     </div>
                 ))}
             </div>
 
-            {openApp && <WindowApp app={openApp} cart={cart} onClose={() => setOpenApp(null)} />}
+            {openApp && <WindowApp app={openApp} cart={cart} scenarioName={scenarioName} onClose={() => setOpenApp(null)} />}
 
-            <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: '48px', background: 'rgba(32,32,32,0.95)', backdropFilter: 'blur(20px)', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', zIndex: 200 }} onClick={e => e.stopPropagation()}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <button onClick={() => setStartOpen(v => !v)} style={{ background: 'transparent', border: 'none', fontSize: '22px', cursor: 'pointer', padding: '6px 10px', borderRadius: '6px' }}>🪟</button>
-                    <button onClick={() => alert('🔍 Tìm kiếm: Gõ vào thanh địa chỉ trình duyệt hoặc YouTube')} style={{ background: 'transparent', border: 'none', color: '#aaa', padding: '4px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'inherit' }}>🔍 <span style={{ color: '#666' }}>Tìm kiếm</span></button>
+            <div style={{ position:'fixed', bottom:0, left:0, right:0, height:'48px', background:'rgba(32,32,32,0.95)', backdropFilter:'blur(20px)', borderTop:'1px solid rgba(255,255,255,0.1)', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 16px', zIndex:200 }} onClick={e => e.stopPropagation()}>
+                <div style={{ display:'flex', alignItems:'center', gap:'4px' }}>
+                    <button onClick={() => setStartOpen(v => !v)} style={{ background:'transparent', border:'none', fontSize:'22px', cursor:'pointer', padding:'6px 10px', borderRadius:'6px' }}>🪟</button>
+                    <button onClick={() => alert('🔍 Mở trình duyệt Edge để tìm kiếm Google hoặc Wiki PC để tra cứu!')} style={{ background:'transparent', border:'none', color:'#aaa', padding:'4px 12px', borderRadius:'6px', cursor:'pointer', fontSize:'13px', display:'flex', alignItems:'center', gap:'6px', fontFamily:'inherit' }}>🔍 <span style={{ color:'#666' }}>Tìm kiếm</span></button>
                     {APPS.map(app => (
                         <button key={app.id} onClick={() => setOpenApp(app)} title={app.name}
-                            style={{ background: openApp?.id === app.id ? 'rgba(255,255,255,0.15)' : 'transparent', border: 'none', fontSize: '20px', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', borderBottom: openApp?.id === app.id ? '2px solid #0078d4' : '2px solid transparent' }}>
+                            style={{ background: openApp?.id === app.id ? 'rgba(255,255,255,0.15)' : 'transparent', border:'none', fontSize:'20px', padding:'6px 10px', borderRadius:'6px', cursor:'pointer', borderBottom: openApp?.id === app.id ? '2px solid #0078d4' : '2px solid transparent' }}>
                             {app.icon}
                         </button>
                     ))}
                 </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <button onClick={onExit} style={{ background: 'rgba(239,68,68,0.8)', color: 'white', border: 'none', padding: '4px 14px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, fontFamily: 'inherit' }}>⏻ Tắt máy</button>
-                    <div style={{ color: 'white', fontSize: '12px', textAlign: 'right' }}>
-                        <div style={{ fontWeight: 600 }}>{time}</div>
-                        <div style={{ color: '#aaa', fontSize: '10px' }}>{new Date().toLocaleDateString('vi-VN')}</div>
+                <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
+                    <button onClick={onExit} style={{ background:'rgba(239,68,68,0.8)', color:'white', border:'none', padding:'4px 14px', borderRadius:'6px', cursor:'pointer', fontSize:'12px', fontWeight:700, fontFamily:'inherit' }}>⏻ Tắt máy</button>
+                    <div style={{ color:'white', fontSize:'12px', textAlign:'right' }}>
+                        <div style={{ fontWeight:600 }}>{time}</div>
+                        <div style={{ color:'#aaa', fontSize:'10px' }}>{new Date().toLocaleDateString('vi-VN')}</div>
                     </div>
                 </div>
             </div>
 
             {startOpen && (
-                <div onClick={e => e.stopPropagation()} style={{ position: 'fixed', bottom: '56px', left: '50%', transform: 'translateX(-50%)', width: '520px', background: 'rgba(36,36,36,0.98)', backdropFilter: 'blur(30px)', borderRadius: '12px', padding: '24px', border: '1px solid rgba(255,255,255,0.1)', zIndex: 300 }}>
-                    <div style={{ color: 'white', fontWeight: 600, marginBottom: '16px', fontSize: '14px' }}>Ứng dụng đã ghim</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '8px', marginBottom: '16px' }}>
+                <div onClick={e => e.stopPropagation()} style={{ position:'fixed', bottom:'56px', left:'50%', transform:'translateX(-50%)', width:'520px', background:'rgba(36,36,36,0.98)', backdropFilter:'blur(30px)', borderRadius:'12px', padding:'24px', border:'1px solid rgba(255,255,255,0.1)', zIndex:300 }}>
+                    <div style={{ color:'white', fontWeight:600, marginBottom:'16px', fontSize:'14px' }}>Ứng dụng đã ghim</div>
+                    <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'8px', marginBottom:'16px' }}>
                         {APPS.map(app => (
-                            <button key={app.id} onClick={() => { setOpenApp(app); setStartOpen(false); }} style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', padding: '8px', borderRadius: '6px', color: 'white', fontFamily: 'inherit' }}
+                            <button key={app.id} onClick={() => { setOpenApp(app); setStartOpen(false); }} style={{ background:'transparent', border:'none', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', gap:'4px', padding:'8px', borderRadius:'6px', color:'white', fontFamily:'inherit' }}
                                 onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
                                 onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                                <span style={{ fontSize: '28px' }}>{app.icon}</span>
-                                <span style={{ fontSize: '10px' }}>{app.name}</span>
+                                <span style={{ fontSize:'28px' }}>{app.icon}</span>
+                                <span style={{ fontSize:'10px' }}>{app.name}</span>
                             </button>
                         ))}
                     </div>
-                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ color: '#aaa', fontSize: '13px' }}>👤 PC Master User</span>
-                        <button onClick={onExit} style={{ background: 'transparent', border: 'none', color: '#aaa', cursor: 'pointer', fontSize: '13px', fontFamily: 'inherit' }}>⏻ Tắt máy</button>
+                    <div style={{ borderTop:'1px solid rgba(255,255,255,0.1)', paddingTop:'12px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                        <span style={{ color:'#aaa', fontSize:'13px' }}>👤 PC Master User {scenarioName && `· ${scenarioName}`}</span>
+                        <button onClick={onExit} style={{ background:'transparent', border:'none', color:'#aaa', cursor:'pointer', fontSize:'13px', fontFamily:'inherit' }}>⏻ Tắt máy</button>
                     </div>
                 </div>
             )}

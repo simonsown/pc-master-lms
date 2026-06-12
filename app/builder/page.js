@@ -228,25 +228,7 @@ function Home(props) {
       saveSession();
 
       if (appMode === 'mission_assembly' && missionData) {
-        let totalTDP = 0, psuWattage = 0;
-        missionData.purchasedItems.forEach(item => {
-          if (item.power) totalTDP += item.power;
-          if (item.wattage) psuWattage += item.wattage;
-        });
-
-        let msg = lang === 'en' ? 'SYSTEM ASSEMBLED! ' : 'HỆ THỐNG ĐÃ LẮP XONG! ';
-
-        if (psuWattage < totalTDP + 50) {
-          msg += lang === 'en' ? 'But the PSU is too weak! System CRASHED 💥' : 'Nhưng nguồn quá yếu! Hệ thống CHÁY NỔ 💥';
-        } else if (missionData?.targets?.minPower && totalTDP < missionData.targets.minPower) {
-          msg += lang === 'en' ? 'FAILED: Not enough performance for this quest.' : 'KÉM: Chưa đạt sức mạnh tối thiểu của nhiệm vụ.';
-        } else if (missionData?.remainingBudget < 0) {
-          msg += lang === 'en' ? 'FAILED: Over budget!' : 'THẤT BẠI: Quá ngân sách!';
-        } else {
-          msg += lang === 'en' ? 'MISSION ACCOMPLISHED! Perfect build 🏆' : 'HOÀN THÀNH NHIỆM VỤ! Cấu hình hoàn hảo 🏆';
-          confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-        }
-        guru.setMessage(msg);
+        setTimeout(() => setShowWindowsSim(true), 500);
       } else if (appMode === 'assembly') {
         setShowWindowsSim(true);
       } else {
@@ -648,8 +630,9 @@ function Home(props) {
 
       {showWindowsSim && (
         <WindowsSimulator
-          cart={placedItemsList.map(type => ({ type, name: type }))}
-          onExit={() => { setShowWindowsSim(false); setAppMode('menu'); setPlacedItemsList([]); }}
+          cart={missionData?.purchasedItems || placedItemsList.map(type => ({ type, name: type }))}
+          scenarioName={missionData?.scenarioName}
+          onExit={() => { setShowWindowsSim(false); setAppMode('menu'); setPlacedItemsList([]); setMissionData(null); }}
         />
       )}
 
