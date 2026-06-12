@@ -98,13 +98,13 @@ function LessonDetail({ lesson, onBack, completedIds, onToggleComplete, complete
     };
 
     return (
-        <div className="flex h-full overflow-hidden bg-slate-50">
+        <div className="flex flex-col md:flex-row h-full overflow-hidden bg-slate-50">
             {/* Left sidebar: section nav */}
             <motion.aside
                 initial={{ x: -260 }}
                 animate={{ x: 0 }}
                 transition={{ type: 'spring', stiffness: 120, damping: 20 }}
-                className="w-[240px] flex-shrink-0 bg-white border-r border-slate-200 flex flex-col overflow-y-auto p-5 shadow-sm"
+                className="w-full md:w-[240px] flex-shrink-0 bg-white border-b md:border-b-0 md:border-r border-slate-200 flex md:flex-col overflow-x-auto md:overflow-y-auto p-4 md:p-5 gap-2 md:gap-0 shadow-sm"
             >
                 <motion.button
                     whileHover={{ x: -4 }}
@@ -160,7 +160,7 @@ function LessonDetail({ lesson, onBack, completedIds, onToggleComplete, complete
 
             {/* Main content */}
             <div className="flex-1 overflow-y-auto">
-                <div className="max-w-4xl mx-auto px-8 py-8">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8">
                     {lesson.thumbnail_url && (
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -583,8 +583,8 @@ export default function LectureCourse({ lang, onBack }) {
 
             {/* Top bar: breadcrumb + title + badges */}
             <div className="flex-shrink-0 bg-white border-b border-slate-200">
-                <div className="max-w-7xl mx-auto px-6 md:px-10 py-4">
-                    <div className="flex items-center justify-between">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 py-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div>
                             {/* Breadcrumb */}
                             <nav className="flex items-center gap-2 text-xs text-slate-400 mb-2">
@@ -595,21 +595,21 @@ export default function LectureCourse({ lang, onBack }) {
                                 <span className="text-slate-600 font-medium">Bài giảng</span>
                             </nav>
                             {/* Title */}
-                            <h1 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2">
-                                <BookOpen size={22} className="text-blue-600" />
+                            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 flex items-center gap-2">
+                                <BookOpen size={20} className="text-blue-600 shrink-0" />
                                 Thư Viện Bài Giảng
                             </h1>
                         </div>
                         {/* Badges */}
                         {userId && (
-                            <div className="flex items-center gap-3">
-                                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-slate-500 bg-slate-100 px-2.5 sm:px-3 py-1.5 rounded-full">
                                     📚 {totalLessons} bài học
                                 </span>
-                                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full">
+                                <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 sm:px-3 py-1.5 rounded-full">
                                     ✅ {totalCompleted} hoàn thành
                                 </span>
-                                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-full">
+                                <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-amber-600 bg-amber-50 px-2.5 sm:px-3 py-1.5 rounded-full">
                                     ⭐ {totalLessons > 0 ? Math.round((totalCompleted / totalLessons) * 100) : 0}%
                                 </span>
                             </div>
@@ -620,7 +620,7 @@ export default function LectureCourse({ lang, onBack }) {
 
             {/* Tabs */}
             <div className="flex-shrink-0 bg-white border-b border-slate-200">
-                <div className="max-w-7xl mx-auto px-6 md:px-10 py-3 flex gap-2">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 py-3 flex gap-2 overflow-x-auto scrollbar-none">
                     {tabs.map(tab => {
                         const isActive = activeTab === tab.key;
                         return (
@@ -657,7 +657,7 @@ export default function LectureCourse({ lang, onBack }) {
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto px-6 md:px-10 py-6">
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-10 py-4 sm:py-6">
                 <div className="max-w-7xl mx-auto">
                     {loading ? (
                         <div className="flex justify-center py-24">
