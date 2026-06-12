@@ -30,6 +30,7 @@ import SessionManager from "@/components/SessionManager";
 import { GuruProvider } from "@/lib/guru-state";
 import AIGuruGlobal from "@/components/AIGuruGlobal";
 import { SessionTimeProvider } from "@/lib/session-time";
+import RealtimeWrapper from "@/components/RealtimeWrapper";
 
 export default function RootLayout({ children }) {
   return (
@@ -48,7 +49,9 @@ export default function RootLayout({ children }) {
         <SessionManager />
         <GuruProvider>
           <SessionTimeProvider>
-            {children}
+            <RealtimeWrapper>
+              {children}
+            </RealtimeWrapper>
             <AIGuruGlobal />
           </SessionTimeProvider>
         </GuruProvider>

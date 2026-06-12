@@ -18,19 +18,6 @@ const SKILLS = [
     prerequisites: [],
   },
   {
-    id: 'cable',
-    title: 'Cable Management',
-    titleVn: 'Quản lý Cáp',
-    desc: 'Kết nối dây nguồn và dây dữ liệu chuẩn xác',
-    descEn: 'Connect power and data cables correctly',
-    icon: '\uD83D\uDD0C',
-    route: '/builder/cable-game',
-    category: 'assembly',
-    color: '#FFD700',
-    xp: 100,
-    prerequisites: ['scenarios'],
-  },
-  {
     id: 'diagnosis',
     title: 'Diagnosis Mode',
     titleVn: 'Chẩn đoán lỗi',
@@ -41,7 +28,7 @@ const SKILLS = [
     category: 'troubleshooting',
     color: '#3742FA',
     xp: 200,
-    prerequisites: ['cable'],
+    prerequisites: ['scenarios'],
   },
   {
     id: 'os-install',

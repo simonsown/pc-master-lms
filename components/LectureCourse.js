@@ -12,6 +12,7 @@ import {
 import { BadgesPanel } from './LessonInteractive';
 import NotificationBar from './NotificationBar';
 import LessonComments from './LessonComments';
+import { useRealtime } from '@/lib/realtime-provider';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -512,12 +513,14 @@ function EmptyState({ tabKey, onExplore }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function LectureCourse({ lang, onBack }) {
+    const { state: realtimeState } = useRealtime();
     const [activeTab, setActiveTab] = useState('textbook');
     const [lessons, setLessons] = useState({ textbook: [], extended: [] });
-    const [completedIds, setCompletedIds] = useState(new Set());
     const [loading, setLoading] = useState(true);
     const [selectedLesson, setSelectedLesson] = useState(null);
     const [userId, setUserId] = useState(null);
+
+    const completedIds = realtimeState.completedLessons;
 
     useEffect(() => {
         const init = async () => {
@@ -525,17 +528,15 @@ export default function LectureCourse({ lang, onBack }) {
             const { data: { user } } = await supabase.auth.getUser();
             if (user) setUserId(user.id);
 
-            const [{ data: allLessons }, { data: progress }] = await Promise.all([
-                supabase.from('lessons').select('*').eq('is_published', true).order('created_at', { ascending: false }),
-                user ? supabase.from('lesson_progress').select('lesson_id').eq('student_id', user.id) : { data: [] }
-            ]);
+            const { data: allLessons } = await supabase
+                .from('lessons').select('*').eq('is_published', true)
+                .order('created_at', { ascending: false });
 
             const all = allLessons || [];
             setLessons({
                 textbook: all.filter(l => l.category === 'textbook'),
                 extended: all.filter(l => l.category === 'extended' || !l.category)
             });
-            setCompletedIds(new Set((progress || []).map(p => p.lesson_id)));
             setLoading(false);
         };
         init();
@@ -545,10 +546,8 @@ export default function LectureCourse({ lang, onBack }) {
         if (!userId) return;
         if (wasCompleted) {
             await supabase.from('lesson_progress').delete().eq('student_id', userId).eq('lesson_id', lessonId);
-            setCompletedIds(prev => { const s = new Set(prev); s.delete(lessonId); return s; });
         } else {
             await supabase.from('lesson_progress').upsert({ student_id: userId, lesson_id: lessonId });
-            setCompletedIds(prev => new Set([...prev, lessonId]));
         }
     };
 

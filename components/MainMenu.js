@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Cpu, ShoppingCart, Users, ArrowRight, Info, LogIn, LogOut, User, Award, Swords, Star, Trophy, GraduationCap, Zap, ShieldCheck, Bot, Cable, Wrench, Monitor, AlertTriangle } from 'lucide-react';
+import { BookOpen, Cpu, ShoppingCart, Users, ArrowRight, Info, LogIn, LogOut, User, Award, Swords, Star, Trophy, GraduationCap, Zap, ShieldCheck, Bot, Wrench, Monitor, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -272,7 +272,6 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
                     {[
-                        { id: '/builder/cable-game', title: 'Cable Management', desc: 'Nối dây nguồn chuẩn chỉnh', Icon: Cable, color: '#22c55e' },
                         { id: '/builder/os-install', title: 'Cài Windows 11', desc: 'Mô phỏng cài đặt OS thực tế', Icon: Monitor, color: '#3b82f6' },
                         { id: '/builder/diagnosis', title: 'Chuẩn Đoán', desc: 'Tìm lỗi và sửa PC', Icon: Wrench, color: '#f59e0b' },
 
