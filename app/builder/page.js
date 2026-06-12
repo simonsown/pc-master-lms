@@ -18,7 +18,6 @@ const HandTracker = dynamic(
     )
   }
 );
-import { motion } from 'framer-motion';
 import GameEngine from '../../components/GameEngine';
 import MultiplayerEngine from '../../components/MultiplayerEngine';
 import MainMenu from '../../components/MainMenu';
@@ -33,10 +32,6 @@ import Marketplace from '../../components/Marketplace';
 import LectureCourse from '../../components/LectureCourse';
 import VirtualAssistant from '../../components/VirtualAssistant';
 import WindowsSimulator from '../../components/WindowsSimulator';
-import PCBenchmark from '../../components/PCBenchmark';
-import ComponentQuiz from '../../components/ComponentQuiz';
-import MotherboardTour from '../../components/MotherboardTour';
-import PCBootSimulator from '../../components/PCBootSimulator';
 import LoadingScreen from '../../components/LoadingScreen';
 import ExamsList from '../../components/ExamsList';
 import LoginModal from '../../components/auth/LoginModal';
@@ -68,8 +63,6 @@ function Home(props) {
   const [showLoading, setShowLoading] = useState(true);
   const [isAIOpen, setIsAIOpen] = useState(false);
   const [showWindowsSim, setShowWindowsSim] = useState(false);
-  const [showBenchmark, setShowBenchmark] = useState(false);
-  const [showBoot, setShowBoot] = useState(false);
   const [theme, setTheme] = useState(() => {
     if (typeof window !== 'undefined') {
       try { return localStorage.getItem('theme') || 'dark' } catch(e) {}
@@ -517,35 +510,6 @@ function Home(props) {
                                             );
                                         })}
                                     </div>
-                                    {(['CPU','COOLER','RAM','GPU','SSD','PSU'].every(t => {
-                                        const target = t === 'RAM' ? 2 : 1;
-                                        return placedItemsList.filter(i => i === t).length >= target;
-                                    })) && (
-                                        <div className="flex gap-2 mt-3">
-                                            <motion.button
-                                                initial={{ opacity: 0, y: 10 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                whileHover={{ scale: 1.05 }}
-                                                whileTap={{ scale: 0.95 }}
-                                                onClick={() => setShowBenchmark(true)}
-                                                className="flex-1 px-3 py-2 rounded-xl text-sm font-bold text-white"
-                                                style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1)' }}
-                                            >
-                                                🏁 Benchmark
-                                            </motion.button>
-                                            <motion.button
-                                                initial={{ opacity: 0, y: 10 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                whileHover={{ scale: 1.05 }}
-                                                whileTap={{ scale: 0.95 }}
-                                                onClick={() => setShowBoot(true)}
-                                                className="flex-1 px-3 py-2 rounded-xl text-sm font-bold text-white"
-                                                style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}
-                                            >
-                                                🖥️ Boot
-                                            </motion.button>
-                                        </div>
-                                    )}
                                 </div>
                             </div>
                             </div>
@@ -634,10 +598,6 @@ function Home(props) {
                                     trackingSensitivity={trackingSensitivity}
                                 />
                             </div>
-                        ) : appMode === 'component_quiz' ? (
-                            <ComponentQuiz onClose={() => setAppMode('menu')} />
-                        ) : appMode === 'motherboard_tour' ? (
-                            <MotherboardTour onClose={() => setAppMode('menu')} />
                         ) : appMode === 'exams' ? (
                             <ExamsList lang={lang} onBack={() => setAppMode('menu')} />
                         ) : appMode === 'components' ? (
@@ -690,20 +650,6 @@ function Home(props) {
         <WindowsSimulator
           cart={placedItemsList.map(type => ({ type, name: type }))}
           onExit={() => { setShowWindowsSim(false); setAppMode('menu'); setPlacedItemsList([]); }}
-        />
-      )}
-
-      {showBenchmark && (
-        <PCBenchmark
-          placedItemsList={placedItemsList}
-          onClose={() => setShowBenchmark(false)}
-        />
-      )}
-
-      {showBoot && (
-        <PCBootSimulator
-          placedItemsList={placedItemsList}
-          onClose={() => setShowBoot(false)}
         />
       )}
 
