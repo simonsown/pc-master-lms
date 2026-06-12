@@ -508,15 +508,9 @@ function Home(props) {
                                 onCancel={() => setAppMode('menu')}
                             />
                         ) : appMode === 'mission_assembly' ? (
-                            <div style={{ display: 'flex', gap: '16px', width: '100%' }}>
-                                <PartPickerSidebar
-                                    lang={lang}
-                                    onSelect={handlePartSelect}
-                                    placedCounts={placedCounts}
-                                />
-                                <div style={{ width: '100%', position: 'relative' }}>
+                            <div style={{ width: '100%', position: 'relative' }}>
                                 <h2 style={{ color: 'var(--brand-primary)', marginTop: 0 }}>
-                                    {lang === 'en' ? `Lab: ${missionData?.missionId}` : `Phòng Lab: ${missionData?.missionId}`}
+                                    {lang === 'en' ? `Lab: ${missionData?.missionId || missionData?.scenarioName}` : `Phòng Lab: ${missionData?.missionId || missionData?.scenarioName}`}
                                 </h2>
                                 <GameEngine
                                     ref={gameEngineRef}
@@ -526,23 +520,6 @@ function Home(props) {
                                     trackingSensitivity={trackingSensitivity}
                                     purchasedItems={missionData?.purchasedItems}
                                 />
-                                <div className="glass-panel" style={{
-                                    position: 'absolute', top: '50px', right: '2%', padding: '1rem',
-                                    minWidth: 'min(160px, 20vw)', pointerEvents: 'none', zIndex: 10
-                                }}>
-                                    <h3 style={{ margin: '0 0 10px 0', fontSize: '13px', color: 'var(--text-primary)', textTransform: 'uppercase' }}>
-                                        {lang === 'en' ? 'Purchased Inventory' : 'Khay linh kiện'}
-                                    </h3>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px' }}>
-                                        {missionData?.purchasedItems?.map((comp, idx) => (
-                                            <div key={idx} style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                <span>☐</span>
-                                                <span>{comp.type}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
                             </div>
                         ) : appMode === 'course' ? (
                             <LectureCourse lang={lang} onBack={() => setAppMode('menu')} />
