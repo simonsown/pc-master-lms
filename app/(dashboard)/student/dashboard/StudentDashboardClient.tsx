@@ -16,10 +16,8 @@ import {
   YAxis
 } from 'recharts'
 
-import { motion, AnimatePresence } from 'framer-motion'
-import { useEffect } from 'react'
-import { createBrowserClient } from '@supabase/ssr'
-import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
+import { useRealtime } from '@/lib/realtime-provider'
 
 type UserProps = {
   id: string
@@ -110,30 +108,17 @@ export function StudentDashboardClient({
   const progressValue = Math.max(0, Math.min(progressPercent, 100))
   const percentageLabel = `${progressValue}%`
 
+  const { state: realtimeState } = useRealtime()
+  const liveStreak = realtimeState.streak || stats.streakDays
+  const liveTotalHours = realtimeState.studyMinutes > 0 ? (realtimeState.studyMinutes / 60) : stats.totalHours
+  const liveWeeklyActivity: { day: string; minutes: number }[] = realtimeState.weeklyActivity.some(v => v > 0)
+    ? ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((day, i) => ({
+        day,
+        minutes: realtimeState.weeklyActivity[i] || 0
+      }))
+    : chartData
+
   const dailyQuizCompleted = dailyAttempt?.status === 'submitted'
-
-  const router = useRouter()
-
-  useEffect(() => {
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-
-    const channel = supabase
-      .channel('dashboard-realtime')
-      .on('postgres_changes',
-        { event: '*', schema: 'public', table: 'lesson_progress' },
-        () => router.refresh()
-      )
-      .on('postgres_changes',
-        { event: '*', schema: 'public', table: 'quiz_attempts' },
-        () => router.refresh()
-      )
-      .subscribe()
-
-    return () => { supabase.removeChannel(channel) }
-  }, [])
 
   return (
     <motion.div className="p-6 md:p-8 lg:p-10" style={{ background: 'transparent' }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
@@ -143,7 +128,7 @@ export function StudentDashboardClient({
             <div className="lms-card" style={{ padding: '32px' }}>
               <p style={{ fontSize: '13px', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--brand-primary)', fontWeight: 700, marginBottom: '8px' }}>Bảng điều khiển học sinh</p>
               <h1 style={{ fontSize: '32px', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px 0' }}>Chào buổi {greeting}, {user.full_name.split(' ').at(-1)}</h1>
-              <p style={{ color: 'var(--text-muted)', fontSize: '14px', margin: 0 }}>Hôm nay là {formattedDate} · Streak: {stats.streakDays} ngày</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '14px', margin: 0 }}>Hôm nay là {formattedDate} · Streak: {liveStreak} ngày</p>
             </div>
             <div className="lms-card" style={{ padding: '32px' }}>
               <div style={{ fontSize: '13px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 700, marginBottom: '8px' }}>Tổng tiến trình</div>
@@ -197,9 +182,9 @@ export function StudentDashboardClient({
           <section style={{ display: 'grid', gap: '16px', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
             {[
               { label: 'Bài đã hoàn thành', value: `${stats.completedLessons} / ${stats.startedLessons}`, sub: 'Tổng số bài đã bắt đầu' },
-              { label: 'Tổng giờ học', value: stats.totalHours.toFixed(1), sub: 'Giờ học tích lũy' },
+              { label: 'Tổng giờ học', value: liveTotalHours.toFixed(1), sub: 'Giờ học tích lũy' },
               { label: 'Điểm TB quiz', value: stats.averageScore !== null ? `${stats.averageScore}` : '—', sub: 'Điểm trung bình' },
-              { label: 'Streak', value: `${stats.streakDays}`, sub: 'Ngày liên tiếp' },
+              { label: 'Streak', value: `${liveStreak}`, sub: 'Ngày liên tiếp' },
             ].map((s, i) => (
               <motion.div key={i} className="lms-card" style={{ padding: '20px' }} whileHover={{ scale: 1.02, y: -2 }} transition={{ type: 'spring', stiffness: 300 }}>
                 <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--text-muted)', marginBottom: '8px' }}>{s.label}</div>
@@ -299,13 +284,13 @@ export function StudentDashboardClient({
             </div>
             <div style={{ height: '300px', width: '100%' }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                <BarChart data={liveWeeklyActivity} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                   <CartesianGrid stroke="var(--border-subtle)" vertical={false} />
                   <XAxis dataKey="day" tick={{ fill: 'var(--text-muted)', fontSize: 12 }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 12 }} axisLine={false} tickLine={false} />
                   <Tooltip formatter={formatMinutes} cursor={{ fill: 'rgba(8, 158, 96, 0.08)' }} contentStyle={{ background: 'var(--bg-surface)', borderColor: 'var(--border-default)', color: 'var(--text-primary)' }} />
                   <Bar dataKey="minutes" radius={[8, 8, 0, 0]} fill={BAR_FILL}>
-                    {chartData.map((entry, index) => (
+                    {liveWeeklyActivity.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={BAR_FILL} />
                     ))}
                   </Bar>
