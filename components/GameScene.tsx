@@ -2,7 +2,7 @@
 
 import { useRef, useMemo, Suspense } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Environment, ContactShadows, Stars, Lightformer, MeshTransmissionMaterial } from '@react-three/drei';
+import { Environment, ContactShadows, Lightformer } from '@react-three/drei';
 import * as THREE from 'three';
 import { useAssemblyStore } from '@/lib/useStore';
 import PcCase from './PcCase';
@@ -42,10 +42,11 @@ function ControlledCamera() {
 function SceneLighting() {
   return (
     <>
-      <ambientLight intensity={0.25} />
+      <ambientLight intensity={0.5} color="#4466ff" />
       <directionalLight
-        position={[4, 6, 4]}
-        intensity={1.8}
+        position={[5, 8, 5]}
+        intensity={2.5}
+        color="#ffffff"
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
@@ -58,10 +59,11 @@ function SceneLighting() {
       >
         <orthographicCamera attach="shadow-camera" args={[-5, 5, 5, -5, 0.1, 12]} />
       </directionalLight>
-      <directionalLight position={[-4, 3, -3]} intensity={0.5} color="#4488ff" />
-      <directionalLight position={[0, -1, 5]} intensity={0.2} />
-      <pointLight position={[0, 2, 1.5]} intensity={0.6} color="#00d4aa" distance={4} decay={1} />
-      <pointLight position={[-2, 0.5, -1]} intensity={0.3} color="#4488ff" distance={3} decay={1} />
+      <directionalLight position={[-4, 3, -3]} intensity={0.8} color="#4488ff" />
+      <directionalLight position={[0, -1, 5]} intensity={0.4} color="#ff8844" />
+      <pointLight position={[0, 2.5, 2]} intensity={0.8} color="#00ffcc" distance={5} decay={0.5} />
+      <pointLight position={[-2, 1, -1.5]} intensity={0.5} color="#6666ff" distance={4} decay={0.5} />
+      <pointLight position={[2, 0.5, -1.5]} intensity={0.4} color="#ff66aa" distance={4} decay={0.5} />
     </>
   );
 }
@@ -70,7 +72,7 @@ function GroundPlane() {
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.15, 0]} receiveShadow>
       <planeGeometry args={[10, 10]} />
-      <meshStandardMaterial color="#050510" roughness={0.95} metalness={0.05} />
+      <meshStandardMaterial color="#1a2244" roughness={0.8} metalness={0.2} />
     </mesh>
   );
 }
@@ -79,18 +81,19 @@ function EnvironmentSetup() {
   return (
     <>
       <Environment
-        preset="studio"
-        environmentIntensity={0.5}
-        environmentRotation={[0, Math.PI / 4, 0]}
+        preset="city"
+        environmentIntensity={0.8}
+        environmentRotation={[0, Math.PI / 3, 0]}
       >
-        <Lightformer form="ring" color="#00d4aa" intensity={0.3} scale={5} position={[0, 2, -3]} />
-        <Lightformer form="rect" color="#4488ff" intensity={0.2} scale={4} position={[-3, 1, 3]} />
+        <Lightformer form="ring" color="#00ffcc" intensity={0.5} scale={8} position={[0, 3, -4]} />
+        <Lightformer form="rect" color="#4488ff" intensity={0.4} scale={6} position={[-4, 2, 4]} />
+        <Lightformer form="rect" color="#ff66aa" intensity={0.3} scale={4} position={[4, 1, 4]} />
       </Environment>
       <ContactShadows
         position={[0, -0.14, 0]}
-        opacity={0.6}
+        opacity={0.4}
         scale={8}
-        blur={2.5}
+        blur={3}
         far={4}
         resolution={512}
       />
@@ -98,22 +101,39 @@ function EnvironmentSetup() {
   );
 }
 
-function AmbientParticles() {
-  const count = 50;
+function FloatingParticles() {
+  const count = 80;
   const positions = useMemo(() => {
     const pos = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      pos[i * 3] = (Math.random() - 0.5) * 4;
-      pos[i * 3 + 1] = Math.random() * 2.5;
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 4 - 0.5;
+      pos[i * 3] = (Math.random() - 0.5) * 6;
+      pos[i * 3 + 1] = Math.random() * 3;
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 5;
     }
     return pos;
+  }, []);
+
+  const colors = useMemo(() => {
+    const c = new Float32Array(count * 3);
+    const palette = [
+      [0, 1, 0.8],
+      [0.27, 0.53, 1],
+      [1, 0.4, 0.67],
+      [1, 0.8, 0.2],
+    ];
+    for (let i = 0; i < count; i++) {
+      const p = palette[i % palette.length];
+      c[i * 3] = p[0];
+      c[i * 3 + 1] = p[1];
+      c[i * 3 + 2] = p[2];
+    }
+    return c;
   }, []);
 
   const ref = useRef<THREE.Points>(null);
   useFrame(({ clock }) => {
     if (ref.current) {
-      ref.current.rotation.y = clock.getElapsedTime() * 0.01;
+      ref.current.rotation.y = clock.getElapsedTime() * 0.02;
     }
   });
 
@@ -121,12 +141,13 @@ function AmbientParticles() {
     <points ref={ref}>
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+        <bufferAttribute attach="attributes-color" args={[colors, 3]} />
       </bufferGeometry>
       <pointsMaterial
-        size={0.008}
-        color="#00d4aa"
+        size={0.015}
+        vertexColors
         transparent
-        opacity={0.3}
+        opacity={0.5}
         sizeAttenuation
         depthWrite={false}
       />
@@ -140,7 +161,7 @@ export default function GameScene() {
   return (
     <div style={{
       width: '100%', height: '100%', position: 'relative',
-      background: '#050510', overflow: 'hidden',
+      background: '#14182b', overflow: 'hidden',
     }}>
       <Canvas
         camera={{ position: [0, 0.65, 2.2], fov: 48, near: 0.05, far: 15 }}
@@ -148,14 +169,14 @@ export default function GameScene() {
         gl={{
           antialias: true,
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.0,
+          toneMappingExposure: 1.2,
           outputColorSpace: THREE.SRGBColorSpace,
         }}
         shadows="percentage"
         style={{ width: '100%', height: '100%' }}
       >
-        <color attach="background" args={['#050510']} />
-        <fog attach="fog" args={['#050510', 5, 10]} />
+        <color attach="background" args={['#14182b']} />
+        <fog attach="fog" args={['#14182b', 4, 10]} />
         <ControlledCamera />
         <SceneLighting />
         <GroundPlane />
@@ -168,10 +189,10 @@ export default function GameScene() {
         <Suspense fallback={null}>
           <Components />
         </Suspense>
-        <AmbientParticles />
+        <FloatingParticles />
 
         {bootStatus === 'success' && (
-          <pointLight position={[0, 1, 0.5]} intensity={3} color="#00d4aa" distance={4} decay={0.5} />
+          <pointLight position={[0, 1, 0.5]} intensity={4} color="#00ffcc" distance={5} decay={0.3} />
         )}
       </Canvas>
     </div>
