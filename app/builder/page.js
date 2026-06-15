@@ -41,6 +41,7 @@ import { useGuru } from '@/lib/guru-state';
 import { withTracking } from '@/lib/tracking';
 import BuilderLab from '@/components/builder/BuilderLab';
 import CollaborationStatus from '@/components/builder/CollaborationStatus';
+import VoiceController from '@/components/VoiceController';
 
 // Hoist camera state outside component or use persistent Context to ensure "only turn on once" stays on even if rerendered
 let globalCameraState = false;
@@ -60,6 +61,8 @@ function Home(props) {
   const [isCameraActive, setIsCameraActive] = useState(globalCameraState);
   const [trackingSensitivity, setTrackingSensitivity] = useState(1.0);
   const [placedItemsList, setPlacedItemsList] = useState([]);
+  const [imageMode, setImageMode] = useState(false);
+  const [lastVoiceResult, setLastVoiceResult] = useState('');
   const [showLoading, setShowLoading] = useState(true);
   const [isAIOpen, setIsAIOpen] = useState(false);
   const [showWindowsSim, setShowWindowsSim] = useState(false);
@@ -100,6 +103,53 @@ function Home(props) {
       gameEngineRef.current.spawnComponent(type, count, modelId);
     }
   }, []);
+
+  const handleVoiceCommand = useCallback((action, params) => {
+    if (action === 'SPAWN' && params?.type) {
+      const ref = gameEngineRef.current;
+      if (!ref) {
+        setLastVoiceResult('❌ GameEngine chưa sẵn sàng');
+        return;
+      }
+      const ok = ref.placeComponent?.(params.type);
+      if (ok) {
+        setLastVoiceResult(`✅ placeComponent(${params.type}) thành công`);
+        setPlacedItemsList(prev => [...prev, params.type]);
+      } else {
+        setLastVoiceResult(`⚠️ placeComponent(${params.type}) thất bại → spawn staging`);
+        if (ref.spawnComponent) {
+          ref.spawnComponent(params.type, params.type === 'RAM' ? 2 : 1);
+        }
+      }
+    } else if (action === 'REMOVE' && params?.type) {
+      setLastVoiceResult(`🗑️ REMOVE ${params.type}`);
+      setPlacedItemsList(prev => {
+        const idx = prev.indexOf(params.type);
+        if (idx === -1) return prev;
+        const copy = [...prev];
+        copy.splice(idx, 1);
+        return copy;
+      });
+    } else if (action === 'RESET') {
+      setLastVoiceResult('🔄 RESET');
+      setPlacedItemsList([]);
+    } else if (action === 'CHECK_COMPATIBILITY') {
+      const totalTDP = { CPU: 125, GPU: 300, RAM: 10, SSD: 5, COOLER: 5, PSU: 0 };
+      const psuItems = placedItemsList.filter(t => t === 'PSU');
+      if (psuItems.length === 0) {
+        guru.setMessage(lang === 'vn' ? 'Chưa có nguồn! Hãy lắp PSU trước.' : 'No PSU installed!');
+        return;
+      }
+      const tdp = placedItemsList.reduce((sum, t) => sum + (totalTDP[t] || 0), 0);
+      if (tdp > 500) {
+        guru.setMessage(lang === 'vn' ? `Cảnh báo: TDP ${tdp}W có thể quá tải!` : `Warning: TDP ${tdp}W may exceed limit!`);
+      } else {
+        guru.setMessage(lang === 'vn' ? `TDP: ${tdp}W. Hệ thống tương thích!` : `TDP: ${tdp}W. System is compatible!`);
+      }
+    } else if (action === 'BOOT_PC') {
+      setShowWindowsSim(true);
+    }
+  }, [placedItemsList, lang, guru]);
 
   const placedCounts = {};
   placedItemsList.forEach(item => {
@@ -467,11 +517,12 @@ function Home(props) {
                                     onHover={handleHover}
                                     onGameEvent={handleGameEvent}
                                     trackingSensitivity={trackingSensitivity}
+                                    imageMode={imageMode}
                                 />
-                                {/* Checklist */}
+                                {/* Checklist + Debug */}
                                 <div className="glass-panel" style={{
                                     position: 'absolute', top: '50px', right: '2%', padding: '1rem',
-                                    minWidth: 'min(160px, 20vw)', pointerEvents: 'none', zIndex: 10
+                                    minWidth: 'min(200px, 25vw)', pointerEvents: 'none', zIndex: 10
                                 }}>
                                     <h3 style={{ margin: '0 0 10px 0', fontSize: '13px', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '1px' }}>
                                         {lang === 'en' ? 'Checklist' : 'Nhiệm vụ'}
@@ -492,6 +543,33 @@ function Home(props) {
                                             );
                                         })}
                                     </div>
+                                    <hr style={{ borderColor: 'rgba(255,255,255,0.1)', margin: '10px 0' }} />
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11px' }}>
+                                        <div style={{ pointerEvents: 'auto', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                                             onClick={() => setImageMode(!imageMode)}>
+                                            <span style={{ opacity: imageMode ? 1 : 0.4 }}>📷</span>
+                                            <span>{imageMode ? (lang === 'en' ? 'Image Mode' : 'Ảnh thật') : (lang === 'en' ? 'Image Mode' : 'Ảnh vẽ')}</span>
+                                        </div>
+                                        <div style={{ pointerEvents: 'auto', display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                                            <button onClick={() => {
+                                                const ok = gameEngineRef.current?.placeComponent?.('CPU');
+                                                setLastVoiceResult(ok ? '✅ Test CPU OK' : '❌ Test CPU fail');
+                                            }} style={{ fontSize: '10px', padding: '2px 6px', cursor: 'pointer', background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: '4px', color: 'var(--text-primary)' }}>
+                                                Test CPU
+                                            </button>
+                                            <button onClick={() => {
+                                                const ok = gameEngineRef.current?.placeComponent?.('SSD');
+                                                setLastVoiceResult(ok ? '✅ Test SSD OK' : '❌ Test SSD fail');
+                                            }} style={{ fontSize: '10px', padding: '2px 6px', cursor: 'pointer', background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: '4px', color: 'var(--text-primary)' }}>
+                                                Test SSD
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {lastVoiceResult && (
+                                        <div style={{ marginTop: '6px', padding: '4px 8px', borderRadius: '4px', background: 'rgba(0,0,0,0.3)', fontSize: '10px', color: '#ff0', fontFamily: 'monospace', wordBreak: 'break-word' }}>
+                                            {lastVoiceResult}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                             </div>
@@ -519,6 +597,7 @@ function Home(props) {
                                     onGameEvent={handleGameEvent}
                                     trackingSensitivity={trackingSensitivity}
                                     purchasedItems={missionData?.purchasedItems}
+                                    imageMode={imageMode}
                                 />
                             </div>
                         ) : appMode === 'course' ? (
@@ -610,6 +689,13 @@ function Home(props) {
           cart={missionData?.purchasedItems || placedItemsList.map(type => ({ type, name: type }))}
           scenarioName={missionData?.scenarioName}
           onExit={() => { setShowWindowsSim(false); setAppMode('menu'); setPlacedItemsList([]); setMissionData(null); }}
+        />
+      )}
+
+      {['assembly', 'mission_assembly'].includes(appMode) && (
+        <VoiceController
+          lang={lang}
+          onCommand={handleVoiceCommand}
         />
       )}
 

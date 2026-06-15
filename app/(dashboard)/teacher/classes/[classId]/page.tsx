@@ -34,6 +34,42 @@ export default function ClassDetailsPage({ params }: { params: Promise<{ classId
 
   useEffect(() => {
     fetchClassInfo();
+    const channel = supabase.channel(`class-${classId}-realtime`);
+
+    channel.on('postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'submissions', filter: `class_id=eq.${classId}` },
+      async (payload: any) => {
+        const assignmentId = payload.new?.assignment_id;
+        if (assignmentId) {
+          setAssignments(prev => prev.map(a =>
+            a.id === assignmentId ? { ...a, submissions: { count: (a.submissions?.count || 0) + 1 } } : a
+          ));
+        }
+      }
+    );
+
+    channel.on('postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'class_members', filter: `class_id=eq.${classId}` },
+      async (payload: any) => {
+        const studentId = payload.new?.student_id;
+        if (studentId) {
+          const { data: profile } = await supabase.from('profiles').select('*').eq('id', studentId).single();
+          if (profile) {
+            setMembers(prev => [...prev, { id: payload.new.id, class_id: classId, student_id: studentId, student: profile }]);
+          }
+        }
+      }
+    );
+
+    channel.on('postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'assignments', filter: `class_id=eq.${classId}` },
+      (payload: any) => {
+        setAssignments(prev => [payload.new, ...prev]);
+      }
+    );
+
+    channel.subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [classId]);
 
   async function fetchClassInfo() {

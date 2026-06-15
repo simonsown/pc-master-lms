@@ -274,10 +274,12 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                     {[
                         { id: '/builder/os-install', title: 'Cài Windows 11', desc: 'Mô phỏng cài đặt OS thực tế', Icon: Monitor, color: '#3b82f6' },
                         { id: '/builder/diagnosis', title: 'Chuẩn Đoán', desc: 'Tìm lỗi và sửa PC', Icon: Wrench, color: '#f59e0b' },
-
+                        { id: '/builder/invoice-check', title: 'Quét Hóa Đơn', desc: 'So sánh giá chống chặt chém AI', Icon: Bot, color: '#00d4aa' },
                         { id: '/builder/pc-builder', title: 'PC Builder 3D', desc: 'Build PC trực quan với 3D', Icon: Cpu, color: '#6366f1' },
                         { id: '/builder/common-mistakes', title: 'Lỗi Thường Gặp', desc: '8 lỗi build PC phổ biến kèm video', Icon: AlertTriangle, color: '#ef4444' },
                         { id: '/builder/mac-check', title: 'Gợi Ý Máy Tính', desc: 'Tìm PC phù hợp với nhu cầu & ngân sách', Icon: Monitor, color: '#8b5cf6' },
+                        { id: '/builder/career-build', title: 'Ước Mơ & PC', desc: 'Build PC theo nghề nghiệp tương lai', Icon: Star, color: '#facc15' },
+
                     ].map((mode) => (
                         <motion.a
                             key={mode.id}

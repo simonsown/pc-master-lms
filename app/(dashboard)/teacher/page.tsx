@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { 
-  Users, FileText, BookOpen, GraduationCap, TrendingUp, ArrowRight, Loader2
+  Users, FileText, BookOpen, GraduationCap, TrendingUp, ArrowRight, Loader2, AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -11,22 +11,66 @@ export default function TeacherDashboard() {
   const [stats, setStats] = useState({ classes: 0, students: 0, assignments: 0, submissions: 0 });
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [realtimeLog, setRealtimeLog] = useState<string[]>([]);
 
-  useEffect(() => { fetchStats(); }, []);
+  const addLog = useCallback((msg: string) => {
+    setRealtimeLog(prev => [msg, ...prev].slice(0, 10));
+  }, []);
 
-  async function fetchStats() {
-    try {
+  useEffect(() => {
+    let channel: any = null;
+    let cancelled = false;
+
+    async function init() {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user || cancelled) return;
+
       const { data: classesData, count: classesCount } = await supabase.from('classes').select('*', { count: 'exact' }).eq('teacher_id', user.id);
+      if (cancelled) return;
       setClasses(classesData || []);
       const classIds = classesData?.map(c => c.id) || [];
+
       const { count: studentsCount } = await supabase.from('class_members').select('*', { count: 'exact', head: true }).in('class_id', classIds);
       const { count: asgCount } = await supabase.from('assignments').select('*', { count: 'exact', head: true }).eq('teacher_id', user.id);
-      setStats({ classes: classesCount || 0, students: studentsCount || 0, assignments: asgCount || 0, submissions: 0 });
-    } catch (err) { console.error('Error fetching teacher stats:', err); }
-    finally { setLoading(false); }
-  }
+      const { count: subCount } = await supabase.from('submissions').select('*', { count: 'exact', head: true }).in('class_id', classIds);
+      if (!cancelled) {
+        setStats({ classes: classesCount || 0, students: studentsCount || 0, assignments: asgCount || 0, submissions: subCount || 0 });
+        setLoading(false);
+      }
+
+      if (classIds.length === 0) return;
+
+      channel = supabase.channel('teacher-dashboard-realtime');
+      channel.on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'class_members', filter: `class_id=in.(${classIds.join(',')})` },
+        () => {
+          setStats(prev => ({ ...prev, students: prev.students + 1 }));
+          addLog('📋 Học sinh mới đã tham gia lớp');
+        }
+      );
+      channel.on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'submissions', filter: `class_id=in.(${classIds.join(',')})` },
+        (payload: any) => {
+          setStats(prev => ({ ...prev, submissions: prev.submissions + 1 }));
+          addLog(`📝 Bài nộp mới từ học sinh`);
+        }
+      );
+      channel.on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'assignments', filter: `teacher_id=eq.${user.id}` },
+        () => {
+          setStats(prev => ({ ...prev, assignments: prev.assignments + 1 }));
+          addLog('📄 Nhiệm vụ mới đã được tạo');
+        }
+      );
+      channel.subscribe();
+    }
+
+    init();
+    return () => {
+      cancelled = true;
+      if (channel) supabase.removeChannel(channel);
+    };
+  }, [addLog]);
 
   const quickActions = [
     { title: 'Quản lý Lớp học', desc: 'Tạo mã lớp, quản lý thành viên', icon: <Users size={24} />, color: 'var(--accent-blue)', href: '/teacher/classes' },
@@ -61,6 +105,27 @@ export default function TeacherDashboard() {
           </div>
         ))}
       </div>
+
+      {realtimeLog.length > 0 && (
+        <div style={{ marginBottom: '24px' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', animation: 'pulse 2s infinite' }} />
+            Hoạt động trực tiếp
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {realtimeLog.map((msg, i) => (
+              <div key={i} style={{
+                padding: '8px 14px', borderRadius: '8px', fontSize: '13px',
+                background: i === 0 ? 'rgba(34,197,94,0.08)' : 'var(--bg-surface)',
+                border: `1px solid ${i === 0 ? 'rgba(34,197,94,0.2)' : 'var(--border-default)'}`,
+                color: 'var(--text-primary)', animation: i === 0 ? 'fadeSlideIn 0.3s ease-out' : 'none',
+              }}>
+                {msg}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="teacher-dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '32px' }}>
         <div>
@@ -110,6 +175,7 @@ export default function TeacherDashboard() {
           </div>
         </div>
       </div>
+      <style>{`@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } } @keyframes fadeSlideIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }`}</style>
     </div>
   );
 }

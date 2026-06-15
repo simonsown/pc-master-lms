@@ -673,3 +673,22 @@ img { max-width: 100%; height: auto; }
 .spec-table tr:last-child td {
   border-bottom: none;
 }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes voicePulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 0.2; transform: scale(1.2); }
+}
+
+@keyframes scanProgress {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}

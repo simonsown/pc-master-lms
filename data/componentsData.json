@@ -266,5 +266,176 @@
     "type": "Cooler",
     "price": 3500000,
     "desc": "Tản nhiệt nước AIO 3 quạt 120mm, hiệu năng tối đa dành cho CPU nóng cao cấp."
+  },
+  {
+    "id": "cpu_i5_12400",
+    "name": "Intel Core i5-12400F",
+    "type": "CPU",
+    "price": 3100000,
+    "socket": "LGA1700",
+    "power": 65,
+    "desc": "6 nhân 12 luồng, lựa chọn tầm trung tuyệt vời cho gaming và làm việc."
+  },
+  {
+    "id": "cpu_i7_13700k",
+    "name": "Intel Core i7-13700K",
+    "type": "CPU",
+    "price": 9500000,
+    "socket": "LGA1700",
+    "power": 125,
+    "desc": "16 nhân (8P+8E) hiệu năng cao cho gaming và đa nhiệm."
+  },
+  {
+    "id": "cpu_r7_7800x3d",
+    "name": "AMD Ryzen 7 7800X3D",
+    "type": "CPU",
+    "price": 10500000,
+    "socket": "AM5",
+    "power": 120,
+    "desc": "8 nhân với 3D V-Cache, chip gaming tốt nhất thị trường."
+  },
+  {
+    "id": "cpu_r5_7500f",
+    "name": "AMD Ryzen 5 7500F",
+    "type": "CPU",
+    "price": 4200000,
+    "socket": "AM5",
+    "power": 65,
+    "desc": "6 nhân 12 luồng, lựa chọn ngân sách tốt trên nền AM5."
+  },
+  {
+    "id": "gpu_rtx_4060",
+    "name": "NVIDIA RTX 4060 8GB",
+    "type": "GPU",
+    "price": 8000000,
+    "power": 115,
+    "desc": "Card tầm trung thế hệ mới, chơi game 1080p-1440p tốt."
+  },
+  {
+    "id": "gpu_rtx_4070",
+    "name": "NVIDIA RTX 4070 12GB",
+    "type": "GPU",
+    "price": 14000000,
+    "power": 200,
+    "desc": "Card tầm cao, chơi game 1440p và ray tracing mượt mà."
+  },
+  {
+    "id": "gpu_rtx_4080",
+    "name": "NVIDIA RTX 4080 16GB",
+    "type": "GPU",
+    "price": 28000000,
+    "power": 320,
+    "desc": "Card cao cấp cho gaming 4K và AI."
+  },
+  {
+    "id": "gpu_rx_7600",
+    "name": "AMD Radeon RX 7600 8GB",
+    "type": "GPU",
+    "price": 7000000,
+    "power": 165,
+    "desc": "Card tầm trung AMD, cạnh tranh với RTX 4060."
+  },
+  {
+    "id": "gpu_rx_7900xtx",
+    "name": "AMD Radeon RX 7900 XTX 24GB",
+    "type": "GPU",
+    "price": 22000000,
+    "power": 355,
+    "desc": "Card flagship AMD, cạnh tranh với RTX 4080."
+  },
+  {
+    "id": "ram_d4_32G",
+    "name": "32GB (2x16GB) DDR4-3600",
+    "type": "RAM",
+    "price": 1750000,
+    "ramType": "DDR4",
+    "desc": "Bộ Kit 32GB DDR4 tốc độ cao, phù hợp gaming và đa nhiệm."
+  },
+  {
+    "id": "ram_d5_16G",
+    "name": "16GB (2x8GB) DDR5-5600",
+    "type": "RAM",
+    "price": 1500000,
+    "ramType": "DDR5",
+    "desc": "Bộ Kit 16GB DDR5 thế hệ mới, khởi đầu cho nền tảng AM5/LGA1700."
+  },
+  {
+    "id": "storage_1tb_ssd",
+    "name": "1TB NVMe Gen3",
+    "type": "Storage",
+    "price": 1300000,
+    "desc": "Ổ SSD NVMe 1TB dung lượng lớn, lưu trữ game và ứng dụng."
+  },
+  {
+    "id": "storage_1tb_nvme_gen4",
+    "name": "1TB NVMe Gen4",
+    "type": "Storage",
+    "price": 1800000,
+    "desc": "Ổ NVMe Gen4 tốc độ đọc 7000MB/s, lý tưởng cho game thủ."
+  },
+  {
+    "id": "storage_4tb_hdd",
+    "name": "4TB HDD 7200rpm",
+    "type": "Storage",
+    "price": 1500000,
+    "desc": "Ổ cứng HDD dung lượng lớn, lưu trữ dữ liệu giá rẻ."
+  },
+  {
+    "id": "psu_650w",
+    "name": "650W 80+ Gold",
+    "type": "PSU",
+    "price": 1600000,
+    "wattage": 650,
+    "desc": "Nguồn 80+ Gold tầm trung, phù hợp cấu hình gaming."
+  },
+  {
+    "id": "psu_850w",
+    "name": "850W 80+ Gold Fully Modular",
+    "type": "PSU",
+    "price": 3000000,
+    "wattage": 850,
+    "desc": "Nguồn 80+ Gold full-modular cho cấu hình cao cấp."
+  },
+  {
+    "id": "case_mid_tower",
+    "name": "Case Mid Tower Tầm Trung",
+    "type": "Case",
+    "price": 600000,
+    "desc": "Case mid tower tiêu chuẩn, đủ không gian cho linh kiện cơ bản."
+  },
+  {
+    "id": "case_mid_tower_glass",
+    "name": "Case Mid Tower Kính Cường Lực",
+    "type": "Case",
+    "price": 1200000,
+    "desc": "Case mid tower với mặt kính cường lực, tản nhiệt tốt."
+  },
+  {
+    "id": "case_full_tower",
+    "name": "Case Full Tower Cao Cấp",
+    "type": "Case",
+    "price": 2500000,
+    "desc": "Case full tower không gian rộng, hỗ trợ E-ATX và tản nhiệt nước."
+  },
+  {
+    "id": "monitor_24_1080p",
+    "name": "Màn Hình 24\" IPS 1080p 144Hz",
+    "type": "Monitor",
+    "price": 3500000,
+    "desc": "Màn hình gaming 24 inch, tần số quét 144Hz, IPS."
+  },
+  {
+    "id": "monitor_27_1440p",
+    "name": "Màn Hình 27\" IPS 2K 165Hz",
+    "type": "Monitor",
+    "price": 6500000,
+    "desc": "Màn hình gaming 27 inch 2K, tần số quét 165Hz."
+  },
+  {
+    "id": "monitor_32_4k",
+    "name": "Màn Hình 32\" 4K 144Hz",
+    "type": "Monitor",
+    "price": 12000000,
+    "desc": "Màn hình 32 inch 4K, tần số quét 144Hz, dành cho sáng tạo và gaming."
   }
 ]

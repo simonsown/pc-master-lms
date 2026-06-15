@@ -611,6 +611,11 @@ export default function DiagnosisMode({ lang = 'en', onComplete, onExit }) {
   const [elapsed, setElapsed] = useState(0);
   const [finalResults, setFinalResults] = useState(null);
   const [showExplanation, setShowExplanation] = useState(false);
+  const [diagnosisTab, setDiagnosisTab] = useState('game');
+  const [aiSymptoms, setAiSymptoms] = useState('');
+  const [aiDiagnosing, setAiDiagnosing] = useState(false);
+  const [aiResult, setAiResult] = useState(null);
+  const [aiError, setAiError] = useState('');
   const timerRef = useRef(null);
 
   const tr = useCallback((en, vn) => (lang === 'vn' ? vn : en), [lang]);
@@ -956,17 +961,46 @@ export default function DiagnosisMode({ lang = 'en', onComplete, onExit }) {
         >
           ✕
         </button>
-        <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
-          {tr('PC Diagnosis', 'Chẩn đoán PC')}
-        </span>
-        <ProgressBar current={currentScenario} total={SCENARIOS.length} lang={lang} />
-        <Lives count={lives} />
-        <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--brand-primary)', fontFamily: 'monospace' }}>
-          {score.toLocaleString()}
+        <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-elevated)', borderRadius: '8px', padding: '3px' }}>
+          <button
+            onClick={() => setDiagnosisTab('game')}
+            style={{
+              padding: '6px 14px', borderRadius: '6px', border: 'none',
+              background: diagnosisTab === 'game' ? 'var(--brand-primary)' : 'transparent',
+              color: diagnosisTab === 'game' ? '#fff' : 'var(--text-muted)',
+              fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+              transition: 'all 0.15s',
+            }}
+            type="button"
+          >
+            🎮 {tr('Game', 'Game')}
+          </button>
+          <button
+            onClick={() => setDiagnosisTab('ai')}
+            style={{
+              padding: '6px 14px', borderRadius: '6px', border: 'none',
+              background: diagnosisTab === 'ai' ? 'var(--brand-primary)' : 'transparent',
+              color: diagnosisTab === 'ai' ? '#fff' : 'var(--text-muted)',
+              fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+              transition: 'all 0.15s',
+            }}
+            type="button"
+          >
+            🤖 {tr('AI Diagnosis', 'Chẩn đoán AI')}
+          </button>
         </div>
-        <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
-          {formatTime(elapsed)}
-        </div>
+        {diagnosisTab === 'game' && (
+          <>
+            <ProgressBar current={currentScenario} total={SCENARIOS.length} lang={lang} />
+            <Lives count={lives} />
+            <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--brand-primary)', fontFamily: 'monospace' }}>
+              {score.toLocaleString()}
+            </div>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+              {formatTime(elapsed)}
+            </div>
+          </>
+        )}
       </div>
 
       <div
@@ -976,6 +1010,265 @@ export default function DiagnosisMode({ lang = 'en', onComplete, onExit }) {
           display: 'flex', flexDirection: 'column', gap: '16px',
         }}
       >
+        {diagnosisTab === 'ai' ? (
+          <div style={{ animation: 'diagnosisFadeIn 0.3s ease-out' }}>
+            <div style={{
+              background: 'var(--bg-surface)', borderRadius: '12px',
+              border: '1px solid var(--border-default)', overflow: 'hidden', marginBottom: '16px',
+            }}>
+              <div className="diagnosis-terminal" style={{
+                padding: '16px 20px', borderBottom: '1px solid rgba(0,255,136,0.15)',
+              }}>
+                <div style={{ fontSize: '11px', color: '#00ff88', opacity: 0.6, marginBottom: '4px' }}>
+                  {'>'} AI_DIAGNOSIS_TERMINAL v2.0
+                </div>
+                <div style={{ fontSize: '11px', color: '#00ff88', opacity: 0.4, marginBottom: '12px' }}>
+                  {'>'} Mô tả lỗi PC bằng tiếng Việt để nhận chẩn đoán...
+                </div>
+                <div style={{ position: 'relative' }}>
+                  <textarea
+                    value={aiSymptoms}
+                    onChange={(e) => setAiSymptoms(e.target.value)}
+                    placeholder={tr(
+                      'Describe your PC issue... (e.g., "PC keeps beeping and wont turn on")',
+                      'Mô tả lỗi PC của bạn... (VD: "Máy tính kêu bíp bíp không lên nguồn, thỉnh thoảng bị màn hình xanh khi chơi game")'
+                    )}
+                    style={{
+                      width: '100%', minHeight: '100px', padding: '14px',
+                      background: '#0a0e17', color: '#00ff88', border: '1px solid rgba(0,255,136,0.2)',
+                      borderRadius: '8px', fontSize: '14px', fontFamily: '"Courier New", monospace',
+                      resize: 'vertical', outline: 'none', lineHeight: '1.6',
+                    }}
+                  />
+                  <div style={{
+                    position: 'absolute', bottom: '8px', right: '12px',
+                    fontSize: '10px', color: 'rgba(0,255,136,0.3)',
+                    fontFamily: '"Courier New", monospace',
+                  }}>
+                    {aiSymptoms.length} ký tự
+                  </div>
+                </div>
+              </div>
+              <div style={{ padding: '12px 20px', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                <button
+                  onClick={async () => {
+                    if (!aiSymptoms.trim()) return;
+                    setAiDiagnosing(true);
+                    setAiError('');
+                    setAiResult(null);
+                    try {
+                      const res = await fetch('/api/ai/diagnose-symptoms', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ symptoms: aiSymptoms }),
+                      });
+                      const data = await res.json();
+                      if (data.error) throw new Error(data.error);
+                      setAiResult(data);
+                    } catch (err) {
+                      setAiError(err.message || 'Lỗi kết nối AI');
+                    } finally {
+                      setAiDiagnosing(false);
+                    }
+                  }}
+                  disabled={aiDiagnosing || !aiSymptoms.trim()}
+                  style={{
+                    padding: '12px 28px', borderRadius: '8px', border: 'none',
+                    background: aiDiagnosing ? 'var(--bg-elevated)' : 'linear-gradient(135deg, #00d4aa, #00a3ff)',
+                    color: aiDiagnosing ? 'var(--text-muted)' : '#fff',
+                    fontSize: '14px', fontWeight: 700, cursor: aiDiagnosing ? 'default' : 'pointer',
+                    fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '8px',
+                  }}
+                  type="button"
+                >
+                  {aiDiagnosing ? (
+                    <>
+                      <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: '2px solid var(--text-muted)', borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
+                      {tr('Analyzing...', 'Đang chẩn đoán...')}
+                    </>
+                  ) : (
+                    <>
+                      🧠 {tr('Send to AI', 'Gửi AI chẩn đoán')}
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {aiDiagnosing && (
+              <div style={{
+                textAlign: 'center', padding: '32px',
+                background: 'var(--bg-surface)', borderRadius: '12px',
+                border: '1px solid var(--border-default)',
+              }}>
+                <div style={{
+                  width: '60px', height: '60px', borderRadius: '50%',
+                  border: '4px solid var(--border-default)', borderTopColor: '#00d4aa',
+                  margin: '0 auto 16px', animation: 'spin 1s linear infinite',
+                }} />
+                <div className="diagnosis-terminal" style={{
+                  padding: '16px', borderRadius: '8px', fontSize: '13px',
+                  lineHeight: '1.8', display: 'inline-block',
+                }}>
+                  <div style={{ color: '#00ff88', opacity: 0.5, fontSize: '11px', marginBottom: '8px' }}>
+                    {'>'} AI đang phân tích triệu chứng...
+                  </div>
+                  <div style={{
+                    display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'left',
+                    color: '#00ff88', opacity: 0.7,
+                  }}>
+                    <div>{'>'} Đọc triệu chứng...</div>
+                    <div>{'>'} Phân tích nguyên nhân...</div>
+                    <div>{'>'} Tra cứu cơ sở tri thức...</div>
+                    <div style={{ opacity: 0.4 }}>{'>'} Đưa ra chẩn đoán... <span style={{ animation: 'blink 1s infinite' }}>_</span></div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {aiError && (
+              <div style={{
+                padding: '16px', borderRadius: '10px',
+                background: 'rgba(232,72,85,0.1)', border: '1px solid var(--danger)',
+                color: 'var(--danger)', fontSize: '13px', fontWeight: 600,
+              }}>
+                {aiError}
+              </div>
+            )}
+
+            {aiResult && (
+              <div style={{
+                background: 'var(--bg-surface)', borderRadius: '12px',
+                border: '1px solid var(--border-default)', overflow: 'hidden',
+                animation: 'diagnosisFadeIn 0.3s ease-out',
+              }}>
+                <div className="diagnosis-terminal" style={{
+                  padding: '14px 20px',
+                  borderBottom: '1px solid rgba(0,255,136,0.15)',
+                  display: 'flex', alignItems: 'center', gap: '12px',
+                }}>
+                  <span style={{ fontSize: '24px' }}>🔬</span>
+                  <div>
+                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#00ff88' }}>
+                      {aiResult.diagnosis}
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#00ff88', opacity: 0.5 }}>
+                      {'>'} DIAGNOSIS_REPORT #AI-{Date.now().toString(36).toUpperCase()}
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                    <div style={{
+                      padding: '12px 20px', borderRadius: '10px',
+                      background: 'var(--bg-elevated)', border: '1px solid var(--border-default)',
+                      textAlign: 'center', flex: 1, minWidth: '140px',
+                    }}>
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
+                        {tr('Probability', 'Xác suất')}
+                      </div>
+                      <div style={{
+                        fontSize: '28px', fontWeight: 900,
+                        color: aiResult.probability > 80 ? '#ef4444' : aiResult.probability > 50 ? '#f59e0b' : '#22c55e',
+                      }}>
+                        {aiResult.probability}%
+                      </div>
+                    </div>
+                    <div style={{
+                      padding: '12px 20px', borderRadius: '10px',
+                      background: 'var(--bg-elevated)', border: '1px solid var(--border-default)',
+                      flex: 1, minWidth: '140px',
+                    }}>
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
+                        {tr('Suspected Component', 'Linh kiện nghi ngờ')}
+                      </div>
+                      <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--brand-primary)' }}>
+                        {aiResult.suspectedComponent}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{
+                    padding: '16px', borderRadius: '10px',
+                    background: 'var(--bg-elevated)', border: '1px solid var(--border-default)',
+                  }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px' }}>
+                      {tr('Reasoning', 'Phân tích nguyên nhân')}
+                    </div>
+                    <p style={{ fontSize: '13px', lineHeight: '1.7', color: 'var(--text-secondary)', margin: 0 }}>
+                      {aiResult.reason}
+                    </p>
+                  </div>
+
+                  <div style={{
+                    padding: '16px', borderRadius: '10px',
+                    background: 'rgba(0,212,170,0.05)', border: '1px solid rgba(0,212,170,0.15)',
+                  }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: '#00d4aa', textTransform: 'uppercase', marginBottom: '10px' }}>
+                      {tr('Fix Steps', 'Các bước khắc phục')}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {aiResult.steps && aiResult.steps.map((step, i) => (
+                        <div key={i} style={{
+                          display: 'flex', alignItems: 'flex-start', gap: '10px',
+                          padding: '10px 14px', borderRadius: '8px',
+                          background: 'var(--bg-elevated)', border: '1px solid var(--border-default)',
+                        }}>
+                          <div style={{
+                            width: '22px', height: '22px', borderRadius: '50%',
+                            background: '#00d4aa', color: '#fff', fontSize: '11px',
+                            fontWeight: 800, display: 'flex', alignItems: 'center',
+                            justifyContent: 'center', flexShrink: 0,
+                          }}>
+                            {i + 1}
+                          </div>
+                          <span style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                            {step}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {aiResult.toolsNeeded && aiResult.toolsNeeded.length > 0 && (
+                    <div>
+                      <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px' }}>
+                        {tr('Tools Needed', 'Dụng cụ cần dùng')}
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        {aiResult.toolsNeeded.map((tool, i) => (
+                          <div key={i} style={{
+                            padding: '6px 14px', borderRadius: '100px',
+                            background: 'var(--bg-elevated)', border: '1px solid var(--border-default)',
+                            fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 500,
+                          }}>
+                            🔧 {tool}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '8px' }}>
+                    <button
+                      onClick={() => { setAiSymptoms(''); setAiResult(null); }}
+                      style={{
+                        padding: '10px 20px', borderRadius: '8px', border: '1px solid var(--border-default)',
+                        background: 'transparent', color: 'var(--text-secondary)',
+                        fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                      }}
+                      type="button"
+                    >
+                      {tr('New Diagnosis', 'Chẩn đoán mới')}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+        <>
         {scenario && (
           <SymptomPanel
             symptoms={scenario.symptoms}
@@ -1154,6 +1447,8 @@ export default function DiagnosisMode({ lang = 'en', onComplete, onExit }) {
         {scenario && !showExplanation && (
           <ComponentDiagram type={scenario.diagram} />
         )}
+        </>
+      )}
       </div>
     </div>
   );

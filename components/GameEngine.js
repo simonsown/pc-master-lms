@@ -2,11 +2,41 @@
 
 import { useEffect, useRef, useState, useImperativeHandle, forwardRef, useCallback } from 'react';
 import confetti from 'canvas-confetti';
+import { IMAGE_MAP } from './imageAssets';
 
 const GRAB_THRESHOLD = 0.07; // Pinch to grab (lower = easier to grab)
 const RELEASE_THRESHOLD = 0.10; // Release when fingers open wider (hysteresis prevents jitter)
 
-const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems, defaultPlaced }, ref) => {
+const imgCache = new Map();
+
+function getCachedImg(src) {
+  if (imgCache.has(src)) return imgCache.get(src);
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => imgCache.set(src, img);
+  img.onerror = () => imgCache.set(src, img);
+  img.src = src;
+  imgCache.set(src, img);
+  return null;
+}
+
+const IMAGE_MAP_TYPES = ['CPU', 'RAM', 'GPU', 'PSU', 'SSD', 'COOLER'];
+
+function randomImage(type) {
+  const images = IMAGE_MAP[type];
+  if (!images || images.length === 0) return '';
+  return images[Math.floor(Math.random() * images.length)];
+}
+
+function assignRandomImages(components) {
+  components.forEach(c => {
+    if (!c.imageUrl && IMAGE_MAP_TYPES.includes(c.type)) {
+      c.imageUrl = randomImage(c.type);
+    }
+  });
+}
+
+const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems, defaultPlaced, imageMode }, ref) => {
     const canvasRef = useRef(null);
 
     // Offscreen Canvas for caching static heavy elements
@@ -119,6 +149,29 @@ const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems, default
             for (let i = 0; i < count; i++) {
                 spawnOne();
             }
+        },
+        placeComponent: (type) => {
+            const dims = { CPU: {w:80,h:80}, RAM: {w:25,h:260}, GPU: {w:320,h:130}, SSD: {w:140,h:35}, COOLER: {w:90,h:90}, PSU: {w:180,h:160} };
+            let comp = stateRef.current.components.find(c => c.type === type && !c.isPlaced);
+            if (!comp) {
+              const d = dims[type] || {w:80,h:80};
+              const offset = stateRef.current.components.filter(c => c.type === type && !c.isPlaced).length;
+              comp = { id: Date.now() + Math.random(), type, x: 120 + offset * 30, y: 100 + offset * 20, width: d.w, height: d.h, isGrabbed: false, isPlaced: false };
+              stateRef.current.components.push(comp);
+            }
+            const socket = stateRef.current.sockets.find(s =>
+              s.type === type &&
+              !stateRef.current.components.some(c2 => c2.isPlaced && c2 !== comp && Math.abs(c2.x - s.x) < 5 && Math.abs(c2.y - s.y) < 5)
+            );
+            if (!socket) return false;
+            comp.x = socket.x;
+            comp.y = socket.y;
+            comp.width = socket.width;
+            comp.height = socket.height;
+            comp.isPlaced = true;
+            comp.isGrabbed = false;
+            if (onGameEvent) onGameEvent('placed', type);
+            return true;
         }
     }));
 
@@ -132,6 +185,12 @@ const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems, default
     useEffect(() => {
         landmarksRef.current = landmarks;
     }, [landmarks]);
+
+    useEffect(() => {
+        if (imageMode && stateRef.current) {
+            assignRandomImages(stateRef.current.components);
+        }
+    }, [imageMode]);
 
     const handleMouseMove = (e) => {
         const canvas = canvasRef.current;
@@ -505,6 +564,34 @@ const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems, default
 
         const drawComponent = (ctx, comp, time) => {
             ctx.save();
+
+            // Image mode: draw actual 2D image instead of canvas art
+            if (imageMode && comp.imageUrl) {
+                ctx.translate(comp.x, comp.y);
+                ctx.translate(comp.width / 2, comp.height / 2);
+                if (comp.isGrabbed) {
+                    ctx.scale(1.05, 1.05);
+                }
+                ctx.translate(-comp.width / 2, -comp.height / 2);
+                ctx.shadowBlur = 6;
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                ctx.shadowOffsetY = 4;
+                let img = comp.imageUrl ? imgCache.get(comp.imageUrl) : null;
+                if (img && img.complete && img.naturalWidth > 0) {
+                    ctx.drawImage(img, 0, 0, comp.width, comp.height);
+                } else {
+                    if (!img) getCachedImg(comp.imageUrl);
+                    ctx.fillStyle = '#333';
+                    ctx.fillRect(0, 0, comp.width, comp.height);
+                    ctx.fillStyle = '#666';
+                    ctx.font = '12px monospace';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(comp.type, comp.width / 2, comp.height / 2 + 4);
+                }
+                ctx.restore();
+                return;
+            }
+
             ctx.translate(comp.x, comp.y);
 
             // Realistic Drop Shadow - Native shadowBlur is EXTREMELY expensive on complex paths like GPU, causing severe drag latency.
