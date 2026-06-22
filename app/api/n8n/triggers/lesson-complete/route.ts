@@ -41,7 +41,7 @@ export async function POST(request: Request) {
         user_id: studentId,
         type: 'success',
         title: 'Huy hieu moi! Khoi dau hanh trinh',
-        message: 'Chuc mung ban da hoan thanh bai hoc dau tien!'
+        body: 'Chuc mung ban da hoan thanh bai hoc dau tien!'
       })
     }
 

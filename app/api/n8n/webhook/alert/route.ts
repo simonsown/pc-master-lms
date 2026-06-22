@@ -39,8 +39,8 @@ export async function POST(request: Request) {
       user_id: studentId,
       type: 'warning',
       title: `Canh bao hoc tap: ${alertType}`,
-      message: reason,
-      link: details?.suggestedLesson ? `/lessons/${details.suggestedLesson}` : null
+      body: reason,
+      action_url: details?.suggestedLesson ? `/lessons/${details.suggestedLesson}` : null
     })
 
     const { data: parentLinks } = await supabase
@@ -53,8 +53,8 @@ export async function POST(request: Request) {
         user_id: pl.parent_id,
         type: 'warning',
         title: `Canh bao: Tinh hinh hoc tap cua con ban`,
-        message: `Con ban (${profile.full_name}) dang gap van de: ${reason}`,
-        link: details?.suggestedLesson ? `/lessons/${details.suggestedLesson}` : `/student/${studentId}`
+        body: `Con ban (${profile.full_name}) dang gap van de: ${reason}`,
+        action_url: details?.suggestedLesson ? `/lessons/${details.suggestedLesson}` : `/student/${studentId}`
       }))
 
       await supabase.from('notifications').insert(parentNotifs)
@@ -72,8 +72,8 @@ export async function POST(request: Request) {
           user_id: classInfo.teacher_id,
           type: 'warning',
           title: `Hoc sinh can tro giup: ${profile.full_name}`,
-          message: reason,
-          link: `/student/${studentId}`
+          body: reason,
+          action_url: `/student/${studentId}`
         })
       }
     }

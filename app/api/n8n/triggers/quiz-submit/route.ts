@@ -50,7 +50,7 @@ export async function POST(request: Request) {
           user_id: studentId,
           type: 'success',
           title: 'Huy hieu moi! Xuat sac!',
-          message: 'Chuc mung! Ban dat diem tuyet doi trong bai kiem tra!'
+          body: 'Chuc mung! Ban dat diem tuyet doi trong bai kiem tra!'
         })
       }
     }
@@ -71,8 +71,8 @@ export async function POST(request: Request) {
         user_id: studentId,
         type: 'warning',
         title: 'Ban can tro giap them!',
-        message: `Diem trung binh 3 bai gan day cua ban la ${Math.round(avgScore)}/100. Hay xem lai bai hoc va thu lai nhe!`,
-        link: `/lessons`
+        body: `Diem trung binh 3 bai gan day cua ban la ${Math.round(avgScore)}/100. Hay xem lai bai hoc va thu lai nhe!`,
+        action_url: `/lessons`
       })
     }
 

@@ -146,12 +146,12 @@ export async function POST(request: Request) {
 
       await supabase.from('certificates').update({ pdf_url: publicUrl }).eq('id', cert.id)
 
-      const { error: notifyErr } = await supabase.from('notifications').insert({
+      await supabase.from('notifications').insert({
         user_id: studentId,
         type: 'success',
         title: 'Chung chi moi!',
-        message: `Chuc mung! Ban da nhan duoc chung chi "${cert.course_title}" voi so diem ${cert.final_score}%!`,
-        link: `/verify/${certNumber}`
+        body: `Chuc mung! Ban da nhan duoc chung chi "${cert.course_title}" voi so diem ${cert.final_score}%!`,
+        action_url: `/verify/${certNumber}`
       })
 
       const { data: parentLinks } = await supabase
@@ -164,8 +164,8 @@ export async function POST(request: Request) {
           user_id: pl.parent_id,
           type: 'success',
           title: 'Con ban hoan thanh khoa hoc!',
-          message: `Con ban ${cert.student_name} vua hoan thanh "${cert.course_title}" voi diem ${cert.final_score}%!`,
-          link: `/verify/${certNumber}`
+          body: `Con ban ${cert.student_name} vua hoan thanh "${cert.course_title}" voi diem ${cert.final_score}%!`,
+          action_url: `/verify/${certNumber}`
         }))
         await supabase.from('notifications').insert(parentNotifs)
       }
@@ -188,8 +188,8 @@ export async function POST(request: Request) {
             user_id: tid,
             type: 'success',
             title: 'Hoc sinh hoan thanh khoa hoc!',
-            message: `Hoc sinh ${cert.student_name} da hoan thanh "${cert.course_title}"!`,
-            link: `/verify/${certNumber}`
+            body: `Hoc sinh ${cert.student_name} da hoan thanh "${cert.course_title}"!`,
+            action_url: `/verify/${certNumber}`
           }))
           await supabase.from('notifications').insert(teacherNotifs)
         }
@@ -203,7 +203,9 @@ export async function POST(request: Request) {
         reference_id: cert.id
       })
 
-      await supabase.rpc('add_xp', { p_user_id: studentId, p_amount: 200 })
+      try {
+        await supabase.rpc('add_xp', { p_user_id: studentId, p_amount: 200 })
+      } catch {}
 
       return NextResponse.json({
         success: true,
