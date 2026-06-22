@@ -17,11 +17,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
-    const { recipients, title, message, type, link } = body
+    const { recipients, title, message, type, actionUrl } = await request.json()
 
     if (!recipients || !recipients.length || !title || !message) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+      return NextResponse.json({ error: 'Missing required fields: recipients, title, message' }, { status: 400 })
     }
 
     const supabase = createServiceClient()
@@ -30,9 +29,8 @@ export async function POST(request: Request) {
       user_id: userId,
       type: type || 'info',
       title,
-      message,
-      link: link || null,
-      is_read: false
+      body: message,
+      action_url: actionUrl || null,
     }))
 
     const { error: insertErr } = await supabase
