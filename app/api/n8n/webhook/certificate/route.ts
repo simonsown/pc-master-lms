@@ -6,7 +6,7 @@ import QRCode from 'qrcode'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 
-const N8N_SECRET = process.env.N8N_WEBHOOK_SECRET || ''
+const N8N_SECRET = (process.env.N8N_WEBHOOK_SECRET || '').trim()
 
 function verifyN8nRequest(request: Request): boolean {
   const auth = request.headers.get('authorization')

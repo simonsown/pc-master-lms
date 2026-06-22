@@ -4,8 +4,8 @@ import { createServiceClient } from '@/lib/supabase-service'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 30
 
-const N8N_SECRET = process.env.N8N_WEBHOOK_SECRET || ''
-const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || ''
+const N8N_SECRET = (process.env.N8N_WEBHOOK_SECRET || '').trim()
+const N8N_WEBHOOK_URL = (process.env.N8N_WEBHOOK_URL || '').trim()
 
 export async function POST(request: Request) {
   try {
