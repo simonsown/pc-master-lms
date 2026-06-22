@@ -1,0 +1,94 @@
+{
+  "name": "03 - AI Generate Lesson Content & Questions",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/n8n/webhook/lesson-content",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook: Teacher Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "n8n-lesson-content"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.N8N_WEBHOOK_BASE }}/webhook/lesson-content",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer {{ $env.N8N_WEBHOOK_SECRET }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "jsonBody": "={\n  \"topic\": \"{{ $json.body.topic }}\",\n  \"difficulty\": \"{{ $json.body.difficulty || 'trung binh' }}\",\n  \"lessonId\": \"{{ $json.body.lessonId }}\",\n  \"teacherId\": \"{{ $json.body.teacherId }}\",\n  \"questionCount\": {{ $json.body.questionCount || 5 }}\n}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "call-nextjs",
+      "name": "Call AI Content Generator",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "notifications",
+        "dataToSend": "defineBelow",
+        "fieldsToSend": {
+          "values": [
+            { "fieldName": "user_id", "fieldValue": "={{ $json.body.teacherId }}" },
+            { "fieldName": "type", "fieldValue": "success" },
+            { "fieldName": "title", "fieldValue": "Noi dung da duoc tao!" },
+            { "fieldName": "message", "fieldValue": "={{ 'Da tao ' + ($json.questionsCreated || 0) + ' cau hoi cho chu de ' + $json.body.topic }}" },
+            { "fieldName": "link", "fieldValue": "" }
+          ]
+        },
+        "supabaseUrl": "={{ $env.SUPABASE_URL }}",
+        "supabaseServiceKey": "={{ $env.SUPABASE_SERVICE_KEY }}"
+      },
+      "id": "notify-teacher",
+      "name": "Notify Teacher",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1.1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [650, 500]
+    }
+  ],
+  "connections": {
+    "webhook-trigger": {
+      "main": [[ { "node": "call-nextjs", "type": "main", "index": 0 } ]]
+    },
+    "call-nextjs": {
+      "main": [
+        [ { "node": "notify-teacher", "type": "main", "index": 0 } ],
+        [ { "node": "respond", "type": "main", "index": 0 } ]
+      ]
+    }
+  },
+  "pinData": {},
+  "versionId": "generate-content-v1",
+  "active": true,
+  "settings": {},
+  "id": "workflow-generate-content",
+  "tags": []
+}

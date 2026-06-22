@@ -1,0 +1,171 @@
+{
+  "name": "04 - Weekly Report for Stakeholders",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "cronExpression", "expression": "0 8 * * 1" }
+          ]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Every Monday 8 AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/rpc/get_weekly_stats_summary",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "Bearer {{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        }
+      },
+      "id": "get-stats",
+      "name": "Get Weekly Stats",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/profiles?select=id,full_name,email,role,class_id,school_id,xp,level&role=eq.teacher&limit=100",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+          ]
+        }
+      },
+      "id": "get-teachers",
+      "name": "Get All Teachers",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 500]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.N8N_WEBHOOK_BASE }}/webhook/notification",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer {{ $env.N8N_WEBHOOK_SECRET }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "jsonBody": "={\n  \"recipients\": [\"{{ $json.id }}\"],\n  \"title\": \"Bao cao tuan - PC Master Builder\",\n  \"message\": \"Bao cao tuan: {{ $json.full_name }}, hay kiem tra bang dieu khien de xem tien do lop hoc.\",\n  \"type\": \"info\",\n  \"link\": \"/teacher\"\n}",
+        "options": {}
+      },
+      "id": "notify-teachers",
+      "name": "Notify Each Teacher",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [650, 500]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/parent_student_links?select=parent_id,student_id&limit=500",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+          ]
+        }
+      },
+      "id": "get-parents",
+      "name": "Get Parent-Student Links",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 700]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/rpc/get_student_weekly_summary?student_id={{ $json.student_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+          ]
+        }
+      },
+      "id": "get-student-summary",
+      "name": "Get Weekly Summary for Student",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [650, 700]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.N8N_WEBHOOK_BASE }}/webhook/notification",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer {{ $env.N8N_WEBHOOK_SECRET }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "jsonBody": "={\n  \"recipients\": [\"{{ $json.parent_id }}\"],\n  \"title\": \"Bao cao hoc tap tuan cua con ban\",\n  \"message\": \"Tuan nay con ban da hoan thanh {{ $json.completed_lessons }} bai hoc, dat diem TB {{ $json.avg_score }}/10.\",\n  \"type\": \"info\",\n  \"link\": \"/parent\"\n}",
+        "options": {}
+      },
+      "id": "notify-parent",
+      "name": "Notify Parent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [850, 700]
+    }
+  ],
+  "connections": {
+    "cron-trigger": {
+      "main": [[ { "node": "get-stats", "type": "main", "index": 0 } ]]
+    },
+    "get-stats": {
+      "main": [
+        [],
+        [ { "node": "get-teachers", "type": "main", "index": 0 } ]
+      ]
+    },
+    "get-parents": {
+      "main": [[ { "node": "get-student-summary", "type": "main", "index": 0 } ]]
+    },
+    "get-student-summary": {
+      "main": [[ { "node": "notify-parent", "type": "main", "index": 0 } ]]
+    }
+  },
+  "pinData": {},
+  "versionId": "weekly-report-v1",
+  "active": true,
+  "settings": {},
+  "id": "workflow-weekly-report",
+  "tags": []
+}

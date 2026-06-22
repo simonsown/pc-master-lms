@@ -1,0 +1,140 @@
+{
+  "name": "01 - Auto Certificate on Course Completion",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "hours", "minutesInterval": 30 }
+          ]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Check Every 30 Min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/rpc/check_completed_paths",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "Bearer {{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        }
+      },
+      "id": "supabase-query",
+      "name": "Check Completed Paths",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "has-data",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "larger"
+              }
+            }
+          ]
+        }
+      },
+      "id": "if-has-data",
+      "name": "Has Results?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.N8N_WEBHOOK_BASE }}/webhook/certificate",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer {{ $env.N8N_WEBHOOK_SECRET }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "jsonBody": "{\n  \"studentId\": \"{{ $json.student_id }}\",\n  \"pathId\": \"{{ $json.path_id }}\"\n}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "call-certificate",
+      "name": "Issue Certificate",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "notifications",
+        "dataToSend": "defineBelow",
+        "fieldsToSend": {
+          "values": [
+            { "fieldName": "user_id", "fieldValue": "={{ $json.student_id }}" },
+            { "fieldName": "type", "fieldValue": "success" },
+            { "fieldName": "title", "fieldValue": "Chung chi tu dong!" },
+            { "fieldName": "message", "fieldValue": "Chuc mung! Chung chi cua ban da duoc tao tu dong." },
+            { "fieldName": "link", "fieldValue": "=/verify/{{ $json.certificate_number }}" }
+          ]
+        },
+        "supabaseUrl": "={{ $env.SUPABASE_URL }}",
+        "supabaseServiceKey": "={{ $env.SUPABASE_SERVICE_KEY }}"
+      },
+      "id": "notify-student",
+      "name": "Notify Student",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1.1,
+      "position": [1050, 300]
+    }
+  ],
+  "connections": {
+    "cron-trigger": {
+      "main": [[ { "node": "supabase-query", "type": "main", "index": 0 } ]]
+    },
+    "supabase-query": {
+      "main": [[ { "node": "if-has-data", "type": "main", "index": 0 } ]]
+    },
+    "if-has-data": {
+      "main": [
+        [ { "node": "call-certificate", "type": "main", "index": 0 } ],
+        []
+      ]
+    },
+    "call-certificate": {
+      "main": [[ { "node": "notify-student", "type": "main", "index": 0 } ]]
+    }
+  },
+  "pinData": {},
+  "versionId": "auto-certificate-v1",
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "workflow-auto-certificate",
+  "tags": []
+}

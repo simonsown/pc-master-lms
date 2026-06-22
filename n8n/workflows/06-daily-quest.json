@@ -1,0 +1,196 @@
+{
+  "name": "06 - Daily Quest Generator & Streak Reminder",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "cronExpression", "expression": "0 6 * * *" }
+          ]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Every Day 6 AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/daily_quests?select=id,title,description,type,difficulty,icon,requirement_type,requirement_value,xp_reward,is_active&is_active=eq.true&limit=50",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+          ]
+        }
+      },
+      "id": "get-quests",
+      "name": "Get Active Quest Templates",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/profiles?select=id,full_name,level,quest_streak,last_quest_date&role=eq.student&limit=500",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+          ]
+        }
+      },
+      "id": "get-students",
+      "name": "Get All Students",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 500]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "user_quests",
+        "dataToSend": "defineBelow",
+        "fieldsToSend": {
+          "values": [
+            { "fieldName": "user_id", "fieldValue": "={{ $json.id }}" },
+            { "fieldName": "quest_id", "fieldValue": "={{ $json.quests[0].id }}" },
+            { "fieldName": "progress", "fieldValue": 0 },
+            { "fieldName": "xp_earned", "fieldValue": 0 },
+            { "fieldName": "status", "fieldValue": "active" },
+            { "fieldName": "assigned_at", "fieldValue": "={{ new Date().toISOString() }}" },
+            { "fieldName": "expires_at", "fieldValue": "={{ new Date(Date.now() + 86400000).toISOString() }}" }
+          ]
+        },
+        "supabaseUrl": "={{ $env.SUPABASE_URL }}",
+        "supabaseServiceKey": "={{ $env.SUPABASE_SERVICE_KEY }}"
+      },
+      "id": "assign-quests",
+      "name": "Assign Quests to Students",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1.1,
+      "position": [650, 500]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.N8N_WEBHOOK_BASE }}/webhook/notification",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer {{ $env.N8N_WEBHOOK_SECRET }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "jsonBody": "={\n  \"recipients\": [\"{{ $json.id }}\"],\n  \"title\": \"Nhiem vu hang ngay da san sang!\",\n  \"message\": \"Hom nay co nhiem vu moi dang cho ban. Hay hoan thanh de giu streak!\"\n}",
+        "options": {}
+      },
+      "id": "notify-students",
+      "name": "Notify Students",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [850, 500]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "missed-yesterday",
+              "leftValue": "={{ $json.last_quest_date }}",
+              "rightValue": "={{ new Date(Date.now() - 86400000).toISOString().split('T')[0] }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEqual"
+              }
+            },
+            {
+              "id": "has-streak",
+              "leftValue": "={{ $json.quest_streak }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "larger"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-streak",
+      "name": "Check Streak Status",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [650, 700]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.N8N_WEBHOOK_BASE }}/webhook/notification",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer {{ $env.N8N_WEBHOOK_SECRET }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "jsonBody": "={\n  \"recipients\": [\"{{ $json.id }}\"],\n  \"title\": \"Day streak! Hom nay hay hoc tiep nhe!\",\n  \"message\": \"Ban dang co streak {{ $json.quest_streak }} ngay. Dung de bi gian doan!\"\n}",
+        "options": {}
+      },
+      "id": "streak-reminder",
+      "name": "Send Streak Reminder",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [850, 700]
+    }
+  ],
+  "connections": {
+    "cron-trigger": {
+      "main": [[ { "node": "get-quests", "type": "main", "index": 0 } ]]
+    },
+    "get-quests": {
+      "main": [
+        [],
+        [ { "node": "get-students", "type": "main", "index": 0 } ]
+      ]
+    },
+    "get-students": {
+      "main": [[ { "node": "assign-quests", "type": "main", "index": 0 } ]]
+    },
+    "assign-quests": {
+      "main": [[ { "node": "notify-students", "type": "main", "index": 0 } ]]
+    },
+    "get-students": {
+      "main": [[ { "node": "check-streak", "type": "main", "index": 0 } ]]
+    },
+    "check-streak": {
+      "main": [
+        [],
+        [ { "node": "streak-reminder", "type": "main", "index": 0 } ]
+      ]
+    }
+  },
+  "pinData": {},
+  "versionId": "daily-quest-v1",
+  "active": true,
+  "settings": {},
+  "id": "workflow-daily-quest",
+  "tags": []
+}

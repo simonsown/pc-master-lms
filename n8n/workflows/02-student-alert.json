@@ -1,0 +1,155 @@
+{
+  "name": "02 - Student Performance Alert",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "hours", "minutesInterval": 60 }
+          ]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Check Every Hour",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/rpc/get_students_low_performance",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "Bearer {{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        }
+      },
+      "id": "supabase-query",
+      "name": "Get Low Performance Students",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "has-data",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "larger"
+              }
+            }
+          ]
+        }
+      },
+      "id": "if-has-data",
+      "name": "Has At-Risk Students?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.N8N_WEBHOOK_BASE }}/webhook/alert",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer {{ $env.N8N_WEBHOOK_SECRET }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "jsonBody": "={\n  \"studentId\": \"{{ $json.student_id }}\",\n  \"alertType\": \"low_score\",\n  \"reason\": \"Diem trung binh {{ $json.avg_score }}/10 - can tro giap them\",\n  \"details\": {\n    \"avgScore\": {{ $json.avg_score }},\n    \"recentQuizzes\": {{ $json.recent_quiz_count }},\n    \"suggestedLesson\": \"{{ $json.weakest_topic }}\"\n  }\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "send-alert",
+      "name": "Send Alert via Webhook",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.GEMINI_API_URL || 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent' }}?key={{ $env.GEMINI_API_KEY }}",
+        "authentication": "none",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [{\n    \"parts\": [{\"text\": \"Hoc sinh {{ $json.full_name }} co diem trung binh {{ $json.avg_score }}/10. Hay goi y 3 bai hoc on tap phu hop de cai thien diem so. Tra loi bang tieng Viet, ngan gon.\"}]\n  }]\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "gemini-suggest",
+      "name": "Get AI Suggestions",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [850, 500]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "notifications",
+        "dataToSend": "defineBelow",
+        "fieldsToSend": {
+          "values": [
+            { "fieldName": "user_id", "fieldValue": "={{ $json.student_id }}" },
+            { "fieldName": "type", "fieldValue": "info" },
+            { "fieldName": "title", "fieldValue": "Goi y on tap cho ban" },
+            { "fieldName": "message", "fieldValue": "={{ $json.candidates[0].content.parts[0].text.substring(0, 200) }}" },
+            { "fieldName": "link", "fieldValue": "" }
+          ]
+        },
+        "supabaseUrl": "={{ $env.SUPABASE_URL }}",
+        "supabaseServiceKey": "={{ $env.SUPABASE_SERVICE_KEY }}"
+      },
+      "id": "ai-suggestions",
+      "name": "Send AI Suggestions to Student",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1.1,
+      "position": [1050, 500]
+    }
+  ],
+  "connections": {
+    "cron-trigger": {
+      "main": [[ { "node": "supabase-query", "type": "main", "index": 0 } ]]
+    },
+    "supabase-query": {
+      "main": [[ { "node": "if-has-data", "type": "main", "index": 0 } ]]
+    },
+    "if-has-data": {
+      "main": [
+        [ { "node": "send-alert", "type": "main", "index": 0 } ],
+        []
+      ]
+    },
+    "send-alert": {
+      "main": [[ { "node": "gemini-suggest", "type": "main", "index": 0 } ]]
+    },
+    "gemini-suggest": {
+      "main": [[ { "node": "ai-suggestions", "type": "main", "index": 0 } ]]
+    }
+  },
+  "pinData": {},
+  "versionId": "student-alert-v1",
+  "active": true,
+  "settings": {},
+  "id": "workflow-student-alert",
+  "tags": []
+}

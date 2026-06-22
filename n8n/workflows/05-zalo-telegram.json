@@ -1,0 +1,177 @@
+{
+  "name": "05 - Zalo/Telegram Parent Notifications",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/n8n/zalo-parent-notify",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook: New Notification Event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "n8n-zalo-parent"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/parent_student_links?select=parent_id,relationship&student_id=eq.{{ $json.body.studentId }}&limit=10",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+          ]
+        }
+      },
+      "id": "find-parents",
+      "name": "Find Linked Parents",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "has-parents",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": 0,
+              "operator": { "type": "number", "operation": "larger" }
+            }
+          ]
+        }
+      },
+      "id": "if-has-parents",
+      "name": "Has Linked Parents?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/profiles?select=id,full_name,email,phone&id=eq.{{ $json.parent_id }}&limit=1",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+          ]
+        }
+      },
+      "id": "get-parent-profile",
+      "name": "Get Parent Profile",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/profiles?select=full_name&id=eq.{{ $json.body.studentId }}&limit=1",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+          ]
+        }
+      },
+      "id": "get-student-name",
+      "name": "Get Student Name",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [850, 500]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/sendMessage",
+        "authentication": "none",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"chat_id\": \"{{ $json.telegram_chat_id }}\",\n  \"text\": \"*Thong bao tu PC Master Builder*\n\nCon ban: {{ $json.student_name }}\nNoi dung: {{ $json.body.message }}\n\nXem chi tiet: {{ $env.NEXT_PUBLIC_SITE_URL }}{{ $json.body.link || '' }}\",\n  \"parse_mode\": \"Markdown\"\n}",
+        "options": {}
+      },
+      "id": "send-telegram",
+      "name": "Send Telegram Message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://openapi.zalo.me/v2.0/oa/message",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "headerParameters": {
+          "parameters": [
+            { "name": "access_token", "value": "={{ $env.ZALO_OA_ACCESS_TOKEN }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "jsonBody": "={\n  \"recipient\": { \"user_id\": \"{{ $json.zalo_user_id }}\" },\n  \"message\": {\n    \"text\": \"Thong bao tu PC Master Builder\n\nCon ban: {{ $json.student_name }}\nNoi dung: {{ $json.body.message }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "send-zalo",
+      "name": "Send Zalo Message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1050, 500]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1250, 300]
+    }
+  ],
+  "connections": {
+    "webhook-trigger": {
+      "main": [[ { "node": "find-parents", "type": "main", "index": 0 } ]]
+    },
+    "find-parents": {
+      "main": [[ { "node": "if-has-parents", "type": "main", "index": 0 } ]]
+    },
+    "if-has-parents": {
+      "main": [
+        [ { "node": "get-parent-profile", "type": "main", "index": 0 } ],
+        []
+      ]
+    },
+    "get-parent-profile": {
+      "main": [
+        [ { "node": "send-telegram", "type": "main", "index": 0 } ],
+        [ { "node": "get-student-name", "type": "main", "index": 0 } ]
+      ]
+    },
+    "get-student-name": {
+      "main": [[ { "node": "send-zalo", "type": "main", "index": 0 } ]]
+    },
+    "send-telegram": {
+      "main": [[ { "node": "respond", "type": "main", "index": 0 } ]]
+    }
+  },
+  "pinData": {},
+  "versionId": "zalo-telegram-v1",
+  "active": true,
+  "settings": {},
+  "id": "workflow-zalo-telegram",
+  "tags": []
+}
