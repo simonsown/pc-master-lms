@@ -10,7 +10,6 @@ const LABEL_MAP: Record<string, string> = {
   'create': 'Tạo bài giảng',
   'classes': 'Quản lý lớp học',
   'new': 'Tạo mới',
-  'learning-path': 'Quản lý Lộ trình',
   'quiz': 'Quản lý Đề thi',
   'certificates': 'Quản lý Chứng chỉ',
   'student': 'Học sinh',
@@ -18,8 +17,7 @@ const LABEL_MAP: Record<string, string> = {
   'history': 'Lịch sử học tập',
   'profile': 'Hồ sơ',
   'discussion': 'Diễn đàn',
-  'achievements': 'Thành tích',
-  'progress': 'Tiến độ',
+
 }
 
 export default function Breadcrumb() {

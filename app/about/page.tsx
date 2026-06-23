@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Phone, Mail, MapPin, ExternalLink, ShieldCheck, Heart, Loader2, Sparkles, BookOpen } from 'lucide-react';
+import { ArrowLeft, Phone, Mail, MapPin, ExternalLink, ShieldCheck, Heart, Loader2, Sparkles, BookOpen, Award, Users, Target, Quote } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 export default function AboutPage() {
@@ -16,8 +16,10 @@ export default function AboutPage() {
                 setTeam(data);
             } else {
                 setTeam([
-                    { id: '1', full_name: 'Nguyễn Phúc Khánh Sơn', image_url: '/son.png', role: 'Lập trình viên & Phát triển sản phẩm' },
-                    { id: '2', full_name: 'Dương Vũ Minh Đức', image_url: '/duc.png', role: 'Lập trình viên & Thiết kế hệ thống' }
+                    { id: '1', full_name: 'Nguyễn Phúc Khánh Sơn', image_url: '/son.png', role: 'Developer' },
+                    { id: '2', full_name: 'Đặng Quốc An', image_url: '/team-an-khang.png', role: 'Thành viên' },
+                    { id: '3', full_name: 'Nguyễn Phạm Gia Khiêm', image_url: '/team-hiem.png', role: 'Thành viên' },
+                    { id: '4', full_name: 'Ngô Minh Khang', image_url: '/team-an-khang.png', role: 'Thành viên' },
                 ]);
             }
             setLoading(false);
@@ -45,7 +47,7 @@ export default function AboutPage() {
 
                 <div style={{ maxWidth: '1000px', padding: '0 24px', position: 'relative', zIndex: 1 }}>
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: 'rgba(0, 243, 255, 0.1)', borderRadius: '100px', color: 'var(--brand-primary)', fontSize: '13px', fontWeight: 700, marginBottom: '24px', letterSpacing: '1px' }}>
-                        <Sparkles size={14} /> ONE MISSION TEAM
+                        <Sparkles size={14} /> PC MASTER BUILDER
                     </div>
                     <h1 style={{ fontSize: 'clamp(40px, 8vw, 64px)', fontWeight: 900, marginBottom: '24px', lineHeight: 1, letterSpacing: '-0.04em' }}>
                         Về Chúng Tôi
@@ -65,7 +67,7 @@ export default function AboutPage() {
                         
                         <div style={{ fontSize: '18px', color: '#8899a6', lineHeight: 1.8, marginBottom: '32px' }}>
                             <p style={{ fontStyle: 'italic', color: '#fff', fontSize: '20px', marginBottom: '24px' }}>
-                                "PC Master Builder" là dự án giải pháp ứng dụng công nghệ và AI đang trong quá trình chạy thử nghiệm (Pilot Run), được phát triển bởi One Mission Team.
+                                "PC Master Builder" là dự án giải pháp ứng dụng công nghệ và AI đang trong quá trình chạy thử nghiệm (Pilot Run).
                             </p>
                             <p>
                                 Chúng tôi khao khát ứng dụng sức mạnh của Công nghệ và AI để giải quyết các thách thức trong việc học tập và thực hành lắp ráp máy tính. Hiện tại, sản phẩm đang được vận hành thử nghiệm trên các hạ tầng công nghệ hiện đại nhất để kiểm chứng tính khả thi và hiệu quả giáo dục.
@@ -145,54 +147,196 @@ export default function AboutPage() {
                             <circle cx="270" cy="155" r="2" fill="rgba(255,185,0,0.4)" style={{ animation: 'pulseDot 2s infinite 1s' }} />
 
                             {/* Text labels */}
-                            <text x="200" y="200" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="10" fontFamily="monospace">ONE MISSION TEAM</text>
+                            <text x="200" y="200" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="10" fontFamily="monospace">PC MASTER BUILDER</text>
                             <text x="200" y="215" textAnchor="middle" fill="rgba(0,212,170,0.2)" fontSize="8" fontFamily="monospace">TECHNOLOGY · INNOVATION · EDUCATION</text>
                         </svg>
                     </div>
                 </div>
             </section>
 
-            <section style={{ padding: '60px 24px' }}>
+            <section style={{ padding: '80px 24px', background: 'linear-gradient(to bottom, #0a0a0c, #050507)' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <h2 style={{ fontSize: '36px', fontWeight: 900, textAlign: 'center', marginBottom: '60px', letterSpacing: '-0.02em' }}>
-                        Đội Ngũ <span style={{ color: 'var(--brand-primary)' }}>Phát Hành</span>
-                    </h2>
-                    {loading ? (
-                        <div style={{ textAlign: 'center' }}><Loader2 className="animate-spin" size={40} color="var(--brand-primary)" /></div>
-                    ) : (
-                        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '60px' }}>
-                            {team.map((member) => (
-                                <div key={member.id} style={{ textAlign: 'center', width: '320px' }}>
-                                    <div style={{ 
-                                        position: 'relative', width: '320px', height: '420px', 
-                                        marginBottom: '32px', borderRadius: '40px', overflow: 'hidden',
-                                        border: '1px solid rgba(255,255,255,0.1)', background: '#0a0a0c'
-                                    }}>
-                                        <img src={member.image_url} alt={member.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    </div>
-                                    <h3 style={{ fontSize: '24px', fontWeight: 800, margin: '0 0 6px' }}>{member.full_name}</h3>
-                                    {member.role && <p style={{ fontSize: '14px', color: 'var(--brand-primary)', margin: 0, fontWeight: 600 }}>{member.role}</p>}
-                                </div>
-                            ))}
+                    <div style={{ textAlign: 'center', marginBottom: '80px' }}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', padding: '10px 20px', background: 'rgba(0, 243, 255, 0.08)', borderRadius: '100px', color: 'var(--brand-primary)', fontSize: '13px', fontWeight: 700, marginBottom: '24px', letterSpacing: '1px' }}>
+                            <Award size={16} /> ĐỘI NGŨ GIÁO VIÊN
                         </div>
-                    )}
+                        <h2 style={{ fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 900, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+                            Giáo Viên <span style={{ color: 'var(--brand-primary)', background: 'linear-gradient(135deg, #00d4aa, #00f3ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Hướng Dẫn</span>
+                        </h2>
+                        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '16px', marginTop: '16px', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }}>
+                            Những người tận tâm hướng dẫn và truyền cảm hứng cho thế hệ kỹ sư công nghệ tương lai
+                        </p>
+                    </div>
+
+                    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '80px', marginBottom: '40px' }}>
+                        {/* Giáo viên 1: Trần Minh Phụng */}
+                        <div style={{ textAlign: 'center', width: '320px' }}>
+                            <div style={{ 
+                                position: 'relative', width: '220px', height: '220px', 
+                                margin: '0 auto 32px', borderRadius: '50%', overflow: 'hidden',
+                                border: '3px solid rgba(0, 212, 170, 0.3)', background: '#0a0a0c',
+                                boxShadow: '0 0 40px rgba(0, 212, 170, 0.15), inset 0 0 40px rgba(0, 212, 170, 0.05)',
+                                transition: 'all 0.4s ease',
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 0 60px rgba(0, 212, 170, 0.3), inset 0 0 40px rgba(0, 212, 170, 0.08)'; e.currentTarget.style.borderColor = 'rgba(0, 212, 170, 0.6)' }}
+                            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 0 40px rgba(0, 212, 170, 0.15), inset 0 0 40px rgba(0, 212, 170, 0.05)'; e.currentTarget.style.borderColor = 'rgba(0, 212, 170, 0.3)' }}
+                            >
+                                <img 
+                                    src="/teacher-phung.png" 
+                                    alt="Trần Minh Phụng" 
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                />
+                                <div style={{ position: 'absolute', bottom: '8px', right: '8px', width: '36px', height: '36px', borderRadius: '50%', background: 'var(--brand-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.4)' }}>
+                                    <ShieldCheck size={18} color="#fff" />
+                                </div>
+                            </div>
+                            <h3 style={{ fontSize: '26px', fontWeight: 800, margin: '0 0 6px', background: 'linear-gradient(135deg, #fff, #00d4aa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Trần Minh Phụng</h3>
+                            <p style={{ fontSize: '14px', color: 'var(--brand-primary)', margin: '0 0 8px', fontWeight: 600, letterSpacing: '1px' }}>GIÁO VIÊN HƯỚNG DẪN</p>
+                            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)', margin: 0, fontStyle: 'italic' }}>Chuyên gia Tin học & Công nghệ thông tin</p>
+                        </div>
+
+                        {/* Giáo viên 2: Đoàn Thụy Kim Phượng */}
+                        <div style={{ textAlign: 'center', width: '320px' }}>
+                            <div style={{ 
+                                position: 'relative', width: '220px', height: '220px', 
+                                margin: '0 auto 32px', borderRadius: '50%', overflow: 'hidden',
+                                border: '3px solid rgba(0, 243, 255, 0.3)', background: '#0a0a0c',
+                                boxShadow: '0 0 40px rgba(0, 243, 255, 0.15), inset 0 0 40px rgba(0, 243, 255, 0.05)',
+                                transition: 'all 0.4s ease',
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 0 60px rgba(0, 243, 255, 0.3), inset 0 0 40px rgba(0, 243, 255, 0.08)'; e.currentTarget.style.borderColor = 'rgba(0, 243, 255, 0.6)' }}
+                            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 0 40px rgba(0, 243, 255, 0.15), inset 0 0 40px rgba(0, 243, 255, 0.05)'; e.currentTarget.style.borderColor = 'rgba(0, 243, 255, 0.3)' }}
+                            >
+                                <img 
+                                    src="/teacher-phuong.png" 
+                                    alt="Đoàn Thụy Kim Phượng" 
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                />
+                                <div style={{ position: 'absolute', bottom: '8px', right: '8px', width: '36px', height: '36px', borderRadius: '50%', background: '#00f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.4)' }}>
+                                    <ShieldCheck size={18} color="#000" />
+                                </div>
+                            </div>
+                            <h3 style={{ fontSize: '26px', fontWeight: 800, margin: '0 0 6px', background: 'linear-gradient(135deg, #fff, #00f3ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Đoàn Thụy Kim Phượng</h3>
+                            <p style={{ fontSize: '14px', color: '#00f3ff', margin: '0 0 8px', fontWeight: 600, letterSpacing: '1px' }}>GIÁO VIÊN HƯỚNG DẪN</p>
+                            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)', margin: 0, fontStyle: 'italic' }}>Chuyên gia Tin học & Công nghệ thông tin</p>
+                        </div>
+                    </div>
+
+                    <section style={{ padding: '80px 24px' }}>
+                        <div style={{ textAlign: 'center', marginBottom: '80px' }}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', padding: '10px 20px', background: 'rgba(0, 212, 170, 0.08)', borderRadius: '100px', color: 'var(--brand-primary)', fontSize: '13px', fontWeight: 700, marginBottom: '24px', letterSpacing: '1px' }}>
+                                <Users size={16} /> ĐỘI NGŨ PHÁT TRIỂN
+                            </div>
+                            <h2 style={{ fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 900, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+                                Đội Ngũ <span style={{ color: 'var(--brand-primary)', background: 'linear-gradient(135deg, #ffb900, #ff8b00)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Phát Triển</span>
+                            </h2>
+                            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '16px', marginTop: '16px', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }}>
+                                Những con người tâm huyết tạo nên PC Master Builder - Dám nghĩ dám làm
+                            </p>
+                        </div>
+
+                        {loading ? (
+                            <div style={{ textAlign: 'center' }}><Loader2 className="animate-spin" size={40} color="var(--brand-primary)" /></div>
+                        ) : (
+                            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '60px' }}>
+                                {team.map((member, idx) => {
+                                    const isKhangOrAn = member.full_name === 'Đặng Quốc An' || member.full_name === 'Ngô Minh Khang';
+                                    const borderGradients = [
+                                        'linear-gradient(135deg, #00d4aa, #00f3ff)',
+                                        'linear-gradient(135deg, #ffb900, #ff8b00)',
+                                        'linear-gradient(135deg, #a78bfa, #6366f1)',
+                                        'linear-gradient(135deg, #f472b6, #ec4899)',
+                                    ];
+                                    return (
+                                        <div key={member.id} style={{ textAlign: 'center', width: '320px' }}>
+                                            <div style={{ 
+                                                position: 'relative', width: '280px', height: '280px', 
+                                                margin: '0 auto 28px', borderRadius: '40px', overflow: 'hidden',
+                                                border: '2px solid rgba(255,255,255,0.1)', background: '#0a0a0c',
+                                                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                                                boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                                            }}
+                                            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)'; e.currentTarget.style.borderColor = 'var(--brand-primary)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(0,212,170,0.2)' }}
+                                            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.3)' }}
+                                            >
+                                                <img src={member.image_url} alt={member.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                                                <div style={{
+                                                    position: 'absolute', bottom: 0, left: 0, right: 0,
+                                                    background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%)',
+                                                    padding: '24px 16px 16px',
+                                                    display: 'flex', flexDirection: 'column', alignItems: 'center',
+                                                }}>
+                                                    <span style={{
+                                                        padding: '4px 14px', borderRadius: '99px',
+                                                        background: 'rgba(0,212,170,0.2)', color: '#00d4aa',
+                                                        fontSize: '11px', fontWeight: 700, letterSpacing: '1px',
+                                                    }}>
+                                                        {member.role || 'Thành viên'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <h3 style={{ fontSize: '22px', fontWeight: 800, margin: '0 0 4px', color: '#fff' }}>{member.full_name}</h3>
+                                            <div style={{ width: '40px', height: '3px', background: borderGradients[idx % borderGradients.length], margin: '8px auto', borderRadius: '2px' }} />
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </section>
                 </div>
             </section>
 
-            <section style={{ padding: '100px 24px', background: 'rgba(255,255,255,0.01)' }}>
-                <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '60px' }}>
+            <section style={{ padding: '100px 24px', background: 'linear-gradient(to bottom, #050507, #0a0a0c)' }}>
+                <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                    <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', padding: '10px 20px', background: 'rgba(0, 243, 255, 0.08)', borderRadius: '100px', color: 'var(--brand-primary)', fontSize: '13px', fontWeight: 700, marginBottom: '24px', letterSpacing: '1px' }}>
+                            <MapPin size={16} /> LIÊN HỆ
+                        </div>
+                        <h2 style={{ fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: 900, letterSpacing: '-0.02em' }}>
+                            TRƯỜNG THPT <span style={{ color: 'var(--brand-primary)' }}>NGUYỄN CÔNG TRỨ</span>
+                        </h2>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '60px', alignItems: 'center' }}>
                         <div>
-                            <h2 style={{ fontSize: '32px', fontWeight: 800, marginBottom: '32px' }}>TRƯỜNG THPT <br/>NGUYỄN CÔNG TRỨ</h2>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                                <div style={{ display: 'flex', gap: '16px' }}><MapPin color="var(--brand-primary)" /> 97 Quang Trung, Phường 8, Gò Vấp, TP. HCM</div>
-                                <div style={{ display: 'flex', gap: '16px' }}><Phone color="var(--brand-primary)" /> 077 293 4951</div>
-                                <div style={{ display: 'flex', gap: '16px' }}><Mail color="var(--brand-primary)" /> phuckhanhsonnguyen@gmail.com</div>
-                                <a href="https://maps.app.goo.gl/CDytzt1bYAJ7zVew7" target="_blank" style={{ color: 'var(--brand-primary)', textDecoration: 'underline', marginTop: '20px' }}>Mở trong Google Maps →</a>
+                            <div style={{ padding: '32px', borderRadius: '24px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                    <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                                        <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(0,212,170,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                            <MapPin color="var(--brand-primary)" size={20} />
+                                        </div>
+                                        <div>
+                                            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', margin: '0 0 4px' }}>Địa chỉ</p>
+                                            <p style={{ fontSize: '16px', fontWeight: 600, margin: 0, color: '#fff' }}>97 Quang Trung, Phường Thông Tây Hội, Gò Vấp, TP. HCM</p>
+                                        </div>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                                        <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(0,243,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                            <Phone color="#00f3ff" size={20} />
+                                        </div>
+                                        <div>
+                                            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', margin: '0 0 4px' }}>Điện thoại</p>
+                                            <p style={{ fontSize: '16px', fontWeight: 600, margin: 0, color: '#fff' }}>(028) 3894 1546</p>
+                                        </div>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                                        <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(167,139,250,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                            <Mail color="#a78bfa" size={20} />
+                                        </div>
+                                        <div>
+                                            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', margin: '0 0 4px' }}>Email liên hệ</p>
+                                            <p style={{ fontSize: '16px', fontWeight: 600, margin: 0, color: '#fff' }}>c3nguyencongtru.tphcm@moet.edu.vn</p>
+                                        </div>
+                                    </div>
+                                    <a href="https://maps.app.goo.gl/CDytzt1bYAJ7zVew7" target="_blank"
+                                        style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', borderRadius: '12px', background: 'var(--brand-primary)', color: '#000', fontWeight: 800, fontSize: '14px', textDecoration: 'none', marginTop: '8px', justifyContent: 'center' }}>
+                                        <ExternalLink size={18} /> MỞ TRONG GOOGLE MAPS
+                                    </a>
+                                </div>
                             </div>
                         </div>
 
-                        <div style={{ height: '450px', borderRadius: '32px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <div style={{ height: '450px', borderRadius: '32px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', position: 'relative' }}>
                             <iframe 
                                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3918.84715830911!2d106.6661623147491!3d10.82329389228965!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x317528e57849e531%3A0xc3b320d72c0d3b3c!2zVHLGsOG7nW5nIFRIUFQgTmd1eeG7hW4gQ8O0bmcgVHLhu6k!5e0!3m2!1svi!2s!4v1651130000000!5m2!1svi!2s" 
                                 width="100%" height="100%" style={{ border: 0, filter: 'invert(90%) hue-rotate(180deg)' }} 
@@ -203,8 +347,37 @@ export default function AboutPage() {
                 </div>
             </section>
 
-            <footer style={{ padding: '60px 24px', textAlign: 'center', color: 'rgba(255,255,255,0.3)' }}>
-                One Mission Team - THPT Nguyễn Công Trứ
+            <footer style={{ padding: '80px 24px 40px', background: '#050507', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', flexWrap: 'wrap', marginBottom: '40px' }}>
+                        <div style={{ textAlign: 'left', maxWidth: '300px' }}>
+                            <h4 style={{ fontSize: '13px', fontWeight: 800, color: '#fff', marginBottom: '16px', letterSpacing: '1px', textTransform: 'uppercase' }}>Tác giả</h4>
+                            <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)', lineHeight: 1.8, margin: 0 }}>
+                                Nguyễn Phúc Khánh Sơn<br />
+                                <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)' }}>Developer & Designer</span>
+                            </p>
+                        </div>
+                        <div style={{ textAlign: 'left', maxWidth: '300px' }}>
+                            <h4 style={{ fontSize: '13px', fontWeight: 800, color: '#fff', marginBottom: '16px', letterSpacing: '1px', textTransform: 'uppercase' }}>Giáo viên hướng dẫn</h4>
+                            <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)', lineHeight: 1.8, margin: 0 }}>
+                                Trần Minh Phụng<br />
+                                Đoàn Thụy Kim Phượng
+                            </p>
+                        </div>
+                        <div style={{ textAlign: 'left', maxWidth: '300px' }}>
+                            <h4 style={{ fontSize: '13px', fontWeight: 800, color: '#fff', marginBottom: '16px', letterSpacing: '1px', textTransform: 'uppercase' }}>Báo cáo & Hỗ trợ</h4>
+                            <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)', lineHeight: 1.8, margin: 0 }}>
+                                Đoàn Thụy Kim Phượng<br />
+                                <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)' }}>Giáo viên phụ trách</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div style={{ paddingTop: '32px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                        <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.2)', margin: 0 }}>
+                            © {new Date().getFullYear()} PC Master Builder - THPT Nguyễn Công Trứ. Tất cả quyền được bảo lưu.
+                        </p>
+                    </div>
+                </div>
             </footer>
 
             <style>{`

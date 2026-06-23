@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import {
     GraduationCap, LayoutDashboard, Cpu, History, LogOut, Users,
     BookOpen, Sun, Moon, Map, BarChart2, Menu, X, BookMarked,
-    ShoppingCart, Swords, FileQuestion, Gamepad2, User, ChevronRight
+    ShoppingCart, Swords, FileQuestion, Gamepad2, User, ChevronRight, Zap
 } from 'lucide-react'
 import { logout } from '@/lib/auth-actions'
 import { createBrowserClient } from '@supabase/ssr'
@@ -49,9 +49,9 @@ function ThemeToggle() {
 const ALL_NAV_ITEMS = [
     { href: '/student/dashboard', label: 'Bảng điều khiển', icon: LayoutDashboard, mobileOnly: false },
     { href: '/student/lessons', label: 'Bài Giảng', icon: BookOpen, mobileOnly: false },
-    { href: '/student/learning-path', label: 'Lộ Trình Học', icon: Map, mobileOnly: false },
-    { href: '/student/progress', label: 'Tiến Độ Học Tập', icon: BarChart2, mobileOnly: false },
+
     { href: '/builder', label: 'Luyện Tập', icon: Cpu, mobileOnly: false },
+    { href: '/student/level', label: 'Cấp Độ & Nhiệm Vụ', icon: Zap, mobileOnly: false },
     { href: '/student/sgk', label: 'Chợ Máy Tính', icon: ShoppingCart, mobileOnly: true },
     { href: '/student/quiz', label: 'Kỳ Thi', icon: FileQuestion, mobileOnly: true },
     { href: '/student/multiplayer', label: '2 Người Chơi', icon: Swords, mobileOnly: true },

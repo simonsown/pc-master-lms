@@ -54,7 +54,6 @@ export default function Navbar() {
     { name: 'Kỳ thi', path: '/exams', icon: <FileText size={18} /> },
     { name: 'Trắc nghiệm', path: '/quiz', icon: <HelpCircle size={18} /> },
     { name: 'Xếp hạng', path: '/leaderboard', icon: <Trophy size={18} /> },
-    { name: 'Lộ trình', path: '/roadmap', icon: <LayoutDashboard size={18} /> },
   ]
 
   const teacherMenu = [

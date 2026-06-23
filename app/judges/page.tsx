@@ -7,7 +7,7 @@ import { QRCodeSVG } from 'qrcode.react';
 const sections = [
   {
     icon: '🎯', title: 'Tổng Quan Dự Án',
-    content: `PC Master Builder là nền tảng giáo dục trực tuyến giúp học sinh THPT học và thực hành lắp ráp máy tính thông qua mô phỏng 2D trực quan kết hợp với trí tuệ nhân tạo (AI). Dự án được phát triển bởi đội ngũ One Mission Team, hướng đến giải quyết bài toán thiếu hụt thiết bị thực hành trong các trường học.`
+    content: `PC Master Builder là nền tảng giáo dục trực tuyến giúp học sinh THPT học và thực hành lắp ráp máy tính thông qua mô phỏng 2D trực quan kết hợp với trí tuệ nhân tạo (AI). Dự án hướng đến giải quyết bài toán thiếu hụt thiết bị thực hành trong các trường học.`
   },
   {
     icon: '🧠', title: 'Công Nghệ & AI',
@@ -31,7 +31,7 @@ const sections = [
   },
   {
     icon: '📊', title: 'Bảng Điều Khiển',
-    content: `Dashboard dành riêng cho Giáo viên: tạo lớp học, giao bài tập, theo dõi tiến độ. Dashboard Học sinh: xem điểm, thành tích, lộ trình học tập. Phụ huynh: giám sát kết quả học tập của con.`
+    content: `Dashboard dành riêng cho Giáo viên: tạo lớp học, giao bài tập, theo dõi tiến độ. Dashboard Học sinh: xem điểm, kết quả học tập. Phụ huynh: giám sát kết quả học tập của con.`
   },
   {
     icon: '🔬', title: 'Thi Cử & Chứng Chỉ',
@@ -78,7 +78,7 @@ export default function JudgesPage() {
             borderRadius: '100px', color: '#00d4aa', fontSize: '13px',
             fontWeight: 700, marginBottom: '24px', letterSpacing: '1px'
           }}>
-            🏆 ONE MISSION TEAM · THPT NGUYỄN CÔNG TRỨ
+            🏆 PC MASTER BUILDER · THPT NGUYỄN CÔNG TRỨ
           </div>
           <h1 style={{
             fontSize: 'clamp(36px, 7vw, 72px)', fontWeight: 900,
@@ -279,8 +279,10 @@ export default function JudgesPage() {
         </h2>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', flexWrap: 'wrap' }}>
           {[
-            { name: 'Nguyễn Phúc Khánh Sơn', role: 'Full-stack Developer' },
-            { name: 'Dương Vũ Minh Đức', role: 'Frontend Developer' }
+            { name: 'Nguyễn Phúc Khánh Sơn', role: 'Developer' },
+            { name: 'Đặng Quốc An', role: 'Thành viên' },
+            { name: 'Nguyễn Phạm Gia Khiêm', role: 'Thành viên' },
+            { name: 'Ngô Minh Khang', role: 'Thành viên' },
           ].map((m, i) => (
             <motion.div
               key={i}
@@ -296,7 +298,7 @@ export default function JudgesPage() {
                 margin: '0 auto 16px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: '40px'
               }}>
-                {i === 0 ? '👑' : '⚡'}
+                {['👑', '⚡', '💻', '🚀'][i] || '⭐'}
               </div>
               <h3 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 4px' }}>{m.name}</h3>
               <p style={{ color: '#8899a6', fontSize: '13px', margin: 0 }}>{m.role}</p>
@@ -307,7 +309,7 @@ export default function JudgesPage() {
 
       {/* Footer */}
       <footer style={{ padding: '40px 24px', textAlign: 'center', color: 'rgba(255,255,255,0.2)', fontSize: '13px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-        <p>One Mission Team · Trường THPT Nguyễn Công Trứ · 97 Quang Trung, Phường 8, Gò Vấp, TP. HCM</p>
+        <p>PC Master Builder · Trường THPT Nguyễn Công Trứ · 97 Quang Trung, Phường 8, Gò Vấp, TP. HCM</p>
         <p style={{ marginTop: '8px' }}>© 2026 PC Master Builder. All rights reserved.</p>
       </footer>
     </div>

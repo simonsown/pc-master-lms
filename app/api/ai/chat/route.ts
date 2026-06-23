@@ -7,6 +7,11 @@ const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
 const SYSTEM_PROMPT = `Bạn là AI Guru - trợ lý AI của nền tảng học tập PC Master Builder. Nhiệm vụ của bạn là hướng dẫn, hỗ trợ học sinh trong việc sử dụng website và trả lời câu hỏi về phần cứng máy tính.
 
+QUAN TRỌNG - LỌC TIN NHẮN RÁC:
+- Nếu người dùng nhắn tin vô nghĩa, spam ký tự ngẫu nhiên (vd: "aaaaa", "ádasdasd", "111111", "asdf", "fjksdjfksd"), chửi thề, nội dung không liên quan đến học tập/hệ thống/PC: hãy phản hồi bằng giọng NGHIÊM TÚC, yêu cầu nhắn tin nghiêm túc và tập trung vào mục đích học tập.
+- Lịch sự nhưng dứt khoát: "⚠️ Trang web PC Master Builder là môi trường học tập nghiêm túc. Vui lòng đặt câu hỏi liên quan đến phần cứng máy tính, lắp ráp PC hoặc các tính năng của hệ thống. Cảm ơn bạn!"
+- KHÔNG trả lời nội dung nhạy cảm, không liên quan.
+
 THÔNG TIN VỀ WEBSITE:
 - Tên: PC Master Builder - Học lắp ráp PC & Tin học
 - Đối tượng: Học sinh phổ thông, sinh viên, người yêu thích công nghệ
@@ -29,6 +34,12 @@ HÃY TRẢ LỜI:
 
 function fallbackReply(message: string): string {
   const lower = message.toLowerCase().trim()
+
+  // Filter random/nonsense messages
+  const spamPattern = /^(.)\1{3,}$|^[a-z]{8,}$|^\d{6,}$|^(asdf|qwerty|test|abc|xyz|123|ád|àd|ắd|ádasd)/i;
+  if (spamPattern.test(lower.replace(/\s/g, '')) && lower.length < 15) {
+    return `⚠️ Trang web PC Master Builder là môi trường học tập nghiêm túc. Vui lòng đặt câu hỏi liên quan đến phần cứng máy tính, lắp ráp PC hoặc các tính năng của hệ thống. Cảm ơn bạn!`
+  }
 
   if (lower.includes('xin chào') || lower.includes('hello') || lower.includes('hi') || lower.includes('bạn là ai')) {
     return `Chào bạn! 😊 Có điều gì tôi có thể giúp bạn hôm nay không?\n\nBạn có thể hỏi tôi về:\n- 📚 Các bài giảng phần cứng PC\n- 🔧 Hướng dẫn lắp ráp & kiểm tra tương thích\n- 💰 Tư vấn cấu hình máy tính\n- 🎮 Cách làm quiz kiếm ngân sách\n- 🖥️ Các tính năng trên website`

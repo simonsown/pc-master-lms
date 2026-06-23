@@ -7,13 +7,11 @@ const FACE_LANDMARKER_URL =
   'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task';
 const WASM_BASE = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.32/wasm';
 
-const LERP_FACTOR = 0.1;
-const PITCH_MIN = -0.4;
-const PITCH_MAX = 0.4;
-const YAW_MIN = -0.5;
-const YAW_MAX = 0.5;
-const ROLL_MIN = -0.3;
-const ROLL_MAX = 0.3;
+const LERP_FACTOR = 0.6;
+const PITCH_MIN = -0.6;
+const PITCH_MAX = 0.6;
+const YAW_MIN = -0.8;
+const YAW_MAX = 0.8;
 
 export default function HeadTracker() {
   const setCameraCoords = useAssemblyStore((s) => s.setCameraCoords);
@@ -33,7 +31,6 @@ export default function HeadTracker() {
 
   const smoothPitch = useRef(0);
   const smoothYaw = useRef(0);
-  const smoothRoll = useRef(0);
   const fpsCount = useRef(0);
   const fpsTime = useRef(0);
 
@@ -331,10 +328,6 @@ export default function HeadTracker() {
 
             const rawYaw = (nose.x - 0.5) * 2;
             const rawPitch = (nose.y - 0.5) * 2;
-            const rawRoll = Math.atan2(
-              rightEye.y - leftEye.y,
-              rightEye.x - leftEye.x
-            );
 
             smoothPitch.current +=
               LERP_FACTOR *
@@ -344,15 +337,11 @@ export default function HeadTracker() {
               LERP_FACTOR *
               (Math.max(YAW_MIN, Math.min(YAW_MAX, rawYaw)) -
                 smoothYaw.current);
-            smoothRoll.current +=
-              LERP_FACTOR *
-              (Math.max(ROLL_MIN, Math.min(ROLL_MAX, rawRoll)) -
-                smoothRoll.current);
 
             setCameraCoords({
               pitch: smoothPitch.current,
               yaw: smoothYaw.current,
-              roll: smoothRoll.current,
+              roll: 0,
             });
 
             fpsCount.current++;
@@ -563,9 +552,6 @@ export default function HeadTracker() {
             </span>
             <span>
               Y: {(cameraCoords.yaw * 100).toFixed(0)}
-            </span>
-            <span>
-              R: {(cameraCoords.roll * 100).toFixed(0)}
             </span>
           </div>
         </>

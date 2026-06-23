@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { BookOpen, Cpu, ShoppingCart, Users, BrainCircuit, Award, Globe, Sparkles, Menu, Webcam, X, Sun, Moon, BarChart2, Map, FileText, Trophy, Bell, MessageSquare, User, ArrowRight, History } from 'lucide-react';
+import { BookOpen, Cpu, ShoppingCart, Users, BrainCircuit, Award, Globe, Sparkles, Menu, Webcam, X, Sun, Moon, FileText, Bell, MessageSquare, User, ArrowRight, History } from 'lucide-react';
 import JoinClassModal from './JoinClassModal';
 
 interface NavItem {
@@ -108,8 +108,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ lang, toggleLang, onStartQuiz, 
             </div>
             {[
               { id: 'course', icon: BookOpen, label: lang === 'en' ? 'Lecture Course' : 'Bài Giảng', onClick: () => setAppMode('course') },
-              { id: 'progress', icon: BarChart2, label: lang === 'en' ? 'Progress' : 'Tiến Độ Học Tập', href: '/student/progress' },
-              { id: 'learning_path', icon: Map, label: lang === 'en' ? 'Learning Path' : 'Lộ Trình Học', href: '/student/learning-path' },
+
               { id: 'history', icon: History, label: lang === 'en' ? 'Learning History' : 'Lịch Sử Học Tập', href: '/student/history' },
               { id: 'learning', icon: Cpu, label: lang === 'en' ? 'Practice Mode' : 'Luyện Tập', onClick: () => setAppMode('learning') },
               { id: 'market', icon: ShoppingCart, label: lang === 'en' ? 'Marketplace' : 'Chợ Máy Tính', onClick: () => setAppMode('market') },
@@ -134,7 +133,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ lang, toggleLang, onStartQuiz, 
             </div>
             {[
               { id: 'quiz_bank', icon: FileText, label: lang === 'en' ? 'Quiz Bank' : 'Ngân Hàng Đề Thi', href: '/student/quiz' },
-              { id: 'achievements', icon: Trophy, label: lang === 'en' ? 'Achievements' : 'Thành Tích', href: '/student/achievements' },
+
               { id: 'certificates', icon: Award, label: lang === 'en' ? 'Certificates' : 'Chứng Chỉ', href: '/student/certificates' },
             ].map(item => (
               <Link key={item.id} href={item.href} style={{ textDecoration: 'none' }}
@@ -258,13 +257,14 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ lang, toggleLang, onStartQuiz, 
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '14px', color: 'rgba(255,255,255,0.7)' }}>
               <p style={{ margin: 0 }}><strong style={{ color: '#fff' }}>Dự Án:</strong> PC Master Builder</p>
-              <p style={{ margin: 0 }}><strong style={{ color: '#fff' }}>Developer:</strong> One Mission - THPT Nguyễn Công Trứ</p>
+              <p style={{ margin: 0 }}><strong style={{ color: '#fff' }}>Developer:</strong> Nguyễn Phúc Khánh Sơn</p>
               <p style={{ margin: 0 }}><strong style={{ color: '#fff' }}>Thành viên:</strong></p>
               <ul style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <li>Dương Vũ Minh Đức</li>
-                <li>Nguyễn Phúc Khánh Sơn</li>
+                <li>Đặng Quốc An</li>
+                <li>Nguyễn Phạm Gia Khiêm</li>
+                <li>Ngô Minh Khang</li>
               </ul>
-              <p style={{ margin: 0 }}><strong style={{ color: '#fff' }}>Giáo viên HD:</strong> Đoàn Thụy Kim Phượng</p>
+              <p style={{ margin: 0 }}><strong style={{ color: '#fff' }}>Giáo viên HD:</strong> Trần Minh Phụng</p>
               <p style={{ margin: '8px 0 0', fontStyle: 'italic', textAlign: 'center', fontSize: '13px', color: 'rgba(255,255,255,0.5)' }}>
                 Cảm ơn bạn đã trải nghiệm PC Master Builder!
               </p>

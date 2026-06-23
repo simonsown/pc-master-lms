@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Cpu, ShoppingCart, Users, ArrowRight, Info, LogIn, LogOut, User, Award, Swords, Star, Trophy, GraduationCap, Zap, ShieldCheck, Bot, Wrench, Monitor, AlertTriangle } from 'lucide-react';
+import { BookOpen, Cpu, ShoppingCart, Users, ArrowRight, Info, LogIn, LogOut, User, Award, Swords, Star, Trophy, GraduationCap, Zap, ShieldCheck, Bot, Wrench, Monitor, AlertTriangle, Box } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -279,6 +279,7 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                         { id: '/builder/common-mistakes', title: 'Lỗi Thường Gặp', desc: '8 lỗi build PC phổ biến kèm video', Icon: AlertTriangle, color: '#ef4444' },
                         { id: '/builder/mac-check', title: 'Gợi Ý Máy Tính', desc: 'Tìm PC phù hợp với nhu cầu & ngân sách', Icon: Monitor, color: '#8b5cf6' },
                         { id: '/builder/career-build', title: 'Ước Mơ & PC', desc: 'Build PC theo nghề nghiệp tương lai', Icon: Star, color: '#facc15' },
+                        { id: '/builder/3d-components', title: 'Kho Linh Kiện 3D', desc: 'Xem linh kiện dưới góc nhìn 3 chiều', Icon: Box, color: '#a855f7' },
 
                     ].map((mode) => (
                         <motion.a

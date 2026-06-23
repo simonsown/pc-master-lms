@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import { requireRole } from '@/lib/auth/rbac'
 import { createClient } from '@/lib/supabase-ssr-server'
 import ChildProgressChart from '@/components/parent/ChildProgressChart'
-import { ACHIEVEMENT_DEFINITIONS } from '@/lib/achievements'
+const ACHIEVEMENT_DEFINITIONS: any[] = []
 import { 
   ArrowLeft, 
   Award, 

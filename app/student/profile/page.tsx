@@ -7,7 +7,7 @@ import { AvatarUpload } from '@/components/profile/AvatarUpload'
 import { ProfileForm } from '@/components/profile/ProfileForm'
 import { PreferencesForm } from '@/components/profile/PreferencesForm'
 import { SecurityForm } from '@/components/profile/SecurityForm'
-import { User, BarChart2, Settings, ShieldAlert, Trophy, Award, CheckCircle, Flame, RefreshCw, ArrowLeft } from 'lucide-react'
+import { User, BarChart2, Settings, ShieldAlert, Award, CheckCircle, Flame, RefreshCw, ArrowLeft } from 'lucide-react'
 
 export default function StudentProfilePage() {
   const router = useRouter()
@@ -18,7 +18,7 @@ export default function StudentProfilePage() {
     completedLessons: 0,
     averageScore: 0,
     streak: 0,
-    achievementsCount: 0,
+
     latestCert: null
   })
   const [loading, setLoading] = useState(true)
@@ -66,11 +66,6 @@ export default function StudentProfilePage() {
       .eq('student_id', user.id)
       .eq('status', 'submitted')
 
-    const { count: achCount } = await supabase
-      .from('student_achievements')
-      .select('id', { count: 'exact', head: true })
-      .eq('student_id', user.id)
-
     const { data: cert } = await supabase
       .from('certificates')
       .select('course_title, completion_date, certificate_number')
@@ -88,7 +83,6 @@ export default function StudentProfilePage() {
       completedLessons: compCount || 0,
       averageScore: avg,
       streak: 3,
-      achievementsCount: achCount || 0,
       latestCert: cert || null
     })
     setLoading(false)
@@ -240,16 +234,6 @@ export default function StudentProfilePage() {
                   </div>
 
                   <div className="p-4 rounded-2xl flex items-center gap-3 transition-all duration-300" style={{ background: 'color-mix(in srgb, var(--bg-elevated) 40%, transparent)', border: '1px solid var(--border-default)' }}>
-                    <div className="p-2 rounded-xl" style={{ background: 'color-mix(in srgb, var(--accent-amber) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--accent-amber) 20%, transparent)', color: 'var(--accent-amber)' }}>
-                      <Trophy size={20} />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase" style={{ color: 'var(--text-muted)' }}>Huy hiệu</p>
-                      <p className="text-lg font-black" style={{ color: 'var(--text-primary)' }}>{stats.achievementsCount} đạt được</p>
-                    </div>
-                  </div>
-
-                  <div className="p-4 rounded-2xl flex items-center gap-3 transition-all duration-300" style={{ background: 'color-mix(in srgb, var(--bg-elevated) 40%, transparent)', border: '1px solid var(--border-default)' }}>
                     <div className="p-2 rounded-xl" style={{ background: 'color-mix(in srgb, var(--accent-orange) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--accent-orange) 20%, transparent)', color: 'var(--accent-orange)' }}>
                       <Flame size={20} />
                     </div>
@@ -277,7 +261,7 @@ export default function StudentProfilePage() {
                     </div>
                   ) : (
                     <div className="text-xs p-4 rounded-xl text-center" style={{ color: 'var(--text-muted)', background: 'color-mix(in srgb, var(--bg-elevated) 10%, transparent)', border: '1px solid var(--border-default)' }}>
-                      Bạn chưa được cấp chứng chỉ nào. Hoàn thành lộ trình học để nhận!
+                      Bạn chưa được cấp chứng chỉ nào.
                     </div>
                   )}
                 </div>

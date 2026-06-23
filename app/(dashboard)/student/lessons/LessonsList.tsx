@@ -92,7 +92,7 @@ export default function LessonsList({
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Bài giảng</h1>
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Học tập theo lộ trình bài giảng có sẵn</p>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Học tập theo bài giảng có sẵn</p>
         </div>
         <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
           <Layers size={20} style={{ color: 'var(--brand-primary)' }} />

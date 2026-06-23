@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { GraduationCap, LayoutDashboard, Cpu, History, LogOut, Users, BookOpen, ChevronDown, User, Sun, Moon, Map, BarChart2, X } from 'lucide-react'
+import { GraduationCap, LayoutDashboard, Cpu, History, LogOut, Users, BookOpen, ChevronDown, User, Sun, Moon, X } from 'lucide-react'
 import { logout } from '@/lib/auth-actions'
 import { createBrowserClient } from '@supabase/ssr'
 import dynamic from 'next/dynamic'
@@ -48,8 +48,7 @@ export default function StudentDashboardContent({ onClose }: { onClose: () => vo
     { href: '/student/dashboard', label: 'Bảng điều khiển', icon: LayoutDashboard },
     ...(hasClass ? [{ href: '/student/classes', label: 'Lớp học của tôi', icon: Users }] : []),
     { href: '/student/lessons', label: 'Bài giảng', icon: BookOpen },
-    { href: '/student/learning-path', label: 'Lộ trình học tập', icon: Map },
-    { href: '/student/progress', label: 'Tiến Độ Học Tập', icon: BarChart2 },
+
     { href: '/builder', label: 'Thực hành lắp ráp', icon: Cpu },
     { href: '/student/history', label: 'Lịch sử học tập', icon: History },
   ]

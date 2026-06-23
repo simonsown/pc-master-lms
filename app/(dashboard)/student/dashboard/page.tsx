@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase-ssr-server'
 import { requireRole } from '@/lib/auth/rbac'
-import { ACHIEVEMENT_DEFINITIONS } from '@/lib/achievements'
+
 import { StudentDashboardClient } from './StudentDashboardClient'
 
 type LessonProgressRow = {
@@ -16,15 +16,9 @@ type LessonProgressRow = {
   } | null
 }
 
-type QuizAttemptRow = {
-  score: number | null
-  submitted_at: string | null
-  status: string | null
-}
 
-type StudentAchievementRow = {
-  achievement_id: string
-}
+
+
 
 type ChartPoint = {
   day: string
@@ -109,9 +103,7 @@ export default async function StudentDashboardPage() {
   const user = await requireRole(['student'])
   const supabase = await createClient()
 
-  const today = new Date().toISOString().slice(0, 10)
-
-  const [progressRes, quizRes, inProgressRes, achievementsRes, lessonsCountRes, dailyQuizRes] = await Promise.all([
+  const [progressRes, quizRes, lessonsCountRes] = await Promise.all([
     supabase
       .from('lesson_progress')
       .select('lesson_id, status, time_spent_seconds, completed_at, last_accessed, completion_percentage, lessons(title, thumbnail_url)')
@@ -124,60 +116,21 @@ export default async function StudentDashboardPage() {
       .order('submitted_at', { ascending: false })
       .limit(10),
     supabase
-      .from('lesson_progress')
-      .select('lesson_id, status, completion_percentage, last_accessed, lessons(title, thumbnail_url)')
-      .eq('student_id', user.id)
-      .is('is_completed', false)
-      .order('last_accessed', { ascending: false })
-      .not('is_completed', 'is', null)
-      .limit(1),
-    supabase
-      .from('student_achievements')
-      .select('achievement_id')
-      .eq('student_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(3),
-    supabase
       .from('lessons')
       .select('id', { count: 'exact', head: true })
       .eq('is_published', true),
-    supabase
-      .from('quizzes')
-      .select('id, title, description, time_limit_minutes')
-      .eq('is_daily', true)
-      .is('is_published', true)
-      .gte('created_at', `${today}T00:00:00Z`)
-      .lte('created_at', `${today}T23:59:59Z`)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle(),
-    // We'll get the daily attempt after we know the dailyQuiz id
-    Promise.resolve({ data: null })
   ])
 
-  if (progressRes.error || quizRes.error || inProgressRes.error || achievementsRes.error || lessonsCountRes.error || dailyQuizRes.error) {
+  if (progressRes.error || quizRes.error || lessonsCountRes.error) {
     console.error('Student dashboard fetch error', {
       progressError: progressRes.error,
       quizError: quizRes.error,
-      inProgressError: inProgressRes.error,
-      achievementsError: achievementsRes.error,
       lessonsCountError: lessonsCountRes.error,
-      dailyQuizError: dailyQuizRes.error
     })
   }
 
   const progress = (progressRes.data ?? []) as unknown as LessonProgressRow[]
   const quizzes = quizRes.data ?? []
-  const rawInProgress = inProgressRes.data?.[0] ?? null
-  const inProgressLesson = rawInProgress
-    ? {
-        ...rawInProgress,
-        lessons: Array.isArray(rawInProgress.lessons)
-          ? (rawInProgress.lessons[0] ?? null)
-          : rawInProgress.lessons
-      }
-    : null
-  const recentAchievementRows = achievementsRes.data ?? []
   const totalLessonsCount = lessonsCountRes.count ?? 0
 
   const completedLessons = progress.filter((item) => item.status === 'completed').length
@@ -185,33 +138,7 @@ export default async function StudentDashboardPage() {
   const totalMinutes = Math.round(progress.reduce((sum, item) => sum + (item.time_spent_seconds ?? 0), 0) / 60)
   const averageScore = quizzes.length > 0 ? Math.round(quizzes.reduce((sum, item) => sum + (item.score ?? 0), 0) / quizzes.length) : null
   const streakDays = calculateStreak(progress)
-  const routeCompletion = totalLessonsCount > 0 ? Math.round((completedLessons / totalLessonsCount) * 100) : (startedLessons > 0 ? Math.round((completedLessons / startedLessons) * 100) : 0)
   const chartData = buildChartData(progress)
-
-  const recentAchievements = recentAchievementRows.map((row: StudentAchievementRow) => {
-    const definition = ACHIEVEMENT_DEFINITIONS.find((def) => def.id === row.achievement_id)
-    return {
-      id: row.achievement_id,
-      title: definition?.title ?? 'Huy hiệu mới',
-      icon: definition?.icon ?? '🏅',
-      description: definition?.description ?? 'Đã mở khóa thành tựu mới'
-    }
-  })
-
-  const dailyQuiz = dailyQuizRes.data ?? null
-  // Fetch daily quiz attempt separately (depends on dailyQuiz)
-  let dailyAttempt = null
-  if (dailyQuiz) {
-    const { data: attemptData } = await supabase
-      .from('quiz_attempts')
-      .select('id, score, status, submitted_at')
-      .eq('quiz_id', dailyQuiz.id)
-      .eq('student_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
-    dailyAttempt = attemptData
-  }
 
   return (
     <StudentDashboardClient
@@ -225,12 +152,7 @@ export default async function StudentDashboardPage() {
         averageScore,
         streakDays
       }}
-      progressPercent={routeCompletion}
       chartData={chartData}
-      inProgressLesson={inProgressLesson}
-      recentAchievements={recentAchievements}
-      dailyQuiz={dailyQuiz}
-      dailyAttempt={dailyAttempt}
     />
   )
 }

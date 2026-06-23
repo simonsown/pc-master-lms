@@ -3,7 +3,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { checkAndAwardAchievements } from '@/lib/achievements'
+
 
 export async function completeLessonAction(lessonId: string) {
   const cookieStore = await cookies()
@@ -31,9 +31,6 @@ export async function completeLessonAction(lessonId: string) {
       completion_percentage: 100,
       completed_at: new Date().toISOString()
     }, { onConflict: 'student_id,lesson_id' })
-
-  // Trigger achievement evaluation
-  await checkAndAwardAchievements(supabase, user.id, 'lesson_completed')
 
   // Redirect to dashboard or next lesson
   redirect('/student')
@@ -96,8 +93,7 @@ export async function endBuilderSession(sessionId: string, data: { components_us
     })
     .eq('id', sessionId)
 
-  // Trigger achievement evaluation
   if (user) {
-    await checkAndAwardAchievements(supabase, user.id, 'builder_session_ended')
+    // Session ended
   }
 }

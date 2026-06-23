@@ -41,7 +41,6 @@ export default function LoginModal({ isOpen, onClose, redirectTo }: LoginModalPr
       provider: 'google',
       options: {
         redirectTo,
-        queryParams: { prompt: 'select_account' },
       },
     })
     if (oauthError) {

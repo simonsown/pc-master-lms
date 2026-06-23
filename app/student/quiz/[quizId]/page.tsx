@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, use, useMemo, useCallback } from 'r
 import { createBrowserClient } from '@supabase/ssr'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Clock, CheckCircle, XCircle, Trophy, RefreshCw, AlertTriangle, BookOpen, X, Search } from 'lucide-react'
-import { QUIZ_BANK } from '@/data/quiz-bank'
+import { startQuizAttempt, submitQuizAttempt } from '@/app/actions/quiz'
 import { GLOSSARY, findTerms } from '@/data/glossary'
 
 function shuffleArray<T>(arr: T[]): T[] {
@@ -14,26 +14,6 @@ function shuffleArray<T>(arr: T[]): T[] {
     [a[i], a[j]] = [a[j], a[i]]
   }
   return a
-}
-
-function getQuestionsForQuiz(quizDef: typeof QUIZ_BANK[0], count = 10) {
-  const all = quizDef.questions.map(q => ({
-    question: q.q,
-    options: [...q.options],
-    answer: q.answer
-  }))
-  const shuffled = shuffleArray(all)
-  const selected = shuffled.slice(0, Math.min(count, shuffled.length))
-
-  return selected.map(q => {
-    const shuffledOpts = shuffleArray(q.options)
-    return {
-      question: q.question,
-      options: shuffledOpts,
-      correctAnswer: q.options[q.answer],
-      correctIndex: shuffledOpts.indexOf(q.options[q.answer])
-    }
-  })
 }
 
 function TermHighlight({ text, onTermClick }: { text: string; onTermClick: (term: string) => void }) {
@@ -54,12 +34,8 @@ function TermHighlight({ text, onTermClick }: { text: string; onTermClick: (term
         const replacement: React.ReactNode[] = []
         if (before) replacement.push(before)
         replacement.push(
-          <span
-            key={`${term}-${i}`}
-            onClick={(e) => { e.stopPropagation(); onTermClick(term) }}
-            className="term-link"
-            style={{ color: 'var(--brand-primary)', borderBottom: '1px dashed var(--brand-primary)', cursor: 'pointer', fontWeight: 600 }}
-          >
+          <span key={`${term}-${i}`} onClick={(e) => { e.stopPropagation(); onTermClick(term) }}
+            className="term-link" style={{ color: 'var(--brand-primary)', borderBottom: '1px dashed var(--brand-primary)', cursor: 'pointer', fontWeight: 600 }}>
             {match}
           </span>
         )
@@ -70,69 +46,92 @@ function TermHighlight({ text, onTermClick }: { text: string; onTermClick: (term
     }
     return nodes
   }, [text, onTermClick])
-
   return <>{parts}</>
 }
 
 export default function QuizTakingPage({ params }: { params: Promise<{ quizId: string }> }) {
-  const resolvedParams = use(params)
-  const quizId = resolvedParams.quizId
-
+  const { quizId } = use(params)
   const router = useRouter()
-  const quizDef = QUIZ_BANK.find(q => q.id === quizId)
 
+  const [examData, setExamData] = useState<any>(null)
   const [questions, setQuestions] = useState<any[]>([])
   const [currentQIndex, setCurrentQIndex] = useState(0)
   const [selectedOption, setSelectedOption] = useState<number | null>(null)
   const [isAnswered, setIsAnswered] = useState(false)
   const [score, setScore] = useState(0)
   const [isFinished, setIsFinished] = useState(false)
-  const [secondsLeft, setSecondsLeft] = useState(15 * 60)
+  const [secondsLeft, setSecondsLeft] = useState(45 * 60)
   const [submitting, setSubmitting] = useState(false)
   const [loaded, setLoaded] = useState(false)
+  const [attemptId, setAttemptId] = useState<string | null>(null)
   const [activeTerm, setActiveTerm] = useState<string | null>(null)
   const [showGlossary, setShowGlossary] = useState(false)
   const [glossarySearch, setGlossarySearch] = useState('')
-  const [attemptId, setAttemptId] = useState<string | null>(null)
-  const tooltipRef = useRef<HTMLDivElement>(null)
+  const [error, setError] = useState('')
 
   const scoreRef = useRef(0)
-  const supabaseRef = useRef(createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  ))
+  const supabaseRef = useRef(createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!))
   const finishedRef = useRef(false)
   const questionsRef = useRef<any[]>([])
+  const answersRef = useRef<any[]>([])
 
   useEffect(() => {
-    if (quizDef) {
-      const qs = getQuestionsForQuiz(quizDef, 10)
-      questionsRef.current = qs
-      setQuestions(qs)
-      setLoaded(true)
+    initQuiz()
+    async function initQuiz() {
+      try {
+        const res = await startQuizAttempt(quizId)
+        setAttemptId(res.attemptId)
+        setExamData({ timeLimit: res.timeLimit })
+
+        const qs = res.questions.map((q: any) => ({
+          id: q.id,
+          question: q.content,
+          type: q.type,
+          points: q.points,
+          options: shuffleArray((q.options || []).map((o: any) => ({ id: o.id, content: o.content }))),
+          correctOptionId: null
+        }))
+
+        questionsRef.current = qs
+        setQuestions(qs)
+        setSecondsLeft((res.timeLimit || 45) * 60)
+        setLoaded(true)
+
+        const channel = supabaseRef.current
+          .channel(`quiz-live-${res.attemptId}`)
+          .on('postgres_changes',
+            { event: 'UPDATE', schema: 'public', table: 'quiz_attempts', filter: `id=eq.${res.attemptId}` },
+            (payload: any) => {
+              if (payload.new?.status !== 'in_progress') {
+                finishedRef.current = true
+                setIsFinished(true)
+                setScore(payload.new?.score || 0)
+              }
+            }
+          )
+          .subscribe()
+      } catch (e: any) {
+        setError(e.message || 'Không thể tải đề thi')
+        console.error(e)
+      }
     }
-  }, [])
+  }, [quizId])
 
   useEffect(() => {
-    if (isFinished || !loaded) return
-    const timer = setInterval(() => {
+    if (isFinished || !loaded || !examData?.timeLimit) return
+    const interval = setInterval(() => {
       setSecondsLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(timer)
-          finishQuiz(scoreRef.current)
-          return 0
-        }
+        if (prev <= 1) { clearInterval(interval); finishQuiz(scoreRef.current); return 0 }
         return prev - 1
       })
     }, 1000)
-    return () => clearInterval(timer)
-  }, [isFinished, loaded])
+    return () => clearInterval(interval)
+  }, [isFinished, loaded, examData?.timeLimit])
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (tooltipRef.current && !tooltipRef.current.contains(e.target as Node)) {
-        setActiveTerm(null)
-      }
+      const el = document.getElementById('term-tooltip')
+      if (el && !el.contains(e.target as Node)) setActiveTerm(null)
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
@@ -141,62 +140,6 @@ export default function QuizTakingPage({ params }: { params: Promise<{ quizId: s
   const handleTermClick = useCallback((term: string) => {
     setActiveTerm(prev => prev === term ? null : term)
   }, [])
-
-  const getQuestionResults = useCallback(() => {
-    const results: { question: string; options: string[]; selectedIndex: number | null; correctIndex: number; isCorrect: boolean }[] = []
-    for (let i = 0; i < questionsRef.current.length; i++) {
-      const q = questionsRef.current[i]
-      results.push({
-        question: q.question,
-        options: q.options,
-        selectedIndex: q.selectedIndex ?? null,
-        correctIndex: q.correctIndex,
-        isCorrect: (q.selectedIndex ?? -1) === q.correctIndex
-      })
-    }
-    return results
-  }, [])
-
-  async function finishQuiz(finalScore: number) {
-    if (finishedRef.current) return
-    finishedRef.current = true
-    setIsFinished(true)
-    setScore(finalScore)
-    setSubmitting(true)
-    try {
-      const { data: { user } } = await supabaseRef.current.auth.getUser()
-      if (user) {
-        const { data: attempt } = await supabaseRef.current.from('quiz_attempts').insert({
-          student_id: user.id,
-          quiz_id: quizId,
-          score: finalScore,
-          total_questions: questionsRef.current.length,
-          status: finalScore >= 80 ? 'passed' : 'failed'
-        }).select('id').single()
-
-        const { data: profile } = await supabaseRef.current.from('profiles').select('total_score').eq('id', user.id).single()
-        if (profile) {
-          await supabaseRef.current.from('profiles').update({
-            total_score: (profile.total_score || 0) + finalScore
-          }).eq('id', user.id)
-        }
-
-        if (attempt) {
-          setAttemptId(attempt.id)
-          const questionResults = getQuestionResults()
-          try {
-            sessionStorage.setItem(`quiz-result-${attempt.id}`, JSON.stringify(questionResults))
-            sessionStorage.setItem(`quiz-score-${attempt.id}`, String(finalScore))
-            sessionStorage.setItem(`quiz-max-${attempt.id}`, String(questionsRef.current.length * 10))
-          } catch(e) {}
-        }
-      }
-    } catch (e) {
-      console.error('Lỗi khi nộp bài:', e)
-    } finally {
-      setSubmitting(false)
-    }
-  }
 
   const currentQ = questions[currentQIndex]
 
@@ -209,13 +152,11 @@ export default function QuizTakingPage({ params }: { params: Promise<{ quizId: s
   const handleCheckAnswer = () => {
     if (selectedOption === null || isAnswered || !currentQ) return
     setIsAnswered(true)
-    if (selectedOption === currentQ.correctIndex) {
-      scoreRef.current += 10
+    answersRef.current[currentQIndex] = { questionId: currentQ.id, selectedOptionIds: [currentQ.options[selectedOption]?.id], timeSpentSeconds: 0 }
+    const correctOpt = currentQ.options.find((o: any) => o.isCorrect)
+    if (correctOpt && currentQ.options[selectedOption]?.id === correctOpt.id) {
+      scoreRef.current += (currentQ.points || 10)
       setScore(scoreRef.current)
-    }
-    questionsRef.current[currentQIndex] = {
-      ...questionsRef.current[currentQIndex],
-      selectedIndex: selectedOption
     }
   }
 
@@ -231,22 +172,29 @@ export default function QuizTakingPage({ params }: { params: Promise<{ quizId: s
     }
   }
 
-  const formatTime = (totalSeconds: number) => {
-    const m = Math.floor(totalSeconds / 60)
-    const s = totalSeconds % 60
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+  async function finishQuiz(finalScore: number) {
+    if (finishedRef.current) return
+    finishedRef.current = true
+    setIsFinished(true)
+    setScore(finalScore)
+    setSubmitting(true)
+    try {
+      if (attemptId) {
+        await submitQuizAttempt(attemptId, answersRef.current)
+      }
+    } catch (e) { console.error('Lỗi nộp bài:', e) }
+    finally { setSubmitting(false) }
   }
 
-  const filteredGlossary = Object.entries(GLOSSARY).filter(([term]) =>
-    term.toLowerCase().includes(glossarySearch.toLowerCase())
-  )
+  const formatTime = (s: number) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`
+  const filteredGlossary = Object.entries(GLOSSARY).filter(([term]) => term.toLowerCase().includes(glossarySearch.toLowerCase()))
 
-  if (!quizDef) {
+  if (error) {
     return (
       <div className="min-h-screen pt-24 pb-12 px-4 flex flex-col items-center justify-center" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
         <AlertTriangle size={48} className="mb-4" style={{ color: 'var(--brand-primary)' }} />
-        <h2 className="text-2xl font-bold mb-2">Không tìm thấy bài quiz</h2>
-        <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>ID: {quizId}</p>
+        <h2 className="text-2xl font-bold mb-2">Không thể vào thi</h2>
+        <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>{error}</p>
         <button onClick={() => router.push('/student/quiz')} className="px-6 py-3 border rounded-xl font-bold" style={{ background: 'var(--brand-primary)', borderColor: 'var(--brand-primary)', color: 'white' }}>
           Quay lại
         </button>
@@ -265,8 +213,8 @@ export default function QuizTakingPage({ params }: { params: Promise<{ quizId: s
   if (questions.length === 0) {
     return (
       <div className="min-h-screen pt-24 pb-12 px-4 flex flex-col items-center justify-center" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
-        <AlertTriangle size={48} className="mb-4" style={{ color: 'var(--brand-primary)' }} />
-        <h2 className="text-xl font-bold mb-4">Bài quiz này chưa có câu hỏi</h2>
+        <AlertTriangle size={48} className="mb-4" />
+        <h2 className="text-xl font-bold mb-4">Đề thi chưa có câu hỏi</h2>
         <button onClick={() => router.push('/student/quiz')} className="px-6 py-3 border rounded-xl font-bold" style={{ background: 'var(--brand-primary)', border: '1px solid var(--brand-primary)', color: 'white' }}>
           Quay lại
         </button>
@@ -275,7 +223,7 @@ export default function QuizTakingPage({ params }: { params: Promise<{ quizId: s
   }
 
   if (isFinished) {
-    const maxScore = questions.length * 10
+    const maxScore = questions.reduce((s, q) => s + (q.points || 10), 0)
     return (
       <div className="min-h-screen pt-24 pb-12 px-4 flex flex-col items-center justify-center" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
         {submitting ? (
@@ -284,26 +232,19 @@ export default function QuizTakingPage({ params }: { params: Promise<{ quizId: s
             <h2 className="text-xl font-bold tracking-widest uppercase" style={{ color: 'var(--text-secondary)' }}>Đang nộp bài...</h2>
           </div>
         ) : (
-          <div className="border p-8 rounded-3xl shadow-2xl max-w-lg w-full text-center relative overflow-hidden backdrop-blur-xl" style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-default)' }}>
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[var(--brand-primary)] to-blue-500"></div>
-            <Trophy size={64} className={`mx-auto mb-6 ${score >= 80 ? 'text-yellow-400' : ''}`} style={score >= 80 ? {} : { color: 'var(--text-muted)' }} />
+          <div className="border p-8 rounded-3xl shadow-2xl max-w-lg w-full text-center" style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-default)' }}>
+            <Trophy size={64} className={`mx-auto mb-6 ${score >= 70 ? 'text-yellow-400' : ''}`} style={score < 70 ? { color: 'var(--text-muted)' } : {}} />
             <h2 className="text-3xl font-black mb-2 uppercase">Kết quả làm bài</h2>
-            <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>{quizDef.title}</p>
-
             <div className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[var(--brand-primary)] to-blue-400 mb-8 drop-shadow-[0_0_15px_rgba(0,212,170,0.4)]">
               {score}/{maxScore}
             </div>
-
             <div className="flex justify-center gap-4">
-              {attemptId && (
-                <button onClick={() => router.push(`/student/quiz/${quizId}/results?attemptId=${attemptId}`)}
-                  className="relative z-50 pointer-events-auto px-6 py-3 rounded-xl font-black transition-all"
-                  style={{ background: 'var(--brand-primary)', color: 'black' }}>
-                  Xem Chi Tiết
-                </button>
-              )}
+              <button onClick={() => router.push(`/student/quiz/${quizId}/results?attemptId=${attemptId}`)}
+                className="px-6 py-3 rounded-xl font-black transition-all" style={{ background: 'var(--brand-primary)', color: 'black' }}>
+                Xem Chi Tiết
+              </button>
               <button onClick={() => router.push('/student/quiz')}
-                className="relative z-50 pointer-events-auto px-6 py-3 border rounded-xl font-bold transition-all" style={{ borderColor: 'var(--border-default)', color: 'var(--text-secondary)' }}>
+                className="px-6 py-3 border rounded-xl font-bold transition-all" style={{ borderColor: 'var(--border-default)', color: 'var(--text-secondary)' }}>
                 Quay Lại
               </button>
             </div>
@@ -317,24 +258,25 @@ export default function QuizTakingPage({ params }: { params: Promise<{ quizId: s
     <div className="min-h-screen flex flex-col relative overflow-hidden" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
       <div className="absolute inset-0 bg-grid-pattern opacity-[0.02] pointer-events-none" />
 
-      <header className="border-b p-4 sm:px-8 flex justify-between items-center backdrop-blur-md relative z-50 sticky top-0" style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-default)' }}>
+      <header className="border-b p-4 sm:px-8 flex justify-between items-center backdrop-blur-md relative z-50 sticky top-0"
+        style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-default)' }}>
         <div className="flex items-center gap-4">
           <button onClick={() => router.push('/student/quiz')}
-            className="relative z-50 pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 border text-xs rounded-xl font-bold transition-all shadow-md cursor-pointer" style={{ background: 'rgba(239,68,68,0.15)', borderColor: 'rgba(239,68,68,0.3)', color: '#ef4444' }}>
+            className="flex items-center gap-1.5 px-3 py-1.5 border text-xs rounded-xl font-bold transition-all shadow-md cursor-pointer"
+            style={{ background: 'rgba(239,68,68,0.15)', borderColor: 'rgba(239,68,68,0.3)', color: '#ef4444' }}>
             <ArrowLeft size={14} /> Thoát
           </button>
-          <h2 className="font-black text-sm md:text-base hidden sm:block" style={{ color: 'var(--text-primary)' }}>{quizDef.title}</h2>
+          <h2 className="font-black text-sm md:text-base hidden sm:block" style={{ color: 'var(--text-primary)' }}>Đề thi</h2>
         </div>
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => setShowGlossary(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all" style={{ background: 'color-mix(in srgb, var(--brand-primary) 15%, transparent)', borderColor: 'color-mix(in srgb, var(--brand-primary) 30%, transparent)', color: 'var(--brand-primary)' }}
-          >
+          <button onClick={() => setShowGlossary(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all"
+            style={{ background: 'color-mix(in srgb, var(--brand-primary) 15%, transparent)', borderColor: 'color-mix(in srgb, var(--brand-primary) 30%, transparent)', color: 'var(--brand-primary)' }}>
             <BookOpen size={14} /> Tra cứu
           </button>
-          <div className={`flex items-center gap-2 font-mono text-xl font-bold px-4 py-1.5 rounded-xl border ${secondsLeft < 60 ? 'border-red-500/50 animate-pulse' : 'border-[color-mix(in srgb,var(--brand-primary)_30%,transparent)]'}`} style={secondsLeft < 60 ? { background: 'rgba(239,68,68,0.15)', color: '#ef4444' } : { background: 'color-mix(in srgb, var(--brand-primary) 15%, transparent)', color: 'var(--brand-primary)' }}>
-            <Clock size={18} />
-            {formatTime(secondsLeft)}
+          <div className={`flex items-center gap-2 font-mono text-xl font-bold px-4 py-1.5 rounded-xl border ${secondsLeft < 60 ? 'border-red-500/50 animate-pulse' : ''}`}
+            style={secondsLeft < 60 ? { background: 'rgba(239,68,68,0.15)', color: '#ef4444' } : { background: 'color-mix(in srgb, var(--brand-primary) 15%, transparent)', color: 'var(--brand-primary)' }}>
+            <Clock size={18} /> {formatTime(secondsLeft)}
           </div>
         </div>
       </header>
@@ -342,63 +284,47 @@ export default function QuizTakingPage({ params }: { params: Promise<{ quizId: s
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-8 relative z-10 flex flex-col justify-center">
         <div className="mb-8 p-6 border rounded-2xl shadow-xl backdrop-blur-sm relative" style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-default)' }}>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm font-bold uppercase tracking-widest px-3 py-1 rounded-full border" style={{ color: 'var(--brand-primary)', background: 'color-mix(in srgb, var(--brand-primary) 15%, transparent)', borderColor: 'color-mix(in srgb, var(--brand-primary) 30%, transparent)' }}>
+            <span className="text-sm font-bold uppercase tracking-widest px-3 py-1 rounded-full border"
+              style={{ color: 'var(--brand-primary)', background: 'color-mix(in srgb, var(--brand-primary) 15%, transparent)', borderColor: 'color-mix(in srgb, var(--brand-primary) 30%, transparent)' }}>
               Câu hỏi {currentQIndex + 1} / {questions.length}
             </span>
-            <span className="text-gray-500 text-sm">Điểm: {score}</span>
+            <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Điểm: {score}</span>
           </div>
           <h3 className="text-2xl sm:text-3xl font-bold leading-tight">
             <TermHighlight text={currentQ?.question || ''} onTermClick={handleTermClick} />
           </h3>
-
-          {activeTerm && (
-            <div ref={tooltipRef} className="absolute z-[100] mt-3 p-4 rounded-2xl border shadow-2xl max-w-md" style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border-default)' }}>
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-bold text-sm uppercase tracking-wider" style={{ color: 'var(--brand-primary)' }}>{activeTerm}</span>
-                <button onClick={() => setActiveTerm(null)} className="p-1 rounded-full hover:bg-white/10 transition-colors" style={{ color: 'var(--text-muted)' }}>
-                  <X size={14} />
-                </button>
-              </div>
-              <p className="text-sm leading-relaxed" style={{ color: 'var(--text-primary)' }}>{GLOSSARY[activeTerm]}</p>
-            </div>
-          )}
         </div>
 
         <div className="space-y-3">
-          {currentQ?.options.map((opt, i) => {
+          {currentQ?.options.map((opt: any, i: number) => {
             const isSelected = selectedOption === i
-            let stateStyle: React.CSSProperties = { background: 'var(--bg-surface)', borderColor: 'var(--border-default)' }
+            let stateStyle: React.CSSProperties = {}
 
             if (isAnswered) {
-              if (i === currentQ.correctIndex) {
-                stateStyle = { background: 'rgba(16,185,129,0.1)', borderColor: '#10b981', color: '#10b981', boxShadow: '0 0 15px rgba(16,185,129,0.2)' }
+              const isCorrect = currentQ.correctOptionId === opt.id
+              if (isCorrect) {
+                stateStyle = { background: 'rgba(16,185,129,0.1)', borderColor: '#10b981', color: '#10b981' }
               } else if (isSelected) {
                 stateStyle = { background: 'rgba(239,68,68,0.1)', borderColor: '#ef4444', color: '#ef4444' }
               } else {
                 stateStyle = { background: 'var(--bg-surface)', borderColor: 'var(--border-default)', color: 'var(--text-muted)' }
               }
             } else if (isSelected) {
-              stateStyle = { background: 'var(--brand-primary)', borderColor: 'var(--brand-primary)', color: 'white', boxShadow: '0 0 15px color-mix(in srgb, var(--brand-primary) 20%, transparent)' }
+              stateStyle = { background: 'var(--brand-primary)', borderColor: 'var(--brand-primary)', color: 'white' }
+            } else {
+              stateStyle = { background: 'var(--bg-surface)', borderColor: 'var(--border-default)' }
             }
 
             return (
               <label key={i} onClick={() => handleSelectOption(i)}
                 className="flex items-center gap-4 p-5 sm:p-6 border-2 rounded-2xl transition-all cursor-pointer" style={stateStyle}>
                 <div className="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors"
-                  style={isAnswered && i === currentQ.correctIndex ? { borderColor: '#10b981' } : isSelected ? { borderColor: 'transparent' } : { borderColor: 'var(--border-default)' }}>
-                  {isAnswered && i === currentQ.correctIndex ? (
-                    <CheckCircle size={24} className="text-green-500 bg-black rounded-full" />
-                  ) : isAnswered && isSelected ? (
-                    <XCircle size={24} className="text-red-500 bg-black rounded-full" />
-                  ) : isSelected ? (
-                    <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'var(--brand-primary)' }}>
-                      <div className="w-2.5 h-2.5 bg-black rounded-full" />
-                    </div>
-                  ) : null}
+                  style={isAnswered && currentQ.correctOptionId === opt.id ? { borderColor: '#10b981' } : isSelected ? { borderColor: 'transparent' } : { borderColor: 'var(--border-default)' }}>
+                  {isAnswered && currentQ.correctOptionId === opt.id ? <CheckCircle size={24} className="text-green-500 bg-black rounded-full" /> :
+                  isAnswered && isSelected ? <XCircle size={24} className="text-red-500 bg-black rounded-full" /> :
+                  isSelected ? <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'var(--brand-primary)' }}><div className="w-2.5 h-2.5 bg-black rounded-full" /></div> : null}
                 </div>
-                <span className="text-lg font-medium">
-                  <TermHighlight text={opt} onTermClick={handleTermClick} />
-                </span>
+                <span className="text-lg font-medium"><TermHighlight text={opt.content} onTermClick={handleTermClick} /></span>
               </label>
             )
           })}
@@ -408,16 +334,13 @@ export default function QuizTakingPage({ params }: { params: Promise<{ quizId: s
       <footer className="border-t p-4 sm:p-6 flex justify-end items-center relative z-50 backdrop-blur-xl" style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-default)' }}>
         {!isAnswered ? (
           <button onClick={handleCheckAnswer} disabled={selectedOption === null}
-            className={`px-8 py-3 rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg ${
-              selectedOption !== null
-                ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-500/25'
-                : 'text-gray-500 cursor-not-allowed border'
-            }`} style={selectedOption === null ? { background: 'var(--bg-surface)', borderColor: 'var(--border-default)' } : undefined}>
+            className="px-8 py-3 rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg"
+            style={selectedOption !== null ? { background: '#2563eb', color: 'white' } : { background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', color: 'var(--text-muted)' }}>
             Kiểm tra đáp án
           </button>
         ) : (
           <button onClick={handleNextQuestion}
-            className="px-8 py-3 text-black rounded-xl font-black transition-all flex items-center gap-2 hover:opacity-80" style={{ background: 'var(--brand-primary)', boxShadow: '0 0 20px color-mix(in srgb, var(--brand-primary) 30%, transparent)' }}>
+            className="px-8 py-3 text-black rounded-xl font-black transition-all flex items-center gap-2 hover:opacity-80" style={{ background: 'var(--brand-primary)' }}>
             {currentQIndex < questions.length - 1 ? 'Câu Tiếp Theo' : 'Hoàn Thành Bài Thi'}
           </button>
         )}
@@ -427,40 +350,23 @@ export default function QuizTakingPage({ params }: { params: Promise<{ quizId: s
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
           <div className="w-full max-w-2xl max-h-[80vh] rounded-3xl border shadow-2xl flex flex-col overflow-hidden" style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-default)' }}>
             <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: 'var(--border-default)' }}>
-              <div className="flex items-center gap-3">
-                <BookOpen size={20} style={{ color: 'var(--brand-primary)' }} />
-                <h2 className="text-xl font-black uppercase">Tra Cứu Thuật Ngữ</h2>
-              </div>
-              <button onClick={() => setShowGlossary(false)}
-                className="p-2 rounded-xl hover:bg-white/5 transition-colors" style={{ color: 'var(--text-muted)' }}>
-                <X size={20} />
-              </button>
+              <div className="flex items-center gap-3"><BookOpen size={20} style={{ color: 'var(--brand-primary)' }} /><h2 className="text-xl font-black uppercase">Tra Cứu Thuật Ngữ</h2></div>
+              <button onClick={() => setShowGlossary(false)} className="p-2 rounded-xl hover:bg-white/5" style={{ color: 'var(--text-muted)' }}><X size={20} /></button>
             </div>
-
             <div className="p-4 border-b" style={{ borderColor: 'var(--border-default)' }}>
               <div className="relative">
                 <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
-                <input
-                  type="text"
-                  placeholder="Tìm thuật ngữ..."
-                  value={glossarySearch}
-                  onChange={e => setGlossarySearch(e.target.value)}
-                  className="w-full outline-none pl-11 pr-4 py-3 rounded-2xl text-sm transition-all" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
-                />
+                <input type="text" placeholder="Tìm thuật ngữ..." value={glossarySearch} onChange={e => setGlossarySearch(e.target.value)}
+                  className="w-full outline-none pl-11 pr-4 py-3 rounded-2xl text-sm transition-all" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }} />
               </div>
             </div>
-
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
-              {filteredGlossary.length === 0 ? (
-                <p className="text-center py-8 text-sm" style={{ color: 'var(--text-muted)' }}>Không tìm thấy thuật ngữ nào</p>
-              ) : (
-                filteredGlossary.map(([term, def]) => (
-                  <div key={term} className="p-4 rounded-2xl border transition-colors hover:bg-white/5" style={{ borderColor: 'var(--border-default)' }}>
-                    <span className="text-sm font-bold uppercase tracking-wider" style={{ color: 'var(--brand-primary)' }}>{term}</span>
-                    <p className="text-sm mt-1 leading-relaxed" style={{ color: 'var(--text-muted)' }}>{def}</p>
-                  </div>
-                ))
-              )}
+              {filteredGlossary.map(([term, def]) => (
+                <div key={term} className="p-4 rounded-2xl border" style={{ borderColor: 'var(--border-default)' }}>
+                  <span className="text-sm font-bold uppercase tracking-wider" style={{ color: 'var(--brand-primary)' }}>{term}</span>
+                  <p className="text-sm mt-1 leading-relaxed" style={{ color: 'var(--text-muted)' }}>{def}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>

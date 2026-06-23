@@ -505,7 +505,7 @@ function EmptyState({ tabKey, onExplore }) {
                 onClick={onExplore}
                 className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-emerald-500 text-white font-bold text-sm rounded-2xl shadow-lg shadow-blue-200 hover:shadow-xl transition-all flex items-center gap-2"
             >
-                <Compass size={18} /> Khám phá lộ trình học
+                <Compass size={18} /> Khám phá bài giảng
             </motion.button>
         </motion.div>
     );

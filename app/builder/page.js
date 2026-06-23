@@ -49,7 +49,12 @@ let globalCameraState = false;
 function Home(props) {
   const [landmarks, setLandmarks] = useState([]);
   const [hoveredComponent, setHoveredComponent] = useState(null);
-  const [lang, setLang] = useState('vn'); // 'en' or 'vn'
+  const [lang, setLang] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try { const saved = localStorage.getItem('lang'); if (saved === 'en' || saved === 'vn') return saved } catch(e) {}
+    }
+    return 'vn';
+  });
   const guru = useGuru();
   const [lastPlaced, setLastPlaced] = useState(null);
   const [showQuiz, setShowQuiz] = useState(false);
@@ -215,6 +220,7 @@ function Home(props) {
   const toggleLang = useCallback(() => {
     setLang(prev => {
       const newLang = prev === 'en' ? 'vn' : 'en';
+      try { localStorage.setItem('lang', newLang) } catch(e) {}
       guru.setMessage(GURU_MESSAGES[newLang].welcome);
       return newLang;
     });

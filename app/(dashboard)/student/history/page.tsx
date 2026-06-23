@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { History, BookOpen, Award, Clock, ChevronRight, Wrench, Map } from 'lucide-react';
+import { History, BookOpen, Award, Clock, ChevronRight, Wrench } from 'lucide-react';
 import { createBrowserClient } from '@supabase/ssr';
 
 const supabase = createBrowserClient(
@@ -10,13 +10,13 @@ const supabase = createBrowserClient(
 );
 
 const TYPE_COLORS = {
-  lesson: '#10B981', quiz: '#6366F1', achievement: '#F59E0B',
-  exam: '#EF4444', builder: '#06B6D4', learning_path: '#8B5CF6'
+  lesson: '#10B981', quiz: '#6366F1',
+  exam: '#EF4444', builder: '#06B6D4'
 };
 
 const TYPE_ICONS = {
-  lesson: BookOpen, quiz: Award, achievement: Award,
-  exam: Award, builder: Wrench, learning_path: Map
+  lesson: BookOpen, quiz: Award,
+  exam: Award, builder: Wrench
 };
 
 function formatTime(dateStr: string) {
@@ -38,7 +38,7 @@ export default function StudentHistoryPage() {
     if (!u) return;
     setUserId(u.id);
 
-    const [lessonsRes, quizRes, achieveRes, builderRes] = await Promise.all([
+    const [lessonsRes, quizRes, builderRes] = await Promise.all([
       supabase.from('lesson_progress')
         .select('lesson_id, status, completed_at, last_accessed, time_spent_seconds, score, completion_percentage, lessons(title)')
         .eq('student_id', u.id)
@@ -49,11 +49,6 @@ export default function StudentHistoryPage() {
         .select('id, quiz_id, score, status, submitted_at, created_at, quizzes(title)')
         .eq('student_id', u.id)
         .order('created_at', { ascending: false })
-        .limit(30),
-      supabase.from('student_achievements')
-        .select('achievement_id, earned_at, achievement_definitions(title)')
-        .eq('student_id', u.id)
-        .order('earned_at', { ascending: false })
         .limit(30),
       supabase.from('builder_sessions')
         .select('started_at, ended_at')
@@ -101,16 +96,6 @@ export default function StudentHistoryPage() {
       });
     });
 
-    (achieveRes.data || []).forEach((a: any) => {
-      items.push({
-        id: `achieve-${a.achievement_id}-${a.earned_at}`,
-        type: 'achievement',
-        title: a.achievement_definitions?.title || 'Thành tựu',
-        desc: 'Mở khóa thành tựu mới',
-        time: a.earned_at
-      });
-    });
-
     items.sort((a: any, b: any) => new Date(b.time).getTime() - new Date(a.time).getTime());
     setActivities(items.slice(0, 50));
   };
@@ -125,10 +110,6 @@ export default function StudentHistoryPage() {
       .channel('student-history-realtime')
       .on('postgres_changes',
         { event: '*', schema: 'public', table: 'lesson_progress', filter: `student_id=eq.${userId}` },
-        () => fetchHistory()
-      )
-      .on('postgres_changes',
-        { event: '*', schema: 'public', table: 'student_achievements', filter: `student_id=eq.${userId}` },
         () => fetchHistory()
       )
       .on('postgres_changes',

@@ -1,7 +1,6 @@
 // Path: hooks/useParentNotifications.ts
 'use client'
 import { useEffect, useState, useRef } from 'react'
-import { createClient } from '@/lib/supabase-ssr-client'
 import { RealtimeChannel } from '@supabase/supabase-js'
 
 export interface NotificationData {
@@ -19,12 +18,16 @@ export interface NotificationData {
 export function useParentNotifications(parentId: string | null) {
   const [notifications, setNotifications] = useState<NotificationData[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
+  const [supabase, setSupabase] = useState<any>(null)
   const channelRef = useRef<RealtimeChannel | null>(null)
-  const supabase = createClient()
+
+  useEffect(() => {
+    import('@/lib/supabase-ssr-client').then(m => setSupabase(m.createClient()))
+  }, [])
 
   // Fetch initial notifications
   useEffect(() => {
-    if (!parentId) return
+    if (!parentId || !supabase) return
 
     async function fetchNotifications() {
       try {
@@ -50,7 +53,7 @@ export function useParentNotifications(parentId: string | null) {
 
   // Subscribe to real-time notification changes
   useEffect(() => {
-    if (!parentId) return
+    if (!parentId || !supabase) return
 
     const channelName = `parent-notif-${parentId}`
     const channel = supabase.channel(channelName)
@@ -116,7 +119,7 @@ export function useParentNotifications(parentId: string | null) {
 
   // Mark all notifications as read
   const markAllAsRead = async () => {
-    if (!parentId) return
+    if (!parentId || !supabase) return
     try {
       const { error } = await supabase
         .from('notifications')
@@ -135,6 +138,7 @@ export function useParentNotifications(parentId: string | null) {
 
   // Mark single notification as read
   const markAsRead = async (notificationId: string) => {
+    if (!supabase) return
     try {
       const { error } = await supabase
         .from('notifications')

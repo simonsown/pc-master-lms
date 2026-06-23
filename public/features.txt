@@ -1,0 +1,132 @@
+=== PC MASTER BUILDER — DANH SÁCH TÍNH NĂNG ===
+https://pc-master-lms.vercel.app
+
+═══════════════════════════════════════════════
+1. GOOGLE ĐĂNG NHẬP
+═══════════════════════════════════════════════
+- Đăng nhập bằng Google (Supabase Auth)
+- Không yêu cầu chọn tài khoản mỗi lần
+- Hồ sơ người dùng (profile, ảnh đại diện)
+- Quyền: student / teacher / admin
+
+═══════════════════════════════════════════════
+2. SO SÁNH GIÁ LINH KIỆN (Chống Chặt Chém)
+═══════════════════════════════════════════════
+- Nhập tay tên linh kiện + giá hóa đơn
+- So khớp với 127 linh kiện thật từ GearVN
+- Hiển thị: giá hóa đơn vs giá thị trường
+- Trạng thái: Hợp lý / Hơi đắt / Chặt chém!
+- % chênh lệch + thanh bar trực quan
+- Đánh giá AI + lời khuyên chi tiết
+- So sánh tổng tiền (invoice vs market)
+- URL: /builder/invoice-check
+
+═══════════════════════════════════════════════
+3. CAREER BUILD — GỢI Ý CẤU HÌNH THEO ƯỚC MƠ
+═══════════════════════════════════════════════
+- Chọn nghề nghiệp (AI Engineer, 3D Designer, Video Editor, Streamer, Coder, Office, Mac...)
+- Hoặc nhập ước mơ tự do (có spell check)
+- Thêm yêu cầu đặc biệt (ngân sách, RGB, AMD...)
+- AI gợi ý cấu hình chi tiết từng linh kiện
+- Mỗi linh kiện có: tên, loại, giá, LÝ DO chọn, LINK MUA GEARVN (hoa hồng)
+- Hỗ trợ cả Windows PC và Mac (MacBook/Mac Studio)
+- Chia tab Windows / Mac khi có cả hai
+- Click "Lắp ráp" để build ngay
+- URL: /builder/career-build
+
+═══════════════════════════════════════════════
+4. GỢI Ý MÁY TÍNH (Tất cả máy trên thị trường)
+═══════════════════════════════════════════════
+- Nhập: mục đích sử dụng, ngân sách, use case
+- AI lọc từ 12+ máy pre-built (cập nhật liên tục)
+- Gồm: PC Gaming, PC Văn phòng, Workstation, Laptop, MacBook, Mac Studio, iMac
+- Mỗi máy: specs, giá, lý do phù hợp, link mua GearVN
+- Filter theo nhu cầu: Gaming / Lập trình / AI / Design...
+- URL: /builder/pc-suggest
+
+═══════════════════════════════════════════════
+5. TẤT CẢ MÁY TÍNH (Mac + Windows)
+═══════════════════════════════════════════════
+- 14 máy tính: Windows gaming, office, workstation, laptop + MacBook, Mac Studio, iMac
+- Filter theo hãng: Windows / Laptop Windows / Mac
+- Tìm kiếm theo tên, specs
+- Link mua GearVN ngay trên mỗi máy
+- URL: /builder/mac-check
+
+═══════════════════════════════════════════════
+6. LẮP RÁP PC 3D VR
+═══════════════════════════════════════════════
+- Căn phòng VR với: TV, ghế sofa, bàn, thảm
+- WASD di chuyển + Head Tracking (webcam)
+- Điều khiển đầu để nhìn xung quanh
+- Nút "Bắt đầu lắp ráp" → đứng vào bàn
+- Hand Tracking để cầm nắm linh kiện
+- Đồ họa sáng, FPS cao
+- URL: /builder/3d-viewer
+
+═══════════════════════════════════════════════
+7. LỖI THƯỜNG GẶP KHI BUILD PC
+═══════════════════════════════════════════════
+- 8 lỗi phổ biến (RAM, display, assembly, PSU, compatibility, SSD, wiring)
+- Hover để xem nguyên nhân + cách khắc phục
+- Video YouTube hướng dẫn kèm theo
+- Thanh tìm kiếm lỗi
+- Giao diện đẹp, responsive
+- URL: /builder/common-mistakes
+
+═══════════════════════════════════════════════
+8. 2 NGƯỜI CHƠI
+═══════════════════════════════════════════════
+- 2 người chơi qua webcam
+- Hand Tracking: P1 bên trái màn hình, P2 bên phải
+- Mỗi người giơ 1 tay để sẵn sàng
+- Ai lắp PC nhanh hơn sẽ thắng
+- Có nút P2 override nếu không thấy tay
+- URL: Builder → Chế độ 2 Người Chơi
+
+═══════════════════════════════════════════════
+9. BUILDER CHÍNH (Lắp ráp PC 2D)
+═══════════════════════════════════════════════
+- Kéo thả linh kiện vào case
+- GameEngine 2D với hand tracking
+- PartPickerSidebar (chọn linh kiện)
+- Checklist tiến độ
+- Tính TDP, kiểm tra tương thích
+- Khởi động Windows ảo khi hoàn thành
+- Chế độ: Luyện tập / Bài giảng / Chợ / Thi đấu / Kỳ thi
+- URL: /builder
+
+═══════════════════════════════════════════════
+10. HỌC TẬP & THI CỬ
+═══════════════════════════════════════════════
+- Bài giảng (LectureCourse)
+- Luyện tập (LearningMode)
+- Quiz kiến thức phần cứng
+- Kỳ thi (Exams)
+- Chứng chỉ (Certificates)
+- Lộ trình học tập
+- AI Guru hỗ trợ 24/7
+- URL: /courses, /quiz, /exams, /certificates
+
+═══════════════════════════════════════════════
+11. QUẢN TRỊ & THEO DÕI
+═══════════════════════════════════════════════
+- Dashboard học sinh, giáo viên, admin
+- Thống kê analytics
+- Quản lý lớp học, bài tập
+- Leaderboard
+- Thông báo
+- Lịch sử học tập
+- URL: /admin, /student, /teacher
+
+═══════════════════════════════════════════════
+CÔNG NGHỆ SỬ DỤNG
+═══════════════════════════════════════════════
+- Frontend: Next.js 16, React, Three.js (R3F)
+- Backend: Next.js API routes, Supabase (PostgreSQL)
+- AI: Groq API, Gemini API
+- Xác thực: Supabase Auth + Google OAuth
+- Hand Tracking: MediaPipe Hands + Face Landmarker
+- 3D: React Three Fiber (R3F)
+- Deploy: Vercel (production)
+- CSS: Inline styles, CSS variables (dark/light theme)

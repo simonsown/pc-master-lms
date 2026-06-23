@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   BookOpen, Cpu, ShoppingCart, Users, BrainCircuit, Award, Globe, Sparkles, 
-  Menu, Webcam, X, Sun, Moon, BarChart2, Map, FileText, Trophy, Bell, MessageSquare, User, Monitor 
+  Menu, Webcam, X, Sun, Moon, FileText, Bell, MessageSquare, User, Monitor 
 } from 'lucide-react';
 import JoinClassModal from './JoinClassModal';
 import ComponentPreview from './ComponentPreview';
@@ -173,25 +173,6 @@ const BurgerMenu = ({
                             {lang === 'en' ? 'Lecture Course' : 'Bài Giảng'}
                         </button>
                         
-                        <Link 
-                            href="/student/progress" 
-                            style={{ ...navItemStyle('progress', false), textDecoration: 'none' }}
-                            onMouseEnter={() => setHoveredBtn('progress')} 
-                            onMouseLeave={() => setHoveredBtn(null)}
-                        >
-                            <BarChart2 style={iconStyle('progress', false)} />
-                            {lang === 'en' ? 'Progress' : 'Tiến Độ Học Tập'}
-                        </Link>
-                        
-                        <Link 
-                            href="/student/learning-path" 
-                            style={{ ...navItemStyle('learning_path', false), textDecoration: 'none' }}
-                            onMouseEnter={() => setHoveredBtn('learning_path')} 
-                            onMouseLeave={() => setHoveredBtn(null)}
-                        >
-                            <Map style={iconStyle('learning_path', false)} />
-                            {lang === 'en' ? 'Learning Path' : 'Lộ Trình Học'}
-                        </Link>
                         
                         <button
                             onMouseEnter={() => setHoveredBtn('learning')} onMouseLeave={() => setHoveredBtn(null)}
@@ -249,15 +230,6 @@ const BurgerMenu = ({
                             {lang === 'en' ? 'Quiz Bank' : 'Ngân Hàng Đề Thi'}
                         </Link>
                         
-                        <Link 
-                            href="/student/achievements" 
-                            style={{ ...navItemStyle('achievements', false), textDecoration: 'none' }}
-                            onMouseEnter={() => setHoveredBtn('achievements')} 
-                            onMouseLeave={() => setHoveredBtn(null)}
-                        >
-                            <Trophy style={iconStyle('achievements', false)} />
-                            {lang === 'en' ? 'Achievements' : 'Thành Tích'}
-                        </Link>
                         
                         <Link 
                             href="/student/certificates" 
@@ -506,13 +478,14 @@ const BurgerMenu = ({
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', fontSize: '14px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
                             <p style={{ margin: 0 }}><strong>{lang === 'en' ? 'Project:' : 'Dự Án:'}</strong> PC Master Builder</p>
-                            <p style={{ margin: 0 }}><strong>{lang === 'en' ? 'Developer:' : 'Nhà Phát Triển:'}</strong> One Mission - THPT Nguyễn Công Trứ</p>
+                            <p style={{ margin: 0 }}><strong>{lang === 'en' ? 'Developer:' : 'Developer:'}</strong> Nguyễn Phúc Khánh Sơn</p>
                             <p style={{ margin: 0 }}><strong>{lang === 'en' ? 'Members:' : 'Thành viên:'}</strong></p>
                             <ul style={{ margin: 0, paddingLeft: '24px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                <li>Dương Vũ Minh Đức</li>
-                                <li>Nguyễn Phúc Khánh Sơn</li>
+                                <li>Đặng Quốc An</li>
+                                <li>Nguyễn Phạm Gia Khiêm</li>
+                                <li>Ngô Minh Khang</li>
                             </ul>
-                            <p style={{ margin: 0 }}><strong>{lang === 'en' ? 'Advisor:' : 'Giáo viên HD:'}</strong> Đoàn Thụy Kim Phượng</p>
+                            <p style={{ margin: 0 }}><strong>{lang === 'en' ? 'Advisor:' : 'Giáo viên HD:'}</strong> Trần Minh Phụng</p>
                             <div style={{ height: '1px', background: 'var(--border-subtle)', margin: '8px 0' }}></div>
                             <p style={{ margin: 0, fontStyle: 'italic', textAlign: 'center', fontSize: '13px' }}>
                                 {lang === 'en'

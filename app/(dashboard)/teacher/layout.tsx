@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BookOpen, Users, FileText, LogOut, LayoutDashboard, Compass, HelpCircle, Award, Laptop, MessageSquare, TrendingUp, ChevronDown, User, Shield, GraduationCap, Sun, Moon } from 'lucide-react'
+import { BookOpen, Users, FileText, LogOut, LayoutDashboard, ClipboardList, Award, Laptop, MessageSquare, TrendingUp, ChevronDown, User, Shield, GraduationCap, Sun, Moon, ScanEye } from 'lucide-react'
 import { logout } from '@/lib/auth-actions'
 import { supabase } from '@/lib/supabase'
 import PageTransition from '@/components/PageTransition'
@@ -108,12 +108,12 @@ export default function TeacherLayout({ children }: { children: React.ReactNode 
           <NavGroup label="Quản lý">
             <NavItem href="/teacher/classes" icon={Users} label="Lớp học" />
             <NavItem href="/teacher/lessons" icon={FileText} label="Bài giảng" />
-            <NavItem href="/teacher/learning-path" icon={Compass} label="Lộ trình" />
-            <NavItem href="/teacher/quiz" icon={HelpCircle} label="Đề thi" />
+            <NavItem href="/teacher/exams" icon={ClipboardList} label="Đề thi" />
             <NavItem href="/teacher/certificates" icon={Award} label="Chứng chỉ" />
           </NavGroup>
           <NavGroup label="Tiện ích">
             <NavItem href="/student/discussion" icon={MessageSquare} label="Diễn đàn" />
+            <NavItem href="/teacher/proctoring" icon={ScanEye} label="Giám sát thi" />
           </NavGroup>
         </nav>
 

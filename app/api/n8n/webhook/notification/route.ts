@@ -38,7 +38,21 @@ export async function POST(request: Request) {
       .insert(notifications)
 
     if (insertErr) {
-      return NextResponse.json({ error: 'Failed to create notifications', details: insertErr }, { status: 500 })
+      const fallbackRows = recipients.map(userId => ({
+        user_id: userId,
+        action_type: 'notification_fallback',
+        description: `[${type || 'info'}] ${title}: ${message}`,
+        metadata: { title, message, type, actionUrl, originalError: insertErr.message }
+      }))
+
+      await supabase.from('activity_logs').insert(fallbackRows)
+
+      return NextResponse.json({
+        success: false,
+        fallback: 'activity_logs',
+        error: insertErr.message,
+        sentCount: 0
+      })
     }
 
     return NextResponse.json({ success: true, sentCount: notifications.length })

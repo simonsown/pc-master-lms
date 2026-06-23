@@ -22,7 +22,7 @@ export default function FloatingChatbot() {
             exit={{ scale: 0, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-4 right-4 z-[9999] w-14 h-14 rounded-full flex items-center justify-center shadow-2xl cursor-pointer border-2"
+            className="fixed bottom-20 right-4 z-[9999] w-14 h-14 rounded-full flex items-center justify-center shadow-2xl cursor-pointer border-2"
             style={{
               background: 'var(--brand-primary)',
               borderColor: 'color-mix(in srgb, var(--brand-primary) 50%, white)',

@@ -30,7 +30,7 @@ interface ParentNotificationsViewProps {
   deleteSingle: (id: string) => Promise<void>
 }
 
-type TabType = 'all' | 'lesson' | 'quiz' | 'achievement' | 'absent'
+type TabType = 'all' | 'lesson' | 'quiz' | 'absent'
 
 export default function ParentNotificationsView({
   initialNotifications,
@@ -57,9 +57,8 @@ export default function ParentNotificationsView({
       if (activeTab === 'all') return true
       if (activeTab === 'lesson') return notif.type === 'lesson_completed'
       if (activeTab === 'quiz') return notif.type === 'quiz_graded' || notif.type === 'child_low_score'
-      if (activeTab === 'achievement') return notif.type === 'achievement_earned'
       if (activeTab === 'absent') return notif.type === 'child_absent'
-      return true
+      return false
     })
   }, [notifications, activeTab])
 
@@ -72,8 +71,6 @@ export default function ParentNotificationsView({
         return <Award size={16} className="text-[#00d4aa]" />
       case 'child_low_score':
         return <Award size={16} className="text-red-400" />
-      case 'achievement_earned':
-        return <Trophy size={16} className="text-yellow-400" />
       case 'child_absent':
         return <UserMinus size={16} className="text-orange-400" />
       default:
@@ -158,7 +155,7 @@ export default function ParentNotificationsView({
           { key: 'all', label: 'Tất cả' },
           { key: 'lesson', label: 'Tiến độ học' },
           { key: 'quiz', label: 'Điểm số' },
-          { key: 'achievement', label: 'Thành tích' },
+
           { key: 'absent', label: 'Nghỉ học' }
         ].map((tab) => (
           <button

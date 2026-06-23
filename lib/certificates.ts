@@ -34,7 +34,7 @@ export async function issueCertificate(userId: string, pathId: string) {
   const allCompleted = lessons.every(l => completedLessonIds.includes(l.item_id))
 
   if (!allCompleted) {
-    throw new Error('Bạn chưa hoàn thành tất cả bài học trong lộ trình này.')
+    throw new Error('Bạn chưa hoàn thành tất cả bài học cần thiết.')
   }
 
   // 3. Snapshot student and course information

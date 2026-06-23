@@ -228,7 +228,7 @@ export default function LandingPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '24px' }}>
             {[
               { icon: <GraduationCap size={28} style={{ color: 'var(--brand-primary)' }} />, step: '01', title: 'Chọn Vai Trò', desc: 'Đăng nhập và chọn vai trò Học sinh hoặc Giáo viên để truy cập không gian làm việc phù hợp.' },
-              { icon: <MonitorPlay size={28} style={{ color: 'var(--accent-blue)' }} />, step: '02', title: 'Tham Gia Lớp Học', desc: 'Khám phá lộ trình học tập, xem các bài giảng lý thuyết và làm quen với các linh kiện máy tính.' },
+              { icon: <MonitorPlay size={28} style={{ color: 'var(--accent-blue)' }} />, step: '02', title: 'Tham Gia Lớp Học', desc: 'Xem các bài giảng lý thuyết và làm quen với các linh kiện máy tính.' },
               { icon: <Wrench size={28} style={{ color: 'var(--accent-amber)' }} />, step: '03', title: 'Thực Hành Lắp Ráp', desc: 'Sử dụng PC Lab 2D để tự tay lắp ráp linh kiện, kiểm tra độ tương thích và tính toán TDP.' },
               { icon: <Bot size={28} style={{ color: 'var(--info)' }} />, step: '04', title: 'Nhận Hỗ Trợ Từ AI', desc: 'Hỏi đáp trực tiếp với AI Guru bất cứ lúc nào bạn gặp khó khăn.' },
             ].map((item, i) => (

@@ -1,0 +1,114 @@
+{
+  "name": "05 - Zalo Teacher Notifications",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/n8n/zalo-notify",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook: Violation Event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "n8n-zalo-teacher"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/profiles?select=id,full_name,zalo_phone,zalo_notifications&role=eq.teacher&zalo_notifications=eq.true&limit=50",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+          ]
+        }
+      },
+      "id": "find-teachers",
+      "name": "Find Teachers with Zalo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "has-teachers",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": 0,
+              "operator": { "type": "number", "operation": "larger" }
+            }
+          ]
+        }
+      },
+      "id": "if-has-teachers",
+      "name": "Has Teachers?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.N8N_WEBHOOK_URL }}/zalo-notify",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer {{ $env.N8N_WEBHOOK_SECRET }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "jsonBody": "={\n  \"teacherId\": \"{{ $json.id }}\",\n  \"phone\": \"{{ $json.zalo_phone }}\",\n  \"title\": \"{{ $json.body.title }}\",\n  \"message\": \"{{ $json.body.message }}\",\n  \"examId\": \"{{ $json.body.examId }}\",\n  \"studentName\": \"{{ $json.body.studentName }}\",\n  \"violationType\": \"{{ $json.body.violationType }}\"\n}",
+        "options": {}
+      },
+      "id": "send-via-api",
+      "name": "Send via Zalo API Webhook",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1050, 300]
+    }
+  ],
+  "connections": {
+    "webhook-trigger": {
+      "main": [[ { "node": "find-teachers", "type": "main", "index": 0 } ]]
+    },
+    "find-teachers": {
+      "main": [[ { "node": "if-has-teachers", "type": "main", "index": 0 } ]]
+    },
+    "if-has-teachers": {
+      "main": [
+        [ { "node": "send-via-api", "type": "main", "index": 0 } ],
+        []
+      ]
+    },
+    "send-via-api": {
+      "main": [[ { "node": "respond", "type": "main", "index": 0 } ]]
+    }
+  },
+  "pinData": {},
+  "versionId": "zalo-notify-v1",
+  "active": true,
+  "settings": {},
+  "id": "workflow-zalo-notify",
+  "tags": []
+}

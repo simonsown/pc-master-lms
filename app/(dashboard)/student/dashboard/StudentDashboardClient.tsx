@@ -1,15 +1,11 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import {
   BarChart,
   Bar,
   CartesianGrid,
   Cell,
-  PolarAngleAxis,
-  RadialBar,
-  RadialBarChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -18,6 +14,7 @@ import {
 
 import { motion } from 'framer-motion'
 import { useRealtime } from '@/lib/realtime-provider'
+import { ChevronRight } from 'lucide-react'
 
 type UserProps = {
   id: string
@@ -40,49 +37,12 @@ type ChartPoint = {
   minutes: number
 }
 
-type InProgressLesson = {
-  lesson_id: string
-  status: string | null
-  completion_percentage: number | null
-  last_accessed: string | null
-  lessons?: {
-    title: string | null
-    thumbnail_url: string | null
-  } | null
-}
-
-type Achievement = {
-  id: string
-  title: string
-  icon: string
-  description: string
-}
-
-type DailyQuiz = {
-  id: string
-  title: string
-  description: string | null
-  time_limit_minutes: number | null
-}
-
-type DailyAttempt = {
-  id: string
-  score: number | null
-  status: string | null
-  submitted_at: string | null
-}
-
 type Props = {
   user: UserProps
   greeting: string
   formattedDate: string
   stats: ProgressStats
-  progressPercent: number
   chartData: ChartPoint[]
-  inProgressLesson: InProgressLesson | null
-  recentAchievements: Achievement[]
-  dailyQuiz: DailyQuiz | null
-  dailyAttempt: DailyAttempt | null
 }
 
 const BAR_FILL = '#00d4aa'
@@ -96,18 +56,8 @@ export function StudentDashboardClient({
   greeting,
   formattedDate,
   stats,
-  progressPercent,
-  chartData,
-  inProgressLesson,
-  recentAchievements,
-  dailyQuiz,
-  dailyAttempt
+  chartData
 }: Props) {
-  const thumbnailUrl = inProgressLesson?.lessons?.thumbnail_url ?? '/lesson-summary.png'
-  const lessonTitle = inProgressLesson?.lessons?.title ?? 'Chưa có bài học dở'
-  const progressValue = Math.max(0, Math.min(progressPercent, 100))
-  const percentageLabel = `${progressValue}%`
-
   const { state: realtimeState } = useRealtime()
   const liveStreak = realtimeState.streak || stats.streakDays
   const liveTotalHours = realtimeState.studyMinutes > 0 ? (realtimeState.studyMinutes / 60) : stats.totalHours
@@ -117,8 +67,6 @@ export function StudentDashboardClient({
         minutes: realtimeState.weeklyActivity[i] || 0
       }))
     : chartData
-
-  const dailyQuizCompleted = dailyAttempt?.status === 'submitted'
 
   return (
     <motion.div className="p-6 md:p-8 lg:p-10" style={{ background: 'transparent' }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
@@ -130,53 +78,9 @@ export function StudentDashboardClient({
               <h1 style={{ fontSize: '32px', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px 0' }}>Chào buổi {greeting}, {user.full_name.split(' ').at(-1)}</h1>
               <p style={{ color: 'var(--text-muted)', fontSize: '14px', margin: 0 }}>Hôm nay là {formattedDate} · Streak: {liveStreak} ngày</p>
             </div>
-            <div className="lms-card" style={{ padding: '32px' }}>
-              <div style={{ fontSize: '13px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 700, marginBottom: '8px' }}>Tổng tiến trình</div>
-              <div style={{ display: 'flex', alignItems: 'end', gap: '16px' }}>
-                <div style={{ fontSize: '48px', fontWeight: 800, color: 'var(--brand-primary)', lineHeight: 1 }}>{percentageLabel}</div>
-                <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '4px' }}>Hoàn thành lộ trình</div>
-              </div>
-              <p style={{ marginTop: '16px', fontSize: '13px', color: 'var(--text-muted)' }}>Dựa trên bài học đã hoàn thành trong toàn bộ lộ trình.</p>
-            </div>
           </section>
         </motion.div>
 
-        {/* Daily Quiz Card */}
-        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 * 0.08, duration: 0.4 }}>
-          {dailyQuiz && (
-            <section>
-              <motion.div className="lms-card" style={{ padding: '24px', background: 'var(--bg-surface)' }} whileHover={{ scale: 1.02, y: -2 }} transition={{ type: 'spring', stiffness: 300 }}>
-                <div style={{ display: 'flex', gap: '16px', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
-                  <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-                    <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'linear-gradient(135deg, var(--warning), #d48a0a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0 }}>
-                      {dailyQuizCompleted ? '✅' : '📝'}
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '13px', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--warning)', fontWeight: 700 }}>
-                        {dailyQuizCompleted ? 'Đã hoàn thành' : 'Thử thách hằng ngày'}
-                      </div>
-                      <div style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', marginTop: '4px' }}>{dailyQuiz.title}</div>
-                      <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                        {dailyQuizCompleted
-                          ? `Bạn đạt ${dailyAttempt?.score?.toFixed(1) ?? 0}% · ${dailyAttempt?.submitted_at ? new Date(dailyAttempt.submitted_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : ''}`
-                          : `${dailyQuiz.description ?? '5 câu hỏi nhanh để ôn tập.'} · ⏱ ${dailyQuiz.time_limit_minutes ?? 10} phút`}
-                      </p>
-                    </div>
-                  </div>
-                  {dailyQuizCompleted ? (
-                    <div style={{ fontSize: '13px', color: 'var(--text-muted)', flexShrink: 0 }}>Điểm: {dailyAttempt?.score?.toFixed(0) ?? 0}%</div>
-                  ) : (
-                    <motion.div whileTap={{ scale: 0.98 }}>
-                      <Link href={`/daily-quiz/${dailyQuiz.id}`} style={{ padding: '10px 24px', borderRadius: '99px', background: 'var(--warning)', color: '#fff', fontWeight: 700, textDecoration: 'none', fontSize: '14px', flexShrink: 0 }}>
-                        Làm ngay →
-                      </Link>
-                    </motion.div>
-                  )}
-                </div>
-              </motion.div>
-            </section>
-          )}
-        </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 2 * 0.08, duration: 0.4 }}>
           <section style={{ display: 'grid', gap: '16px', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
@@ -195,82 +99,36 @@ export function StudentDashboardClient({
           </section>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 3 * 0.08, duration: 0.4 }}>
-          <section style={{ display: 'grid', gap: '16px', gridTemplateColumns: '2fr 1.2fr' }}>
-            <div className="lms-card" style={{ padding: '24px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <div>
-                  <div style={{ fontSize: '13px', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--text-muted)', fontWeight: 700 }}>Tiến độ lộ trình</div>
-                  <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)', marginTop: '4px' }}>Theo dõi mức độ hoàn thành</div>
-                </div>
-                <div style={{ padding: '4px 14px', borderRadius: '99px', border: '1px solid var(--brand-primary)', fontSize: '13px', fontWeight: 700, color: 'var(--brand-primary)' }}>{percentageLabel}</div>
-              </div>
-              <div style={{ height: '300px', width: '100%' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadialBarChart cx="50%" cy="50%" innerRadius="70%" outerRadius="100%" barSize={18} data={[{ name: 'Hoàn thành', value: progressValue, fill: BAR_FILL }]}>
-                    <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
-                    <RadialBar dataKey="value" cornerRadius={999} background />
-                    <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" style={{ fontSize: '24px', fontWeight: 700, fill: 'var(--text-primary)' }}>
-                      {percentageLabel}
-                    </text>
-                  </RadialBarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <motion.div className="lms-card" style={{ padding: 0, overflow: 'hidden' }} whileHover={{ scale: 1.02, y: -2 }} transition={{ type: 'spring', stiffness: 300 }}>
-                <div style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-                  <div>
-                    <div style={{ fontSize: '13px', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--text-muted)', fontWeight: 700 }}>Tiếp tục học</div>
-                    <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)', marginTop: '4px' }}>{lessonTitle}</div>
-                  </div>
-                  <motion.div whileTap={{ scale: 0.98 }}>
-                    <Link href={inProgressLesson ? `/lessons/${inProgressLesson.lesson_id}` : '/lessons'} className="lms-btn lms-btn-primary" style={{ padding: '10px 20px', fontSize: '14px', borderRadius: '99px' }}>
-                      Tiếp tục →
-                    </Link>
-                  </motion.div>
-                </div>
-                <div style={{ padding: '0 20px 20px' }}>
-                  <div style={{ position: 'relative', height: '160px', borderRadius: '12px', overflow: 'hidden', background: 'var(--bg-base)', marginBottom: '12px' }}>
-                    <Image src={thumbnailUrl} alt={lessonTitle} fill style={{ objectFit: 'cover' }} sizes="(max-width: 768px) 100vw, 320px" />
-                  </div>
-                  <div>
-                    <div style={{ height: '8px', borderRadius: '99px', background: 'var(--bg-elevated)', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', borderRadius: '99px', background: 'var(--brand-primary)', width: `${inProgressLesson?.completion_percentage ?? 0}%` }} />
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '12px', color: 'var(--text-muted)' }}>
-                      <span>{inProgressLesson ? `${Math.round(inProgressLesson.completion_percentage ?? 0)}% hoàn thành` : 'Chưa có bài học dở'}</span>
-                      <span>{inProgressLesson ? 'Đang tiếp tục' : 'Bắt đầu hành trình'}</span>
-                    </div>
+        {/* Level Card */}
+        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 2.5 * 0.08, duration: 0.4 }}>
+          <Link href="/student/level" style={{ textDecoration: 'none' }}>
+            <motion.div className="lms-card" style={{ padding: '24px', background: 'linear-gradient(135deg, rgba(0,212,170,0.08), transparent)', border: '1px solid rgba(0,212,170,0.2)', cursor: 'pointer', overflow: 'hidden', position: 'relative' }} whileHover={{ scale: 1.01 }} transition={{ type: 'spring', stiffness: 300 }}>
+              <div style={{ position: 'absolute', top: '-50%', right: '-10%', width: '200px', height: '200px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,212,170,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', position: 'relative', zIndex: 1 }}>
+                <div style={{ textAlign: 'center', minWidth: '60px' }}>
+                  <div style={{ fontSize: '36px', lineHeight: 1 }}>{realtimeState.levelIcon}</div>
+                  <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--brand-primary)', textTransform: 'uppercase', marginTop: '4px' }}>
+                    Level {realtimeState.level}
                   </div>
                 </div>
-              </motion.div>
-
-              <div className="lms-card" style={{ padding: '20px' }}>
-                <div style={{ fontSize: '13px', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--text-muted)', fontWeight: 700, marginBottom: '16px' }}>Thành tích gần nhất</div>
-                {recentAchievements.length > 0 ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {recentAchievements.map((achievement) => (
-                      <div key={achievement.id} className="lms-card" style={{ padding: '12px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                        <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(8,158,96,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>
-                          {achievement.icon}
-                        </div>
-                        <div>
-                          <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '14px' }}>{achievement.title}</div>
-                          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>{achievement.description}</div>
-                        </div>
-                      </div>
-                    ))}
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Cấp Độ</div>
+                  <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>
+                    {realtimeState.levelTitle}
                   </div>
-                ) : (
-                  <div style={{ padding: '24px', textAlign: 'center', border: '2px dashed var(--border-default)', borderRadius: '12px', color: 'var(--text-muted)', fontSize: '13px' }}>
-                    Hoàn thành bài học để nhận huy hiệu đầu tiên.
+                  <div style={{ height: '6px', borderRadius: '99px', background: 'rgba(255,255,255,0.08)', overflow: 'hidden', marginBottom: '6px' }}>
+                    <div style={{ height: '100%', borderRadius: '99px', background: 'linear-gradient(90deg, var(--brand-primary), #00f3ff)', width: `${realtimeState.levelProgress}%`, transition: 'width 0.5s ease' }} />
                   </div>
-                )}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-muted)' }}>
+                    <span>{realtimeState.xpInLevel} / {realtimeState.xpToNext} XP</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--brand-primary)' }}>
+                      Xem chi tiết <ChevronRight size={14} />
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </section>
+            </motion.div>
+          </Link>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 4 * 0.08, duration: 0.4 }}>

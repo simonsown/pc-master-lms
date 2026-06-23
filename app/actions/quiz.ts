@@ -4,7 +4,6 @@ import { createClient } from '@/lib/supabase-ssr-server';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { shuffleArray, scoreQuestion, StudentAnswer } from '@/lib/quiz-engine';
-import { checkAndAwardAchievements } from '@/lib/achievements';
 
 export async function getAuthUser(supabase: any) {
   const { data: { user } } = await supabase.auth.getUser();
@@ -167,9 +166,6 @@ export async function submitQuizAttempt(attemptId: string, answers: StudentAnswe
     action_url: `/student/quiz/${attemptId}/results`,
     data: { quizId: attempt.quizzes.id, attemptId, score: finalScore }
   });
-
-  // Evaluate and award achievements
-  await checkAndAwardAchievements(supabase, user.id, 'quiz_submitted');
 
   revalidatePath(`/student/quiz/${attempt.quizzes.id}`);
   return { attemptId, score: finalScore, redirect: `/student/quiz/${attemptId}/results` };

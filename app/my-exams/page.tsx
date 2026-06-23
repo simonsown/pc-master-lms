@@ -42,7 +42,7 @@ export default function StudentAnalyticsPage() {
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h1 className="text-4xl font-black mb-2">Phân tích <span style={{ color: 'var(--brand-primary)' }}>Năng lực</span></h1>
-          <p className="font-medium italic" style={{ color: 'var(--text-muted)' }}>"Theo dõi sự tiến bộ và tối ưu hóa lộ trình học tập của bạn."</p>
+          <p className="font-medium italic" style={{ color: 'var(--text-muted)' }}>"Theo dõi sự tiến bộ và tối ưu hóa việc học của bạn."</p>
         </div>
         <button className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: 'var(--text-muted)' }}>
           <Download size={18} /> Xuất báo cáo (PDF)

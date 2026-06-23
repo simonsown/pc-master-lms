@@ -74,7 +74,7 @@ const HandTracker = ({ onLandmarks }) => {
               delegate: hasWebGL ? 'GPU' : 'CPU'
             },
             runningMode: 'VIDEO',
-            numHands: 2
+            numHands: 4
           });
 
           if (cancelled) return;

@@ -347,7 +347,7 @@ function SSDModel({ isHovered }) {
       <Text
         position={[0.1, 0.022, 0.11]}
         fontSize={0.04}
-        color="#555"
+        color="#fff"
         anchorX="center"
         anchorY="middle"
       >
@@ -545,7 +545,7 @@ function MainboardModel({ isHovered }) {
       <Text
         position={[-0.75, 0.05, 0.7]}
         fontSize={0.05}
-        color="#aaa"
+        color="#fff"
         anchorX="center"
         anchorY="middle"
       >
@@ -554,7 +554,7 @@ function MainboardModel({ isHovered }) {
       <Text
         position={[0.75, 0.05, 0.7]}
         fontSize={0.05}
-        color="#aaa"
+        color="#fff"
         anchorX="center"
         anchorY="middle"
       >
@@ -569,7 +569,7 @@ function MainboardModel({ isHovered }) {
       <Text
         position={[0, 0.05, -0.4]}
         fontSize={0.05}
-        color="#aaa"
+        color="#fff"
         anchorX="center"
         anchorY="middle"
       >

@@ -14,13 +14,11 @@ export default function ParentLayout({ children }: { children: React.ReactNode }
   const [parentId, setParentId] = useState<string | null>(null)
   const pathname = usePathname()
   const [supabase] = useState(() => {
-    if (typeof window === 'undefined' && (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)) {
-      return null as any
-    }
-    return createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()
+    if (typeof window === 'undefined' && (!url || !key)) return null as any
+    if (!url || !key) return null as any
+    return createBrowserClient(url, key)
   })
 
   useEffect(() => {
