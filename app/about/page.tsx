@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Phone, Mail, MapPin, ExternalLink, ShieldCheck, Heart, Loader2, Sparkles, BookOpen, Award, Users, Target, Quote, ChevronDown } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ArrowLeft, Phone, Mail, MapPin, ExternalLink, ShieldCheck, Heart, Loader2, Sparkles, BookOpen, Award, Users, Target, Quote, ChevronDown, Cpu } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 function CollapsibleGroup({ title, children, defaultOpen = false }) {
@@ -107,21 +108,66 @@ export default function AboutPage() {
                         </div>
                     </div>
 
-                    <div style={{ 
-                        position: 'relative', borderRadius: '32px', overflow: 'hidden', 
-                        boxShadow: '0 25px 50px -12px rgba(0, 243, 255, 0.25)',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        aspectRatio: '16/9', animation: 'fadeInRight 1s ease',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        background: 'radial-gradient(circle at 30% 40%, rgba(0, 212, 170, 0.08) 0%, rgba(5, 5, 7, 1) 70%)'
-                    }}>
-                        <div style={{
-                            width: '48px', height: '48px', borderRadius: '12px',
-                            background: 'rgba(0,212,170,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center'
-                        }}>
-                            <BookOpen size={24} color="var(--brand-primary)" />
-                        </div>
-                    </div>
+                    <motion.div
+                        initial={{ opacity: 0, x: 30 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6 }}
+                        style={{ perspective: '1200px' }}
+                    >
+                        <motion.div
+                            animate={{ y: [0, -5, 0] }}
+                            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                            style={{
+                                position: 'relative', borderRadius: '32px', overflow: 'hidden',
+                                boxShadow: '0 25px 50px -12px rgba(0, 243, 255, 0.25)',
+                                border: '1px solid rgba(255,255,255,0.08)',
+                                aspectRatio: '16/9',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                background: 'radial-gradient(circle at 30% 40%, rgba(0, 212, 170, 0.08) 0%, rgba(5, 5, 7, 1) 70%)',
+                                transition: 'box-shadow 0.4s ease, border-color 0.4s ease',
+                                transformStyle: 'preserve-3d',
+                            }}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.boxShadow = '0 35px 70px -12px rgba(0, 243, 255, 0.45), 0 0 0 1px rgba(0,212,170,0.3)';
+                                e.currentTarget.style.borderColor = 'var(--brand-primary)';
+                                e.currentTarget.style.transform = 'rotateY(-2deg) rotateX(2deg)';
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.boxShadow = '0 25px 50px -12px rgba(0, 243, 255, 0.25)';
+                                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                                e.currentTarget.style.transform = 'rotateY(0deg) rotateX(0deg)';
+                            }}
+                        >
+                            <motion.img
+                                src="/showcase.png"
+                                alt="PC Master Builder"
+                                style={{
+                                    width: '100%', height: '100%', objectFit: 'cover', display: 'block',
+                                    position: 'relative', zIndex: 0,
+                                }}
+                                animate={{ scale: [1, 1.03, 1] }}
+                                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                            />
+                            <div style={{
+                                position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
+                                background: 'linear-gradient(135deg, rgba(0,212,170,0.12) 0%, transparent 50%, rgba(99,102,241,0.1) 100%)',
+                                animation: 'aboutShowcaseGlow 3s ease-in-out infinite',
+                            }} />
+                            <div style={{
+                                position: 'absolute', bottom: '16px', left: '50%', transform: 'translateX(-50%)', zIndex: 2,
+                                padding: '8px 20px', borderRadius: '99px',
+                                background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
+                                border: '1px solid rgba(0,212,170,0.2)',
+                                display: 'flex', alignItems: 'center', gap: '8px',
+                            }}>
+                                <Cpu size={14} color="#00d4aa" />
+                                <span style={{ fontSize: '12px', fontWeight: 700, color: '#fff', letterSpacing: '0.5px' }}>
+                                    Mô phỏng lắp ráp PC thực tế
+                                </span>
+                            </div>
+                        </motion.div>
+                    </motion.div>
                 </div>
             </section>
 
@@ -321,7 +367,7 @@ export default function AboutPage() {
                 </div>
             </section>
 
-            <footer style={{ padding: '40px 24px 40px', background: '#050507', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+            <footer style={{ padding: '60px 24px 60px', background: '#050507', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                 <div style={{ maxWidth: '900px', margin: '0 auto' }}>
                     <CollapsibleGroup title="Tác giả & Giáo viên hướng dẫn" defaultOpen={false}>
                         <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', flexWrap: 'wrap' }}>
@@ -341,7 +387,7 @@ export default function AboutPage() {
                             </div>
                         </div>
                     </CollapsibleGroup>
-                    <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                         <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.2)', margin: 0, textAlign: 'center' }}>
                             © {new Date().getFullYear()} PC Master Builder - THPT Nguyễn Công Trứ. Tất cả quyền được bảo lưu.
                         </p>
@@ -369,6 +415,10 @@ export default function AboutPage() {
                 @keyframes fadeInRight {
                     from { opacity: 0; transform: translateX(24px); }
                     to { opacity: 1; transform: translateX(0); }
+                }
+                @keyframes aboutShowcaseGlow {
+                    0%, 100% { opacity: 0.3; }
+                    50% { opacity: 0.9; }
                 }
             `}</style>
         </div>
