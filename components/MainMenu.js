@@ -171,6 +171,7 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                     </button>
                 )}
                     </div>
+                </div>
             </motion.div>
 
             <motion.div {...fadeUp(0.05)} style={{
