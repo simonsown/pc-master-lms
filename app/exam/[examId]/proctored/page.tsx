@@ -4,8 +4,8 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Camera, ShieldAlert, Monitor, Lock, AlertCircle, CheckCircle2, ScanFace, Zap,
-  ArrowRight, Video, Eye, EyeOff, UserX, UserCheck, Clock, AlertTriangle, RefreshCw,
-  Gauge, Maximize, Fingerprint, Wifi
+  ArrowRight, Video, EyeOff, UserX, UserCheck, Clock, AlertTriangle, RefreshCw,
+  Gauge, Maximize, Wifi
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
@@ -199,7 +199,7 @@ export default function ProctoredExamPage({ params }: { params: Promise<{ examId
                   { icon: Monitor, text: "Bat buoc che do Toan man hinh", color: "var(--accent-blue)" },
                   { icon: ShieldAlert, text: "Phat hien va canh bao khi roi Tab", color: "var(--danger)" },
                   { icon: Lock, text: "Khoa chuc nang Copy, Paste, chuot phai", color: "#8b5cf6" },
-                  { icon: Fingerprint, text: "Phat hien khuon mat bang AI (MediaPipe)", color: "var(--brand-primary)" },
+                  { icon: Camera, text: "Phat hien khuon mat bang AI (MediaPipe)", color: "var(--brand-primary)" },
                   { icon: Gauge, text: "Theo doi huong nhin & phat hien nhieu mat", color: "#f59e0b" },
                   { icon: Wifi, text: "Canh bao thoi gian thuc den giao vien", color: "#06b6d4" },
                 ].map((item, i) => (

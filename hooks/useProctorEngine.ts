@@ -5,9 +5,16 @@ import { supabase } from '@/lib/supabase'
 
 const SNAPSHOT_INTERVAL = 60000
 const FACE_CHECK_INTERVAL = 1500
-const MAX_VIOLATIONS = 3
+const AUDIO_CHECK_INTERVAL = 3000
+const IDLE_CHECK_INTERVAL = 5000
+const SCREEN_REC_CHECK_INTERVAL = 30000
+const MAX_VIOLATIONS = 5
+const IDLE_THRESHOLD = 30
+const AUDIO_THRESHOLD = 0.15
+const GAZE_YAW_THRESHOLD = 0.4
+const GAZE_PITCH_THRESHOLD = 0.35
 
-export type ViolationType = 'tab_switch' | 'fullscreen_exit' | 'face_not_visible' | 'multiple_faces' | 'looking_away' | 'no_face_match'
+export type ViolationType = 'tab_switch' | 'fullscreen_exit' | 'face_not_visible' | 'multiple_faces' | 'looking_away' | 'no_face_match' | 'audio_anomaly' | 'prolonged_idle' | 'screen_recording' | 'vm_detected'
 
 export interface ProctorState {
   status: 'idle' | 'loading' | 'active' | 'error'
@@ -21,6 +28,9 @@ export interface ProctorState {
   stream: MediaStream | null
   identityCapture: string | null
   gazeDirection: { yaw: number; pitch: number }
+  audioLevel: number
+  isIdle: boolean
+  idleTime: number
 }
 
 interface ProctorOptions {
@@ -47,17 +57,30 @@ export function useProctorEngine({ examId, attemptId, identityPhoto, onViolation
     stream: null,
     identityCapture: null,
     gazeDirection: { yaw: 0, pitch: 0 },
+    audioLevel: 0,
+    isIdle: false,
+    idleTime: 0,
   })
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const landmarkerRef = useRef<any>(null)
-  const animRef = useRef<number>(0)
   const faceCheckTimerRef = useRef<any>(null)
   const snapshotTimerRef = useRef<any>(null)
   const mountedRef = useRef(true)
   const violationCountRef = useRef(0)
+
+  const audioContextRef = useRef<AudioContext | null>(null)
+  const analyserRef = useRef<AnalyserNode | null>(null)
+  const audioDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null)
+  const idleTimeRef = useRef<number>(0)
+  const audioCheckTimerRef = useRef<any>(null)
+  const idleCheckTimerRef = useRef<any>(null)
+  const lastActivityRef = useRef<number>(Date.now())
+  const activityHandlerRef = useRef<(() => void) | null>(null)
+  const screenRecCheckTimerRef = useRef<any>(null)
+  const vmCheckedRef = useRef<boolean>(false)
 
   const capturePhoto = useCallback(() => {
     if (videoRef.current && canvasRef.current) {
@@ -102,9 +125,17 @@ export function useProctorEngine({ examId, attemptId, identityPhoto, onViolation
   const startCamera = useCallback(async () => {
     try {
       setState(prev => ({ ...prev, status: 'loading', cameraError: null }))
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: { ideal: 240 }, height: { ideal: 180 }, facingMode: 'user', frameRate: { ideal: 15 } },
-      })
+      let stream: MediaStream
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 240 }, height: { ideal: 180 }, facingMode: 'user', frameRate: { ideal: 15 } },
+          audio: true,
+        })
+      } catch {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 240 }, height: { ideal: 180 }, facingMode: 'user', frameRate: { ideal: 15 } },
+        })
+      }
       if (!mountedRef.current) { stream.getTracks().forEach(t => t.stop()); return }
       streamRef.current = stream
       if (videoRef.current) {
@@ -172,6 +203,118 @@ export function useProctorEngine({ examId, attemptId, identityPhoto, onViolation
     return { face: ratio > 0.05, multiple: false, yaw: 0, pitch: 0 }
   }, [])
 
+  const setupAudioDetection = useCallback(() => {
+    const stream = streamRef.current
+    if (!stream) return
+    try {
+      const audioTrack = stream.getAudioTracks()[0]
+      if (!audioTrack) return
+
+      const audioContext = new AudioContext()
+      const source = audioContext.createMediaStreamSource(stream)
+      const analyser = audioContext.createAnalyser()
+      analyser.fftSize = 256
+      source.connect(analyser)
+
+      audioContextRef.current = audioContext
+      analyserRef.current = analyser
+      audioDataRef.current = new Uint8Array(analyser.frequencyBinCount) as Uint8Array<ArrayBuffer>
+
+      audioCheckTimerRef.current = setInterval(() => {
+        if (!analyserRef.current || !audioDataRef.current) return
+        analyserRef.current.getByteFrequencyData(audioDataRef.current)
+        const sum = audioDataRef.current.reduce((a, b) => a + b, 0)
+        const average = sum / audioDataRef.current.length
+        const level = average / 255
+
+        setState(prev => ({ ...prev, audioLevel: level }))
+
+        if (level > AUDIO_THRESHOLD) {
+          recordViolation('audio_anomaly', `Phat hien am thanh bat thuong (muc do: ${level.toFixed(2)})`)
+        }
+      }, AUDIO_CHECK_INTERVAL)
+    } catch {
+    }
+  }, [recordViolation])
+
+  const setupIdleDetection = useCallback(() => {
+    const updateActivity = () => {
+      lastActivityRef.current = Date.now()
+      idleTimeRef.current = 0
+    }
+    activityHandlerRef.current = updateActivity
+
+    window.addEventListener('mousemove', updateActivity)
+    window.addEventListener('mousedown', updateActivity)
+    window.addEventListener('keydown', updateActivity)
+    window.addEventListener('touchstart', updateActivity)
+
+    idleCheckTimerRef.current = setInterval(() => {
+      const elapsed = (Date.now() - lastActivityRef.current) / 1000
+      idleTimeRef.current = elapsed
+      setState(prev => ({ ...prev, isIdle: elapsed > IDLE_THRESHOLD, idleTime: Math.floor(elapsed) }))
+
+      if (Math.floor(elapsed) === IDLE_THRESHOLD + 1) {
+        recordViolation('prolonged_idle', `Khong co hoat dong chuot/ban phim trong ${Math.floor(elapsed)} giay`)
+      }
+    }, IDLE_CHECK_INTERVAL)
+  }, [recordViolation])
+
+  const detectScreenRecording = useCallback(() => {
+    try {
+      // @ts-ignore
+      if (navigator.mediaSession?.playbackState === 'recording') {
+        recordViolation('screen_recording', 'Phat hien phan mem ghi man hinh (mediaSession)')
+        return
+      }
+    } catch {}
+
+    try {
+      // @ts-ignore
+      if (window.screenRecording || window.__RECORDING__) {
+        recordViolation('screen_recording', 'Phat hien phan mem ghi man hinh (window flag)')
+        return
+      }
+    } catch {}
+  }, [recordViolation])
+
+  const detectVM = useCallback(() => {
+    if (vmCheckedRef.current) return
+    vmCheckedRef.current = true
+
+    const vmIndicators: string[] = []
+
+    if (navigator.webdriver) {
+      vmIndicators.push('webdriver')
+    }
+
+    const platform = navigator.platform?.toLowerCase() || ''
+    if (platform.includes('vm') || platform.includes('virtual')) {
+      vmIndicators.push('platform')
+    }
+
+    const { width, height } = window.screen
+    if ((width === 1024 && height === 768) || (width === 800 && height === 600)) {
+      vmIndicators.push('resolution')
+    }
+
+    if (navigator.hardwareConcurrency <= 2) {
+      vmIndicators.push('low_cores')
+    }
+
+    for (let i = 0; i < navigator.plugins.length; i++) {
+      const name = navigator.plugins[i].name.toLowerCase()
+      if (name.includes('vmware') || name.includes('virtualbox') || name.includes('hyper-v') || name.includes('virtual machine')) {
+        vmIndicators.push('vmm_plugin')
+        break
+      }
+    }
+
+    if (vmIndicators.length >= 2) {
+      recordViolation('vm_detected', `Phat hien may ao (dau hieu: ${vmIndicators.join(', ')})`)
+    }
+  }, [recordViolation])
+
   const startFaceDetection = useCallback(async () => {
     await initMediaPipe()
 
@@ -204,7 +347,7 @@ export function useProctorEngine({ examId, attemptId, identityPhoto, onViolation
           ...prev,
           faceDetected: face,
           multipleFaces: multiple,
-          lookingAway: Math.abs(yaw) > 0.4 || Math.abs(pitch) > 0.35,
+          lookingAway: Math.abs(yaw) > GAZE_YAW_THRESHOLD || Math.abs(pitch) > GAZE_PITCH_THRESHOLD,
           gazeDirection: { yaw, pitch },
         }))
 
@@ -214,7 +357,7 @@ export function useProctorEngine({ examId, attemptId, identityPhoto, onViolation
 
         if (!face) {
           recordViolation('face_not_visible', 'Khong phat hien khuon mat truoc camera')
-        } else if (Math.abs(yaw) > 0.4 || Math.abs(pitch) > 0.35) {
+        } else if (Math.abs(yaw) > GAZE_YAW_THRESHOLD || Math.abs(pitch) > GAZE_PITCH_THRESHOLD) {
           recordViolation('looking_away', `Nhin sang huong khac (yaw=${yaw.toFixed(2)}, pitch=${pitch.toFixed(2)})`)
         }
       } catch (e) {
@@ -234,7 +377,12 @@ export function useProctorEngine({ examId, attemptId, identityPhoto, onViolation
         }).then()
       }
     }, SNAPSHOT_INTERVAL)
-  }, [initMediaPipe, detectFace, recordViolation, capturePhoto, examId, attemptId])
+
+    setupAudioDetection()
+    setupIdleDetection()
+    screenRecCheckTimerRef.current = setInterval(detectScreenRecording, SCREEN_REC_CHECK_INTERVAL)
+    detectVM()
+  }, [initMediaPipe, detectFace, recordViolation, capturePhoto, examId, attemptId, setupAudioDetection, setupIdleDetection, detectScreenRecording, detectVM])
 
   useEffect(() => {
     mountedRef.current = true
@@ -243,8 +391,24 @@ export function useProctorEngine({ examId, attemptId, identityPhoto, onViolation
       stopCamera()
       clearInterval(faceCheckTimerRef.current)
       clearInterval(snapshotTimerRef.current)
-      cancelAnimationFrame(animRef.current)
       landmarkerRef.current = null
+
+      clearInterval(audioCheckTimerRef.current)
+      clearInterval(idleCheckTimerRef.current)
+      clearInterval(screenRecCheckTimerRef.current)
+
+      if (activityHandlerRef.current) {
+        window.removeEventListener('mousemove', activityHandlerRef.current)
+        window.removeEventListener('mousedown', activityHandlerRef.current)
+        window.removeEventListener('keydown', activityHandlerRef.current)
+        window.removeEventListener('touchstart', activityHandlerRef.current)
+        activityHandlerRef.current = null
+      }
+
+      if (audioContextRef.current) {
+        audioContextRef.current.close()
+        audioContextRef.current = null
+      }
     }
   }, [stopCamera])
 

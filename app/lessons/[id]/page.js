@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
+import PdfViewer from '@/components/PdfViewer';
 
 export default function StudentLessonPage({ params }) {
     const resolvedParams = use(params);
@@ -129,14 +130,7 @@ export default function StudentLessonPage({ params }) {
                             )}
 
                             {s.type === 'pdf' && (
-                                <div style={{ background: '#0a0f1a', borderRadius: '24px', overflow: 'hidden', border: '1px solid #1e293b' }}>
-                                    <iframe src={getDriveEmbed(s.content)} style={{ width: '100%', height: '600px', border: 'none' }} />
-                                    <div style={{ padding: '16px', display: 'flex', justifyContent: 'flex-end' }}>
-                                        <a href={s.content} target="_blank" style={{ color: '#00f3ff', textDecoration: 'none', fontSize: '14px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <Maximize2 size={16} /> Xem toàn màn hình
-                                        </a>
-                                    </div>
-                                </div>
+                                <PdfViewer url={s.content} title={s.title} />
                             )}
 
                             {s.type === 'embed' && s.content && (
@@ -175,12 +169,12 @@ export default function StudentLessonPage({ params }) {
             {/* Modal xem sách */}
             {selectedBook && (
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.95)', zIndex: 1000, display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ padding: '20px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0a0f1a' }}>
-                        <h3 style={{ margin: 0 }}>Đang xem: {selectedBook.title}</h3>
-                        <button onClick={() => setSelectedBook(null)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><X size={32}/></button>
+                    <div style={{ padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0a0f1a' }}>
+                        <h3 style={{ margin: 0, fontSize: '18px' }}>{selectedBook.title}</h3>
+                        <button onClick={() => setSelectedBook(null)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><X size={28}/></button>
                     </div>
-                    <div style={{ flex: 1 }}>
-                        <iframe src={getDriveEmbed(selectedBook.drive_embed_url)} style={{ width: '100%', height: '100%', border: 'none' }} />
+                    <div style={{ flex: 1, overflow: 'auto' }}>
+                        <PdfViewer url={selectedBook.drive_embed_url} title={selectedBook.title} />
                     </div>
                 </div>
             )}

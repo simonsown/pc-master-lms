@@ -135,9 +135,6 @@ export async function register(formData: FormData) {
   if (error) return { error: error.message }
 
   if (data.user) {
-    // 4. Tạo/Cập nhật Profile thủ công an toàn
-    // Vì trigger handle_new_user thường đã tự động INSERT một bản ghi cơ bản,
-    // ta nên ưu tiên thực hiện UPDATE trước, nếu thất bại mới thực hiện UPSERT.
     let profileError = null;
     const { error: updateError } = await supabase
       .from('profiles')
@@ -168,9 +165,7 @@ export async function register(formData: FormData) {
       console.error('Profile Creation/Update Error:', profileError);
     }
 
-    // 5. Nếu là phụ huynh, tạo liên kết với học sinh dựa trên classCode (Mã học sinh/Email)
     if (role === 'parent' && classCode) {
-      // Tìm học sinh dựa trên email hoặc id
       const { data: student } = await supabase
         .from('profiles')
         .select('id')
@@ -186,9 +181,22 @@ export async function register(formData: FormData) {
         });
       }
     }
+
+    // Auto sign-in after registration
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    if (signInError) {
+      console.error('Auto sign-in after registration failed:', signInError);
+    }
   }
 
-  return { success: true }
+  const userRole = role || 'student'
+  if (userRole === 'student') {
+    return { success: true, redirectUrl: '/builder' }
+  } else if (userRole === 'parent') {
+    return { success: true, redirectUrl: '/parent' }
+  } else {
+    return { success: true, redirectUrl: `/${userRole}` }
+  }
 }
 
 export async function logout() {

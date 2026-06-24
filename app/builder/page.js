@@ -5,19 +5,8 @@ import Link from 'next/link';
 import confetti from 'canvas-confetti';
 import { supabase } from '@/lib/supabase';
 import { startBuilderSession, endBuilderSession } from '@/lib/learning-actions';
-import dynamic from 'next/dynamic';
-const HandTracker = dynamic(
-  () => import('../../components/HandTracker'),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex items-center gap-2 text-sm text-[#5a5d72]">
-        <div className="w-4 h-4 border-2 border-[#00d4aa] border-t-transparent rounded-full animate-spin" />
-        Đang tải Hand Tracking...
-      </div>
-    )
-  }
-);
+import { motion } from 'framer-motion';
+import { useRealtime } from '@/lib/realtime-provider';
 import GameEngine from '../../components/GameEngine';
 import MultiplayerEngine from '../../components/MultiplayerEngine';
 import MainMenu from '../../components/MainMenu';
@@ -26,7 +15,6 @@ import PartPickerSidebar from '../../components/PartPickerSidebar';
 import ComponentPreview from '../../components/ComponentPreview';
 import BurgerMenu from '../../components/BurgerMenu';
 import QuizModal from '../../components/QuizModal';
-import WebcamCursor from '../../components/WebcamCursor';
 import LearningMode from '../../components/LearningMode';
 import Marketplace from '../../components/Marketplace';
 import LectureCourse from '../../components/LectureCourse';
@@ -42,12 +30,10 @@ import { withTracking } from '@/lib/tracking';
 import BuilderLab from '@/components/builder/BuilderLab';
 import CollaborationStatus from '@/components/builder/CollaborationStatus';
 import VoiceController from '@/components/VoiceController';
-
-// Hoist camera state outside component or use persistent Context to ensure "only turn on once" stays on even if rerendered
-let globalCameraState = false;
+import {} from 'lucide-react';
 
 function Home(props) {
-  const [landmarks, setLandmarks] = useState([]);
+  const { state: realtimeState } = useRealtime();
   const [hoveredComponent, setHoveredComponent] = useState(null);
   const [lang, setLang] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -58,13 +44,10 @@ function Home(props) {
   const guru = useGuru();
   const [lastPlaced, setLastPlaced] = useState(null);
   const [showQuiz, setShowQuiz] = useState(false);
-  const [quizParams, setQuizParams] = useState(null); // { topic, level, onSuccess }
-  const [appMode, setAppMode] = useState('menu'); // 'menu', 'assembly', 'learning', 'course', 'market', 'multiplayer', 'mission_assembly', 'exams', 'challenge'
-  const [appView, setAppView] = useState('menu'); // 'menu' or 'game'
+  const [quizParams, setQuizParams] = useState(null);
+  const [appMode, setAppMode] = useState('menu');
+  const [appView, setAppView] = useState('menu');
   const [missionData, setMissionData] = useState(null);
-  const [webcamMouseEnabled, setWebcamMouseEnabled] = useState(false);
-  const [isCameraActive, setIsCameraActive] = useState(globalCameraState);
-  const [trackingSensitivity, setTrackingSensitivity] = useState(1.0);
   const [placedItemsList, setPlacedItemsList] = useState([]);
   const [imageMode, setImageMode] = useState(false);
   const [lastVoiceResult, setLastVoiceResult] = useState('');
@@ -226,7 +209,6 @@ function Home(props) {
     });
   }, []);
 
-  // Update appView based on appMode changes
   useEffect(() => {
     if (appMode === 'menu') {
         setAppView('menu');
@@ -245,7 +227,6 @@ function Home(props) {
           steps: [
             { element: '.sidebar-container', popover: { title: 'Menu Điều Khiển', description: 'Đầy đủ các chức năng khám phá, từ bài giảng đến 2 người chơi.', side: 'right', align: 'start' }},
             { element: '.mode-card', popover: { title: 'Chế độ Bài Giảng', description: 'Học các lý thuyết cơ bản trước khi lắp ráp nhé.', side: 'bottom', align: 'start' }},
-            { element: '.toggle-switch', popover: { title: 'Theo dõi tay (Webcam)', description: 'Bật tính năng này để dùng tay "cầm nắm" linh kiện ảo!', side: 'right', align: 'start' }},
           ],
           onDestroyStarted: () => {
              localStorage.setItem('onboardingDone_v2', 'true');
@@ -344,16 +325,6 @@ function Home(props) {
         onStartQuiz={() => setShowQuiz(true)}
         appMode={appMode}
         setAppMode={setAppMode}
-        webcamMouseEnabled={webcamMouseEnabled}
-        setWebcamMouseEnabled={(val) => {
-          setWebcamMouseEnabled(val);
-          if (val) {
-            globalCameraState = true;
-            setIsCameraActive(true);
-          }
-        }}
-        trackingSensitivity={trackingSensitivity}
-        setTrackingSensitivity={setTrackingSensitivity}
         onToggleAI={() => setIsAIOpen(prev => !prev)}
         isAIOpen={isAIOpen}
         theme={theme}
@@ -362,11 +333,7 @@ function Home(props) {
         onShowDashboard={() => setShowStudentDashboard(true)}
       />
 
-
-
       <main className="main-content">
-        {appMode !== 'multiplayer' && <WebcamCursor landmarks={landmarks} enabled={webcamMouseEnabled} trackingSensitivity={trackingSensitivity} />}
-
         {showQuiz && (
             <QuizModal
             lang={lang}
@@ -381,7 +348,6 @@ function Home(props) {
             />
         )}
 
-        {/* Virtual Assistant — visible on all modes except menu */}
         {appView !== 'menu' && (
             <VirtualAssistant
                 lang={lang}
@@ -407,101 +373,29 @@ function Home(props) {
                 padding: ['course','market'].includes(appMode) ? '0' : '24px',
                 overflow: 'hidden'
             }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '12px 24px', background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-subtle)', borderRadius: '12px', marginBottom: '16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '14px', cursor: 'pointer' }} onClick={() => setAppMode('menu')}>
-                            {lang === 'en' ? 'Home' : 'Trang chủ'}
-                        </span>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '14px' }}>/</span>
-                        <span style={{ color: 'var(--text-primary)', fontSize: '14px', fontWeight: 600 }}>
-                            {getModeTitle()}
-                        </span>
-                    </div>
-
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <button
+                    onClick={() => setAppMode('menu')}
+                    style={{
+                      padding: '8px 18px',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-default)',
+                      borderRadius: '8px',
+                      color: 'var(--text-primary)',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--border-strong)'; e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                    onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.background = 'var(--bg-elevated)'; }}
+                  >
+                    ← {lang === 'en' ? 'Back' : 'Thoát'}
+                  </button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <CollaborationStatus />
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        {/* Hand Tracking Status Badge */}
-                        <div style={{ 
-                            display: 'flex', alignItems: 'center', gap: '8px', 
-                            padding: '4px 12px', borderRadius: '100px', 
-                            background: webcamMouseEnabled ? 'rgba(16, 185, 129, 0.1)' : 'rgba(71, 85, 105, 0.1)',
-                            border: `1px solid ${webcamMouseEnabled ? 'rgba(16, 185, 129, 0.2)' : 'rgba(71, 85, 105, 0.2)'}`
-                        }}>
-                            <div style={{ 
-                                width: '8px', height: '8px', borderRadius: '50%', 
-                                background: webcamMouseEnabled ? 'var(--success)' : 'var(--text-muted)',
-                                boxShadow: webcamMouseEnabled ? '0 0 8px var(--success)' : 'none',
-                                animation: webcamMouseEnabled ? 'blink 2s infinite' : 'none'
-                            }}></div>
-                            <span style={{ fontSize: '12px', fontWeight: 600, color: webcamMouseEnabled ? 'var(--success)' : 'var(--text-muted)' }}>
-                                Hand Tracking: {webcamMouseEnabled ? 'ON' : 'OFF'}
-                            </span>
-                        </div>
-                        
-                        <button
-                            onClick={() => setAppMode('menu')}
-                            style={{
-                                padding: '6px 16px', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)',
-                                borderRadius: '6px', color: 'var(--text-primary)', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
-                                transition: 'all 0.2s'
-                            }}
-                            onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--border-strong)'; e.currentTarget.style.background = 'var(--bg-hover)'; }}
-                            onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.background = 'var(--bg-elevated)'; }}
-                        >
-                            {lang === 'en' ? 'Back' : 'Thoát'}
-                        </button>
-                    </div>
+                  </div>
                 </div>
-
-                {/* Camera Feed Area — Fixed global (except in learning mode where it's integrated) */}
-                {appMode !== 'menu' && appMode !== 'course' && appMode !== 'market' && appMode !== 'learning' && (
-                    <div style={{
-                        ...(appMode === 'multiplayer' ? {
-                            position: 'absolute', top: '80px', left: '50%', transform: 'translateX(-50%)', width: '280px', zIndex: 1001,
-                        } : {
-                            position: 'fixed', bottom: '2rem', right: '2rem', width: '360px',
-                        }),
-                        zIndex: 1000, pointerEvents: 'none'
-                    }}>
-                        <div className="glass-panel" style={{ padding: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', pointerEvents: 'auto', boxShadow: '0 8px 32px rgba(0,0,0,0.3)', background: 'rgba(10, 20, 40, 0.8)' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', marginBottom: '0.5rem' }}>
-                                <h3 style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    📷 Camera
-                                    {appMode === 'multiplayer' && <span style={{ fontSize: '9px', padding: '2px 6px', borderRadius: '4px', background: '#fbbf24', color: '#000', fontWeight: 700 }}>2 NGƯỜI</span>}
-                                </h3>
-                                <button
-                                    onClick={() => {
-                                        const nextCameraState = !isCameraActive;
-                                        globalCameraState = nextCameraState;
-                                        setIsCameraActive(nextCameraState);
-                                        setWebcamMouseEnabled(nextCameraState);
-                                        if (!nextCameraState) setLandmarks([]);
-                                    }}
-                                    style={{
-                                        background: isCameraActive ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)',
-                                        color: isCameraActive ? '#ef4444' : 'var(--success)',
-                                        border: `1px solid ${isCameraActive ? 'rgba(239, 68, 68, 0.3)' : 'rgba(16, 185, 129, 0.3)'}`,
-                                        padding: '2px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', fontWeight: 600,
-                                    }}
-                                >
-                                    {isCameraActive ? (lang === 'en' ? 'Off' : 'Tắt') : (lang === 'en' ? 'On' : 'Bật')}
-                                </button>
-                            </div>
-                            <div style={{ width: '100%', overflow: 'hidden', borderRadius: '4px', background: '#020617', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                {isCameraActive ? (
-                                    <div style={{ width: '100%', height: appMode === 'multiplayer' ? '160px' : '220px' }}>
-                                        <HandTracker onLandmarks={setLandmarks} />
-                                    </div>
-                                ) : (
-                                    <p style={{ color: 'var(--text-muted)', fontSize: '11px', textAlign: 'center', padding: '1rem', margin: 0 }}>
-                                        {lang === 'en' ? 'OFF' : 'TẮT'}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                )}
 
                 {/* Main View Port */}
                 <div style={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, alignItems: 'center', justifyContent: ['course','market'].includes(appMode) ? 'flex-start' : 'center', overflow: 'auto' }}>
@@ -519,10 +413,8 @@ function Home(props) {
                                 </h2>
                                 <GameEngine
                                     ref={gameEngineRef}
-                                    landmarks={landmarks}
                                     onHover={handleHover}
                                     onGameEvent={handleGameEvent}
-                                    trackingSensitivity={trackingSensitivity}
                                     imageMode={imageMode}
                                 />
                                 {/* Checklist + Debug */}
@@ -598,10 +490,8 @@ function Home(props) {
                                 </h2>
                                 <GameEngine
                                     ref={gameEngineRef}
-                                    landmarks={landmarks}
                                     onHover={handleHover}
                                     onGameEvent={handleGameEvent}
-                                    trackingSensitivity={trackingSensitivity}
                                     purchasedItems={missionData?.purchasedItems}
                                     imageMode={imageMode}
                                 />
@@ -613,18 +503,8 @@ function Home(props) {
                                 lang={lang}
                                 externalSelection={lastPlaced}
                                 appMode={appMode}
-                                landmarks={landmarks}
                                 onHover={handleHover}
                                 onGameEvent={handleGameEvent}
-                                trackingSensitivity={trackingSensitivity}
-                                isCameraActive={isCameraActive}
-                                setIsCameraActive={(val) => {
-                                    globalCameraState = val;
-                                    setIsCameraActive(val);
-                                    setWebcamMouseEnabled(val);
-                                    if (!val) setLandmarks([]);
-                                }}
-                                onSetLandmarks={setLandmarks}
                                 onTakeQuiz={(topic, level, onSuccess) => {
                                     setQuizParams({ topic, level, onSuccess });
                                     setShowQuiz(true);
@@ -636,10 +516,8 @@ function Home(props) {
                                     {lang === 'en' ? '2-Player Versus Mode' : 'Chế độ 2 Người Chơi'}
                                 </h2>
                                 <MultiplayerEngine
-                                    landmarks={landmarks}
                                     onGameEvent={handleGameEvent}
                                     lang={lang}
-                                    trackingSensitivity={trackingSensitivity}
                                 />
                             </div>
                         ) : appMode === 'exams' ? (
@@ -653,8 +531,8 @@ function Home(props) {
                             </div>
                         ) : appMode === 'challenge' ? (
                             <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
-                                <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#1A2F4A', marginBottom: '16px' }}>Thử Thách Hằng Ngày</h2>
-                                <p style={{ color: '#64748B', fontSize: '14px', marginBottom: '24px' }}>Hoàn thành thử thách để nhận điểm kinh nghiệm và huy hiệu.</p>
+                                <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#1A2F4A', marginBottom: '16px' }}>Nhiệm Vụ Hằng Ngày</h2>
+                                <p style={{ color: '#64748B', fontSize: '14px', marginBottom: '24px' }}>Hoàn thành nhiệm vụ để nhận điểm kinh nghiệm và huy hiệu.</p>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                                     {[
                                         { title: 'Lắp ráp nhanh', desc: 'Hoàn thành 1 bộ PC trong 5 phút', reward: '100 XP', color: '#D32F2F' },
@@ -669,7 +547,7 @@ function Home(props) {
                                                 <span style={{ fontSize: '12px', fontWeight: 700, color: c.color }}>+{c.reward}</span>
                                                 <button onClick={() => { setAppMode('learning'); }}
                                                     style={{ padding: '6px 14px', borderRadius: '6px', border: 'none', background: c.color, color: '#fff', fontWeight: 600, fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
-                                                    Nhận thử thách
+                                                    Nhận nhiệm vụ
                                                 </button>
                                             </div>
                                         </div>
@@ -710,6 +588,8 @@ function Home(props) {
       {showStudentDashboard && (
         <StudentDashboardContent onClose={() => setShowStudentDashboard(false)} />
       )}
+
+      <style jsx>{``}</style>
     </div>
   );
 }

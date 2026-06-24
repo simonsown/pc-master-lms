@@ -11,6 +11,7 @@ import ReactMarkdown from 'react-markdown'
 import { saveLessonProgress } from '@/lib/lesson-actions'
 import { getKeyQuestions } from '@/data/key-questions'
 import { QUIZ_BANK } from '@/data/quiz-bank'
+import PdfViewer from '@/components/PdfViewer'
 
 const EXTRA_VIDEOS: Record<string, { title: string; id: string }[]> = {
   'cpu': [
@@ -208,10 +209,9 @@ export default function LessonViewer({
                         ) : null
                       }
                       if (part.type === 'pdf') {
-                        const embedUrl = getPdfEmbedUrl(part.url!)
-                        return embedUrl ? (
-                          <div key={i} className="my-4 rounded-xl overflow-hidden" style={{ background: '#0a0f1a', border: '1px solid var(--border-subtle)' }}>
-                            <iframe src={embedUrl} className="w-full h-[500px] border-0" title="PDF" loading="lazy" />
+                        return part.url ? (
+                          <div key={i} className="my-4">
+                            <PdfViewer url={part.url} title="PDF" />
                           </div>
                         ) : null
                       }
@@ -224,13 +224,8 @@ export default function LessonViewer({
                   <img src={s.content} alt={s.title} style={{ maxWidth: '100%', height: 'auto', borderRadius: '12px' }} loading="lazy" />
                 )}
 
-                {s.type === 'pdf' && getPdfEmbedUrl(s.content) && (
-                  <iframe
-                    src={getPdfEmbedUrl(s.content)}
-                    className="w-full h-[500px] rounded-xl border-0"
-                    title={s.title}
-                    loading="lazy"
-                  />
+                {s.type === 'pdf' && s.content && (
+                  <PdfViewer url={s.content} title={s.title} />
                 )}
 
                 {s.type === 'embed' && s.content && (

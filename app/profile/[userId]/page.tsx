@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { BookOpen, Clock, Trophy, Award, Activity, FileText, ShieldCheck, ArrowLeft } from 'lucide-react'
+import { BookOpen, Clock, Trophy, Award, Activity, ShieldCheck, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import { motion } from 'framer-motion'
@@ -35,57 +35,57 @@ export default function UserProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0f0f1a] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00d2a0]"></div>
+      <div style={{ minHeight: '100vh', background: 'var(--bg-base)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: '48px', height: '48px', borderRadius: '50%', border: '2px solid var(--brand-primary)', borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
       </div>
     )
   }
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-[#0f0f1a] flex flex-col items-center justify-center text-white p-6">
-        <h2 className="text-2xl font-bold mb-4">Không tìm thấy người dùng</h2>
-        <Link href="/" className="px-6 py-3 bg-[#00d2a0] text-black font-bold rounded-xl">Quay lại trang chủ</Link>
+      <div style={{ minHeight: '100vh', background: 'var(--bg-base)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-primary)', padding: '24px' }}>
+        <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '16px' }}>Không tìm thấy người dùng</h2>
+        <Link href="/" style={{ padding: '12px 24px', background: 'var(--brand-primary)', color: 'var(--bg-base)', fontWeight: 700, borderRadius: '12px', textDecoration: 'none' }}>Quay lại trang chủ</Link>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#0f0f1a] text-white">
+    <div style={{ minHeight: '100vh', background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
       <Navbar />
 
-      <main className="pt-24 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <Link href="/student/classes" className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-6">
+      <main style={{ paddingTop: '96px', paddingBottom: '80px', paddingLeft: '16px', paddingRight: '16px', maxWidth: '1280px', margin: '0 auto' }} className="sm:px-6 lg:px-8">
+        <Link href="/student/classes" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', textDecoration: 'none', marginBottom: '24px', fontSize: '14px' }}>
           <ArrowLeft size={18} />
           <span>Quay lại</span>
         </Link>
 
         {/* HEADER SECTION */}
-        <div className="bg-[#16213e] rounded-2xl border border-[#1e293b] overflow-hidden mb-8 shadow-xl">
-          <div className="h-48 md:h-64 bg-gradient-to-r from-[#00d2a0]/20 via-[#00b4d8]/20 to-purple-500/20 relative">
-            <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+        <div style={{ background: 'var(--bg-surface)', borderRadius: '16px', border: '1px solid var(--border-default)', overflow: 'hidden', marginBottom: '32px', boxShadow: '0 4px 24px var(--shadow-color)' }}>
+          <div style={{ height: '192px', background: 'linear-gradient(to right, color-mix(in srgb, var(--brand-primary) 20%, transparent), color-mix(in srgb, var(--accent-blue) 20%, transparent), color-mix(in srgb, var(--accent-purple) 20%, transparent))', position: 'relative' }} className="md:h-64">
+            <div style={{ position: 'absolute', inset: 0, opacity: 0.2, backgroundImage: 'radial-gradient(var(--text-primary) 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
           </div>
 
-          <div className="px-6 md:px-10 pb-8 relative">
-            <div className="flex flex-col md:flex-row md:items-end gap-6 md:gap-8 -mt-16 md:-mt-20 relative z-10">
-              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-[#16213e] bg-[#0f0f1a] overflow-hidden shadow-2xl">
+          <div style={{ padding: '24px 40px 32px', position: 'relative' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }} className="md:flex-row md:items-end md:gap-8">
+              <div style={{ width: '128px', height: '128px', borderRadius: '50%', border: '4px solid var(--bg-surface)', background: 'var(--bg-base)', overflow: 'hidden', boxShadow: '0 8px 32px var(--shadow-hover)', marginTop: '-64px' }} className="md:w-40 md:h-40 md:-mt-20">
                 {profile.avatar_url ? (
-                  <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                  <img src={profile.avatar_url} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-[#1e293b] to-[#2a3655] flex items-center justify-center text-4xl font-bold text-slate-500">
+                  <div style={{ width: '100%', height: '100%', background: 'linear-gradient(to bottom right, var(--bg-elevated), color-mix(in srgb, var(--bg-elevated) 80%, var(--accent-blue)))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '36px', fontWeight: 700, color: 'var(--text-muted)' }}>
                     {profile.full_name?.charAt(0).toUpperCase()}
                   </div>
                 )}
               </div>
 
-              <div className="flex-1 pb-2">
-                <h1 className="text-3xl font-bold flex items-center gap-3">
+              <div style={{ flex: 1, paddingBottom: '8px' }}>
+                <h1 style={{ fontSize: '30px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '12px' }}>
                   {profile.full_name}
-                  {profile.role === 'admin' && <ShieldCheck className="text-[#00d2a0]" size={24} />}
+                  {profile.role === 'admin' && <ShieldCheck style={{ color: 'var(--brand-primary)' }} size={24} />}
                 </h1>
-                <p className="text-slate-400 mt-1 flex items-center gap-2">
+                <p style={{ color: 'var(--text-muted)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
                   {profile.role.toUpperCase()} 
-                  <span className="w-1 h-1 rounded-full bg-slate-600"></span>
+                  <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--text-muted)' }} />
                   <span>Tham gia từ: {new Date(profile.created_at).toLocaleDateString('vi-VN')}</span>
                 </p>
               </div>
@@ -94,20 +94,20 @@ export default function UserProfilePage() {
         </div>
 
         {/* STATS BAR */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <StatCard label="Bài học" value="12" icon={<BookOpen size={24} />} color="#00d2a0" />
-          <StatCard label="Giờ học" value="48h" icon={<Clock size={24} />} color="#a855f7" />
-          <StatCard label="Điểm XP" value="2,450" icon={<Trophy size={24} />} color="#eab308" />
-          <StatCard label="Huy hiệu" value="8" icon={<Award size={24} />} color="#00b4d8" />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '32px' }} className="md:grid-cols-4">
+          <StatCard label="Bài học" value="12" icon={<BookOpen size={24} />} color="var(--brand-primary)" />
+          <StatCard label="Giờ học" value="48h" icon={<Clock size={24} />} color="var(--accent-purple)" />
+          <StatCard label="Điểm XP" value="2,450" icon={<Trophy size={24} />} color="var(--accent-amber)" />
+          <StatCard label="Huy hiệu" value="8" icon={<Award size={24} />} color="var(--accent-blue)" />
         </div>
 
         {/* RECENT ACTIVITY */}
-        <div className="bg-[#16213e] rounded-2xl border border-[#1e293b] p-6 md:p-8">
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-            <Activity size={20} className="text-[#00d2a0]" /> Hoạt động gần đây
+        <div style={{ background: 'var(--bg-surface)', borderRadius: '16px', border: '1px solid var(--border-default)', padding: '24px 32px' }}>
+          <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Activity size={20} style={{ color: 'var(--brand-primary)' }} /> Hoạt động gần đây
           </h3>
           
-          <div className="space-y-6">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <ActivityItem title="Hoàn thành bài giảng: CPU Socket Types" date="Hôm nay" />
             <ActivityItem title="Đạt điểm 10 trong bài thi giữa kỳ" date="Hôm qua" />
             <ActivityItem title="Mở khóa huy hiệu: Fast Learner" date="3 ngày trước" />
@@ -120,13 +120,13 @@ export default function UserProfilePage() {
 
 function StatCard({ label, value, icon, color }: any) {
   return (
-    <div className="bg-[#16213e] p-5 rounded-2xl border border-[#1e293b] flex items-center gap-4">
-      <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${color}10`, color: color }}>
+    <div style={{ background: 'var(--bg-surface)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border-default)', display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div style={{ width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: `color-mix(in srgb, ${color} 10%, transparent)`, color }}>
         {icon}
       </div>
       <div>
-        <p className="text-sm text-slate-400 font-medium">{label}</p>
-        <p className="text-2xl font-bold mt-0.5">{value}</p>
+        <p style={{ fontSize: '14px', color: 'var(--text-muted)', fontWeight: 500 }}>{label}</p>
+        <p style={{ fontSize: '24px', fontWeight: 700, marginTop: '2px', color: 'var(--text-primary)' }}>{value}</p>
       </div>
     </div>
   )
@@ -134,11 +134,11 @@ function StatCard({ label, value, icon, color }: any) {
 
 function ActivityItem({ title, date }: any) {
   return (
-    <div className="flex gap-4 p-4 rounded-xl bg-[#0f0f1a] border border-[#1e293b]">
-      <div className="w-2 h-2 rounded-full bg-[#00d2a0] mt-2"></div>
+    <div style={{ display: 'flex', gap: '16px', padding: '16px', borderRadius: '12px', background: 'var(--bg-base)', border: '1px solid var(--border-default)' }}>
+      <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--brand-primary)', marginTop: '8px', flexShrink: 0 }} />
       <div>
-        <p className="font-medium">{title}</p>
-        <p className="text-xs text-slate-500 mt-1">{date}</p>
+        <p style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{title}</p>
+        <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>{date}</p>
       </div>
     </div>
   )

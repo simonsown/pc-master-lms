@@ -3,14 +3,17 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Plus, Trash2, Save, Loader2, Upload } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, Save, Loader2, Upload, FileText } from 'lucide-react'
 import { createExam, addQuestionToExam } from '@/app/actions/exam'
+import { parseDocx } from '@/utils/word-parser'
 
 export default function NewExamPage() {
   const router = useRouter()
   const [classes, setClasses] = useState<any[]>([])
   const [lessons, setLessons] = useState<any[]>([])
   const [saving, setSaving] = useState(false)
+  const [uploadingWord, setUploadingWord] = useState(false)
+  const [wordFileName, setWordFileName] = useState('')
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -76,6 +79,24 @@ export default function NewExamPage() {
 
   function removeQuestion(id: string) {
     setQuestions(prev => prev.filter(q => q.id !== id))
+  }
+
+  async function handleWordUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.name.endsWith('.docx')) { alert('Chỉ hỗ trợ file .docx'); return }
+    setUploadingWord(true)
+    setWordFileName(file.name)
+    try {
+      const { questions: parsed } = await parseDocx(file)
+      if (parsed.length === 0) { alert('Không tìm thấy câu hỏi trong file. Đảm bảo định dạng: "1. Nội dung câu hỏi" và "A. Đáp án"'); return }
+      setQuestions(prev => [...prev, ...parsed.map((q, i) => ({ ...q, id: `word_${Date.now()}_${i}` }))])
+      alert(`Đã nhập ${parsed.length} câu hỏi từ file Word!`)
+    } catch (err: any) {
+      alert('Lỗi đọc file: ' + err.message)
+    } finally {
+      setUploadingWord(false)
+    }
   }
 
   async function handleSave() {
@@ -236,6 +257,33 @@ export default function NewExamPage() {
               <textarea value={questionInput.explanation} onChange={e => setQuestionInput(p => ({ ...p, explanation: e.target.value }))}
                 placeholder="Giải thích (hiện sau khi học sinh trả lời)" rows={2}
                 style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'var(--text-primary)', fontSize: '13px', outline: 'none', resize: 'vertical' }} />
+
+              <div style={{ borderTop: '1px solid var(--border-default)', paddingTop: '12px', marginTop: '4px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                  <Upload size={14} style={{ color: 'var(--brand-primary)' }} />
+                  <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)' }}>Nhập từ file Word (.docx)</span>
+                </div>
+                <label style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                  padding: '10px', borderRadius: '10px',
+                  background: uploadingWord ? 'rgba(99,102,241,0.08)' : 'rgba(99,102,241,0.06)',
+                  border: '1px dashed rgba(99,102,241,0.3)',
+                  cursor: uploadingWord ? 'wait' : 'pointer', fontSize: '13px', fontWeight: 500,
+                  color: 'var(--brand-primary)', transition: 'all 0.2s'
+                }}>
+                  {uploadingWord ? (
+                    <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Đang xử lý...</>
+                  ) : (
+                    <><Upload size={16} /> Chọn file .docx (định dạng như Azota)</>
+                  )}
+                  <input type="file" accept=".docx" onChange={handleWordUpload} style={{ display: 'none' }} disabled={uploadingWord} />
+                </label>
+                {wordFileName && (
+                  <div style={{ marginTop: '6px', fontSize: '11px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <FileText size={12} /> {wordFileName}
+                  </div>
+                )}
+              </div>
 
               <button onClick={addCurrentQuestion}
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '12px', borderRadius: '10px', background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)', color: '#10b981', fontWeight: 700, cursor: 'pointer', fontSize: '14px' }}>

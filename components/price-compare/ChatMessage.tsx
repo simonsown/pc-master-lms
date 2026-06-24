@@ -2,6 +2,20 @@
 
 import { AlertTriangle } from 'lucide-react'
 import ComponentCard from './ComponentCard'
+import PriceTable from './PriceTable'
+
+interface PriceInfo {
+  site: string
+  price: string
+  link: string
+  rating: number
+}
+
+interface Recommended {
+  site: string
+  price: string
+  link: string
+}
 
 interface Component {
   id: string
@@ -14,11 +28,13 @@ interface ChatMessageProps {
   role: 'user' | 'assistant'
   content: string
   components?: Component[]
+  prices?: PriceInfo[]
+  recommended?: Recommended
   onComponentClick?: (component: Component) => void
   error?: boolean
 }
 
-export default function ChatMessage({ role, content, components, onComponentClick, error }: ChatMessageProps) {
+export default function ChatMessage({ role, content, components, prices, recommended, onComponentClick, error }: ChatMessageProps) {
   const isUser = role === 'user'
 
   if (error) {
@@ -62,6 +78,9 @@ export default function ChatMessage({ role, content, components, onComponentClic
             />
           ))}
         </div>
+      )}
+      {prices && prices.length > 0 && recommended && (
+        <PriceTable prices={prices} recommended={recommended} />
       )}
     </div>
   )

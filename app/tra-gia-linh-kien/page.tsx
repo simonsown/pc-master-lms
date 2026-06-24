@@ -8,6 +8,19 @@ import ChatInput from '@/components/price-compare/ChatInput'
 import ChatMessage from '@/components/price-compare/ChatMessage'
 import ImageModal from '@/components/price-compare/ImageModal'
 
+interface PriceInfo {
+  site: string
+  price: string
+  link: string
+  rating: number
+}
+
+interface Recommended {
+  site: string
+  price: string
+  link: string
+}
+
 interface Component {
   id: string
   exact_name: string
@@ -19,6 +32,8 @@ interface Message {
   role: 'user' | 'assistant'
   content: string
   components?: Component[]
+  prices?: PriceInfo[]
+  recommended?: Recommended
   error?: boolean
 }
 
@@ -56,7 +71,9 @@ export default function PriceComparePage() {
           components: data.components?.map((c: any) => ({
             ...c,
             image_url: c.image_url || 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=500&q=80'
-          }))
+          })),
+          prices: data.prices,
+          recommended: data.recommended,
         }])
       } else {
         setMessages(prev => [...prev, {
@@ -101,6 +118,8 @@ export default function PriceComparePage() {
                 role={msg.role}
                 content={msg.content}
                 components={msg.components}
+                prices={msg.prices}
+                recommended={msg.recommended}
                 error={msg.error}
                 onComponentClick={(comp) => setSelectedImage(comp)}
               />

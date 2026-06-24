@@ -1,10 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Cpu, ShoppingCart, Users, ArrowRight, Info, LogIn, LogOut, User, Award, Swords, Star, Trophy, GraduationCap, Zap, ShieldCheck, Bot, Wrench, Monitor, AlertTriangle, Box } from 'lucide-react';
+import { BookOpen, Cpu, ShoppingCart, Users, ArrowRight, Info, LogIn, LogOut, User, Award, Swords, Star, Trophy, GraduationCap, Zap, ShieldCheck, Bot, Wrench, Monitor, AlertTriangle, Box, Bell } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import NotificationBell from './NotificationBell';
 
 const s = {
   red: '#D32F2F',
@@ -20,10 +23,11 @@ const fadeUp = (delay = 0) => ({
 });
 
 const MainMenu = ({ onStart, lang, onOpenLogin }) => {
+    const isMobile = useIsMobile();
     const [user, setUser] = useState(null);
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [stats, setStats] = useState({ lessons: 0, achievements: 0, xp: 0 });
+    const router = useRouter();
 
     useEffect(() => {
         const checkUser = async () => {
@@ -36,20 +40,6 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                     .eq('id', currentUser.id)
                     .single();
                 setProfile(userProfile);
-                const [lessonsRes, achievementsRes, xpRes] = await Promise.all([
-                    supabase.from('lesson_progress').select('id', { count: 'exact', head: true }).eq('user_id', currentUser.id).eq('status', 'completed'),
-                    supabase.from('student_achievements').select('id', { count: 'exact', head: true }).eq('student_id', currentUser.id),
-                    supabase.from('student_achievements').select('achievement_id').eq('student_id', currentUser.id)
-                ]);
-                const lessonCount = lessonsRes.count ?? 0;
-                const achievementCount = achievementsRes.count ?? 0;
-                let xpTotal = 0;
-                if (xpRes.data?.length) {
-                    const ids = xpRes.data.map((r) => r.achievement_id);
-                    const { data: defs } = await supabase.from('achievement_definitions').select('points').in('id', ids);
-                    xpTotal = (defs ?? []).reduce((sum, d) => sum + (d.points ?? 0), 0);
-                }
-                setStats({ lessons: lessonCount, achievements: achievementCount, xp: xpTotal });
             }
             setLoading(false);
         };
@@ -68,25 +58,24 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
         { id: 'multiplayer', title: '2 Người Chơi', desc: 'Đối kháng — ai lắp nhanh hơn thắng', Icon: Users, color: s.red },
     ];
 
-    const quickStats = [
-        { icon: <Zap size={16} />, label: 'Bài đã học', value: stats.lessons.toString(), color: s.teal },
-        { icon: <Award size={16} />, label: 'Thành tích', value: stats.achievements.toString(), color: s.orange },
-        { icon: <Star size={16} />, label: 'Điểm kinh nghiệm', value: stats.xp.toLocaleString(), color: s.red },
-    ];
-
     return (
         <div style={{
             display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '1100px',
-            margin: '0 auto', padding: '32px 48px', minHeight: '100vh'
+            margin: '0 auto', padding: isMobile ? '16px' : '32px 48px', minHeight: '100vh'
         }}>
             <motion.div {...fadeUp(0)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                    <div style={{
-                        width: '44px', height: '44px', borderRadius: '10px',
-                        background: s.red, display: 'flex', alignItems: 'center', justifyContent: 'center'
-                    }}>
+                    <motion.div
+                        animate={{ y: [0, -4, 0] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                        style={{
+                            width: '44px', height: '44px', borderRadius: '10px',
+                            background: 'linear-gradient(135deg, var(--brand-primary), #6366f1, #a855f7)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            boxShadow: '0 4px 16px rgba(99,102,241,0.4)'
+                        }}>
                         <GraduationCap size={22} color="#fff" />
-                    </div>
+                    </motion.div>
                     <div>
                         <h1 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.03em' }}>
                             PC Master Builder
@@ -101,6 +90,7 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                     <div style={{ width: '40px' }} />
                 ) : user ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <NotificationBell />
                         <Link href={profile?.role === 'teacher' ? '/teacher' : profile?.role === 'parent' ? '/parent' : '/builder'}
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none',
@@ -109,8 +99,9 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                             }}>
                             <div style={{
                                 width: '28px', height: '28px', borderRadius: '50%',
-                                background: `${s.red}0d`, display: 'flex', alignItems: 'center',
-                                justifyContent: 'center', color: s.red
+                                background: 'linear-gradient(135deg, var(--brand-primary), #6366f1)',
+                                display: 'flex', alignItems: 'center',
+                                justifyContent: 'center', color: '#fff'
                             }}>
                                 <User size={14} />
                             </div>
@@ -120,7 +111,8 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                         </Link>
                         <button onClick={handleSignOut}
                             style={{
-                                background: `${s.red}0d`, color: s.red, border: 'none',
+                                background: 'linear-gradient(135deg, var(--brand-primary), #6366f1)',
+                                color: '#fff', border: 'none',
                                 padding: '6px 12px', borderRadius: '6px', cursor: 'pointer',
                                 fontSize: '12px', display: 'flex', alignItems: 'center',
                                 gap: '4px', fontWeight: 600, fontFamily: 'inherit'
@@ -146,23 +138,7 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                 margin: '20px 0'
             }} />
 
-            {user && (
-                <motion.div {...fadeUp(0.1)} style={{ display: 'flex', gap: '12px', marginBottom: '28px', flexWrap: 'wrap' }}>
-                    {quickStats.map((stat, i) => (
-                        <div key={i} style={{
-                            display: 'flex', alignItems: 'center', gap: '8px',
-                            padding: '8px 14px', borderRadius: '8px',
-                            background: 'var(--bg-elevated)', border: '1px solid var(--border-default)'
-                        }}>
-                            <div style={{ color: stat.color }}>{stat.icon}</div>
-                            <div>
-                                <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.2 }}>{stat.value}</div>
-                                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{stat.label}</div>
-                            </div>
-                        </div>
-                    ))}
-                </motion.div>
-            )}
+
 
             {/* 4 MODES GRID */}
             <motion.div {...fadeUp(0.15)} style={{ marginBottom: '24px' }}>
@@ -174,8 +150,8 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                 </div>
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(4, 1fr)',
-                    gap: '12px'
+                    gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
+                    gap: isMobile ? '10px' : '12px'
                 }}>
                     {modes.map((mode, idx) => (
                         <motion.button
@@ -224,14 +200,14 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                 }}>
                     {lang === 'en' ? 'More' : 'Thêm'}
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: '10px' }}>
                     {[
                         { id: 'exams', title: 'Kỳ Thi', desc: 'Kiểm tra kiến thức định kỳ', Icon: ShieldCheck, color: s.teal },
-                        { id: 'challenge', title: 'Thử Thách', desc: 'Nhiệm vụ hàng ngày', Icon: Swords, color: s.orange },
+                        { id: 'challenge', title: 'Nhiệm Vụ', desc: 'Nhiệm vụ hàng ngày', Icon: Swords, color: s.orange },
                     ].map((mode) => (
                         <motion.button
                             key={mode.id}
-                            onClick={() => onStart(mode.id)}
+                            onClick={() => mode.id === 'practice' ? router.push('/practice') : onStart(mode.id)}
                             whileHover={{ y: -1 }}
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '12px',
@@ -270,7 +246,7 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                 }}>
                     <Zap size={13} /> Pro Learning System
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: '10px' }}>
                     {[
                         { id: '/builder/os-install', title: 'Cài Windows 11', desc: 'Mô phỏng cài đặt OS thực tế', Icon: Monitor, color: '#3b82f6' },
                         { id: '/builder/diagnosis', title: 'Chuẩn Đoán', desc: 'Tìm lỗi và sửa PC', Icon: Wrench, color: '#f59e0b' },

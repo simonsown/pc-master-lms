@@ -2,8 +2,32 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Phone, Mail, MapPin, ExternalLink, ShieldCheck, Heart, Loader2, Sparkles, BookOpen, Award, Users, Target, Quote } from 'lucide-react';
+import { ArrowLeft, Phone, Mail, MapPin, ExternalLink, ShieldCheck, Heart, Loader2, Sparkles, BookOpen, Award, Users, Target, Quote, ChevronDown } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+
+function CollapsibleGroup({ title, children, defaultOpen = false }) {
+    const [open, setOpen] = useState(defaultOpen);
+    return (
+        <div style={{ marginBottom: '8px' }}>
+            <button onClick={() => setOpen(!open)} style={{
+                display: 'flex', alignItems: 'center', gap: '8px', width: '100%',
+                padding: '10px 16px', borderRadius: '10px',
+                background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)',
+                color: 'rgba(255,255,255,0.6)', cursor: 'pointer',
+                fontSize: '12px', fontWeight: 700, letterSpacing: '0.5px',
+                fontFamily: 'inherit', textTransform: 'uppercase',
+            }}>
+                <span style={{ flex: 1, textAlign: 'left' }}>{title}</span>
+                <ChevronDown size={14} style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+            </button>
+            {open && (
+                <div style={{ padding: '16px 16px 8px' }}>
+                    {children}
+                </div>
+            )}
+        </div>
+    );
+}
 
 export default function AboutPage() {
     const [team, setTeam] = useState([]);
@@ -91,65 +115,12 @@ export default function AboutPage() {
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         background: 'radial-gradient(circle at 30% 40%, rgba(0, 212, 170, 0.08) 0%, rgba(5, 5, 7, 1) 70%)'
                     }}>
-                        <svg viewBox="0 0 400 225" style={{ width: '80%', height: '80%' }}>
-                            <defs>
-                                <linearGradient id="teamGlow" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stopColor="#00d4aa" stopOpacity="0.3" />
-                                    <stop offset="100%" stopColor="#289cf9" stopOpacity="0.1" />
-                                </linearGradient>
-                            </defs>
-
-                            {/* Monitor frame */}
-                            <rect x="120" y="30" width="160" height="120" rx="10" fill="rgba(255,255,255,0.03)" stroke="rgba(0,212,170,0.2)" strokeWidth="1.5" />
-                            <rect x="128" y="38" width="144" height="100" rx="5" fill="url(#teamGlow)" />
-
-                            {/* Technology icons on screen */}
-                            <circle cx="170" cy="65" r="15" fill="none" stroke="rgba(0,212,170,0.3)" strokeWidth="1.5" />
-                            <circle cx="170" cy="65" r="5" fill="rgba(0,212,170,0.3)" />
-                            <rect x="200" y="55" width="20" height="6" rx="2" fill="rgba(40,156,249,0.3)" />
-                            <rect x="200" y="68" width="30" height="4" rx="2" fill="rgba(40,156,249,0.2)" />
-                            <rect x="200" y="78" width="15" height="4" rx="2" fill="rgba(40,156,249,0.2)" />
-                            <rect x="200" y="88" width="25" height="4" rx="2" fill="rgba(40,156,249,0.2)" />
-
-                            {/* Team members on screen - animated figures */}
-                            <g style={{ animation: 'floatBounce 3s ease-in-out infinite' }}>
-                                <circle cx="140" cy="100" r="8" fill="rgba(0,212,170,0.2)" />
-                                <circle cx="140" cy="95" r="5" fill="rgba(0,212,170,0.3)" />
-                                <rect x="135" y="105" width="10" height="15" rx="3" fill="rgba(0,212,170,0.15)" />
-                            </g>
-                            <g style={{ animation: 'floatBounce 3.5s ease-in-out infinite 0.5s' }}>
-                                <circle cx="200" cy="105" r="8" fill="rgba(40,156,249,0.2)" />
-                                <circle cx="200" cy="100" r="5" fill="rgba(40,156,249,0.3)" />
-                                <rect x="195" y="110" width="10" height="15" rx="3" fill="rgba(40,156,249,0.15)" />
-                            </g>
-                            <g style={{ animation: 'floatBounce 4s ease-in-out infinite 1s' }}>
-                                <circle cx="250" cy="100" r="8" fill="rgba(255,185,0,0.2)" />
-                                <circle cx="250" cy="95" r="5" fill="rgba(255,185,0,0.3)" />
-                                <rect x="245" y="105" width="10" height="15" rx="3" fill="rgba(255,185,0,0.15)" />
-                            </g>
-
-                            {/* Stand */}
-                            <rect x="190" y="150" width="20" height="20" rx="2" fill="rgba(255,255,255,0.05)" />
-                            <rect x="175" y="168" width="50" height="5" rx="2" fill="rgba(255,255,255,0.08)" />
-
-                            {/* Floating tech elements */}
-                            <g style={{ animation: 'floatRotate 8s linear infinite', transformOrigin: '200px 100px' }}>
-                                <rect x="290" y="40" width="12" height="12" rx="3" fill="none" stroke="rgba(0,212,170,0.2)" strokeWidth="1" />
-                                <circle cx="296" cy="46" r="3" fill="rgba(0,212,170,0.2)" />
-                            </g>
-                            <g style={{ animation: 'floatRotate 6s linear infinite reverse', transformOrigin: '200px 100px' }}>
-                                <rect x="90" y="50" width="8" height="8" rx="2" fill="none" stroke="rgba(255,185,0,0.2)" strokeWidth="1" />
-                            </g>
-
-                            {/* AI connection dots */}
-                            <circle cx="130" cy="155" r="2" fill="rgba(0,212,170,0.4)" style={{ animation: 'pulseDot 2s infinite' }} />
-                            <circle cx="200" cy="160" r="2" fill="rgba(40,156,249,0.4)" style={{ animation: 'pulseDot 2s infinite 0.5s' }} />
-                            <circle cx="270" cy="155" r="2" fill="rgba(255,185,0,0.4)" style={{ animation: 'pulseDot 2s infinite 1s' }} />
-
-                            {/* Text labels */}
-                            <text x="200" y="200" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="10" fontFamily="monospace">PC MASTER BUILDER</text>
-                            <text x="200" y="215" textAnchor="middle" fill="rgba(0,212,170,0.2)" fontSize="8" fontFamily="monospace">TECHNOLOGY · INNOVATION · EDUCATION</text>
-                        </svg>
+                        <div style={{
+                            width: '48px', height: '48px', borderRadius: '12px',
+                            background: 'rgba(0,212,170,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                        }}>
+                            <BookOpen size={24} color="var(--brand-primary)" />
+                        </div>
                     </div>
                 </div>
             </section>
@@ -339,41 +310,39 @@ export default function AboutPage() {
                         <div style={{ height: '450px', borderRadius: '32px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', position: 'relative' }}>
                             <iframe 
                                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3918.84715830911!2d106.6661623147491!3d10.82329389228965!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x317528e57849e531%3A0xc3b320d72c0d3b3c!2zVHLGsOG7nW5nIFRIUFQgTmd1eeG7hW4gQ8O0bmcgVHLhu6k!5e0!3m2!1svi!2s!4v1651130000000!5m2!1svi!2s" 
-                                width="100%" height="100%" style={{ border: 0, filter: 'invert(90%) hue-rotate(180deg)' }} 
+                                width="100%" height="100%" style={{ border: 0 }} 
                                 allowFullScreen={true} loading="lazy"
                             ></iframe>
+                            <div style={{ position: 'absolute', top: '12px', left: '12px', padding: '6px 14px', borderRadius: '8px', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', fontSize: '12px', fontWeight: 600, color: '#fff', zIndex: 10, pointerEvents: 'none' }}>
+                                🏫 THPT Nguyễn Công Trứ
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <footer style={{ padding: '80px 24px 40px', background: '#050507', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', flexWrap: 'wrap', marginBottom: '40px' }}>
-                        <div style={{ textAlign: 'left', maxWidth: '300px' }}>
-                            <h4 style={{ fontSize: '13px', fontWeight: 800, color: '#fff', marginBottom: '16px', letterSpacing: '1px', textTransform: 'uppercase' }}>Tác giả</h4>
-                            <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)', lineHeight: 1.8, margin: 0 }}>
-                                Nguyễn Phúc Khánh Sơn<br />
-                                <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)' }}>Developer & Designer</span>
-                            </p>
+            <footer style={{ padding: '40px 24px 40px', background: '#050507', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+                    <CollapsibleGroup title="Tác giả & Giáo viên hướng dẫn" defaultOpen={false}>
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', flexWrap: 'wrap' }}>
+                            <div style={{ textAlign: 'center', minWidth: '160px' }}>
+                                <p style={{ fontSize: '13px', fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>Nguyễn Phúc Khánh Sơn</p>
+                                <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', margin: 0 }}>Developer & Designer</p>
+                            </div>
+                            <div style={{ width: '1px', background: 'rgba(255,255,255,0.08)', alignSelf: 'stretch' }} />
+                            <div style={{ textAlign: 'center', minWidth: '160px' }}>
+                                <p style={{ fontSize: '13px', fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>Trần Minh Phụng</p>
+                                <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', margin: 0 }}>GV hướng dẫn</p>
+                            </div>
+                            <div style={{ width: '1px', background: 'rgba(255,255,255,0.08)', alignSelf: 'stretch' }} />
+                            <div style={{ textAlign: 'center', minWidth: '160px' }}>
+                                <p style={{ fontSize: '13px', fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>Đoàn Thụy Kim Phượng</p>
+                                <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', margin: 0 }}>GV phụ trách</p>
+                            </div>
                         </div>
-                        <div style={{ textAlign: 'left', maxWidth: '300px' }}>
-                            <h4 style={{ fontSize: '13px', fontWeight: 800, color: '#fff', marginBottom: '16px', letterSpacing: '1px', textTransform: 'uppercase' }}>Giáo viên hướng dẫn</h4>
-                            <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)', lineHeight: 1.8, margin: 0 }}>
-                                Trần Minh Phụng<br />
-                                Đoàn Thụy Kim Phượng
-                            </p>
-                        </div>
-                        <div style={{ textAlign: 'left', maxWidth: '300px' }}>
-                            <h4 style={{ fontSize: '13px', fontWeight: 800, color: '#fff', marginBottom: '16px', letterSpacing: '1px', textTransform: 'uppercase' }}>Báo cáo & Hỗ trợ</h4>
-                            <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)', lineHeight: 1.8, margin: 0 }}>
-                                Đoàn Thụy Kim Phượng<br />
-                                <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)' }}>Giáo viên phụ trách</span>
-                            </p>
-                        </div>
-                    </div>
-                    <div style={{ paddingTop: '32px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                        <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.2)', margin: 0 }}>
+                    </CollapsibleGroup>
+                    <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                        <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.2)', margin: 0, textAlign: 'center' }}>
                             © {new Date().getFullYear()} PC Master Builder - THPT Nguyễn Công Trứ. Tất cả quyền được bảo lưu.
                         </p>
                     </div>

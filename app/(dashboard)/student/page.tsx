@@ -1,19 +1,23 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import Link from 'next/link';
-import { BookOpen, Users, Cpu, ArrowRight, Plus, Loader2, GraduationCap, Bot, Sparkles, Bell, Megaphone, ExternalLink } from 'lucide-react';
+import { BookOpen, Users, Cpu, ArrowRight, Plus, Loader2, GraduationCap, Bot, Sparkles, Bell, Megaphone, ExternalLink, Trophy, Zap, Target, Clock, CheckCircle2, Flame } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import JoinClassModal from '../../../components/JoinClassModal';
 import CareerRecommendation from '../../../components/CareerRecommendation';
 import { supabase } from '@/lib/supabase';
 import { useGuru } from '@/lib/guru-state';
+import { useRealtime } from '@/lib/realtime-provider';
 import { createBrowserClient } from '@supabase/ssr'
 
 const fadeUp = (delay = 0) => ({ initial: { opacity: 0, y: 24 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.5, delay, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] } })
 
 export default function StudentDashboard() {
   const { openChat } = useGuru()
+  const { state: realtimeState } = useRealtime()
+  const isMobile = useIsMobile()
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [classes, setClasses] = useState([]);
@@ -102,10 +106,10 @@ export default function StudentDashboard() {
         </motion.button>
       </motion.header>
 
-      <motion.div {...fadeUp(0.1)} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '36px' }}>
+      <motion.div {...fadeUp(0.1)} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: isMobile ? '12px' : '20px', marginBottom: isMobile ? '24px' : '36px' }}>
         {stats.map((stat, idx) => (
           <motion.div key={idx} whileHover={{ y: -4, boxShadow: '0 12px 40px var(--shadow-hover)' }}
-            className="lms-card" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '16px', borderRadius: '14px', transition: 'box-shadow 0.3s' }}>
+            className="lms-card" style={{ padding: isMobile ? '16px' : '24px', display: 'flex', alignItems: 'center', gap: isMobile ? '12px' : '16px', borderRadius: '14px', transition: 'box-shadow 0.3s' }}>
             <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: `${stat.color}15`, color: stat.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               {stat.icon}
             </div>
@@ -117,10 +121,10 @@ export default function StudentDashboard() {
         ))}
       </motion.div>
 
-      <div className="student-dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '28px' }}>
-        <section style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <div className="student-dashboard-grid" style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.6fr 1fr', gap: isMobile ? '16px' : '28px' }}>
+        <section style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '16px' : '24px' }}>
           <motion.div {...fadeUp(0.2)}
-            className="lms-card" style={{ padding: '32px', position: 'relative', overflow: 'hidden', borderRadius: '16px', background: 'linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-elevated) 100%)', boxShadow: '0 8px 30px var(--shadow-color)' }}>
+            className="lms-card" style={{ padding: isMobile ? '20px' : '32px', position: 'relative', overflow: 'hidden', borderRadius: '16px', background: 'linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-elevated) 100%)', boxShadow: '0 8px 30px var(--shadow-color)' }}>
             <div style={{ position: 'relative', zIndex: 1 }}>
               <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '10px', color: 'var(--text-primary)' }}>Phòng thực hành PC Builder</h2>
               <p style={{ color: 'var(--text-muted)', marginBottom: '24px', maxWidth: '380px', fontSize: '14px', lineHeight: 1.6 }}>
@@ -135,7 +139,7 @@ export default function StudentDashboard() {
             </div>
           </motion.div>
 
-          <motion.div {...fadeUp(0.3)} className="lms-card" style={{ padding: '28px', borderRadius: '16px' }}>
+          <motion.div {...fadeUp(0.3)} className="lms-card" style={{ padding: isMobile ? '18px' : '28px', borderRadius: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '18px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>Lớp học của tôi</h2>
               <span style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 500 }}>{classes.length} lớp</span>
@@ -176,61 +180,142 @@ export default function StudentDashboard() {
           </motion.div>
         </section>
 
-        <aside style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <aside style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '16px' : '24px' }}>
           <motion.div {...fadeUp(0.25)}
-            onClick={openChat}
-            className="lms-card" style={{ padding: '28px', background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-dark))', color: '#fff', position: 'relative', overflow: 'hidden', borderRadius: '16px', boxShadow: '0 8px 30px rgba(8,158,96,0.3)', cursor: 'pointer' }}>
-            <motion.div animate={{ rotate: [0, 15, 0] }} transition={{ repeat: Infinity, duration: 6, ease: 'easeInOut' }}
-              style={{ position: 'absolute', top: -20, right: -20, opacity: 0.08 }}>
-              <Sparkles size={120} />
-            </motion.div>
+            className="lms-card" style={{ padding: isMobile ? '16px' : '24px', borderRadius: '16px', background: 'linear-gradient(135deg, rgba(0,212,170,0.06), transparent)', border: '1px solid rgba(0,212,170,0.15)', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: -30, right: -30, width: '160px', height: '160px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,212,170,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
             <div style={{ position: 'relative', zIndex: 1 }}>
-              <Bot size={36} style={{ marginBottom: '16px', opacity: 0.9 }} />
-              <h3 style={{ fontSize: '20px', fontWeight: 800, marginBottom: '10px', color: '#fff' }}>AI Guru đang chờ</h3>
-              <p style={{ fontSize: '14px', opacity: 0.9, marginBottom: '24px', lineHeight: 1.6 }}>Gặp khó khăn khi chọn linh kiện? Chat với AI để được tư vấn ngay.</p>
-              <div style={{ display: 'block', textAlign: 'center', padding: '14px', background: '#fff', color: 'var(--brand-primary)', borderRadius: '12px', fontWeight: 700, textDecoration: 'none', fontSize: '14px', boxShadow: '0 4px 14px rgba(0,0,0,0.15)', transition: 'transform 0.2s' }}
-                onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.02)' }}
-                onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)' }}>
-                Bắt đầu trò chuyện
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
+                <div style={{ fontSize: '40px', lineHeight: 1 }}>{realtimeState.levelIcon}</div>
+                <div>
+                  <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-muted)' }}>Cấp Độ Của Bạn</div>
+                  <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)' }}>
+                    {realtimeState.levelTitle}
+                  </div>
+                </div>
+              </div>
+              <div style={{ height: '6px', borderRadius: '99px', background: 'rgba(255,255,255,0.08)', overflow: 'hidden', marginBottom: '6px' }}>
+                <div style={{ height: '100%', borderRadius: '99px', background: 'linear-gradient(90deg, var(--brand-primary), #00f3ff)', width: `${realtimeState.levelProgress}%`, transition: 'width 0.5s ease' }} />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '16px' }}>
+                <span>{realtimeState.xpInLevel} / {realtimeState.xpToNext} XP</span>
+                <span style={{ color: 'var(--brand-primary)' }}>Level {realtimeState.level}</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '16px' }}>
+                <div style={{ padding: '12px', borderRadius: '10px', background: 'var(--bg-elevated)', textAlign: 'center' }}>
+                  <Flame size={18} style={{ color: '#f59e0b', margin: '0 auto 4px' }} />
+                  <div style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)' }}>{realtimeState.streak}</div>
+                  <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Streak</div>
+                </div>
+                <div style={{ padding: '12px', borderRadius: '10px', background: 'var(--bg-elevated)', textAlign: 'center' }}>
+                  <Zap size={18} style={{ color: 'var(--brand-primary)', margin: '0 auto 4px' }} />
+                  <div style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)' }}>{realtimeState.xp}</div>
+                  <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Tổng XP</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <Link href="/student/dashboard" style={{ flex: 1, textAlign: 'center', padding: '10px', borderRadius: '10px', background: 'var(--brand-primary)', color: '#000', fontWeight: 700, fontSize: '12px', textDecoration: 'none' }}>
+                  📊 Chi tiết
+                </Link>
               </div>
             </div>
           </motion.div>
 
-          <motion.div {...fadeUp(0.35)} className="lms-card" style={{ padding: '24px', borderRadius: '16px' }}>
+          <motion.div {...fadeUp(0.3)} className="lms-card" style={{ padding: isMobile ? '16px' : '24px', borderRadius: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 style={{ fontSize: '15px', fontWeight: 700, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Bell size={16} style={{ color: 'var(--accent-amber)' }} /> Thông báo mới
+                <Trophy size={16} style={{ color: '#f59e0b' }} /> Nhiệm vụ hôm nay
+              </h3>
+              <Link href="/student/dashboard" style={{ fontSize: '11px', color: 'var(--brand-primary)', fontWeight: 600, textDecoration: 'none' }}>
+                Xem tất cả →
+              </Link>
+            </div>
+            {realtimeState.allQuests.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {realtimeState.allQuests.slice(0, 4).map((quest, i) => {
+                  const userQuest = realtimeState.quests.find(q => q.quest_id === quest.id)
+                  const isCompleted = userQuest?.is_completed
+                  const progress = userQuest?.progress || 0
+                  return (
+                    <motion.div key={quest.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
+                      style={{ padding: '12px', borderRadius: '10px', background: isCompleted ? 'rgba(16,185,129,0.06)' : 'var(--bg-surface)', border: `1px solid ${isCompleted ? 'rgba(16,185,129,0.2)' : 'var(--border-subtle)'}`, opacity: isCompleted ? 0.7 : 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '20px' }}>{quest.icon || '📌'}</span>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            {quest.title}
+                            {isCompleted && <CheckCircle2 size={12} style={{ color: '#10b981' }} />}
+                          </div>
+                          <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>+{quest.xp_reward} XP</div>
+                          {!isCompleted && quest.requirement_value > 0 && (
+                            <div style={{ height: '3px', borderRadius: '99px', background: 'rgba(255,255,255,0.06)', marginTop: '6px', overflow: 'hidden' }}>
+                              <div style={{ height: '100%', borderRadius: '99px', background: 'var(--brand-primary)', width: `${Math.min(100, (progress / quest.requirement_value) * 100)}%`, transition: 'width 0.3s' }} />
+                            </div>
+                          )}
+                        </div>
+                        <div style={{ fontSize: '10px', fontWeight: 700, color: isCompleted ? '#10b981' : 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                          {isCompleted ? 'Hoan thanh' : `+${quest.xp_reward}XP`}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {[
+                  { id: 'fb-1', title: 'Hoàn thành 1 bài học', xp_reward: 50, icon: '📚' },
+                  { id: 'fb-2', title: 'Lắp ráp PC', xp_reward: 30, icon: '🔧' },
+                  { id: 'fb-3', title: 'Làm quiz', xp_reward: 20, icon: '🧠' },
+                  { id: 'fb-4', title: 'Đạt streak 3 ngày', xp_reward: 100, icon: '🔥' },
+                  { id: 'fb-5', title: 'Tham gia thảo luận', xp_reward: 15, icon: '💬' },
+                ].map((q, i) => (
+                  <motion.div key={q.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
+                    style={{ padding: '12px', borderRadius: '10px', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ fontSize: '20px' }}>{q.icon}</span>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>{q.title}</div>
+                      </div>
+                      <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>+{q.xp_reward}XP</div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+
+          <motion.div {...fadeUp(0.35)} className="lms-card" style={{ padding: isMobile ? '14px' : '20px', borderRadius: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <h3 style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Bell size={16} style={{ color: 'var(--accent-amber)' }} /> Thông báo
               </h3>
               {notifications.some(n => !n.is_read) && (
                 <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#EF4444' }} />
               )}
             </div>
             {notifLoading ? (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '16px' }}><Loader2 size={20} style={{ animation: 'spin 1s linear infinite', color: 'var(--text-muted)' }} /></div>
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '12px' }}><Loader2 size={18} style={{ animation: 'spin 1s linear infinite', color: 'var(--text-muted)' }} /></div>
             ) : notifications.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {notifications.map((n, i) => (
                   <motion.div key={n.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
-                    style={{
-                      padding: '12px', borderRadius: '10px', background: n.is_read ? 'var(--bg-surface)' : 'color-mix(in srgb, var(--brand-primary) 8%, transparent)',
-                      border: `1px solid ${n.is_read ? 'var(--border-subtle)' : 'color-mix(in srgb, var(--brand-primary) 20%, transparent)'}`,
-                      position: 'relative'
-                    }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+                    style={{ padding: '10px 12px', borderRadius: '8px', background: n.is_read ? 'transparent' : 'color-mix(in srgb, var(--brand-primary) 6%, transparent)', border: `1px solid ${n.is_read ? 'var(--border-subtle)' : 'color-mix(in srgb, var(--brand-primary) 15%, transparent)'}` }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '6px' }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '2px' }}>{n.title}</div>
-                        <div style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{n.message}</div>
+                        <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '1px' }}>{n.title}</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{n.message}</div>
                       </div>
-                      <div style={{ fontSize: '10px', color: 'var(--text-muted)', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                        {new Date(n.created_at).toLocaleDateString('vi-VN', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      <div style={{ fontSize: '9px', color: 'var(--text-muted)', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                        {new Date(n.created_at).toLocaleDateString('vi-VN', { day: 'numeric', month: 'numeric' })}
                       </div>
                     </div>
                   </motion.div>
                 ))}
               </div>
             ) : (
-              <div style={{ fontSize: '13px', color: 'var(--text-muted)', textAlign: 'center', padding: '20px 0' }}>
-                Chưa có thông báo nào từ giáo viên.
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center', padding: '16px 0' }}>
+                Chưa có thông báo nào.
               </div>
             )}
           </motion.div>

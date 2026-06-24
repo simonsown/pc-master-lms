@@ -14,7 +14,8 @@ import {
 
 import { motion } from 'framer-motion'
 import { useRealtime } from '@/lib/realtime-provider'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, Cpu, GraduationCap } from 'lucide-react'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 type UserProps = {
   id: string
@@ -67,17 +68,44 @@ export function StudentDashboardClient({
         minutes: realtimeState.weeklyActivity[i] || 0
       }))
     : chartData
+  const isMobile = useIsMobile()
 
   return (
-    <motion.div className="p-6 md:p-8 lg:p-10" style={{ background: 'transparent' }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+    <motion.div className={isMobile ? 'p-4' : 'p-6 md:p-8 lg:p-10'} style={{ background: 'transparent' }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
       <div className="max-w-[1400px] mx-auto" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 * 0.08, duration: 0.4 }}>
-          <section style={{ display: 'grid', gap: '16px', gridTemplateColumns: '1.6fr 1fr', alignItems: 'end' }}>
-            <div className="lms-card" style={{ padding: '32px' }}>
-              <p style={{ fontSize: '13px', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--brand-primary)', fontWeight: 700, marginBottom: '8px' }}>Bảng điều khiển học sinh</p>
-              <h1 style={{ fontSize: '32px', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px 0' }}>Chào buổi {greeting}, {user.full_name.split(' ').at(-1)}</h1>
+          <section style={{ display: 'grid', gap: '16px', gridTemplateColumns: isMobile ? '1fr' : '1.6fr 1fr', alignItems: 'end' }}>
+            <div className="lms-card" style={{ padding: isMobile ? '20px' : '32px', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: -20, right: -20, width: '120px', height: '120px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,212,170,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
+              <p style={{ fontSize: '13px', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--brand-primary)', fontWeight: 700, marginBottom: '8px' }}>Bảng điều khiển</p>
+              <h1 style={{ fontSize: isMobile ? '24px' : '32px', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px 0' }}>Chào buổi {greeting}, {user.full_name.split(' ').at(-1)}</h1>
               <p style={{ color: 'var(--text-muted)', fontSize: '14px', margin: 0 }}>Hôm nay là {formattedDate} · Streak: {liveStreak} ngày</p>
+              <div style={{ marginTop: '16px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <Link href="/builder" className="lms-btn lms-btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '10px', fontWeight: 700, fontSize: '13px', textDecoration: 'none' }}>
+                  <Cpu size={16} /> Thực hành lắp ráp
+                </Link>
+                <Link href="/exams" className="lms-btn lms-btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '10px', fontWeight: 600, fontSize: '13px', textDecoration: 'none' }}>
+                  <GraduationCap size={16} /> Thi thử
+                </Link>
+
+              </div>
             </div>
+            <motion.div className="lms-card" style={{ padding: isMobile ? '16px' : '24px', background: 'linear-gradient(135deg, rgba(0,212,170,0.04), transparent)', border: '1px solid rgba(0,212,170,0.15)' }} whileHover={{ scale: 1.02 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div style={{ fontSize: '44px', lineHeight: 1 }}>{realtimeState.levelIcon}</div>
+                <div>
+                  <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-muted)' }}>Cấp độ</div>
+                  <div style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)' }}>{realtimeState.levelTitle}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--brand-primary)', fontWeight: 600 }}>Level {realtimeState.level}</div>
+                </div>
+              </div>
+              <div style={{ height: '4px', borderRadius: '99px', background: 'rgba(255,255,255,0.06)', overflow: 'hidden', marginTop: '12px' }}>
+                <div style={{ height: '100%', borderRadius: '99px', background: 'linear-gradient(90deg, var(--brand-primary), #00f3ff)', width: `${realtimeState.levelProgress}%`, transition: 'width 0.5s ease' }} />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                <span>{realtimeState.xpInLevel} / {realtimeState.xpToNext} XP</span>
+              </div>
+            </motion.div>
           </section>
         </motion.div>
 
@@ -90,9 +118,9 @@ export function StudentDashboardClient({
               { label: 'Điểm TB quiz', value: stats.averageScore !== null ? `${stats.averageScore}` : '—', sub: 'Điểm trung bình' },
               { label: 'Streak', value: `${liveStreak}`, sub: 'Ngày liên tiếp' },
             ].map((s, i) => (
-              <motion.div key={i} className="lms-card" style={{ padding: '20px' }} whileHover={{ scale: 1.02, y: -2 }} transition={{ type: 'spring', stiffness: 300 }}>
+              <motion.div key={i} className="lms-card" style={{ padding: isMobile ? '14px' : '20px' }} whileHover={{ scale: 1.02, y: -2 }} transition={{ type: 'spring', stiffness: 300 }}>
                 <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--text-muted)', marginBottom: '8px' }}>{s.label}</div>
-                <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-primary)' }}>{s.value}</div>
+                <div style={{ fontSize: isMobile ? '22px' : '28px', fontWeight: 800, color: 'var(--text-primary)' }}>{s.value}</div>
                 <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>{s.sub}</div>
               </motion.div>
             ))}
@@ -102,7 +130,7 @@ export function StudentDashboardClient({
         {/* Level Card */}
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 2.5 * 0.08, duration: 0.4 }}>
           <Link href="/student/level" style={{ textDecoration: 'none' }}>
-            <motion.div className="lms-card" style={{ padding: '24px', background: 'linear-gradient(135deg, rgba(0,212,170,0.08), transparent)', border: '1px solid rgba(0,212,170,0.2)', cursor: 'pointer', overflow: 'hidden', position: 'relative' }} whileHover={{ scale: 1.01 }} transition={{ type: 'spring', stiffness: 300 }}>
+            <motion.div className="lms-card" style={{ padding: isMobile ? '16px' : '24px', background: 'linear-gradient(135deg, rgba(0,212,170,0.08), transparent)', border: '1px solid rgba(0,212,170,0.2)', cursor: 'pointer', overflow: 'hidden', position: 'relative' }} whileHover={{ scale: 1.01 }} transition={{ type: 'spring', stiffness: 300 }}>
               <div style={{ position: 'absolute', top: '-50%', right: '-10%', width: '200px', height: '200px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,212,170,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
               <div style={{ display: 'flex', alignItems: 'center', gap: '20px', position: 'relative', zIndex: 1 }}>
                 <div style={{ textAlign: 'center', minWidth: '60px' }}>
@@ -131,8 +159,9 @@ export function StudentDashboardClient({
           </Link>
         </motion.div>
 
+
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 4 * 0.08, duration: 0.4 }}>
-          <section className="lms-card" style={{ padding: '24px' }}>
+          <section className="lms-card" style={{ padding: isMobile ? '16px' : '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <div>
                 <div style={{ fontSize: '13px', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--text-muted)', fontWeight: 700 }}>Hoạt động 7 ngày</div>

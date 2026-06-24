@@ -5,19 +5,7 @@ import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import GameEngine from './GameEngine';
 import LearningRoadmap from './LearningRoadmap';
-import dynamic from 'next/dynamic';
-const HandTracker = dynamic(
-  () => import('./HandTracker'),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex items-center gap-2 text-sm text-[#5a5d72]">
-        <div className="w-4 h-4 border-2 border-[#00d4aa] border-t-transparent rounded-full animate-spin" />
-        Đang tải Hand Tracking...
-      </div>
-    )
-  }
-);
+
 
 const HARDWARE_DATA = {
 // ... existing data ...
@@ -73,15 +61,10 @@ const LearningMode = ({
     lang, 
     externalSelection, 
     appMode, 
-    landmarks, 
     onHover, 
     onGameEvent, 
     onTakeQuiz, 
-    trackingSensitivity, 
     onBackToMenu,
-    isCameraActive,
-    setIsCameraActive,
-    onSetLandmarks
 }) => {
     // subMode: 'select' | 'roadmap' | 'assembly' | 'free'
     const [subMode, setSubMode] = useState('select');
@@ -259,10 +242,8 @@ const LearningMode = ({
                     </button>
                 </div>
                 <GameEngine
-                    landmarks={landmarks}
                     onHover={onHover}
                     onGameEvent={onGameEvent}
-                    trackingSensitivity={trackingSensitivity}
                 />
             </div>
         );
@@ -325,8 +306,6 @@ const LearningMode = ({
                     unlockedLevels={unlockedLevels}
                     completedLevels={completedLevels}
                     onNodeClick={handleNodeClick}
-                    landmarks={landmarks}
-                    trackingSensitivity={trackingSensitivity}
                 />
             </div>
         );
@@ -349,10 +328,8 @@ const LearningMode = ({
 
                 <div style={{ width: '100%', position: 'relative' }}>
                     <GameEngine
-                        landmarks={landmarks}
                         onHover={onHover}
                         onGameEvent={onGameEvent}
-                        trackingSensitivity={trackingSensitivity}
                     />
                 </div>
 
@@ -381,30 +358,7 @@ const LearningMode = ({
                 </div>
             </div>
 
-            {/* Sidebar Camera Panel */}
-            <div className="camera-panel">
-                <div className="camera-panel-header">
-                    <span>{lang === 'en' ? 'Camera Tracking' : 'Nhận diện tay'}</span>
-                    <button
-                        className="camera-toggle-btn"
-                        onClick={() => setIsCameraActive(!isCameraActive)}
-                    >
-                        {isCameraActive ? (lang === 'en' ? 'OFF' : 'TẮT') : (lang === 'en' ? 'ON' : 'BẬT')}
-                    </button>
-                </div>
-                <div className="camera-feed">
-                    {isCameraActive ? (
-                        <HandTracker onLandmarks={onSetLandmarks} />
-                    ) : (
-                        <span>{lang === 'en' ? 'Camera is OFF' : 'Camera đang tắt'}</span>
-                    )}
-                </div>
-                <div style={{ marginTop: '16px', fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.4 }}>
-                    {lang === 'en' 
-                        ? 'Tip: Raise your hand to move the cursor. Pinch thumb and index to click.'
-                        : 'Mẹo: Giơ tay để di chuyển. Chạm ngón trỏ và cái để bấm.'}
-                </div>
-            </div>
+            
         </div>
     );
 };

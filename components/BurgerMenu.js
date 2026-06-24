@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { 
   BookOpen, Cpu, ShoppingCart, Users, BrainCircuit, Award, Globe, Sparkles, 
-  Menu, Webcam, X, Sun, Moon, FileText, Bell, MessageSquare, User, Monitor 
+  Menu, Webcam, X, Sun, Moon, FileText, Bell, MessageSquare, User, Monitor,
+  BarChart3, Zap, Settings, GraduationCap, BookMarked
 } from 'lucide-react';
 import JoinClassModal from './JoinClassModal';
 import ComponentPreview from './ComponentPreview';
@@ -15,9 +17,9 @@ const BurgerMenu = ({
   onStartQuiz, 
   appMode, 
   setAppMode, 
-  webcamMouseEnabled, 
+  webcamMouseEnabled = false, 
   setWebcamMouseEnabled, 
-  trackingSensitivity, 
+  trackingSensitivity = 1.0, 
   setTrackingSensitivity,
   onToggleAI,
   isAIOpen,
@@ -134,21 +136,13 @@ const BurgerMenu = ({
             {/* Sidebar */}
             <div className={`sidebar-container ${isMobileOpen ? 'open' : ''}`}>
 
-                {/* [1] HEADER */}
-                <div style={{ height: '56px', padding: '0 16px', display: 'flex', alignItems: 'center', flexShrink: 0, justifyContent: 'space-between' }}>
-                    <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} title={lang === 'en' ? 'Home' : 'Trang chủ'}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/logo.png" alt="Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
-                        <span style={{ fontWeight: 600, fontSize: '15px', color: 'var(--text-primary)' }}>
-                            <span className="desktop-only">PC Master </span><span style={{ color: 'var(--brand-light)' }}>Builder</span>
+                <div style={{ height: '60px', padding: '0 16px', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                    <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <img src="/logo.png" alt="" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+                        <span style={{ fontWeight: 700, fontSize: '16px', color: 'var(--text-primary)' }}>
+                            PC Master <span style={{ color: 'var(--brand-primary)' }}>Builder</span>
                         </span>
                     </Link>
-                    <div style={{
-                        fontSize: '10px', fontFamily: 'var(--font-mono)', background: 'var(--brand-subtle)',
-                        color: 'var(--brand-light)', borderRadius: '4px', padding: '2px 6px', fontWeight: 500
-                    }}>
-                        V1.0
-                    </div>
                 </div>
 
                 {/* [2] DIVIDER */}
@@ -221,28 +215,47 @@ const BurgerMenu = ({
                         </div>
                         
                         <Link 
-                            href="/student/quiz" 
+                            href="/daily-quiz" 
                             style={{ ...navItemStyle('quiz_bank', false), textDecoration: 'none' }}
                             onMouseEnter={() => setHoveredBtn('quiz_bank')} 
                             onMouseLeave={() => setHoveredBtn(null)}
                         >
-                            <FileText style={iconStyle('quiz_bank', false)} />
-                            {lang === 'en' ? 'Quiz Bank' : 'Ngân Hàng Đề Thi'}
+                            <BookMarked style={iconStyle('quiz_bank', false)} />
+                            {lang === 'en' ? 'Question Bank' : 'Ngân Hàng Đề Thi'}
                         </Link>
                         
-                        
                         <Link 
-                            href="/student/certificates" 
-                            style={{ ...navItemStyle('certificates', false), textDecoration: 'none' }}
-                            onMouseEnter={() => setHoveredBtn('certificates')} 
+                            href="/exams" 
+                            style={{ ...navItemStyle('exams', false), textDecoration: 'none' }}
+                            onMouseEnter={() => setHoveredBtn('exams')} 
                             onMouseLeave={() => setHoveredBtn(null)}
                         >
-                            <Award style={iconStyle('certificates', false)} />
-                            {lang === 'en' ? 'Certificates' : 'Chứng Chỉ'}
+                            <FileText style={iconStyle('exams', false)} />
+                            {lang === 'en' ? 'Exams' : 'Kỳ Thi'}
+                        </Link>
+                        
+                        <Link 
+                            href="/quiz" 
+                            style={{ ...navItemStyle('mcq', false), textDecoration: 'none' }}
+                            onMouseEnter={() => setHoveredBtn('mcq')} 
+                            onMouseLeave={() => setHoveredBtn(null)}
+                        >
+                            <BrainCircuit style={iconStyle('mcq', false)} />
+                            {lang === 'en' ? 'MCQ' : 'Trắc Nghiệm'}
+                        </Link>
+                        
+                        <Link 
+                            href="/leaderboard" 
+                            style={{ ...navItemStyle('leaderboard', false), textDecoration: 'none' }}
+                            onMouseEnter={() => setHoveredBtn('leaderboard')} 
+                            onMouseLeave={() => setHoveredBtn(null)}
+                        >
+                            <BarChart3 style={iconStyle('leaderboard', false)} />
+                            {lang === 'en' ? 'Leaderboard' : 'Xếp Hạng'}
                         </Link>
                     </div>
 
-                    {/* [4] WEBCAM SECTION */}
+                    {typeof setWebcamMouseEnabled !== 'undefined' && typeof setTrackingSensitivity !== 'undefined' && (
                     <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column' }}>
                         <div style={{
                             fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase',
@@ -260,7 +273,7 @@ const BurgerMenu = ({
                             </div>
                             <div 
                                 className={`toggle-switch ${webcamMouseEnabled ? 'on' : 'off'}`}
-                                onClick={() => setWebcamMouseEnabled(!webcamMouseEnabled)}
+                                onClick={() => { if (setWebcamMouseEnabled) setWebcamMouseEnabled(!webcamMouseEnabled) }}
                             >
                                 <div className="toggle-thumb"></div>
                             </div>
@@ -279,7 +292,7 @@ const BurgerMenu = ({
                                 type="range"
                                 min="0.5" max="3" step="0.1"
                                 value={trackingSensitivity}
-                                onChange={(e) => setTrackingSensitivity(parseFloat(e.target.value))}
+                                onChange={(e) => { if (setTrackingSensitivity) setTrackingSensitivity(parseFloat(e.target.value)) }}
                                 className="custom-slider"
                                 style={{
                                     background: `linear-gradient(to right, var(--brand-primary) ${percent}%, var(--bg-elevated) ${percent}%)`
@@ -287,6 +300,7 @@ const BurgerMenu = ({
                             />
                         </div>
                     </div>
+                    )}
 
                     {/* TÍNH NĂNG KHÁC */}
                     <div style={{ padding: '12px 0', display: 'flex', flexDirection: 'column', gap: '4px', margin: '0 16px' }}>
@@ -318,27 +332,6 @@ const BurgerMenu = ({
                             </Link>
                         )}
                         
-                        <Link 
-                            href="/notifications" 
-                            style={{ ...navItemStyle('notifications', false), textDecoration: 'none' }}
-                            onMouseEnter={() => setHoveredBtn('notifications')} 
-                            onMouseLeave={() => setHoveredBtn(null)}
-                        >
-                            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                                <Bell style={iconStyle('notifications', false)} />
-                                {unreadCount > 0 && (
-                                    <span style={{
-                                        position: 'absolute', top: '-4px', right: '-4px',
-                                        background: '#ef4444', color: 'white', fontSize: '10px',
-                                        fontWeight: 'bold', width: '14px', height: '14px',
-                                        borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                    }}>
-                                        {unreadCount}
-                                    </span>
-                                )}
-                            </div>
-                            <span style={{ marginLeft: '8px' }}>{lang === 'en' ? 'Notifications' : 'Thông Báo'}</span>
-                        </Link>
                         
                         <Link 
                             href="/student/discussion" 
@@ -351,13 +344,33 @@ const BurgerMenu = ({
                         </Link>
                         
                         <Link 
-                            href="/student/profile" 
+                            href="/student/level" 
+                            style={{ ...navItemStyle('level', false), textDecoration: 'none' }}
+                            onMouseEnter={() => setHoveredBtn('level')} 
+                            onMouseLeave={() => setHoveredBtn(null)}
+                        >
+                            <Zap style={iconStyle('level', false)} />
+                            {lang === 'en' ? 'Level & Missions' : 'Cấp Độ & Nhiệm Vụ'}
+                        </Link>
+                        
+                        <Link 
+                            href="/profile" 
                             style={{ ...navItemStyle('profile', false), textDecoration: 'none' }}
                             onMouseEnter={() => setHoveredBtn('profile')} 
                             onMouseLeave={() => setHoveredBtn(null)}
                         >
                             <User style={iconStyle('profile', false)} />
-                            {lang === 'en' ? 'Profile' : 'Hồ Sơ Cá Nhân'}
+                            {lang === 'en' ? 'Profile' : 'Hồ Sơ'}
+                        </Link>
+                        
+                        <Link 
+                            href="/profile?tab=settings" 
+                            style={{ ...navItemStyle('settings', false), textDecoration: 'none' }}
+                            onMouseEnter={() => setHoveredBtn('settings')} 
+                            onMouseLeave={() => setHoveredBtn(null)}
+                        >
+                            <Settings style={iconStyle('settings', false)} />
+                            {lang === 'en' ? 'Settings' : 'Cài Đặt'}
                         </Link>
                         
                         <Link href="/about" style={{ textDecoration: 'none' }}>
@@ -486,6 +499,7 @@ const BurgerMenu = ({
                                 <li>Ngô Minh Khang</li>
                             </ul>
                             <p style={{ margin: 0 }}><strong>{lang === 'en' ? 'Advisor:' : 'Giáo viên HD:'}</strong> Trần Minh Phụng</p>
+                            <p style={{ margin: 0 }}><strong>{lang === 'en' ? 'Co-Advisor:' : 'GVHD:'}</strong> Đoàn Thụy Kim Phượng</p>
                             <div style={{ height: '1px', background: 'var(--border-subtle)', margin: '8px 0' }}></div>
                             <p style={{ margin: 0, fontStyle: 'italic', textAlign: 'center', fontSize: '13px' }}>
                                 {lang === 'en'

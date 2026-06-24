@@ -75,16 +75,16 @@ function RegisterForm() {
     if (formData.province) submitData.append('province', formData.province)
     if (avatarFile) submitData.append('avatar', avatarFile)
 
-    const res = isOauth ? await completeOAuthRegistration(submitData) : await register(submitData)
+    const res: any = isOauth ? await completeOAuthRegistration(submitData) : await register(submitData)
     if (res?.error) {
       let msg = res.error
       if (res.error.toLowerCase().includes('already registered') || res.error.toLowerCase().includes('already exists') || res.error.toLowerCase().includes('user_already_exists')) msg = 'Email này đã được đăng ký. Vui lòng dùng email khác hoặc đăng nhập!'
       setError(msg); setLoading(false)
-    } else {
+    } else if (res?.success) {
       if (typeof window !== 'undefined') {
         import('canvas-confetti').then(m => m.default({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#089e60', '#289cf9', '#ffffff'] }))
       }
-      setTimeout(() => router.push(isOauth ? `/${formData.role}` : '/check-email'), 2000)
+      setTimeout(() => router.push(res.redirectUrl || '/'), 1500)
     }
   }
 

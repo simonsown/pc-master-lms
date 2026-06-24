@@ -13,13 +13,13 @@ interface NavItem {
 interface BurgerMenuProps {
   lang: 'en' | 'vn'; toggleLang: () => void; onStartQuiz: () => void;
   appMode: string; setAppMode: (mode: string) => void;
-  webcamMouseEnabled: boolean; setWebcamMouseEnabled: (enabled: boolean) => void;
-  trackingSensitivity: number; setTrackingSensitivity: (s: number) => void;
+  webcamMouseEnabled?: boolean; setWebcamMouseEnabled?: (enabled: boolean) => void;
+  trackingSensitivity?: number; setTrackingSensitivity?: (s: number) => void;
   onToggleAI: () => void; isAIOpen: boolean; theme: string; setTheme: (t: string) => void;
   userName?: string; onShowDashboard?: () => void;
 }
 
-const BurgerMenu: React.FC<BurgerMenuProps> = ({ lang, toggleLang, onStartQuiz, appMode, setAppMode, webcamMouseEnabled, setWebcamMouseEnabled, trackingSensitivity, setTrackingSensitivity, onToggleAI, isAIOpen, theme, setTheme, userName, onShowDashboard }) => {
+const BurgerMenu: React.FC<BurgerMenuProps> = ({ lang, toggleLang, onStartQuiz, appMode, setAppMode, webcamMouseEnabled = false, setWebcamMouseEnabled, trackingSensitivity = 1.0, setTrackingSensitivity, onToggleAI, isAIOpen, theme, setTheme, userName, onShowDashboard }) => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [hoveredBtn, setHoveredBtn] = useState<string | null>(null);
   const [showCredits, setShowCredits] = useState(false);
@@ -146,6 +146,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ lang, toggleLang, onStartQuiz, 
             ))}
           </div>
 
+          {typeof setWebcamMouseEnabled !== 'undefined' && typeof setTrackingSensitivity !== 'undefined' && (
           <div style={{ padding: '12px 16px' }}>
             <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', padding: '12px 0 6px 0' }}>
               {lang === 'en' ? 'Controls' : 'Điều khiển'}
@@ -158,7 +159,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ lang, toggleLang, onStartQuiz, 
                 </span>
               </div>
               <div className={`toggle-switch ${webcamMouseEnabled ? 'on' : 'off'}`}
-                onClick={() => setWebcamMouseEnabled(!webcamMouseEnabled)}>
+                onClick={() => setWebcamMouseEnabled?.(!webcamMouseEnabled)}>
                 <div className="toggle-thumb"></div>
               </div>
             </div>
@@ -170,11 +171,12 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ lang, toggleLang, onStartQuiz, 
                 <span style={{ fontSize: '12px', color: 'var(--brand-primary)' }}>{trackingSensitivity.toFixed(1)}x</span>
               </div>
               <input type="range" min="0.5" max="3" step="0.1" value={trackingSensitivity}
-                onChange={e => setTrackingSensitivity(parseFloat(e.target.value))}
+                onChange={e => setTrackingSensitivity?.(parseFloat(e.target.value))}
                 className="custom-slider"
                 style={{ background: `linear-gradient(to right, var(--brand-primary) ${percent}%, rgba(255,255,255,0.1) ${percent}%)` }} />
             </div>
           </div>
+          )}
 
           <div style={{ padding: '8px 16px 4px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
             <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', padding: '12px 0 6px 0' }}>
@@ -245,29 +247,172 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ lang, toggleLang, onStartQuiz, 
 
       {showCredits && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', zIndex: 9999,
-          display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '2rem' }}>
-          <div style={{ background: '#1a2f53', borderRadius: '16px', padding: '32px', maxWidth: '480px', width: '100%', color: '#fff', position: 'relative' }}>
+          background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(12px)', zIndex: 9999,
+          display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '1rem',
+          animation: 'creditsFadeIn 0.3s ease' }}>
+          <div style={{
+            background: 'linear-gradient(145deg, #0f1729 0%, #1a2a4a 50%, #0d1f3c 100%)',
+            borderRadius: '24px', padding: '36px', maxWidth: '520px', width: '100%',
+            color: '#fff', position: 'relative',
+            border: '1px solid rgba(0,212,170,0.15)',
+            boxShadow: '0 0 60px rgba(0,212,170,0.08), 0 20px 60px rgba(0,0,0,0.4)',
+            overflow: 'hidden',
+          }}>
+            <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '180px', height: '180px',
+              borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,212,170,0.06) 0%, transparent 70%)',
+              pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', bottom: '-40px', left: '-40px', width: '140px', height: '140px',
+              borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,243,255,0.04) 0%, transparent 70%)',
+              pointerEvents: 'none' }} />
+
             <button onClick={() => setShowCredits(false)}
-              style={{ position: 'absolute', top: '16px', right: '16px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}>
-              <X size={20} />
+              style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)', cursor: 'pointer',
+                width: '32px', height: '32px', borderRadius: '10px', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', transition: 'all 0.2s', zIndex: 1 }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.5)' }}>
+              <X size={16} />
             </button>
-            <h2 style={{ margin: '0 0 24px', fontSize: '22px', textAlign: 'center', fontWeight: 700 }}>
-              {lang === 'en' ? 'CREDITS' : 'TÁC GIẢ'}
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '14px', color: 'rgba(255,255,255,0.7)' }}>
-              <p style={{ margin: 0 }}><strong style={{ color: '#fff' }}>Dự Án:</strong> PC Master Builder</p>
-              <p style={{ margin: 0 }}><strong style={{ color: '#fff' }}>Developer:</strong> Nguyễn Phúc Khánh Sơn</p>
-              <p style={{ margin: 0 }}><strong style={{ color: '#fff' }}>Thành viên:</strong></p>
-              <ul style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <li>Đặng Quốc An</li>
-                <li>Nguyễn Phạm Gia Khiêm</li>
-                <li>Ngô Minh Khang</li>
-              </ul>
-              <p style={{ margin: 0 }}><strong style={{ color: '#fff' }}>Giáo viên HD:</strong> Trần Minh Phụng</p>
-              <p style={{ margin: '8px 0 0', fontStyle: 'italic', textAlign: 'center', fontSize: '13px', color: 'rgba(255,255,255,0.5)' }}>
-                Cảm ơn bạn đã trải nghiệm PC Master Builder!
+
+            <div style={{ textAlign: 'center', marginBottom: '28px', position: 'relative', zIndex: 1 }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '16px',
+                background: 'linear-gradient(135deg, #00d4aa, #00f3ff)',
+                margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '24px', boxShadow: '0 0 30px rgba(0,212,170,0.2)' }}>
+                🏆
+              </div>
+              <h2 style={{ margin: '0 0 4px', fontSize: '20px', fontWeight: 800, letterSpacing: '0.5px' }}>
+                {lang === 'en' ? 'CREDITS' : 'TÁC GIẢ & BÁO CÁO'}
+              </h2>
+              <div style={{ width: '40px', height: '2px', background: 'linear-gradient(90deg, #00d4aa, #00f3ff)', margin: '8px auto', borderRadius: '2px' }} />
+              <p style={{ margin: 0, fontSize: '11px', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.5px' }}>
+                PC Master Builder - v1.0.0
               </p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', position: 'relative', zIndex: 1 }}>
+              <div style={{ padding: '12px 16px', borderRadius: '14px',
+                background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px',
+                  color: 'var(--brand-primary)', marginBottom: '8px' }}>
+                  {lang === 'en' ? 'Project Info' : 'Thông tin dự án'}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px' }}>
+                  {[
+                    { icon: '📦', label: lang === 'en' ? 'Project' : 'Dự Án', value: 'PC Master Builder' },
+                    { icon: '👨‍💻', label: lang === 'en' ? 'Developer' : 'Developer', value: 'Nguyễn Phúc Khánh Sơn' },
+                    { icon: '🛠️', label: lang === 'en' ? 'Version' : 'Phiên bản', value: 'V1.0.0' },
+                  ].map((item, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '14px' }}>{item.icon}</span>
+                      <span style={{ color: 'rgba(255,255,255,0.4)', minWidth: '80px', fontSize: '11px' }}>{item.label}</span>
+                      <span style={{ color: '#fff', fontWeight: 600, fontSize: '12px' }}>{item.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ padding: '12px 16px', borderRadius: '14px',
+                background: 'rgba(0,212,170,0.04)', border: '1px solid rgba(0,212,170,0.1)' }}>
+                <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px',
+                  color: '#00d4aa', marginBottom: '8px' }}>
+                  {lang === 'en' ? 'Supervisors' : 'Giáo viên hướng dẫn'}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {[
+                    { name: 'Trần Minh Phụng', role: lang === 'en' ? 'Lead Supervisor' : 'GVHD Chính', color: '#00d4aa' },
+                    { name: 'Đoàn Thụy Kim Phượng', role: lang === 'en' ? 'Co-Supervisor' : 'GVHD', color: '#00f3ff' },
+                  ].map((gv, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '6px 10px',
+                      borderRadius: '10px', background: 'rgba(255,255,255,0.03)' }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '10px',
+                        background: `linear-gradient(135deg, ${gv.color}22, ${gv.color}11)`,
+                        border: `1px solid ${gv.color}33`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0 }}>
+                        👩‍🏫
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{gv.name}</div>
+                        <div style={{ fontSize: '10px', color: gv.color, fontWeight: 600, letterSpacing: '0.5px' }}>{gv.role}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ padding: '12px 16px', borderRadius: '14px',
+                background: 'rgba(99,102,241,0.04)', border: '1px solid rgba(99,102,241,0.1)' }}>
+                <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px',
+                  color: '#818cf8', marginBottom: '8px' }}>
+                  {lang === 'en' ? 'Team Members' : 'Thành viên'}
+                </div>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {[
+                    { name: 'Đặng Quốc An', role: 'Frontend', color: '#818cf8' },
+                    { name: 'Nguyễn Phạm Gia Khiêm', role: 'Backend', color: '#f59e0b' },
+                    { name: 'Ngô Minh Khang', role: 'UI/UX', color: '#10b981' },
+                  ].map((m, i) => (
+                    <div key={i} style={{ flex: '1 1 auto', minWidth: '120px', padding: '8px 12px', borderRadius: '10px',
+                      background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)',
+                      textAlign: 'center' }}>
+                      <div style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>{m.name}</div>
+                      <div style={{ fontSize: '9px', color: m.color, fontWeight: 600, letterSpacing: '0.5px' }}>{m.role}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ padding: '12px 16px', borderRadius: '14px',
+                background: 'rgba(16,185,129,0.04)', border: '1px solid rgba(16,185,129,0.1)' }}>
+                <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px',
+                  color: '#10b981', marginBottom: '8px' }}>
+                  {lang === 'en' ? 'Features' : 'Tính năng'}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', fontSize: '11px' }}>
+                  {[
+                    '🎮 Lắp ráp PC 2D', '🤖 AI Hướng dẫn', '📚 Bài giảng', '🖥️ Mô phỏng Windows',
+                    '✋ Theo dõi tay', '🏪 Chợ linh kiện', '👥 2 Người chơi', '📝 Kỳ thi & Quiz',
+                    '🏆 Hệ thống XP', '📊 Bảng xếp hạng', '📜 Chứng chỉ', '💬 Diễn đàn',
+                    '📱 Responsive', '🌐 Đa ngôn ngữ',
+                  ].map((feat, i) => (
+                    <div key={i} style={{ padding: '4px 6px', borderRadius: '6px',
+                      background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span style={{ fontSize: '10px', lineHeight: '1' }}>{feat}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ padding: '12px 16px', borderRadius: '14px',
+                background: 'rgba(245,158,11,0.04)', border: '1px solid rgba(245,158,11,0.1)' }}>
+                <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px',
+                  color: '#f59e0b', marginBottom: '8px' }}>
+                  Tech Stack
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                  {['Next.js 16', 'React 19', 'TypeScript', 'Supabase', 'Three.js', 'Framer Motion', 'Tailwind CSS', 'MediaPipe', 'Zustand', 'Recharts', 'Lucide'].map((tech, i) => (
+                    <span key={i} style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '9px', fontWeight: 600,
+                      background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
+                      color: 'rgba(255,255,255,0.6)' }}>
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '20px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+              <div style={{ padding: '12px', borderRadius: '12px',
+                background: 'linear-gradient(135deg, rgba(0,212,170,0.06), rgba(0,243,255,0.06))',
+                border: '1px solid rgba(0,212,170,0.12)' }}>
+                <p style={{ margin: '0 0 4px', fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>
+                  © {new Date().getFullYear()} - THPT Nguyễn Công Trứ
+                </p>
+                <p style={{ margin: 0, fontSize: '10px', color: 'rgba(255,255,255,0.25)', fontStyle: 'italic' }}>
+                  {lang === 'en' ? '"Dare to Think, Dare to Do"' : '"Dám nghĩ, Dám làm"'}
+                </p>
+              </div>
             </div>
           </div>
         </div>

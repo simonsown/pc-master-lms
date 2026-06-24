@@ -38,13 +38,19 @@ export function NewThreadModal({ isOpen, onClose, onSubmit, userRole }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-[#1a1c25] border border-gray-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
+      <div className="rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}>
         
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800 bg-[#16213e]/30">
-          <h3 className="font-bold text-white text-lg">Đặt câu hỏi mới</h3>
-          <button onClick={onClose} className="p-1 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-all">
+        <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border-default)', background: 'var(--bg-surface)' }}>
+          <h3 className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>Đặt câu hỏi mới</h3>
+          <button 
+            onClick={onClose} 
+            className="p-1 rounded-lg transition-all"
+            style={{ color: 'var(--text-muted)' }}
+            onMouseOver={e => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-hover)' }}
+            onMouseOut={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.background = 'transparent' }}
+          >
             <X size={20} />
           </button>
         </div>
@@ -52,13 +58,13 @@ export function NewThreadModal({ isOpen, onClose, onSubmit, userRole }: Props) {
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && (
-            <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg">
+            <div className="p-3 text-sm rounded-lg" style={{ background: 'color-mix(in srgb, var(--danger) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--danger) 20%, transparent)', color: 'var(--danger)' }}>
               {error}
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">
+            <label className="block text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>
               Tiêu đề thảo luận
             </label>
             <input 
@@ -67,19 +73,21 @@ export function NewThreadModal({ isOpen, onClose, onSubmit, userRole }: Props) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="VD: Làm thế nào để tính công suất nguồn (TDP)?"
-              className="w-full bg-[#1e202f]/50 border border-gray-800 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#00d4aa] transition-colors"
+              className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-colors"
+              style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">
+              <label className="block text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>
                 Loại chủ đề
               </label>
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value as any)}
-                className="w-full bg-[#1e202f]/50 border border-gray-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#00d4aa] transition-colors"
+                className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-colors"
+                style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
               >
                 <option value="question">❓ Câu hỏi</option>
                 <option value="discussion">💬 Thảo luận</option>
@@ -89,7 +97,7 @@ export function NewThreadModal({ isOpen, onClose, onSubmit, userRole }: Props) {
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">
+            <label className="block text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>
               Nội dung chi tiết (hỗ trợ Markdown)
             </label>
             <textarea 
@@ -98,14 +106,16 @@ export function NewThreadModal({ isOpen, onClose, onSubmit, userRole }: Props) {
               value={body}
               onChange={(e) => setBody(e.target.value)}
               placeholder="Mô tả chi tiết thắc mắc của bạn..."
-              className="w-full bg-[#1e202f]/50 border border-gray-800 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#00d4aa] transition-colors resize-none"
+              className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-colors resize-none"
+              style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
             />
           </div>
 
           <button 
             type="submit"
             disabled={loading}
-            className="w-full bg-[#00d4aa] text-[#0d0e13] font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50"
+            className="w-full font-bold py-3 rounded-xl transition-opacity disabled:opacity-50"
+            style={{ background: 'var(--brand-primary)', color: '#000' }}
           >
             {loading ? 'Đang gửi...' : 'Đăng chủ đề'}
           </button>

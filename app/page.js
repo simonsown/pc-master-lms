@@ -4,13 +4,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Sparkles, ShieldCheck, Zap, MonitorPlay, Wrench, Bot, HelpCircle, ChevronDown, BookOpen, Users, School, LogIn, UserPlus, GraduationCap, Menu, X, ChevronRight, BarChart3, Award, Clock, PlayCircle, FileText, MessageSquare, Bell } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import { ArrowRight, Sparkles, ShieldCheck, Zap, MonitorPlay, Wrench, Bot, HelpCircle, ChevronDown, BookOpen, Users, School, LogIn, UserPlus, GraduationCap, Menu, X, ChevronRight, BarChart3, Award, Clock, PlayCircle, FileText, MessageSquare, Bell, Cpu, HardDrive, Gauge, BrainCircuit, Cctv } from 'lucide-react';
 
 export default function LandingPage() {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [activeFaq, setActiveFaq] = useState(null);
+  const isMobile = useIsMobile();
   const router = useRouter();
 
   useEffect(() => {
@@ -54,6 +57,7 @@ export default function LandingPage() {
             <Link href="/builder" style={{ color: 'var(--text-muted)', textDecoration: 'none', padding: '8px 16px', borderRadius: '8px', transition: 'all 0.2s' }}>
               Thực hành
             </Link>
+
           </div>
         </div>
 
@@ -107,7 +111,7 @@ export default function LandingPage() {
       </div>
 
       {/* HERO */}
-      <section className="hero-grid landing-hero" style={{ padding: '140px 32px 80px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', position: 'relative' }}>
+      <section className="hero-grid landing-hero" style={{ padding: isMobile ? '100px 16px 48px' : '140px 32px 80px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', position: 'relative' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
           <div className="animate-fade-in-up" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
             <span className="lms-tag lms-tag-green"><Sparkles size={14} /> AI hướng dẫn chi tiết</span>
@@ -117,9 +121,10 @@ export default function LandingPage() {
 
           <h1 className="animate-fade-in-up animate-delay-1" style={{
             fontSize: 'clamp(36px, 6vw, 56px)', fontWeight: 800, lineHeight: 1.15,
-            letterSpacing: '-0.03em', margin: '0 auto 20px auto', color: 'var(--text-primary)'
+            letterSpacing: '-0.03em', margin: '0 auto 20px auto', color: 'var(--text-primary)',
+            whiteSpace: 'nowrap'
           }}>
-            Học Tin học qua <span style={{ color: 'var(--brand-primary)' }}>mô phỏng PC thực tế</span>
+            Học Tin học qua mô phỏng PC <span style={{ color: 'var(--brand-primary)' }}>thực tế</span>
           </h1>
 
           <p className="animate-fade-in-up animate-delay-2" style={{ fontSize: '18px', color: 'var(--text-muted)', maxWidth: '600px', margin: '0 auto 40px auto', lineHeight: 1.6, fontWeight: 500 }}>
@@ -159,7 +164,7 @@ export default function LandingPage() {
       </section>
 
       {/* STATS */}
-      <section className="animate-fade-in-up animate-delay-5 landing-section" style={{ padding: '80px 32px', textAlign: 'center' }}>
+      <section className="animate-fade-in-up animate-delay-5 landing-section" style={{ padding: isMobile ? '48px 16px' : '80px 32px', textAlign: 'center' }}>
         <div className="landing-stats-grid" style={{ maxWidth: '1000px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '24px' }}>
           {[
             { num: '50+', label: 'Linh kiện chi tiết', color: 'var(--brand-primary)' },
@@ -176,41 +181,111 @@ export default function LandingPage() {
       </section>
 
       {/* FEATURES */}
-      <section className="landing-section" style={{ padding: '0 32px 80px' }}>
+      <section className="landing-section" style={{ padding: isMobile ? '0 16px 48px' : '0 32px 80px' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.5 }}
+            style={{ textAlign: 'center', marginBottom: '48px' }}
+          >
             <h2 style={{ fontSize: '32px', fontWeight: 800, marginBottom: '12px', color: 'var(--text-primary)' }}>Mô phỏng trực quan, kết quả thực tế</h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '16px', maxWidth: '600px', margin: '0 auto', lineHeight: 1.6 }}>
-              Không chỉ là lắp ráp, hệ thống giả lập chi tiết các thông số kỹ thuật của từng linh kiện.
+            <p style={{ color: 'var(--text-muted)', fontSize: '16px', maxWidth: '640px', margin: '0 auto', lineHeight: 1.7 }}>
+              Không chỉ là lắp ráp, hệ thống giả lập chi tiết thông số kỹ thuật của từng linh kiện, giúp bạn hiểu sâu về phần cứng trước khi chạm tay vào máy thật.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="landing-features-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', alignItems: 'center' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className="landing-features-grid" style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? '20px' : '28px', alignItems: 'center' }}>
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: '-80px' }}
+              variants={{
+                hidden: {},
+                visible: { transition: { staggerChildren: 0.12 } }
+              }}
+              style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+            >
               {[
-                { icon: <Zap size={22} />, text: 'Tính toán điện năng (TDP) thời gian thực', color: 'var(--accent-amber)' },
-                { icon: <ShieldCheck size={22} />, text: 'Kiểm tra tương thích socket & kích thước Case', color: 'var(--brand-primary)' },
-                { icon: <Sparkles size={22} />, text: 'Trợ lý AI phân tích và sửa lỗi cấu hình', color: 'var(--accent-blue)' },
+                { icon: <Zap size={22} />, text: 'Tính toán điện năng (TDP) thời gian thực', desc: 'Hệ thống tự động tính tổng công suất tiêu thụ dựa trên từng linh kiện bạn chọn, cảnh báo nếu PSU không đủ tải.', color: 'var(--accent-amber)' },
+                { icon: <ShieldCheck size={22} />, text: 'Kiểm tra tương thích socket & kích thước Case', desc: 'Tự động phát hiện sai socket giữa CPU và Mainboard, đo kích thước Case xem có vừa với GPU và tản nhiệt không.', color: 'var(--brand-primary)' },
+                { icon: <Sparkles size={22} />, text: 'Phân tích cấu hình bằng AI thông minh', desc: 'AI Guru gợi ý cấu hình tối ưu dựa trên nhu cầu: Gaming, Đồ họa, Văn phòng hay Server.', color: 'var(--accent-blue)' },
+                { icon: <Cpu size={22} />, text: 'Thông số kỹ thuật 50+ linh kiện thực tế', desc: 'Dữ liệu chi tiết từ Intel, AMD, NVIDIA, phản ánh đúng thông số sản phẩm ngoài thị trường.', color: '#a855f7' },
+                { icon: <BrainCircuit size={22} />, text: 'Gợi ý nâng cấp thông minh', desc: 'Dựa trên cấu hình hiện tại, AI đề xuất các linh kiện nên nâng cấp tiếp theo để cân bằng hiệu năng.', color: '#06b6d4' },
               ].map((f, i) => (
-                <div key={i} className="lms-card animate-slide-left" style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', padding: '20px', animationDelay: `${0.7 + i * 0.15}s` }}>
-                  <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: i === 0 ? 'rgba(255,163,0,0.1)' : i === 1 ? 'var(--brand-subtle)' : 'rgba(40,156,249,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: f.color, flexShrink: 0 }}>
+                <motion.div
+                  key={i}
+                  variants={{
+                    hidden: { opacity: 0, x: -30 },
+                    visible: { opacity: 1, x: 0 }
+                  }}
+                  className="lms-card"
+                  style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', padding: '20px' }}
+                >
+                  <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: i === 0 ? 'rgba(255,163,0,0.1)' : i === 1 ? 'var(--brand-subtle)' : i === 2 ? 'rgba(40,156,249,0.1)' : i === 3 ? 'rgba(168,85,247,0.1)' : 'rgba(6,182,212,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: f.color, flexShrink: 0 }}>
                     {f.icon}
                   </div>
                   <div>
                     <p style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px', fontSize: '15px' }}>{f.text}</p>
-                    <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Chi tiết và chính xác từng thông số kỹ thuật</p>
+                    <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.5 }}>{f.desc}</p>
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
-            <div className="animate-slide-right" style={{ animationDelay: '1s' }}>
-              <div style={{ background: 'var(--bg-surface)', borderRadius: '16px', padding: '16px', border: '1px solid var(--border-default)', boxShadow: '0 4px 12px -2px var(--shadow-color)' }}>
-                <img src="/showcase.png" alt="Giao diện phần mềm mô phỏng lắp ráp PC Master Builder" style={{ width: '100%', borderRadius: '8px' }} />
-                <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
-                  <span className="lms-tag lms-tag-green"><PlayCircle size={14} /> Giao diện Lab thực hành 2D</span>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: '-80px' }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              style={{ perspective: '1200px' }}
+            >
+              <motion.div
+                animate={{ y: [0, -6, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                style={{
+                  background: 'var(--bg-surface)', borderRadius: '16px', padding: '16px',
+                  border: '1px solid var(--border-default)',
+                  boxShadow: '0 8px 32px -4px var(--shadow-color), 0 0 0 1px rgba(0,212,170,0)',
+                  transition: 'box-shadow 0.4s ease, border-color 0.4s ease',
+                  transformStyle: 'preserve-3d',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.boxShadow = '0 20px 60px -8px rgba(0,212,170,0.2), 0 0 0 1px rgba(0,212,170,0.3)';
+                  e.currentTarget.style.borderColor = 'var(--brand-primary)';
+                  e.currentTarget.style.transform = 'rotateY(-2deg) rotateX(2deg)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.boxShadow = '0 8px 32px -4px var(--shadow-color)';
+                  e.currentTarget.style.borderColor = 'var(--border-default)';
+                  e.currentTarget.style.transform = 'rotateY(0deg) rotateX(0deg)';
+                }}
+              >
+                <div style={{
+                  position: 'relative', borderRadius: '8px', overflow: 'hidden',
+                }}>
+                  <div style={{
+                    position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
+                    background: 'linear-gradient(135deg, rgba(0,212,170,0.08) 0%, transparent 50%, rgba(99,102,241,0.08) 100%)',
+                    animation: 'showcaseGlow 3s ease-in-out infinite',
+                  }} />
+                  <motion.img
+                    src="/showcase.png" alt="Giao diện phần mềm mô phỏng lắp ráp PC Master Builder"
+                    style={{ width: '100%', borderRadius: '8px', display: 'block', position: 'relative', zIndex: 0 }}
+                    animate={{ scale: [1, 1.02, 1] }}
+                    transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                  />
                 </div>
-              </div>
-            </div>
+                <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                  <span className="lms-tag lms-tag-green" style={{ animation: 'tagPulse 2s ease-in-out infinite' }}>
+                    <PlayCircle size={14} /> Lab thực hành 2D
+                  </span>
+                  <span className="lms-tag lms-tag-blue" style={{ animation: 'tagPulse 2s ease-in-out 0.3s infinite' }}>
+                    <Cctv size={14} /> Mô phỏng thời gian thực
+                  </span>
+                </div>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -338,6 +413,14 @@ export default function LandingPage() {
           .landing-nav { padding: 0 12px !important; }
           .landing-hero { padding: 100px 12px 40px !important; }
           .landing-stats-grid { grid-template-columns: 1fr !important; }
+        }
+        @keyframes showcaseGlow {
+          0%, 100% { opacity: 0.4; }
+          50% { opacity: 0.9; }
+        }
+        @keyframes tagPulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.6; }
         }
       `}</style>
     </div>

@@ -4,19 +4,6 @@ import { useState, useCallback, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import RawGameEngine from '@/components/GameEngine'
 const GameEngine = RawGameEngine as any;
-import dynamic from 'next/dynamic'
-const HandTracker = dynamic(
-  () => import('@/components/HandTracker'),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex items-center gap-2 text-sm text-[#5a5d72]">
-        <div className="w-4 h-4 border-2 border-[#00d4aa] border-t-transparent rounded-full animate-spin" />
-        Đang tải Hand Tracking...
-      </div>
-    )
-  }
-)
 import VirtualAssistant from '@/components/VirtualAssistant'
 import { useGuru } from '@/lib/guru-state'
 import { GURU_MESSAGES } from '@/utils/i18nData'
@@ -32,8 +19,6 @@ export default function LabExamPage({ params }: { params: Promise<{ examId: stri
   // 1. Exam State
   const [timeLeft, setTimeLeft] = useState(1800); // 30 phút
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [landmarks, setLandmarks] = useState([]);
-  const [isCameraActive, setIsCameraActive] = useState(false);
   const guru = useGuru();
 
   // 2. Mission Data (Mocked from Mega Prompt Scenario)
@@ -119,14 +104,6 @@ export default function LabExamPage({ params }: { params: Promise<{ examId: stri
 
         <div className="flex items-center gap-4">
            <button 
-             onClick={() => setIsCameraActive(!isCameraActive)}
-             className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all
-               ${isCameraActive ? 'bg-[#00d2a0]/10 border-[#00d2a0] text-[#00d2a0]' : 'bg-slate-800 border-slate-700 text-slate-400'}
-             `}
-           >
-             {isCameraActive ? 'Tắt Webcam Tracking' : 'Bật Webcam Tracking'}
-           </button>
-           <button 
              onClick={handleSubmit}
              disabled={isSubmitting}
              className="px-8 py-2.5 bg-[#00d2a0] text-black font-black rounded-xl hover:shadow-[0_0_20px_rgba(0,210,160,0.4)] transition-all disabled:opacity-50"
@@ -166,20 +143,12 @@ export default function LabExamPage({ params }: { params: Promise<{ examId: stri
         {/* The 2D Lab Canvas (Reusing your GameEngine) */}
         <main className="flex-1 flex items-center justify-center bg-black/40">
            <div className="relative w-full max-w-[1400px] aspect-[14/8]">
-              <GameEngine 
-                landmarks={landmarks}
-                onGameEvent={handleGameEvent}
-                purchasedItems={missionData.purchasedItems}
-              />
+               <GameEngine 
+                 onGameEvent={handleGameEvent}
+                 purchasedItems={missionData.purchasedItems}
+               />
               
-              {/* Camera Feed Integrated */}
-              {isCameraActive && (
-                <div className="absolute bottom-6 right-6 w-64 p-2 bg-[#16213e] rounded-2xl border border-white/10 shadow-2xl">
-                   <div className="aspect-video bg-black rounded-lg overflow-hidden">
-                      <HandTracker onLandmarks={setLandmarks} />
-                   </div>
-                </div>
-              )}
+              
            </div>
         </main>
       </div>

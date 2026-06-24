@@ -104,6 +104,14 @@ const defaultLevelDefs: LevelDef[] = [
   { level: 20, title: 'Bất Tử', xp_required: 65000, color_hex: '#ffd700', icon: '🏆', description: 'Bất tử trong lịch sử' },
 ];
 
+const FALLBACK_QUESTS: Quest[] = [
+  { id: 'fallback-lesson', title: 'Hoàn thành 1 bài học', description: 'Hoàn thành một bài học bất kỳ', xp_reward: 50, type: 'daily', difficulty: 'easy', icon: '📚', requirement_type: 'lessons', requirement_value: 1, is_active: true, expires_at: '' },
+  { id: 'fallback-pc', title: 'Lắp ráp PC', description: 'Lắp ráp một cấu hình PC trong builder', xp_reward: 30, type: 'daily', difficulty: 'easy', icon: '🔧', requirement_type: 'builds', requirement_value: 1, is_active: true, expires_at: '' },
+  { id: 'fallback-quiz', title: 'Làm quiz', description: 'Hoàn thành một bài quiz', xp_reward: 20, type: 'daily', difficulty: 'easy', icon: '🧠', requirement_type: 'quizzes', requirement_value: 1, is_active: true, expires_at: '' },
+  { id: 'fallback-streak', title: 'Đạt streak 3 ngày', description: 'Duy trì streak học tập 3 ngày liên tiếp', xp_reward: 100, type: 'daily', difficulty: 'medium', icon: '🔥', requirement_type: 'streak', requirement_value: 3, is_active: true, expires_at: '' },
+  { id: 'fallback-discussion', title: 'Tham gia thảo luận', description: 'Tham gia thảo luận trong lớp học', xp_reward: 15, type: 'daily', difficulty: 'easy', icon: '💬', requirement_type: 'discussions', requirement_value: 1, is_active: true, expires_at: '' },
+];
+
 function calcLevel(xp: number, levelDefs: LevelDef[]) {
   let lvl = levelDefs[0];
   for (const d of levelDefs) {
@@ -191,7 +199,10 @@ export function RealtimeProvider({ children, userId }: { children: React.ReactNo
             ...levelInfo,
             levelDefs: defs,
             quests: (userQuests.data || []) as UserQuest[],
-            allQuests: (activeQuests.data || []) as Quest[],
+            allQuests: (() => {
+              const fetched = (activeQuests.data || []) as Quest[];
+              return fetched.length >= 5 ? fetched : [...fetched, ...FALLBACK_QUESTS].slice(0, 5);
+            })(),
             titles: (titles.data || []) as Title[],
             xpHistory: (xpHistory.data || []) as XpTransaction[],
         }));
