@@ -63,58 +63,59 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
             display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '1100px',
             margin: '0 auto', padding: isMobile ? '16px' : '32px 48px', minHeight: '100vh'
         }}>
-            <motion.div {...fadeUp(0)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
-                    <div style={{ position: 'relative', width: '160px', height: '32px', overflow: 'hidden' }}>
-                        <div style={{
-                            position: 'absolute', inset: 0,
-                            background: 'linear-gradient(90deg, transparent, rgba(0,212,170,0.08), transparent)',
-                            borderRadius: '4px',
-                        }} />
-                        {[0, 1, 2, 3, 4, 5, 6, 7].map(i => (
-                            <motion.div key={i}
-                                animate={{
-                                    x: ['-120px', '280px'],
-                                    opacity: [0, 1, 1, 0],
-                                }}
-                                transition={{
-                                    duration: 2.4,
-                                    repeat: Infinity,
-                                    delay: i * 0.3,
-                                    ease: 'linear',
-                                }}
-                                style={{
-                                    position: 'absolute', top: `${6 + (i % 3) * 10}px`,
-                                    width: `${5 + (i % 3) * 3}px`, height: '2px',
-                                    borderRadius: '2px',
-                                    background: i % 2 === 0
-                                        ? 'linear-gradient(90deg, var(--brand-primary), #6366f1)'
-                                        : 'linear-gradient(90deg, #a855f7, var(--brand-primary))',
-                                    boxShadow: `0 0 ${6 + i * 2}px ${i % 2 === 0 ? 'rgba(0,212,170,0.6)' : 'rgba(168,85,247,0.6)'}`,
-                                }}
-                            />
-                        ))}
-                        {[0, 1, 2, 3].map(i => (
-                            <motion.div key={`dot-${i}`}
-                                animate={{
-                                    x: ['-80px', '240px'],
-                                    y: [0, -6, 0],
-                                }}
-                                transition={{
-                                    duration: 3.0,
-                                    repeat: Infinity,
-                                    delay: i * 0.7,
-                                    ease: 'easeInOut',
-                                }}
-                                style={{
-                                    position: 'absolute', top: '12px',
-                                    width: '4px', height: '4px', borderRadius: '50%',
-                                    background: i % 2 === 0 ? '#00d4aa' : '#a855f7',
-                                    boxShadow: `0 0 10px ${i % 2 === 0 ? '#00d4aa' : '#a855f7'}`,
-                                }}
-                            />
-                        ))}
-                    </div>
+            <motion.div {...fadeUp(0)} style={{ marginBottom: '16px' }}>
+                <div style={{ position: 'relative', height: '32px', overflow: 'hidden', borderRadius: '8px', marginBottom: '12px' }}>
+                    <div style={{
+                        position: 'absolute', inset: 0,
+                        background: 'linear-gradient(90deg, transparent 0%, rgba(0,212,170,0.04) 20%, rgba(99,102,241,0.04) 50%, rgba(168,85,247,0.04) 80%, transparent 100%)',
+                    }} />
+                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(i => (
+                        <motion.div key={i}
+                            animate={{
+                                left: ['-100px', 'calc(100% + 100px)'],
+                                opacity: [0, 1, 1, 0],
+                            }}
+                            transition={{
+                                duration: 3.0 - (i % 3) * 0.3,
+                                repeat: Infinity,
+                                delay: i * 0.25,
+                                ease: 'linear',
+                            }}
+                            style={{
+                                position: 'absolute', top: `${4 + (i % 4) * 7}px`,
+                                width: `${6 + (i % 5) * 3}px`, height: '2px',
+                                borderRadius: '2px',
+                                background: i % 3 === 0
+                                    ? 'linear-gradient(90deg, var(--brand-primary), #6366f1)'
+                                    : i % 3 === 1
+                                        ? 'linear-gradient(90deg, #a855f7, var(--brand-primary))'
+                                        : 'linear-gradient(90deg, #ffb900, #f472b6)',
+                                boxShadow: `0 0 ${8 + i * 2}px ${i % 3 === 0 ? 'rgba(0,212,170,0.6)' : i % 3 === 1 ? 'rgba(168,85,247,0.6)' : 'rgba(255,185,0,0.5)'}`,
+                            }}
+                        />
+                    ))}
+                    {[0, 1, 2, 3, 4, 5].map(i => (
+                        <motion.div key={`dot-${i}`}
+                            animate={{
+                                left: ['-60px', 'calc(100% + 60px)'],
+                                y: [0, -8, 0, 8, 0],
+                            }}
+                            transition={{
+                                duration: 4.0 - i * 0.2,
+                                repeat: Infinity,
+                                delay: i * 0.5,
+                                ease: 'easeInOut',
+                            }}
+                            style={{
+                                position: 'absolute', top: '12px',
+                                width: '5px', height: '5px', borderRadius: '50%',
+                                background: i % 3 === 0 ? '#00d4aa' : i % 3 === 1 ? '#a855f7' : '#ffb900',
+                                boxShadow: `0 0 14px ${i % 3 === 0 ? '#00d4aa' : i % 3 === 1 ? '#a855f7' : '#ffb900'}`,
+                            }}
+                        />
+                    ))}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
                         <h1 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.03em' }}>
                             PC Master Builder
@@ -123,9 +124,8 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                             Mô phỏng lắp ráp PC 2D tích hợp AI
                         </p>
                     </div>
-                </div>
-
-                {loading ? (
+                    <div>
+                    {loading ? (
                     <div style={{ width: '40px' }} />
                 ) : user ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -170,6 +170,7 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                         <LogIn size={16} /> Đăng nhập
                     </button>
                 )}
+                    </div>
             </motion.div>
 
             <motion.div {...fadeUp(0.05)} style={{

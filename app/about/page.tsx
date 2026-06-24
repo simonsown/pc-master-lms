@@ -139,31 +139,121 @@ export default function AboutPage() {
                                 e.currentTarget.style.transform = 'rotateY(0deg) rotateX(0deg)';
                             }}
                         >
-                            <motion.img
-                                src="/showcase.png"
-                                alt="PC Master Builder"
-                                style={{
-                                    width: '100%', height: '100%', objectFit: 'cover', display: 'block',
-                                    position: 'relative', zIndex: 0,
-                                }}
-                                animate={{ scale: [1, 1.03, 1] }}
-                                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-                            />
+                            <svg viewBox="0 0 320 180" style={{ width: '100%', height: '100%', position: 'relative', zIndex: 0, display: 'block' }}>
+                                <defs>
+                                    <linearGradient id="caseGrad" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0%" stopColor="#1a2a3a" />
+                                        <stop offset="100%" stopColor="#0d1520" />
+                                    </linearGradient>
+                                    <linearGradient id="screenGrad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#0a1628" />
+                                        <stop offset="100%" stopColor="#0f2038" />
+                                    </linearGradient>
+                                    <linearGradient id="ledBlue" x1="0" y1="0" x2="1" y2="0">
+                                        <stop offset="0%" stopColor="#00d4aa">
+                                            <animate attributeName="stopColor" values="#00d4aa;#6366f1;#00d4aa" dur="3s" repeatCount="indefinite" />
+                                        </stop>
+                                        <stop offset="100%" stopColor="#6366f1">
+                                            <animate attributeName="stopColor" values="#6366f1;#a855f7;#6366f1" dur="3s" repeatCount="indefinite" />
+                                        </stop>
+                                    </linearGradient>
+                                    <filter id="glow">
+                                        <feGaussianBlur stdDeviation="2" result="blur" />
+                                        <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                                    </filter>
+                                    <filter id="screenGlow">
+                                        <feGaussianBlur stdDeviation="4" result="blur" />
+                                        <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                                    </filter>
+                                </defs>
+
+                                {/* MONITOR STAND */}
+                                <rect x="145" y="125" width="30" height="8" rx="2" fill="#1a2a3a" />
+                                <rect x="155" y="133" width="10" height="12" rx="1" fill="#141e2c" />
+
+                                {/* MONITOR BODY */}
+                                <rect x="60" y="20" width="200" height="115" rx="6" fill="#1a2a3a" stroke="#2a3a4a" strokeWidth="1.5" />
+                                <rect x="68" y="28" width="184" height="99" rx="3" fill="url(#screenGrad)" />
+
+                                {/* SCREEN CONTENT - animated code lines */}
+                                {[0, 1, 2, 3, 4, 5].map(i => (
+                                    <rect key={i} x="78" y={35 + i * 15} width={60 + Math.random() * 80} height="4" rx="2" fill={`rgba(0,212,170,${0.15 + i * 0.05})`}>
+                                        <animate attributeName="opacity" values={`${0.1 + i * 0.05};${0.3 + i * 0.1};${0.1 + i * 0.05}`} dur={`${2 + i * 0.3}s`} repeatCount="indefinite" />
+                                    </rect>
+                                ))}
+                                <rect x="78" y="110" width="100" height="3" rx="1.5" fill="#00d4aa" opacity="0.4">
+                                    <animate attributeName="width" values="100;20;100" dur="2s" repeatCount="indefinite" />
+                                </rect>
+                                <rect x="160" y="110" width="15" height="3" rx="1.5" fill="#00d4aa" opacity="0.6">
+                                    <animate attributeName="opacity" values="0.6;1;0.6" dur="1s" repeatCount="indefinite" />
+                                </rect>
+
+                                {/* SCREEN GLOW */}
+                                <rect x="68" y="28" width="184" height="99" rx="3" fill="none" stroke="#00d4aa" strokeWidth="0.5" opacity="0.3">
+                                    <animate attributeName="opacity" values="0.2;0.5;0.2" dur="2s" repeatCount="indefinite" />
+                                </rect>
+
+                                {/* PC CASE */}
+                                <rect x="50" y="148" width="120" height="28" rx="4" fill="url(#caseGrad)" stroke="#2a3a4a" strokeWidth="1" />
+
+                                {/* CASE LED STRIP */}
+                                <rect x="52" y="148" width="116" height="3" rx="1.5" fill="url(#ledBlue)" filter="url(#glow)" opacity="0.8" />
+
+                                {/* CASE FANS */}
+                                {[70, 94, 118].map((cx, i) => (
+                                    <g key={i} transform={`translate(${cx}, 162)`}>
+                                        <circle r="8" fill="none" stroke="#253545" strokeWidth="1" />
+                                        <g>
+                                            <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur={`${0.8 + i * 0.15}s`} repeatCount="indefinite" />
+                                            {[0, 120, 240].map(angle => (
+                                                <line key={angle} x1="0" y1="0" x2="0" y2="-7" stroke="#00d4aa" strokeWidth="1.5" opacity="0.7" transform={`rotate(${angle})`}>
+                                                    <animate attributeName="opacity" values="0.5;1;0.5" dur={`${0.5 + i * 0.2}s`} repeatCount="indefinite" />
+                                                </line>
+                                            ))}
+                                        </g>
+                                    </g>
+                                ))}
+
+                                {/* GPU */}
+                                <rect x="158" y="155" width="50" height="18" rx="2" fill="#1a1a2e" stroke="#a855f7" strokeWidth="0.8">
+                                    <animate attributeName="stroke-opacity" values="0.3;0.8;0.3" dur="1.5s" repeatCount="indefinite" />
+                                </rect>
+                                <text x="162" y="167" fill="#a855f7" fontSize="5" fontWeight="700" letterSpacing="1">GPU</text>
+
+                                {/* RAM */}
+                                {[210, 220].map((rx, i) => (
+                                    <rect key={i} x={rx} y="158" width="6" height="14" rx="1" fill="#0d1520" stroke="#6366f1" strokeWidth="0.6">
+                                        <animate attributeName="stroke-opacity" values="0.3;0.9;0.3" dur={`${1.2 + i * 0.3}s`} repeatCount="indefinite" />
+                                    </rect>
+                                ))}
+
+                                {/* POWER LED */}
+                                <circle cx="55" cy="163" r="1.5" fill="#00d4aa" filter="url(#glow)">
+                                    <animate attributeName="r" values="1.5;2.5;1.5" dur="1s" repeatCount="indefinite" />
+                                </circle>
+
+                                {/* RIGHT SIDE decorative dots */}
+                                {[0, 1, 2].map(i => (
+                                    <circle key={`dot-${i}`} cx={240 + i * 12} cy={154 + i * 8} r="1.5" fill="#6366f1" opacity="0.5">
+                                        <animate attributeName="opacity" values="0.2;0.8;0.2" dur={`${1.5 + i * 0.5}s`} repeatCount="indefinite" />
+                                    </circle>
+                                ))}
+
+                                {/* WAVES below */}
+                                <path d="M50,178 Q80,172 110,178 Q140,184 170,178" fill="none" stroke="#00d4aa" strokeWidth="0.5" opacity="0.4">
+                                    <animate attributeName="d" values="M50,178 Q80,172 110,178 Q140,184 170,178;M50,178 Q80,184 110,178 Q140,172 170,178;M50,178 Q80,172 110,178 Q140,184 170,178" dur="3s" repeatCount="indefinite" />
+                                </path>
+                            </svg>
                             <div style={{
-                                position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
-                                background: 'linear-gradient(135deg, rgba(0,212,170,0.12) 0%, transparent 50%, rgba(99,102,241,0.1) 100%)',
-                                animation: 'aboutShowcaseGlow 3s ease-in-out infinite',
-                            }} />
-                            <div style={{
-                                position: 'absolute', bottom: '16px', left: '50%', transform: 'translateX(-50%)', zIndex: 2,
-                                padding: '8px 20px', borderRadius: '99px',
-                                background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
+                                position: 'absolute', bottom: '14px', left: '50%', transform: 'translateX(-50%)', zIndex: 2,
+                                padding: '6px 16px', borderRadius: '99px',
+                                background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)',
                                 border: '1px solid rgba(0,212,170,0.2)',
-                                display: 'flex', alignItems: 'center', gap: '8px',
+                                display: 'flex', alignItems: 'center', gap: '6px',
                             }}>
-                                <Cpu size={14} color="#00d4aa" />
-                                <span style={{ fontSize: '12px', fontWeight: 700, color: '#fff', letterSpacing: '0.5px' }}>
-                                    Mô phỏng lắp ráp PC thực tế
+                                <Cpu size={12} color="#00d4aa" />
+                                <span style={{ fontSize: '11px', fontWeight: 700, color: '#fff', letterSpacing: '0.5px' }}>
+                                    PC LAB 2D
                                 </span>
                             </div>
                         </motion.div>
@@ -355,9 +445,9 @@ export default function AboutPage() {
 
                         <div style={{ height: '450px', borderRadius: '32px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', position: 'relative' }}>
                             <iframe 
-                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3918.84715830911!2d106.6661623147491!3d10.82329389228965!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x317528e57849e531%3A0xc3b320d72c0d3b3c!2zVHLGsOG7nW5nIFRIUFQgTmd1eeG7hW4gQ8O0bmcgVHLhu6k!5e0!3m2!1svi!2s!4v1651130000000!5m2!1svi!2s" 
-                                width="100%" height="100%" style={{ border: 0 }} 
-                                allowFullScreen={true} loading="lazy"
+                                src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d979.2117895773255!2d106.668737!3d10.823294!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x317528e57849e531%3A0xc3b320d72c0d3b3c!2zVHLGsOG7nW5nIFRIUFQgTmd1eeG7hW4gQ8O0bmcgVHLhu6k!5e0!3m2!1svi!2s!4v1719200000000!5m2!1svi!2s"
+                                width="100%" height="100%" style={{ border: 0, borderRadius: '32px' }} 
+                                allowFullScreen={true} loading="lazy" referrerPolicy="no-referrer-when-downgrade"
                             ></iframe>
                             <div style={{ position: 'absolute', top: '12px', left: '12px', padding: '6px 14px', borderRadius: '8px', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', fontSize: '12px', fontWeight: 600, color: '#fff', zIndex: 10, pointerEvents: 'none' }}>
                                 🏫 THPT Nguyễn Công Trứ
