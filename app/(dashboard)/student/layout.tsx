@@ -155,13 +155,11 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
                 <div className="w-11" />
                 <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-lg bg-[var(--brand-primary)] flex items-center justify-center">
-                        <GraduationCap size={14} color="#fff" />
-                    </div>
-                    <span className="text-sm font-extrabold text-[var(--text-primary)]">PC Master</span>
+                    <GraduationCap size={14} color="#fff" />
                 </div>
-                <button className="w-9 h-9 rounded-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-muted)]">
-                    <User size={18} />
-                </button>
+                <span className="text-sm font-extrabold text-[var(--text-primary)]">PC Master</span>
+            </div>
+            <div className="w-9" />
             </header>
 
             {/* Spacer for mobile header */}

@@ -3,14 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import Link from 'next/link';
-import { BookOpen, Users, Cpu, ArrowRight, Plus, Loader2, GraduationCap, Bot, Sparkles, Bell, Megaphone, ExternalLink, Trophy, Zap, Target, Clock, CheckCircle2, Flame } from 'lucide-react';
+import { BookOpen, Users, Cpu, ArrowRight, Plus, Loader2, GraduationCap, Bot, Sparkles, Megaphone, ExternalLink, Trophy, Zap, Target, Clock, CheckCircle2, Flame } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import JoinClassModal from '../../../components/JoinClassModal';
 import CareerRecommendation from '../../../components/CareerRecommendation';
 import { supabase } from '@/lib/supabase';
 import { useGuru } from '@/lib/guru-state';
 import { useRealtime } from '@/lib/realtime-provider';
-import { createBrowserClient } from '@supabase/ssr'
 
 const fadeUp = (delay = 0) => ({ initial: { opacity: 0, y: 24 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.5, delay, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] } })
 
@@ -21,54 +20,12 @@ export default function StudentDashboard() {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [classes, setClasses] = useState([]);
-  const [notifications, setNotifications] = useState<any[]>([]);
-  const [notifLoading, setNotifLoading] = useState(true);
   const [stats, setStats] = useState([
     { label: 'Lớp học', value: '0', icon: <Users size={20} />, color: 'var(--accent-blue)' },
     { label: 'Bài tập', value: '0', icon: <BookOpen size={20} />, color: 'var(--brand-primary)' },
     { label: 'Linh kiện', value: '45+', icon: <Cpu size={20} />, color: '#8b5cf6' },
   ]);
-  const supabaseNotif = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-
   useEffect(() => { fetchData(); }, []);
-
-  useEffect(() => {
-    let currentUserId: string | null = null
-
-    const init = async () => {
-      const { data: { user } } = await supabaseNotif.auth.getUser()
-      if (!user) { setNotifLoading(false); return }
-      currentUserId = user.id
-
-      const { data } = await supabaseNotif
-        .from('notifications')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(5)
-      if (data) setNotifications(data)
-      setNotifLoading(false)
-    }
-    init()
-
-    const channel = supabaseNotif
-      .channel('notifications_realtime')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications' }, async (payload) => {
-        const notif = payload.new as any
-        if (notif.user_id === currentUserId) {
-          setNotifications(prev => {
-            if (prev.some(n => n.id === notif.id)) return prev
-            return [notif, ...prev].slice(0, 5)
-          })
-        }
-      })
-      .subscribe()
-
-    return () => { supabaseNotif.removeChannel(channel) }
-  }, [])
 
   async function fetchData() {
     try {
@@ -281,41 +238,6 @@ export default function StudentDashboard() {
                     </div>
                   </motion.div>
                 ))}
-              </div>
-            )}
-          </motion.div>
-
-          <motion.div {...fadeUp(0.35)} className="lms-card" style={{ padding: isMobile ? '14px' : '20px', borderRadius: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <h3 style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Bell size={16} style={{ color: 'var(--accent-amber)' }} /> Thông báo
-              </h3>
-              {notifications.some(n => !n.is_read) && (
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#EF4444' }} />
-              )}
-            </div>
-            {notifLoading ? (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '12px' }}><Loader2 size={18} style={{ animation: 'spin 1s linear infinite', color: 'var(--text-muted)' }} /></div>
-            ) : notifications.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                {notifications.map((n, i) => (
-                  <motion.div key={n.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
-                    style={{ padding: '10px 12px', borderRadius: '8px', background: n.is_read ? 'transparent' : 'color-mix(in srgb, var(--brand-primary) 6%, transparent)', border: `1px solid ${n.is_read ? 'var(--border-subtle)' : 'color-mix(in srgb, var(--brand-primary) 15%, transparent)'}` }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '6px' }}>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '1px' }}>{n.title}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{n.message}</div>
-                      </div>
-                      <div style={{ fontSize: '9px', color: 'var(--text-muted)', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                        {new Date(n.created_at).toLocaleDateString('vi-VN', { day: 'numeric', month: 'numeric' })}
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            ) : (
-              <div style={{ fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center', padding: '16px 0' }}>
-                Chưa có thông báo nào.
               </div>
             )}
           </motion.div>

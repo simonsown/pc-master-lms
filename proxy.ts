@@ -17,10 +17,9 @@ const ROUTE_PERMISSIONS: Record<string, string[]> = {
 
 // Public routes that don't require user authentication
 const PUBLIC_ROUTES = [
-  '/', '/login', '/register', '/about', '/builder',
+  '/', '/login', '/register', '/about',
   '/forgot-password', '/reset-password', '/verify-email',
   '/verify', '/check-email',
-  '/builder',
   '/admin', '/admin/settings', '/admin/users', '/admin/schools',
   '/auth/callback', '/api/auth/callback',
   '/onboarding',

@@ -13,14 +13,11 @@ import {
 
 const TABS = [
   { id: 'exams', label: 'Kỳ Thi', icon: FileQuestion, color: '#6366f1', desc: 'Đề thi do giáo viên giao' },
-  { id: 'bank', label: 'Ngân Hàng Đề Thi', icon: BookOpen, color: '#00d4aa', desc: '22 chủ đề phần cứng, mở khóa theo ngày' },
   { id: 'leaderboard', label: 'Xếp Hạng', icon: BarChart3, color: '#f59e0b', desc: 'Bảng xếp hạng toàn hệ thống' },
-  { id: 'error-analysis', label: 'Phân Tích Lỗi Sai', icon: AlertTriangle, color: '#ef4444', desc: 'Phân tích lỗi thường gặp khi lắp ráp PC' },
 ]
 
 const TAB_LINKS: Record<string, string> = {
   exams: '/exams',
-  bank: '/daily-quiz',
   leaderboard: '/leaderboard',
 }
 
