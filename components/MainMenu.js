@@ -64,18 +64,57 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
             margin: '0 auto', padding: isMobile ? '16px' : '32px 48px', minHeight: '100vh'
         }}>
             <motion.div {...fadeUp(0)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                    <motion.div
-                        animate={{ y: [0, -4, 0] }}
-                        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                        style={{
-                            width: '44px', height: '44px', borderRadius: '10px',
-                            background: 'linear-gradient(135deg, var(--brand-primary), #6366f1, #a855f7)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            boxShadow: '0 4px 16px rgba(99,102,241,0.4)'
-                        }}>
-                        <GraduationCap size={22} color="#fff" />
-                    </motion.div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+                    <div style={{ position: 'relative', width: '160px', height: '32px', overflow: 'hidden' }}>
+                        <div style={{
+                            position: 'absolute', inset: 0,
+                            background: 'linear-gradient(90deg, transparent, rgba(0,212,170,0.08), transparent)',
+                            borderRadius: '4px',
+                        }} />
+                        {[0, 1, 2, 3, 4, 5, 6, 7].map(i => (
+                            <motion.div key={i}
+                                animate={{
+                                    x: ['-120px', '280px'],
+                                    opacity: [0, 1, 1, 0],
+                                }}
+                                transition={{
+                                    duration: 2.4,
+                                    repeat: Infinity,
+                                    delay: i * 0.3,
+                                    ease: 'linear',
+                                }}
+                                style={{
+                                    position: 'absolute', top: `${6 + (i % 3) * 10}px`,
+                                    width: `${5 + (i % 3) * 3}px`, height: '2px',
+                                    borderRadius: '2px',
+                                    background: i % 2 === 0
+                                        ? 'linear-gradient(90deg, var(--brand-primary), #6366f1)'
+                                        : 'linear-gradient(90deg, #a855f7, var(--brand-primary))',
+                                    boxShadow: `0 0 ${6 + i * 2}px ${i % 2 === 0 ? 'rgba(0,212,170,0.6)' : 'rgba(168,85,247,0.6)'}`,
+                                }}
+                            />
+                        ))}
+                        {[0, 1, 2, 3].map(i => (
+                            <motion.div key={`dot-${i}`}
+                                animate={{
+                                    x: ['-80px', '240px'],
+                                    y: [0, -6, 0],
+                                }}
+                                transition={{
+                                    duration: 3.0,
+                                    repeat: Infinity,
+                                    delay: i * 0.7,
+                                    ease: 'easeInOut',
+                                }}
+                                style={{
+                                    position: 'absolute', top: '12px',
+                                    width: '4px', height: '4px', borderRadius: '50%',
+                                    background: i % 2 === 0 ? '#00d4aa' : '#a855f7',
+                                    boxShadow: `0 0 10px ${i % 2 === 0 ? '#00d4aa' : '#a855f7'}`,
+                                }}
+                            />
+                        ))}
+                    </div>
                     <div>
                         <h1 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.03em' }}>
                             PC Master Builder
