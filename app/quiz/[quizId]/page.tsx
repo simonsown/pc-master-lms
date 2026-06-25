@@ -3,10 +3,11 @@
 import React, { useState, useEffect, use } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
+import { QUIZ_BANK } from '@/data/quiz-bank'
 import { 
   Trophy, Flame, Clock, 
   CheckCircle, XCircle, ChevronRight, 
-  Loader2, AlertCircle, Sparkles
+  Loader2, AlertCircle, Sparkles, Star
 } from 'lucide-react'
 import confetti from 'canvas-confetti'
 import Link from 'next/link'
@@ -16,13 +17,15 @@ export default function MiniQuizPage({ params }: { params: Promise<{ quizId: str
   const { quizId } = resolvedParams;
 
   const [questions, setQuestions] = useState<any[]>([])
-  const [currentIdx, setCurrentIdx] = useState(-1) // -1 is loading/start
+  const [currentIdx, setCurrentIdx] = useState(-1)
   const [score, setScore] = useState(0)
   const [streak, setStreak] = useState(0)
   const [loading, setLoading] = useState(true)
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null)
   const [timeLeft, setTimeLeft] = useState(15)
   const [gameEnded, setGameEnded] = useState(false)
+  const [quizTitle, setQuizTitle] = useState('')
+  const [quizXp, setQuizXp] = useState(100)
 
   useEffect(() => {
     initQuiz()
@@ -31,7 +34,25 @@ export default function MiniQuizPage({ params }: { params: Promise<{ quizId: str
   async function initQuiz() {
     try {
       setLoading(true)
-      // 1. Fetch Lesson Section first
+
+      // Check if quizId is from QUIZ_BANK first
+      const bankTopic = QUIZ_BANK.find(q => q.id === quizId)
+      if (bankTopic) {
+        const qs = bankTopic.questions.map((q: any) => ({
+          question: q.q,
+          options: q.options,
+          correctIndex: q.answer,
+          explanation: q.q,
+        }))
+        setQuestions(qs)
+        setQuizTitle(bankTopic.title)
+        setQuizXp(bankTopic.xp || 100)
+        setLoading(false)
+        setCurrentIdx(0)
+        return
+      }
+
+      // Fallback: Fetch Lesson Section from Supabase
       const { data: section } = await supabase
         .from('lesson_sections')
         .select('*, lessons(*)')
@@ -40,7 +61,8 @@ export default function MiniQuizPage({ params }: { params: Promise<{ quizId: str
 
       if (!section) throw new Error('Không tìm thấy bài trắc nghiệm')
 
-      // 2. Call AI to generate Quiz (Real-time AI generation!)
+      setQuizTitle(section.lessons?.title || 'Trắc nghiệm')
+
       const res = await fetch('/api/ai/generate-quiz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -103,8 +125,8 @@ export default function MiniQuizPage({ params }: { params: Promise<{ quizId: str
   if (loading) return (
     <div className="min-h-screen bg-[#0f0f1a] flex flex-col items-center justify-center text-white p-10 text-center">
        <Loader2 className="animate-spin text-[#00d2a0] mb-6" size={64} />
-       <h1 className="text-3xl font-black mb-2 animate-pulse">AI Guru đang đọc bài học...</h1>
-       <p className="text-slate-500 font-bold uppercase tracking-widest text-sm">Đang tạo bộ câu hỏi Mini Quiz cho bạn</p>
+       <h1 className="text-3xl font-black mb-2 animate-pulse">Đang tải câu hỏi...</h1>
+       <p className="text-slate-500 font-bold uppercase tracking-widest text-sm">Chuẩn bị bộ đề cho bạn</p>
     </div>
   )
 
@@ -113,9 +135,11 @@ export default function MiniQuizPage({ params }: { params: Promise<{ quizId: str
        <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center">
           <Trophy className="text-[#f59e0b] mx-auto mb-6" size={120} />
           <h1 className="text-5xl font-black mb-4">HOÀN THÀNH!</h1>
-          <div className="text-8xl font-black text-[#00d2a0] mb-8">{score}</div>
+          <p className="text-xl text-slate-400 mb-4">{quizTitle}</p>
+          <div className="text-8xl font-black text-[#00d2a0] mb-2">{score}</div>
+          <p className="text-slate-500 mb-8">điểm</p>
           <div className="flex gap-4 justify-center">
-             <Link href="/lessons" className="px-10 py-4 bg-[#16213e] border border-[#1e293b] rounded-2xl font-black uppercase">Thoát</Link>
+             <Link href="/quiz-bank" className="px-10 py-4 bg-[#16213e] border border-[#1e293b] rounded-2xl font-black uppercase">Về ngân hàng đề</Link>
              <button onClick={() => window.location.reload()} className="px-10 py-4 bg-[#00d2a0] text-black rounded-2xl font-black uppercase">Chơi lại</button>
           </div>
        </motion.div>
@@ -129,23 +153,30 @@ export default function MiniQuizPage({ params }: { params: Promise<{ quizId: str
     <div className="min-h-screen bg-[#0f0f1a] text-white flex flex-col p-6 overflow-hidden">
       
       {/* HUD */}
-      <header className="flex items-center justify-between mb-10">
-         <div className="bg-[#16213e] px-6 py-2 rounded-full border border-[#1e293b] flex items-center gap-4">
-            <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Score</span>
-            <span className="text-xl font-black text-[#00d2a0]">{score}</span>
+      <header className="flex items-center justify-between mb-6">
+         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+           <div className="bg-[#16213e] px-4 py-2 rounded-full border border-[#1e293b]">
+              <span className="text-xs font-black text-[#00d2a0]">{(currentIdx+1)}/{questions.length}</span>
+           </div>
+           <div className="bg-[#16213e] px-4 py-2 rounded-full border border-[#1e293b] flex items-center gap-2">
+              <Star size={12} className="text-[#f59e0b]" />
+              <span className="text-xs font-black text-slate-400">{quizXp} XP</span>
+           </div>
          </div>
-         
-         <div className="flex items-center gap-6">
+         <div className="flex items-center gap-4">
             {streak > 1 && (
               <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center gap-2 text-orange-500 font-black">
-                <Flame className="animate-bounce" /> x{streak} STREAK!
+                <Flame className="animate-bounce" /> x{streak}
               </motion.div>
             )}
-            <div className="bg-[#16213e] px-8 py-3 rounded-2xl border border-[#1e293b] text-2xl font-mono font-bold">
+            <div className="bg-[#16213e] px-6 py-3 rounded-2xl border border-[#1e293b] text-2xl font-mono font-bold">
                {timeLeft}s
             </div>
          </div>
       </header>
+      <div className="bg-[#16213e] px-4 py-2 rounded-xl border border-[#1e293b] text-center mb-6">
+        <span className="text-sm font-bold text-slate-300">{quizTitle}</span>
+      </div>
 
       {/* Progress Bar */}
       <div className="w-full h-2 bg-[#16213e] rounded-full mb-12 overflow-hidden">

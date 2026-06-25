@@ -4,12 +4,18 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { motion, AnimatePresence } from 'framer-motion'
+import dynamic from 'next/dynamic'
 import {
   ArrowLeft, Cpu, Wrench, RefreshCw, CheckCircle2, AlertTriangle,
   HelpCircle, Loader2, Monitor, Zap, Thermometer, Wifi, HardDrive,
   Keyboard, Mouse, Users, Shield, Puzzle, Star, BookOpen,
-  Toolbox, Disc, Radio, Gauge
+  Toolbox, Disc, Radio, Gauge, Gamepad2, Bot
 } from 'lucide-react'
+
+const DiagnosisMode = dynamic(
+  () => import('@/components/DiagnosisMode'),
+  { ssr: false, loading: () => <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>Đang tải chế độ game...</div> }
+)
 
 interface QAStep {
   q: string
@@ -167,6 +173,7 @@ const TOOLS = [
 
 const MODEL_LABELS: Record<string, { label: string; color: string }> = {
   gemini: { label: 'Gemini 1.5 Flash', color: '#4285F4' },
+  groq: { label: 'Groq Llama 3.3', color: '#f97316' },
   openai: { label: 'OpenAI', color: '#00A67E' },
   huggingface: { label: 'HuggingFace', color: '#FFD21E' },
   'rule-based': { label: 'Local Engine', color: '#f59e0b' },
@@ -177,6 +184,7 @@ const TOTAL_XP = SCENARIOS.reduce((sum, s) => sum + s.xpReward, 0)
 export default function ChanDoanPcPage() {
   const router = useRouter()
   const isMobile = useIsMobile()
+  const [mode, setMode] = useState<'ai' | 'game'>('ai')
   const [symptoms, setSymptoms] = useState('')
   const [history, setHistory] = useState<QAStep[]>([])
   const [currentMessage, setCurrentMessage] = useState('')
@@ -313,26 +321,46 @@ export default function ChanDoanPcPage() {
           <ArrowLeft size={14} /> Quay lại
         </button>
         <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'linear-gradient(135deg, var(--brand-primary), #6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Wrench size={16} style={{ color: '#000' }} />
+          {mode === 'ai' ? <Bot size={16} style={{ color: '#000' }} /> : <Gamepad2 size={16} style={{ color: '#000' }} />}
         </div>
         <div>
-          <h1 className="font-black text-sm" style={{ color: 'var(--text-primary)' }}>Chẩn đoán PC thông minh</h1>
-          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Mô tả lỗi → AI hỏi ngược → Chẩn đoán chính xác</p>
+          <h1 className="font-black text-sm" style={{ color: 'var(--text-primary)' }}>{mode === 'ai' ? 'Chẩn đoán PC thông minh' : 'Game chẩn đoán PC'}</h1>
+          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{mode === 'ai' ? 'Mô tả lỗi → AI hỏi ngược → Chẩn đoán chính xác' : 'Đoán lỗi PC qua các tình huống thực tế'}</p>
         </div>
-        {modelInfo && (
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '8px', background: `${modelInfo.color}15`, border: `1px solid ${modelInfo.color}30`, fontSize: '11px', fontWeight: 700 }}>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: '4px', background: 'var(--bg-elevated)', borderRadius: '10px', padding: '2px', border: '1px solid var(--border-default)' }}>
+          <button onClick={() => setMode('ai')}
+            style={{ padding: '4px 10px', borderRadius: '8px', border: 'none', background: mode === 'ai' ? 'var(--brand-primary)' : 'transparent', color: mode === 'ai' ? '#000' : 'var(--text-muted)', cursor: 'pointer', fontSize: '11px', fontWeight: 700, fontFamily: 'inherit' }}>
+            <Bot size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} /> AI
+          </button>
+          <button onClick={() => setMode('game')}
+            style={{ padding: '4px 10px', borderRadius: '8px', border: 'none', background: mode === 'game' ? 'var(--brand-primary)' : 'transparent', color: mode === 'game' ? '#000' : 'var(--text-muted)', cursor: 'pointer', fontSize: '11px', fontWeight: 700, fontFamily: 'inherit' }}>
+            <Gamepad2 size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} /> Game
+          </button>
+        </div>
+        {mode === 'ai' && modelInfo && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '8px', background: `${modelInfo.color}15`, border: `1px solid ${modelInfo.color}30`, fontSize: '11px', fontWeight: 700 }}>
             {modelInfo.label}
           </div>
         )}
-        <button onClick={() => setShowToolbox(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 border text-xs rounded-xl font-bold cursor-pointer"
-          style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border-default)', color: 'var(--text-muted)' }}>
-          <Toolbox size={14} /> Hộp dụng cụ
-        </button>
+        {mode === 'ai' && (
+          <button onClick={() => setShowToolbox(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 border text-xs rounded-xl font-bold cursor-pointer"
+            style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border-default)', color: 'var(--text-muted)' }}>
+            <Toolbox size={14} /> Hộp dụng cụ
+          </button>
+        )}
       </header>
 
       <div className="flex-1 overflow-y-auto p-4 max-w-3xl mx-auto w-full">
-        {!started ? (
+        {mode === 'game' ? (
+          <div style={{ marginTop: '-16px' }}>
+            <DiagnosisMode
+              lang="vn"
+              onComplete={(results) => { console.log('Diagnosis complete:', results); setMode('ai') }}
+              onExit={() => setMode('ai')}
+            />
+          </div>
+        ) : !started ? (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             style={{ paddingTop: '20px' }}>
             {/* XP Progress */}

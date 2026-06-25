@@ -6,7 +6,8 @@ import { QUIZ_BANK } from '@/data/quiz-bank'
 import { supabase } from '@/lib/supabase'
 import {
   Lock, Unlock, BookOpen, Search, ChevronRight, Zap,
-  Calendar, Clock, Trophy, BookMarked, GraduationCap
+  Calendar, Clock, Trophy, BookMarked, GraduationCap,
+  Sparkles, Layers, Brain, Star, Shield
 } from 'lucide-react'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import Link from 'next/link'
@@ -46,6 +47,21 @@ const DICTIONARY = [
 
 const UNLOCK_KEY = 'quiz_bank_unlock_date'
 const DAILY_UNLOCK = 2
+
+const TOPIC_COLORS = [
+  { bg: 'rgba(99,102,241,0.12)', border: 'rgba(99,102,241,0.25)', text: '#818cf8' },
+  { bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.25)', text: '#34d399' },
+  { bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.25)', text: '#fbbf24' },
+  { bg: 'rgba(239,68,68,0.12)', border: 'rgba(239,68,68,0.25)', text: '#f87171' },
+  { bg: 'rgba(139,92,246,0.12)', border: 'rgba(139,92,246,0.25)', text: '#a78bfa' },
+  { bg: 'rgba(6,182,212,0.12)', border: 'rgba(6,182,212,0.25)', text: '#22d3ee' },
+]
+
+const DIFFICULTY_COLORS: Record<string, string> = {
+  'Dễ': '#34d399',
+  'Trung bình': '#fbbf24',
+  'Khó': '#f87171',
+}
 
 export default function QuizBankPage() {
   const isMobile = useIsMobile()
@@ -105,145 +121,175 @@ export default function QuizBankPage() {
   }, [searchTerm])
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
-      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: isMobile ? '16px 12px' : '32px 24px' }}>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #0a0a1a 0%, #0f0f1a 100%)', color: 'var(--text-primary)' }}>
+      {/* Decorative header */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: '280px',
+        background: 'radial-gradient(ellipse 80% 60% at 50% -20%, rgba(99,102,241,0.08) 0%, transparent 60%)',
+        pointerEvents: 'none', zIndex: 0,
+      }} />
+
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: '1100px', margin: '0 auto', padding: isMobile ? '16px 12px' : '32px 24px' }}>
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
-          style={{ textAlign: 'center', marginBottom: '32px' }}>
+          style={{ textAlign: 'center', marginBottom: '28px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '12px' }}>
-            <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'linear-gradient(135deg, #f59e0b, #6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <BookMarked size={24} color="#fff" />
-            </div>
-            <h1 style={{ fontSize: isMobile ? '26px' : '34px', fontWeight: 900 }}>Ngân Hàng Đề Thi</h1>
+            <motion.div animate={{ rotate: [0, 5, -5, 0] }} transition={{ duration: 3, repeat: Infinity }}
+              style={{ width: '52px', height: '52px', borderRadius: '16px', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 32px rgba(99,102,241,0.3)' }}>
+              <Brain size={26} color="#fff" />
+            </motion.div>
+            <h1 style={{ fontSize: isMobile ? '26px' : '36px', fontWeight: 900, background: 'linear-gradient(135deg, #818cf8, #34d399)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Ngân Hàng Đề Thi</h1>
           </div>
-          <p style={{ color: 'var(--text-muted)', fontSize: '14px', margin: '0 auto 8px', maxWidth: '500px' }}>
-            Mỗi ngày mở khóa {DAILY_UNLOCK} chủ đề mới · Mỗi chủ đề 10-15 câu hỏi
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', margin: '0 auto 12px', maxWidth: '500px' }}>
+            Mỗi ngày mở khóa {DAILY_UNLOCK} chủ đề · {QUIZ_BANK.length} chủ đề · 10 câu hỏi/chủ đề
           </p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap', fontSize: '13px', color: 'var(--text-muted)' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Unlock size={14} color="var(--brand-primary)" /> Đã mở khóa: {unlockedCount}/{QUIZ_BANK.length}</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Zap size={14} color="#f59e0b" /> XP đã nhận: {xpEarned}</span>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap', fontSize: '13px' }}>
+            <motion.div whileHover={{ scale: 1.05 }}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '20px', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', color: '#818cf8' }}>
+              <Unlock size={14} /> {unlockedCount}/{QUIZ_BANK.length} đã mở
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.05 }}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '20px', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', color: '#fbbf24' }}>
+              <Zap size={14} /> {xpEarned} XP
+            </motion.div>
           </div>
         </motion.div>
 
         {/* Tabs */}
         <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', justifyContent: 'center' }}>
           {[
-            { id: 'bank' as const, label: 'Câu hỏi', icon: BookOpen, color: 'var(--brand-primary)' },
-            { id: 'dictionary' as const, label: 'Từ điển thuật ngữ', icon: BookMarked, color: '#f59e0b' },
+            { id: 'bank' as const, label: 'Câu hỏi', icon: Layers, color: '#818cf8' },
+            { id: 'dictionary' as const, label: 'Từ điển thuật ngữ', icon: BookMarked, color: '#34d399' },
           ].map(tab => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+            <motion.button key={tab.id} onClick={() => setActiveTab(tab.id)} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
               style={{
-                display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px',
-                borderRadius: '10px', border: '1px solid', cursor: 'pointer', fontFamily: 'inherit',
+                display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 20px',
+                borderRadius: '12px', border: '1px solid', cursor: 'pointer', fontFamily: 'inherit',
                 fontSize: '13px', fontWeight: activeTab === tab.id ? 700 : 500,
-                borderColor: activeTab === tab.id ? tab.color : 'var(--border-default)',
-                background: activeTab === tab.id ? `${tab.color}15` : 'var(--bg-elevated)',
-                color: activeTab === tab.id ? tab.color : 'var(--text-muted)',
+                borderColor: activeTab === tab.id ? tab.color : 'rgba(255,255,255,0.08)',
+                background: activeTab === tab.id ? `${tab.color}15` : 'rgba(255,255,255,0.03)',
+                color: activeTab === tab.id ? tab.color : 'rgba(255,255,255,0.4)',
                 transition: 'all 0.2s'
               }}>
               <tab.icon size={16} /> {tab.label}
-            </button>
+            </motion.button>
           ))}
         </div>
 
         {/* Search */}
-        <div style={{ position: 'relative', maxWidth: '400px', margin: '0 auto 24px' }}>
-          <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+          style={{ position: 'relative', maxWidth: '400px', margin: '0 auto 24px' }}>
+          <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)' }} />
           <input value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
-            placeholder="Tìm kiếm..."
+            placeholder="Tìm kiếm chủ đề hoặc thuật ngữ..."
             style={{
-              width: '100%', padding: '10px 14px 10px 36px', borderRadius: '10px',
-              border: '1px solid var(--border-default)', background: 'var(--bg-surface)',
-              color: 'var(--text-primary)', fontSize: '14px', outline: 'none',
-              fontFamily: 'inherit'
+              width: '100%', padding: '12px 16px 12px 40px', borderRadius: '14px',
+              border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.04)',
+              color: 'rgba(255,255,255,0.8)', fontSize: '14px', outline: 'none',
+              fontFamily: 'inherit', backdropFilter: 'blur(10px)',
             }} />
-        </div>
+        </motion.div>
 
         {/* Content */}
         {activeTab === 'bank' ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {filteredQuizzes.map((quiz, index) => {
-              const isUnlocked = index < unlockedCount
-              const isCompleted = completedQuizzes.includes(quiz.id)
-              return (
-                <motion.div key={quiz.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.03 }}>
-                  {isUnlocked ? (
-                    <Link href={`/quiz/${quiz.id}`} style={{ textDecoration: 'none' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <AnimatePresence mode="popLayout">
+              {filteredQuizzes.map((quiz, index) => {
+                const isUnlocked = index < unlockedCount
+                const isCompleted = completedQuizzes.includes(quiz.id)
+                const color = TOPIC_COLORS[index % TOPIC_COLORS.length]
+                const diffColor = DIFFICULTY_COLORS[quiz.difficulty] || '#818cf8'
+
+                return (
+                  <motion.div key={quiz.id} layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ delay: index * 0.03 }}>
+                    {isUnlocked ? (
+                      <Link href={`/quiz/${quiz.id}`} style={{ textDecoration: 'none' }}>
+                        <motion.div whileHover={{ scale: 1.01, y: -2 }} whileTap={{ scale: 0.99 }}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: '16px', padding: '18px 20px',
+                            borderRadius: '16px', background: isCompleted ? 'rgba(16,185,129,0.06)' : 'rgba(255,255,255,0.03)',
+                            border: `1px solid ${isCompleted ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.06)'}`,
+                            cursor: 'pointer', transition: 'all 0.2s',
+                            backdropFilter: 'blur(10px)',
+                          }}>
+                          <div style={{
+                            width: '48px', height: '48px', borderRadius: '14px',
+                            background: isCompleted ? 'rgba(16,185,129,0.15)' : color.bg,
+                            border: `1px solid ${isCompleted ? 'rgba(16,185,129,0.2)' : color.border}`,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                            fontSize: '20px',
+                          }}>
+                            {isCompleted ? <Trophy size={20} color="#34d399" /> : <GraduationCap size={20} color={color.text} />}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '15px', fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>{quiz.title}</span>
+                              {isCompleted && (
+                                <span style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '6px', background: 'rgba(16,185,129,0.1)', color: '#34d399', fontWeight: 600 }}>
+                                  ✓ Hoàn thành
+                                </span>
+                              )}
+                            </div>
+                            <div style={{ display: 'flex', gap: '10px', fontSize: '12px', color: 'rgba(255,255,255,0.4)', flexWrap: 'wrap', alignItems: 'center' }}>
+                              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Layers size={12} /> {quiz.questions?.length || 10} câu</span>
+                              <span style={{ width: '3px', height: '3px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)' }} />
+                              <span style={{ color: diffColor, fontWeight: 600, fontSize: '11px', padding: '1px 6px', borderRadius: '4px', background: `${diffColor}15` }}>{quiz.difficulty}</span>
+                              <span style={{ width: '3px', height: '3px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)' }} />
+                              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#fbbf24' }}><Zap size={12} /> +{quiz.xp || 100} XP</span>
+                            </div>
+                          </div>
+                          <motion.div whileHover={{ x: 3 }} style={{ flexShrink: 0, color: 'rgba(255,255,255,0.2)' }}>
+                            <ChevronRight size={20} />
+                          </motion.div>
+                        </motion.div>
+                      </Link>
+                    ) : (
                       <div style={{
-                        display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px',
-                        borderRadius: '14px', background: isCompleted ? 'rgba(16,185,129,0.06)' : 'var(--bg-surface)',
-                        border: `1px solid ${isCompleted ? 'rgba(16,185,129,0.2)' : 'var(--border-default)'}`,
-                        cursor: 'pointer', transition: 'all 0.2s'
-                      }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--brand-primary)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor = isCompleted ? 'rgba(16,185,129,0.2)' : 'var(--border-default)'; e.currentTarget.style.transform = 'translateY(0)' }}>
-                        <div style={{
-                          width: '44px', height: '44px', borderRadius: '12px',
-                          background: isCompleted ? 'rgba(16,185,129,0.1)' : 'rgba(8,158,96,0.08)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
-                        }}>
-                          {isCompleted ? <Trophy size={20} color="#10b981" /> : <GraduationCap size={20} color="var(--brand-primary)" />}
+                        display: 'flex', alignItems: 'center', gap: '16px', padding: '18px 20px',
+                        borderRadius: '16px', background: 'rgba(255,255,255,0.02)',
+                        border: '1px solid rgba(255,255,255,0.04)', opacity: 0.5,
+                      }}>
+                        <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <Lock size={20} style={{ color: 'rgba(255,255,255,0.2)' }} />
                         </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                            <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>{quiz.title}</span>
-                            {isCompleted && <span style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '4px', background: 'rgba(16,185,129,0.1)', color: '#10b981', fontWeight: 600 }}>✓ Hoàn thành</span>}
-                          </div>
-                          <div style={{ display: 'flex', gap: '12px', fontSize: '12px', color: 'var(--text-muted)' }}>
-                            <span>{quiz.questions?.length || 10} câu</span>
-                            <span>·</span>
-                            <span>{quiz.difficulty}</span>
-                            <span>·</span>
-                            <span>+{quiz.xp || 100} XP</span>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: '15px', fontWeight: 700, color: 'rgba(255,255,255,0.4)' }}>{quiz.title}</div>
+                          <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.2)' }}>
+                            Mở khóa sau · {quiz.questions?.length || 10} câu hỏi
                           </div>
                         </div>
-                        <ChevronRight size={18} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
                       </div>
-                    </Link>
-                  ) : (
-                    <div style={{
-                      display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px',
-                      borderRadius: '14px', background: 'var(--bg-surface)', opacity: 0.5,
-                      border: '1px solid var(--border-default)'
-                    }}>
-                      <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <Lock size={20} style={{ color: 'var(--text-muted)' }} />
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-muted)' }}>{quiz.title}</div>
-                        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                          Mở khóa sau · {quiz.questions?.length || 10} câu hỏi
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </motion.div>
-              )
-            })}
+                    )}
+                  </motion.div>
+                )
+              })}
+            </AnimatePresence>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px', textAlign: 'center' }}>
-              {filteredDictionary.length} thuật ngữ chuyên ngành máy tính
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.3)', marginBottom: '8px', textAlign: 'center' }}>
+              {filteredDictionary.length} thuật ngữ chuyên ngành
             </div>
             {filteredDictionary.map((item, i) => (
               <motion.div key={item.term} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.02 }}
-                style={{ padding: '12px 16px', borderRadius: '10px', background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                whileHover={{ scale: 1.005, x: 4 }}
+                style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', cursor: 'default', transition: 'all 0.15s' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{
-                    width: '32px', height: '32px', borderRadius: '8px',
-                    background: 'linear-gradient(135deg, #f59e0b22, #f59e0b11)',
+                    width: '34px', height: '34px', borderRadius: '10px',
+                    background: 'linear-gradient(135deg, rgba(52,211,153,0.15), rgba(52,211,153,0.05))',
+                    border: '1px solid rgba(52,211,153,0.15)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                    fontSize: '11px', fontWeight: 800, color: '#f59e0b'
-                  }}>{item.term.slice(0, 2)}</div>
+                    fontSize: '11px', fontWeight: 800, color: '#34d399'
+                  }}>{item.term.slice(0, 2).toUpperCase()}</div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>{item.term}</div>
-                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>{item.def}</div>
+                    <div style={{ fontSize: '14px', fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>{item.term}</div>
+                    <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>{item.def}</div>
                   </div>
                 </div>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
       </div>
     </div>

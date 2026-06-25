@@ -90,6 +90,42 @@ async function callGemini(symptoms: string, answers: QAStep[]): Promise<AiRespon
   }
 }
 
+async function callGroq(symptoms: string, answers: QAStep[]): Promise<AiResponse | null> {
+  const apiKey = process.env.GROQ_API_KEY
+  if (!apiKey) return null
+
+  const prompt = buildPrompt(symptoms, answers)
+
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 15000)
+
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.3,
+        max_tokens: 1024
+      }),
+      signal: controller.signal
+    })
+    clearTimeout(timeoutId)
+    if (!res.ok) return null
+    const data = await res.json()
+    const text = data?.choices?.[0]?.message?.content || ''
+    if (!text) return null
+    return parseAiResponse(text)
+  } catch {
+    clearTimeout(timeoutId)
+    return null
+  }
+}
+
 async function callOpenAI(symptoms: string, answers: QAStep[]): Promise<AiResponse | null> {
   const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey) return null
@@ -367,6 +403,11 @@ export async function POST(request: NextRequest) {
 
     result = await callGemini(symptoms, qas)
     if (result) usedModel = 'gemini'
+
+    if (!result) {
+      result = await callGroq(symptoms, qas)
+      if (result) usedModel = 'groq'
+    }
 
     if (!result) {
       result = await callOpenAI(symptoms, qas)

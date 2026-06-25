@@ -4,12 +4,15 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { motion, AnimatePresence } from 'framer-motion'
+import dynamic from 'next/dynamic'
 import {
   ArrowLeft, Monitor, HardDrive, User, Shield, CheckCircle2,
   Cpu, MemoryStick, Smartphone, Globe,
   ExternalLink, ChevronRight, AlertTriangle, Clock,
   Disc, FileText, RefreshCw, Power, ChevronLeft,
 } from 'lucide-react'
+
+const WindowsSimulator = dynamic(() => import('@/components/WindowsSimulator'), { ssr: false })
 
 const REAL_STEPS = [
   { id: 'check', label: 'Kiểm tra PC', icon: <Monitor size={14} />, color: '#6366f1' },
@@ -954,68 +957,24 @@ export default function CaiDatWin11Page() {
           </motion.div>
         )}
 
-        {/* STEP 9: Desktop */}
+        {/* STEP 9: Windows Simulator Desktop */}
         {step === 9 && (
-          <motion.div key="step9" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <div style={{ textAlign: 'center' }}>
-              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200, damping: 10 }}
-                style={{ fontSize: '72px', marginBottom: '16px', filter: 'drop-shadow(0 0 30px rgba(0,212,170,0.3))' }}>
-                🎉
-              </motion.div>
-              <h2 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '4px' }}>
-                Chào mừng {userName} đến với Windows 11!
-              </h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '20px' }}>
-                Desktop của bạn đã sẵn sàng. PC: <strong>{pcName}</strong>
-              </p>
-
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-                style={{
-                  padding: '24px', borderRadius: '16px', marginBottom: '20px',
-                  background: 'linear-gradient(135deg, rgba(0,120,212,0.05), rgba(0,168,255,0.05))',
-                  border: '1px solid rgba(0,120,212,0.15)',
-                }}>
-                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: '12px' }}>
-                  {[
-                    { icon: '🌐', text: 'Trình duyệt', desc: 'Chrome / Edge' },
-                    { icon: '📝', text: 'Office', desc: 'Word, Excel' },
-                    { icon: '🛡️', text: 'Bảo mật', desc: 'Windows Defender' },
-                    { icon: '🔄', text: 'Cập nhật', desc: 'Windows Update' },
-                  ].map((item, i) => (
-                    <div key={i} style={{ padding: '12px', borderRadius: '10px', background: 'var(--bg-surface)', border: '1px solid var(--border-default)', textAlign: 'center' }}>
-                      <div style={{ fontSize: '24px', marginBottom: '4px' }}>{item.icon}</div>
-                      <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-primary)' }}>{item.text}</div>
-                      <div style={{ fontSize: '9px', color: 'var(--text-muted)' }}>{item.desc}</div>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-
-              <div style={{ padding: '14px', borderRadius: '12px', background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)', marginBottom: '20px', fontSize: '12px', lineHeight: '1.6', textAlign: 'left' }}>
-                <strong style={{ color: '#10b981' }}>Checklist sau cài đặt:</strong>
-                <div style={{ color: 'var(--text-primary)', marginTop: '6px' }}>
-                  1. Cắm mạng → Windows Update ngay (quan trọng nhất!)<br />
-                  2. Cài driver chipset + VGA từ trang chủ<br />
-                  3. Cập nhật Windows đến bản mới nhất<br />
-                  4. Cài phần mềm cần thiết: trình duyệt, Office, WinRAR...<br />
-                  5. Tạo điểm khôi phục (Restore Point)
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                <button onClick={() => { setStep(0); setProgress(0); setIsInstalling(false); setUserName(''); setPcName(''); setLicenseAccepted(false); setBiosDone(false) }}
-                  className="flex items-center gap-1.5 px-4 py-2.5 font-bold rounded-xl text-xs cursor-pointer"
-                  style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: 'var(--text-muted)', fontFamily: 'inherit' }}>
-                  <RefreshCw size={14} /> Làm lại
-                </button>
-                <button onClick={() => router.push('/builder')}
-                  className="px-6 py-2.5 font-bold rounded-xl text-sm cursor-pointer"
-                  style={{ background: 'var(--brand-primary)', border: 'none', color: '#000', fontFamily: 'inherit' }}>
-                  🚀 Vào Builder lắp PC!
-                </button>
-              </div>
-            </div>
-          </motion.div>
+          <WindowsSimulator
+            cart={[
+              { type: 'CPU', name: 'Intel Core i7-14700K' },
+              { type: 'RAM', name: '32GB (2x16GB) DDR5-5600' },
+              { type: 'GPU', name: 'NVIDIA RTX 4070 Ti' },
+              { type: 'SSD', name: '1TB NVMe SSD' },
+              { type: 'PSU', name: '850W 80+ Gold' },
+            ]}
+            scenarioName={`Windows 11 Pro - ${userName || 'PC Master'}`}
+            onExit={() => {
+              setStep(0)
+              setProgress(0)
+              setIsInstalling(false)
+              setBiosDone(false)
+            }}
+          />
         )}
       </div>
       <style>{`
