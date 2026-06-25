@@ -15,6 +15,7 @@ import {
 
 import { motion } from 'framer-motion'
 import { useRealtime } from '@/lib/realtime-provider'
+import { useSessionTime } from '@/lib/session-time'
 import { ChevronRight, Cpu } from 'lucide-react'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
@@ -88,6 +89,8 @@ export function StudentDashboardClient({
   chartData
 }: Props) {
   const { state: realtimeState } = useRealtime()
+  const sessionTime = useSessionTime()
+  const sessionMinutes = Math.floor(sessionTime.elapsed / 60)
   const liveStreak = realtimeState.streak || stats.streakDays
   const liveTotalHours = realtimeState.studyMinutes > 0 ? (realtimeState.studyMinutes / 60) : stats.totalHours
   const liveWeeklyActivity: { day: string; minutes: number }[] = realtimeState.weeklyActivity.some(v => v > 0)
@@ -98,7 +101,7 @@ export function StudentDashboardClient({
     : chartData
   const todayIndex = useTodayIndex()
   const todayMinutes = liveWeeklyActivity[todayIndex]?.minutes || 0
-  const hasStudiedToday = todayMinutes > 0
+  const hasStudiedToday = todayMinutes > 0 || sessionMinutes > 0
   const isMobile = useIsMobile()
 
   return (
@@ -158,19 +161,19 @@ export function StudentDashboardClient({
               </div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
                 <motion.span
-                  key={todayMinutes}
+                  key={sessionMinutes}
                   initial={{ scale: 1.3, opacity: 0.5 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.3 }}
                   style={{ fontSize: isMobile ? '28px' : '36px', fontWeight: 800, color: 'var(--text-primary)' }}
                 >
-                  {todayMinutes}
+                  {sessionMinutes}
                 </motion.span>
-                <span style={{ fontSize: '14px', color: 'var(--text-muted)', fontWeight: 600 }}>phút hôm nay</span>
+                <span style={{ fontSize: '14px', color: 'var(--text-muted)', fontWeight: 600 }}>phút trên web</span>
               </div>
               <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: 4 }}>
                 {hasStudiedToday
-                  ? `Tuyệt vời! Bạn đã học ${todayMinutes} phút hôm nay.`
+                  ? `Đã online ${sessionMinutes} phút hôm nay.`
                   : 'Bắt đầu một bài học hoặc lắp ráp PC ngay!'}
               </div>
             </motion.div>
@@ -214,9 +217,9 @@ export function StudentDashboardClient({
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 2 * 0.08, duration: 0.4 }}>
           <section style={{ display: 'grid', gap: '16px', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
             {[
-              { label: 'Bài hoàn thành', value: `${stats.completedLessons} / ${stats.startedLessons}`, sub: 'Tổng bài đã bắt đầu', live: false },
+              { label: 'Bài hoàn thành', value: `${realtimeState.completedLessonCount}`, sub: 'Bài đã học', live: true },
               { label: 'Tổng giờ học', value: liveTotalHours.toFixed(1), sub: 'Giờ tích lũy', live: true },
-              { label: 'Điểm TB quiz', value: stats.averageScore !== null ? `${stats.averageScore}` : '—', sub: 'Điểm trung bình', live: false },
+              { label: 'Điểm TB quiz', value: realtimeState.averageScore !== null ? `${realtimeState.averageScore}` : '—', sub: `Đã làm ${realtimeState.totalQuizAttempts} bài`, live: true },
               { label: 'Tổng XP', value: `${realtimeState.xp}`, sub: 'Kinh nghiệm tích lũy', live: true },
             ].map((s, i) => (
               <motion.div key={i} className="lms-card" style={{ padding: isMobile ? '14px' : '20px', position: 'relative', overflow: 'hidden' }} whileHover={{ scale: 1.02, y: -2 }} transition={{ type: 'spring', stiffness: 300 }}>

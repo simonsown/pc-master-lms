@@ -62,6 +62,9 @@ interface RealtimeState {
     streak: number;
     studyMinutes: number;
     weeklyActivity: number[];
+    averageScore: number | null;
+    completedLessonCount: number;
+    totalQuizAttempts: number;
     level: number;
     levelTitle: string;
     levelIcon: string;
@@ -128,6 +131,7 @@ function calcLevel(xp: number, levelDefs: LevelDef[]) {
 const RealtimeContext = createContext<RealtimeContextType>({
     state: {
       completedLessons: new Set(), xp: 0, streak: 0, studyMinutes: 0, weeklyActivity: [],
+      averageScore: null, completedLessonCount: 0, totalQuizAttempts: 0,
       level: 1, levelTitle: 'Tân Thủ', levelIcon: '🌱', levelColor: '#94a3b8', levelProgress: 0, xpToNext: 100, xpInLevel: 0,
       levelDefs: defaultLevelDefs, quests: [], titles: [], xpHistory: [], allQuests: [],
     },
@@ -145,6 +149,9 @@ export function RealtimeProvider({ children, userId }: { children: React.ReactNo
         streak: 0,
         studyMinutes: 0,
         weeklyActivity: [0, 0, 0, 0, 0, 0, 0],
+        averageScore: null,
+        completedLessonCount: 0,
+        totalQuizAttempts: 0,
         level: 1,
         levelTitle: 'Tân Thủ',
         levelIcon: '🌱',
@@ -170,6 +177,40 @@ export function RealtimeProvider({ children, userId }: { children: React.ReactNo
             setClientReady(true);
         });
     }, []);
+
+    const trackDailyLogin = useCallback(async (supabase: any, userId: string) => {
+        try {
+            const today = new Date().toISOString().slice(0, 10)
+            const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
+            const { data: profile } = await supabase.from('profiles').select('last_active_date, streak').eq('id', userId).single()
+            if (!profile) return
+
+            const lastActive = profile.last_active_date?.slice(0, 10)
+            if (lastActive === today) return null
+
+            let newStreak = 1
+            if (lastActive === yesterday) {
+                newStreak = (profile.streak || 0) + 1
+            }
+
+            await supabase.from('profiles').update({ last_active_date: today, streak: newStreak }).eq('id', userId)
+            await supabase.from('learning_stats').upsert({
+                user_id: userId, current_streak: newStreak, last_active_date: today, updated_at: new Date().toISOString()
+            }, { onConflict: 'user_id' })
+
+            if (newStreak > 1 && newStreak % 5 === 0) {
+                const bonusXp = newStreak * 10
+                await supabase.from('xp_transactions').insert({
+                    user_id: userId, amount: bonusXp, reason: `Thưởng streak ${newStreak} ngày`, reference_type: 'streak_bonus', reference_id: userId
+                })
+            }
+
+            return newStreak
+        } catch (e) {
+            console.error('Track daily login error:', e)
+            return null
+        }
+    }, [])
 
     const autoCompleteQuests = useCallback(async (supabase: any, userId: string, currentQuests: UserQuest[], allQuestsDefs: Quest[], currentXp: number, currentLevel: number) => {
         try {
@@ -260,6 +301,10 @@ export function RealtimeProvider({ children, userId }: { children: React.ReactNo
     const fetchData = useCallback(async () => {
         if (!userId || !supabaseRef.current) return;
         const supabase = supabaseRef.current;
+
+        // Track daily login & streak
+        await trackDailyLogin(supabase, userId);
+
         const [
           progress, statsRes, profile, levelDefs, userQuests, activeQuests, titles, xpHistory,
         ] = await Promise.all([
@@ -292,6 +337,21 @@ export function RealtimeProvider({ children, userId }: { children: React.ReactNo
             console.error('Auto-complete error:', e)
         }
 
+        // Fetch quiz attempts for average score
+        let avgScore: number | null = null
+        let completedCount = 0
+        let totalQuizAttempts = 0
+        try {
+            const progressData = progress.data || []
+            completedCount = progressData.filter((p: any) => p.status === 'completed' || p.status === 'in_progress').length
+
+            const { data: quizData } = await supabase.from('quiz_attempts').select('score').eq('student_id', userId).gte('score', 0)
+            if (quizData && quizData.length > 0) {
+                totalQuizAttempts = quizData.length
+                avgScore = Math.round(quizData.reduce((sum: number, q: any) => sum + (q.score || 0), 0) / quizData.length)
+            }
+        } catch (e) {}
+
         const finalLevelInfo = calcLevel(xp, defs);
 
         setState(prev => ({
@@ -301,6 +361,9 @@ export function RealtimeProvider({ children, userId }: { children: React.ReactNo
             streak: statsRes.data?.current_streak || 0,
             studyMinutes: statsRes.data?.total_study_minutes || 0,
             weeklyActivity: statsRes.data?.weekly_activity || [0, 0, 0, 0, 0, 0, 0],
+            averageScore: avgScore,
+            completedLessonCount: completedCount,
+            totalQuizAttempts,
             ...finalLevelInfo,
             levelDefs: defs,
             quests: currentQuests,
@@ -345,6 +408,11 @@ export function RealtimeProvider({ children, userId }: { children: React.ReactNo
             .on(
                 'postgres_changes',
                 { event: '*', schema: 'public', table: 'user_titles', filter: `user_id=eq.${userId}` },
+                () => fetchData()
+            )
+            .on(
+                'postgres_changes',
+                { event: 'INSERT', schema: 'public', table: 'quiz_attempts', filter: `student_id=eq.${userId}` },
                 () => fetchData()
             )
             .subscribe();

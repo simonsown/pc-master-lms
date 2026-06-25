@@ -96,8 +96,12 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
     const sidebarContent = (
         <>
             <div className="p-6 flex items-center gap-3 border-b border-white/10">
-                <div className="w-10 h-10 rounded-xl bg-[var(--brand-primary)] flex items-center justify-center">
-                    <GraduationCap size={20} color="#fff" />
+                <div className="w-10 h-10 rounded-xl bg-[var(--brand-primary)] flex items-center justify-center overflow-hidden">
+                    {profile?.avatar_url ? (
+                        <img src={profile.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                        <GraduationCap size={20} color="#fff" />
+                    )}
                 </div>
                 <div className="flex-1">
                     <div className="font-extrabold text-lg text-white">PC Master</div>
@@ -184,8 +188,12 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
                             className="fixed top-0 left-0 bottom-0 w-[290px] z-[1003] md:hidden flex flex-col bg-gradient-to-b from-[#031f3b] to-[#1a2f53] shadow-2xl overflow-y-auto"
                         >
                             <div className="p-5 flex items-center gap-3 border-b border-white/10">
-                                <div className="w-10 h-10 rounded-xl bg-[var(--brand-primary)] flex items-center justify-center">
-                                    <GraduationCap size={20} color="#fff" />
+                                <div className="w-10 h-10 rounded-xl bg-[var(--brand-primary)] flex items-center justify-center overflow-hidden">
+                                    {profile?.avatar_url ? (
+                                        <img src={profile.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    ) : (
+                                        <GraduationCap size={20} color="#fff" />
+                                    )}
                                 </div>
                                 <div className="flex-1">
                                     <div className="font-extrabold text-lg text-white">PC Master</div>

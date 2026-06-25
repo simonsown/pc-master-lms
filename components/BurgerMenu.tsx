@@ -17,10 +17,10 @@ interface BurgerMenuProps {
   webcamMouseEnabled?: boolean; setWebcamMouseEnabled?: (enabled: boolean) => void;
   trackingSensitivity?: number; setTrackingSensitivity?: (s: number) => void;
   onToggleAI: () => void; isAIOpen: boolean; theme: string; setTheme: (t: string) => void;
-  userName?: string; onShowDashboard?: () => void;
+  userName?: string; userAvatar?: string; onShowDashboard?: () => void;
 }
 
-const BurgerMenu: React.FC<BurgerMenuProps> = ({ lang, toggleLang, onStartQuiz, appMode, setAppMode, webcamMouseEnabled = false, setWebcamMouseEnabled, trackingSensitivity = 1.0, setTrackingSensitivity, onToggleAI, isAIOpen, theme, setTheme, userName, onShowDashboard }) => {
+const BurgerMenu: React.FC<BurgerMenuProps> = ({ lang, toggleLang, onStartQuiz, appMode, setAppMode, webcamMouseEnabled = false, setWebcamMouseEnabled, trackingSensitivity = 1.0, setTrackingSensitivity, onToggleAI, isAIOpen, theme, setTheme, userName, userAvatar, onShowDashboard }) => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [hoveredBtn, setHoveredBtn] = useState<string | null>(null);
   const [showCredits, setShowCredits] = useState(false);
@@ -90,8 +90,12 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ lang, toggleLang, onStartQuiz, 
         </div>
 
         <div style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid rgba(255,255,255,0.06)', cursor: 'pointer' }} onClick={(e) => { e.preventDefault(); if (onShowDashboard) onShowDashboard(); }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--brand-primary), #289cf9)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <User size={14} color="#fff" />
+          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--brand-primary), #289cf9)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+            {userAvatar ? (
+              <img src={userAvatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <User size={14} color="#fff" />
+            )}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: '13px', fontWeight: 600, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{userName || (lang === 'en' ? 'Guest' : 'Khách')}</div>
@@ -136,7 +140,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ lang, toggleLang, onStartQuiz, 
               {lang === 'en' ? 'Assessment' : 'Đánh giá'}
             </div>
             {[
-              { id: 'quiz_bank', icon: FileText, label: lang === 'en' ? 'Quiz Bank' : 'Ngân Hàng Đề Thi', href: '/student/quiz' },
+              { id: 'quiz_bank', icon: FileText, label: lang === 'en' ? 'Quiz Bank' : 'Ngân Hàng Đề Thi', href: '/quiz-bank' },
 
               { id: 'certificates', icon: Award, label: lang === 'en' ? 'Certificates' : 'Chứng Chỉ', href: '/student/certificates' },
             ].map(item => (
