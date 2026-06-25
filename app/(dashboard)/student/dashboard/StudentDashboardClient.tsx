@@ -15,7 +15,7 @@ import {
 
 import { motion } from 'framer-motion'
 import { useRealtime } from '@/lib/realtime-provider'
-import { ChevronRight, Cpu, GraduationCap } from 'lucide-react'
+import { ChevronRight, Cpu } from 'lucide-react'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
 type UserProps = {
@@ -114,9 +114,6 @@ export function StudentDashboardClient({
               <div style={{ marginTop: '16px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 <Link href="/builder" className="lms-btn lms-btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '10px', fontWeight: 700, fontSize: '13px', textDecoration: 'none' }}>
                   <Cpu size={16} /> Thực hành lắp ráp
-                </Link>
-                <Link href="/exams" className="lms-btn lms-btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '10px', fontWeight: 600, fontSize: '13px', textDecoration: 'none' }}>
-                  <GraduationCap size={16} /> Thi thử
                 </Link>
               </div>
             </div>

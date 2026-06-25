@@ -48,7 +48,6 @@ function ThemeToggle() {
 
 const ALL_NAV_ITEMS = [
     { href: '/student/dashboard', label: 'Bảng điều khiển', icon: LayoutDashboard, mobileOnly: false },
-    { href: '/student/lessons', label: 'Bài Giảng', icon: BookOpen, mobileOnly: false },
 
     { href: '/builder', label: 'Luyện Tập', icon: Cpu, mobileOnly: false },
     { href: '/student/level', label: 'Cấp Độ & Nhiệm Vụ', icon: Zap, mobileOnly: false },

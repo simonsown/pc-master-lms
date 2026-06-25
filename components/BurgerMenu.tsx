@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { BookOpen, Cpu, ShoppingCart, Users, BrainCircuit, Award, Globe, Sparkles, Menu, Webcam, X, Sun, Moon, FileText, Bell, MessageSquare, User, ArrowRight, History } from 'lucide-react';
+import { BookOpen, Cpu, ShoppingCart, Users, BrainCircuit, Award, Globe, Sparkles, Menu, Webcam, X, Sun, Moon, FileText, MessageSquare, User, ArrowRight, History, Trophy, CheckCircle2, Flame, Zap } from 'lucide-react';
 import JoinClassModal from './JoinClassModal';
+import { useRealtime } from '@/lib/realtime-provider';
 
 interface NavItem {
   id: string; labelEn: string; labelVn: string; icon: React.ElementType;
@@ -125,6 +126,9 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ lang, toggleLang, onStartQuiz, 
               );
               return item.href ? <Link key={item.id} href={item.href} style={{ textDecoration: 'none' }}>{content}</Link> : content;
             })}
+
+            {/* Quest Widget */}
+            <QuestWidgetSection lang={lang} />
           </div>
 
           <div style={{ padding: '8px 16px 4px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
@@ -198,7 +202,6 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ lang, toggleLang, onStartQuiz, 
               </Link>
             )}
             {[
-              { id: 'notifications', icon: Bell, label: lang === 'en' ? 'Notifications' : 'Thông Báo', href: '/notifications' },
               { id: 'discussion', icon: MessageSquare, label: lang === 'en' ? 'Discussion' : 'Thảo Luận', href: '/student/discussion' },
               { id: 'profile', icon: User, label: lang === 'en' ? 'Profile' : 'Hồ Sơ Cá Nhân', href: '/student/profile' },
               { id: 'about', icon: Users, label: lang === 'en' ? 'About Us' : 'Về chúng tôi', href: '/about' },
@@ -421,5 +424,62 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ lang, toggleLang, onStartQuiz, 
     </>
   );
 };
+
+function QuestWidgetSection({ lang }: { lang: 'en' | 'vn' }) {
+  const { state: realtimeState } = useRealtime()
+  const quests = realtimeState.allQuests.slice(0, 3)
+  const userQuests = realtimeState.quests
+
+  return (
+    <div style={{ padding: '4px 16px 8px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', marginTop: '4px' }}>
+        <Trophy size={12} style={{ color: '#f59e0b' }} />
+        <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)' }}>
+          {lang === 'en' ? 'Daily Quests' : 'Nhiệm Vụ Hôm Nay'}
+        </span>
+        <div style={{ marginLeft: 'auto', fontSize: '9px', color: 'var(--brand-primary)', fontWeight: 600 }}>
+          Lv.{realtimeState.level}
+        </div>
+      </div>
+      {quests.map((quest, i) => {
+        const userQuest = userQuests.find(q => q.quest_id === quest.id)
+        const isCompleted = userQuest?.is_completed
+        const progress = userQuest?.progress || 0
+        return (
+          <div key={quest.id} style={{
+            display: 'flex', alignItems: 'center', gap: '8px',
+            padding: '6px 8px', borderRadius: '8px',
+            background: isCompleted ? 'rgba(16,185,129,0.08)' : 'rgba(255,255,255,0.03)',
+            marginBottom: '4px', opacity: isCompleted ? 0.6 : 1
+          }}>
+            <span style={{ fontSize: '14px' }}>{quest.icon || '📌'}</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: '11px', fontWeight: 600, color: isCompleted ? '#10b981' : 'rgba(255,255,255,0.8)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {quest.title}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '9px', color: 'var(--brand-primary)', fontWeight: 600 }}>+{quest.xp_reward}XP</span>
+                {!isCompleted && quest.requirement_value > 0 && (
+                  <div style={{ flex: 1, height: '2px', borderRadius: '99px', background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', borderRadius: '99px', background: 'var(--brand-primary)', width: `${Math.min(100, (progress / quest.requirement_value) * 100)}%` }} />
+                  </div>
+                )}
+                {isCompleted && <CheckCircle2 size={10} style={{ color: '#10b981' }} />}
+              </div>
+            </div>
+          </div>
+        )
+      })}
+      <Link href="/student/dashboard" style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
+        padding: '6px', borderRadius: '6px', fontSize: '9px', fontWeight: 600,
+        color: 'var(--brand-primary)', textDecoration: 'none', marginTop: '4px',
+        background: 'rgba(8,158,96,0.08)'
+      }}>
+        <Zap size={10} /> {lang === 'en' ? 'View All Tasks' : 'Xem tất cả'} →
+      </Link>
+    </div>
+  )
+}
 
 export default BurgerMenu;

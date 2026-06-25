@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import Link from 'next/link';
-import { BookOpen, Users, Cpu, ArrowRight, Plus, Loader2, GraduationCap, Bot, Sparkles, Megaphone, ExternalLink, Trophy, Zap, Target, Clock, CheckCircle2, Flame } from 'lucide-react';
+import { BookOpen, Users, Cpu, ArrowRight, Plus, Loader2, GraduationCap, Bot, Sparkles, Megaphone, ExternalLink, Trophy, Zap, Target, Clock, CheckCircle2, Flame, FileQuestion } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import JoinClassModal from '../../../components/JoinClassModal';
 import CareerRecommendation from '../../../components/CareerRecommendation';
@@ -23,7 +23,7 @@ export default function StudentDashboard() {
   const [stats, setStats] = useState([
     { label: 'Lớp học', value: '0', icon: <Users size={20} />, color: 'var(--accent-blue)' },
     { label: 'Bài tập', value: '0', icon: <BookOpen size={20} />, color: 'var(--brand-primary)' },
-    { label: 'Linh kiện', value: '45+', icon: <Cpu size={20} />, color: '#8b5cf6' },
+    { label: 'Tổng XP', value: '0', icon: <Zap size={20} />, color: '#8b5cf6' },
   ]);
   useEffect(() => { fetchData(); }, []);
 
@@ -33,9 +33,16 @@ export default function StudentDashboard() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       const { data: memberships, error: memErr } = await supabase
-        .from('class_members').select(`class_id, classes:class_id (id, name, code, subject, teacher_id, profiles:teacher_id (full_name))`).eq('student_id', user.id);
+        .from('class_members').select(`class_id, classes:class_id (id, name, code, subject, teacher_id)`).eq('student_id', user.id);
       if (memErr) throw memErr;
-      const joinedClasses = memberships?.map((m: any) => { const cls = m.classes; if (cls && Array.isArray(cls.profiles)) cls.profiles = cls.profiles[0]; return cls; }) || [];
+      const rawClasses = memberships?.map((m: any) => m.classes).filter(Boolean) || [];
+      const teacherIds = [...new Set(rawClasses.map((c: any) => c.teacher_id).filter(Boolean))];
+      const teacherMap: Record<string, string> = {};
+      if (teacherIds.length > 0) {
+        const { data: teachers } = await supabase.from('profiles').select('id, full_name').in('id', teacherIds);
+        teachers?.forEach((t: any) => { teacherMap[t.id] = t.full_name });
+      }
+      const joinedClasses = rawClasses.map((cls: any) => ({ ...cls, teacher_name: teacherMap[cls.teacher_id] || null }));
       setClasses(joinedClasses);
       const classIds = joinedClasses.map((c: any) => c.id);
       let assignmentCount = 0;
@@ -43,8 +50,9 @@ export default function StudentDashboard() {
       setStats([
         { label: 'Lớp học', value: joinedClasses.length.toString(), icon: <Users size={20} />, color: 'var(--accent-blue)' },
         { label: 'Bài tập', value: assignmentCount.toString(), icon: <BookOpen size={20} />, color: 'var(--brand-primary)' },
-        { label: 'Linh kiện', value: '45+', icon: <Cpu size={20} />, color: '#8b5cf6' },
+        { label: 'Tổng XP', value: `${realtimeState.xp}`, icon: <Zap size={20} />, color: '#8b5cf6' },
       ]);
+      setLoading(false);
     } catch (err) { console.error('Error fetching student data:', err); }
     finally { setLoading(false); }
   }
@@ -80,21 +88,38 @@ export default function StudentDashboard() {
 
       <div className="student-dashboard-grid" style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.6fr 1fr', gap: isMobile ? '16px' : '28px' }}>
         <section style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '16px' : '24px' }}>
-          <motion.div {...fadeUp(0.2)}
-            className="lms-card" style={{ padding: isMobile ? '20px' : '32px', position: 'relative', overflow: 'hidden', borderRadius: '16px', background: 'linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-elevated) 100%)', boxShadow: '0 8px 30px var(--shadow-color)' }}>
-            <div style={{ position: 'relative', zIndex: 1 }}>
-              <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '10px', color: 'var(--text-primary)' }}>Phòng thực hành PC Builder</h2>
-              <p style={{ color: 'var(--text-muted)', marginBottom: '24px', maxWidth: '380px', fontSize: '14px', lineHeight: 1.6 }}>
-                Tự tay lắp ráp cấu hình máy tính, kiểm tra sự tương thích và hiệu năng của linh kiện ngay lập tức.
-              </p>
-              <Link href="/builder" className="lms-btn lms-btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px 28px', borderRadius: '12px', fontWeight: 700, boxShadow: '0 4px 16px rgba(8,158,96,0.3)' }}>
-                Bắt đầu thực hành <ArrowRight size={16} />
-              </Link>
-            </div>
-            <div style={{ position: 'absolute', right: '-20px', bottom: '-20px', opacity: 0.06 }}>
-              <Cpu size={200} color="var(--brand-primary)" />
-            </div>
-          </motion.div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '16px' : '24px' }}>
+            <motion.div {...fadeUp(0.2)}
+              className="lms-card" style={{ padding: isMobile ? '20px' : '32px', position: 'relative', overflow: 'hidden', borderRadius: '16px', background: 'linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-elevated) 100%)', boxShadow: '0 8px 30px var(--shadow-color)' }}>
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '10px', color: 'var(--text-primary)' }}>Phòng thực hành PC Builder</h2>
+                <p style={{ color: 'var(--text-muted)', marginBottom: '24px', maxWidth: '380px', fontSize: '14px', lineHeight: 1.6 }}>
+                  Tự tay lắp ráp cấu hình máy tính, kiểm tra sự tương thích và hiệu năng của linh kiện ngay lập tức.
+                </p>
+                <Link href="/builder" className="lms-btn lms-btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px 28px', borderRadius: '12px', fontWeight: 700, boxShadow: '0 4px 16px rgba(8,158,96,0.3)' }}>
+                  Bắt đầu thực hành <ArrowRight size={16} />
+                </Link>
+              </div>
+              <div style={{ position: 'absolute', right: '-20px', bottom: '-20px', opacity: 0.06 }}>
+                <Cpu size={200} color="var(--brand-primary)" />
+              </div>
+            </motion.div>
+            <motion.div {...fadeUp(0.25)}
+              className="lms-card" style={{ padding: isMobile ? '20px' : '32px', position: 'relative', overflow: 'hidden', borderRadius: '16px', background: 'linear-gradient(135deg, rgba(99,102,241,0.06), transparent)', border: '1px solid rgba(99,102,241,0.15)' }}>
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '10px', color: 'var(--text-primary)' }}>Thi thử kiến thức</h2>
+                <p style={{ color: 'var(--text-muted)', marginBottom: '24px', maxWidth: '380px', fontSize: '14px', lineHeight: 1.6 }}>
+                  Kiểm tra kiến thức phần cứng với đề thi, ngân hàng câu hỏi và bảng xếp hạng.
+                </p>
+                <Link href="/exams" className="lms-btn lms-btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px 28px', borderRadius: '12px', fontWeight: 700, background: '#6366f1', boxShadow: '0 4px 16px rgba(99,102,241,0.3)' }}>
+                  Vào thi thử <GraduationCap size={16} />
+                </Link>
+              </div>
+              <div style={{ position: 'absolute', right: '-20px', bottom: '-20px', opacity: 0.06 }}>
+                <FileQuestion size={200} color="#6366f1" />
+              </div>
+            </motion.div>
+          </div>
 
           <motion.div {...fadeUp(0.3)} className="lms-card" style={{ padding: isMobile ? '18px' : '28px', borderRadius: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
@@ -118,7 +143,7 @@ export default function StudentDashboard() {
                           <span className="lms-badge" style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '6px' }}>{cls.code}</span>
                         </div>
                         <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>{cls.name}</h3>
-                        <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0 }}>GV: {cls.profiles?.full_name || 'Đang cập nhật'}</p>
+                        <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0 }}>GV: {cls.teacher_name || 'Đang cập nhật'}</p>
                       </motion.div>
                     </Link>
                   </motion.div>
