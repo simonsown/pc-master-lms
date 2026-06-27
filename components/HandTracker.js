@@ -22,6 +22,26 @@ function checkWebGLSupport() {
   } catch { return false; }
 }
 
+const SMOOTHING_ALPHA = 0.35;
+
+function getClosestHand(hands) {
+  if (!hands || hands.length <= 1) return hands;
+  let maxScale = 0;
+  let closest = [hands[0]];
+  for (const hand of hands) {
+    if (hand[0] && hand[5]) {
+      const dx = hand[5].x - hand[0].x;
+      const dy = hand[5].y - hand[0].y;
+      const scale = dx * dx + dy * dy;
+      if (scale > maxScale) {
+        maxScale = scale;
+        closest = [hand];
+      }
+    }
+  }
+  return closest;
+}
+
 const HandTracker = ({ onLandmarks, numHands = 1 }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -34,12 +54,38 @@ const HandTracker = ({ onLandmarks, numHands = 1 }) => {
   const streamRef = useRef(null);
   const animRef = useRef(null);
   const mountedRef = useRef(true);
-  const frameSkipRef = useRef(0);
   const lastLMCallbackRef = useRef(null);
+  const smoothCacheRef = useRef(null);
 
   useEffect(() => {
     lastLMCallbackRef.current = onLandmarks;
   }, [onLandmarks]);
+
+  function smoothLandmarks(rawHands) {
+    if (!rawHands || rawHands.length === 0) {
+      smoothCacheRef.current = null;
+      return rawHands;
+    }
+    const cache = smoothCacheRef.current;
+    if (!cache || cache.length !== rawHands.length || cache[0].length !== rawHands[0].length) {
+      smoothCacheRef.current = rawHands.map(h => h.map(p => ({ ...p })));
+      return rawHands;
+    }
+    const a = SMOOTHING_ALPHA;
+    const smoothed = rawHands.map((hand, hi) =>
+      hand.map((lm, li) => {
+        const prev = cache[hi]?.[li];
+        if (!prev) return { ...lm };
+        return {
+          x: prev.x + a * (lm.x - prev.x),
+          y: prev.y + a * (lm.y - prev.y),
+          z: prev.z + a * (lm.z - prev.z),
+        };
+      })
+    );
+    smoothCacheRef.current = smoothed;
+    return smoothed;
+  }
 
   useEffect(() => {
     mountedRef.current = true;
@@ -73,7 +119,7 @@ const HandTracker = ({ onLandmarks, numHands = 1 }) => {
           const landmarker = await HandLandmarker.createFromOptions(vision, {
             baseOptions: {
               modelAssetPath: LANDMARKER_URLS[modelUrlIdx],
-              delegate: isLowEnd ? 'CPU' : (hasWebGL ? 'GPU' : 'CPU')
+              delegate: 'CPU'
             },
             runningMode: 'VIDEO',
             numHands: numHands
@@ -115,11 +161,10 @@ const HandTracker = ({ onLandmarks, numHands = 1 }) => {
 
         const isLowEnd = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
         const multiHand = numHands >= 2;
-        const camW = multiHand ? (isLowEnd ? 320 : 480) : (isLowEnd ? 240 : 480);
-        const camH = multiHand ? (isLowEnd ? 240 : 360) : (isLowEnd ? 180 : 360);
-        const camFps = isLowEnd ? 20 : 30;
+        const camW = multiHand ? 320 : (isLowEnd ? 240 : 320);
+        const camH = multiHand ? 240 : (isLowEnd ? 180 : 240);
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: { ideal: camW }, height: { ideal: camH }, facingMode: 'user', frameRate: { ideal: camFps } }
+          video: { width: { ideal: camW }, height: { ideal: camH }, facingMode: 'user', frameRate: { ideal: 30 } }
         });
         if (cancelled) { stream.getTracks().forEach(t => t.stop()); return; }
         streamRef.current = stream;
@@ -138,11 +183,10 @@ const HandTracker = ({ onLandmarks, numHands = 1 }) => {
         const predictLoop = async () => {
           if (!mountedRef.current) return;
 
-          const isLowEnd = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
           const multiHand = numHands >= 2;
-          const skipFrames = multiHand ? (isLowEnd ? 3 : 2) : (isLowEnd ? 1 : 0);
+          const skipFrames = multiHand ? 1 : 0;
           frameSkipRef.current++;
-          if (frameSkipRef.current % skipFrames !== 0) {
+          if (skipFrames > 0 && frameSkipRef.current % (skipFrames + 1) !== 0) {
             animRef.current = requestAnimationFrame(predictLoop);
             return;
           }
@@ -156,13 +200,16 @@ const HandTracker = ({ onLandmarks, numHands = 1 }) => {
             const results = await handLandmarker.detectForVideo(video, performance.now());
 
             if (results.landmarks && results.landmarks.length > 0) {
-              const mirrored = results.landmarks.map((hand) => {
-                return hand.map(p => ({ ...p, x: 1 - p.x }));
-              });
+              let hands = results.landmarks.map((hand) =>
+                hand.map(p => ({ ...p, x: 1 - p.x }))
+              );
+              if (!multiHand) hands = getClosestHand(hands);
+              const smoothed = smoothLandmarks(hands);
               if (lastLMCallbackRef.current) {
-                lastLMCallbackRef.current(mirrored);
+                lastLMCallbackRef.current(smoothed);
               }
             } else {
+              smoothCacheRef.current = null;
               if (lastLMCallbackRef.current) {
                 lastLMCallbackRef.current([]);
               }

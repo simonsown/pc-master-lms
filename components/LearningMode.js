@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+
 import confetti from 'canvas-confetti';
 import GameEngine from './GameEngine';
 import LearningRoadmap from './LearningRoadmap';
@@ -185,10 +185,10 @@ const LearningMode = ({
                         style={{
                             display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '3rem 2rem', gap: '1.5rem',
                             cursor: 'pointer', border: '1px solid var(--accent-blue)', background: 'var(--bg-surface)',
-                            borderRadius: '16px', transition: 'all 0.2s', color: 'var(--text-primary)'
+                            borderRadius: '16px', color: 'var(--text-primary)'
                         }}
-                        onMouseOver={e => { e.currentTarget.style.boxShadow = '0 15px 40px rgba(0,255,255,0.2)'; }}
-                        onMouseOut={e => { e.currentTarget.style.boxShadow = 'none'; }}
+                        onMouseOver={e => { e.currentTarget.style.borderColor = 'rgba(0,243,255,0.6)'; }}
+                        onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--accent-blue)'; }}
                     >
                         <span style={{ fontSize: '3.5rem' }}>🗺️</span>
                         <div style={{ textAlign: 'center' }}>
@@ -209,10 +209,10 @@ const LearningMode = ({
                         style={{
                             display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '3rem 2rem', gap: '1.5rem',
                             cursor: 'pointer', border: '1px solid var(--brand-primary)', background: 'var(--bg-surface)',
-                            borderRadius: '16px', transition: 'all 0.2s', color: 'var(--text-primary)'
+                            borderRadius: '16px', color: 'var(--text-primary)'
                         }}
-                        onMouseOver={e => { e.currentTarget.style.boxShadow = '0 15px 40px rgba(52,211,153,0.2)'; }}
-                        onMouseOut={e => { e.currentTarget.style.boxShadow = 'none'; }}
+                        onMouseOver={e => { e.currentTarget.style.borderColor = 'rgba(52,211,153,0.6)'; }}
+                        onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--brand-primary)'; }}
                     >
                         <span style={{ fontSize: '3.5rem' }}>🛠️</span>
                         <div style={{ textAlign: 'center' }}>

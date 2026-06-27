@@ -5,7 +5,6 @@ import Link from 'next/link';
 import confetti from 'canvas-confetti';
 import { supabase } from '@/lib/supabase';
 import { startBuilderSession, endBuilderSession } from '@/lib/learning-actions';
-import { motion } from 'framer-motion';
 import { useRealtime } from '@/lib/realtime-provider';
 import GameEngine from '../../components/GameEngine';
 import MultiplayerEngine from '../../components/MultiplayerEngine';
@@ -489,7 +488,7 @@ function Home(props) {
                                 width: '160px', flexShrink: 0, borderRadius: '12px', overflow: 'hidden',
                                 border: `1px solid ${cameraEnabled ? 'rgba(0,212,170,0.3)' : 'rgba(255,80,80,0.3)'}`,
                                 boxShadow: cameraEnabled ? '0 0 20px rgba(0,212,170,0.2)' : 'none',
-                                cursor: 'pointer', transition: 'all 0.3s', height: 'fit-content',
+                                cursor: 'pointer', transition: 'opacity 0.15s', height: 'fit-content',
                                 opacity: cameraEnabled ? 1 : 0.5,
                                 background: '#0f172a',
                             }} onClick={() => setCameraEnabled(!cameraEnabled)}>
@@ -541,7 +540,7 @@ function Home(props) {
                                     width: '160px', flexShrink: 0, borderRadius: '12px', overflow: 'hidden',
                                     border: `1px solid ${cameraEnabled ? 'rgba(0,212,170,0.3)' : 'rgba(255,80,80,0.3)'}`,
                                     boxShadow: cameraEnabled ? '0 0 20px rgba(0,212,170,0.2)' : 'none',
-                                    cursor: 'pointer', transition: 'all 0.3s', height: 'fit-content',
+                                    cursor: 'pointer', height: 'fit-content',
                                     opacity: cameraEnabled ? 1 : 0.5,
                                     background: '#0f172a',
                                 }} onClick={() => setCameraEnabled(!cameraEnabled)}>
@@ -588,20 +587,20 @@ function Home(props) {
                                     />
                                 </div>
                                 <div style={{
-                                    width: '160px', flexShrink: 0, borderRadius: '12px', overflow: 'hidden',
+                                    width: '200px', flexShrink: 0, borderRadius: '12px', overflow: 'hidden',
                                     border: `1px solid ${cameraEnabled ? 'rgba(0,212,170,0.3)' : 'rgba(255,80,80,0.3)'}`,
                                     boxShadow: cameraEnabled ? '0 0 20px rgba(0,212,170,0.2)' : 'none',
-                                    cursor: 'pointer', transition: 'all 0.3s', height: 'fit-content',
+                                    cursor: 'pointer', height: 'fit-content',
                                     opacity: cameraEnabled ? 1 : 0.5,
                                     background: '#0f172a',
                                 }} onClick={() => setCameraEnabled(!cameraEnabled)}>
                                     <div style={{ padding: '8px 10px', background: 'rgba(0,212,170,0.1)', borderBottom: '1px solid rgba(0,212,170,0.2)', fontSize: '11px', fontWeight: 700, color: 'var(--brand-primary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                        <span>📷 Camera</span>
+                                        <span>📷 Camera 2P</span>
                                         <span style={{ fontSize: '10px', color: cameraEnabled ? 'var(--success)' : 'var(--danger)' }}>
                                             {cameraEnabled ? 'Bật' : 'Tắt'}
                                         </span>
                                     </div>
-                                    <div style={{ width: '100%', aspectRatio: '4/3', minHeight: '120px' }}>
+                                    <div style={{ width: '100%', aspectRatio: '4/3', minHeight: '150px' }}>
                                         {cameraEnabled && <HandTracker onLandmarks={handleLandmarks} numHands={2} />}
                                         {!cameraEnabled && (
                                             <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ff5050', fontSize: 11, fontWeight: 600 }}>
