@@ -22,28 +22,6 @@ function checkWebGLSupport() {
   } catch { return false; }
 }
 
-const SMOOTHING_ALPHA = 0.3;
-
-function getClosestHand(hands) {
-  if (!hands || hands.length <= 1) return hands;
-  let maxScale = -1;
-  let closest = [hands[0]];
-  for (const hand of hands) {
-    const w = hand?.[0];
-    const i = hand?.[5];
-    if (w && i && w.x != null && i.x != null) {
-      const dx = i.x - w.x;
-      const dy = i.y - w.y;
-      const scale = dx * dx + dy * dy;
-      if (scale > maxScale) {
-        maxScale = scale;
-        closest = [hand];
-      }
-    }
-  }
-  return closest;
-}
-
 const HandTracker = ({ onLandmarks, numHands = 1 }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -57,37 +35,10 @@ const HandTracker = ({ onLandmarks, numHands = 1 }) => {
   const animRef = useRef(null);
   const mountedRef = useRef(true);
   const lastLMCallbackRef = useRef(null);
-  const smoothCacheRef = useRef(null);
 
   useEffect(() => {
     lastLMCallbackRef.current = onLandmarks;
   }, [onLandmarks]);
-
-  function smoothLandmarks(rawHands) {
-    if (!rawHands || rawHands.length === 0) {
-      smoothCacheRef.current = null;
-      return rawHands;
-    }
-    const cache = smoothCacheRef.current;
-    if (!cache || cache.length !== rawHands.length || cache[0].length !== rawHands[0].length) {
-      smoothCacheRef.current = rawHands.map(h => h.map(p => ({ ...p })));
-      return rawHands;
-    }
-    const a = SMOOTHING_ALPHA;
-    const smoothed = rawHands.map((hand, hi) =>
-      hand.map((lm, li) => {
-        const prev = cache[hi]?.[li];
-        if (!prev) return { ...lm };
-        return {
-          x: prev.x + a * (lm.x - prev.x),
-          y: prev.y + a * (lm.y - prev.y),
-          z: prev.z + a * (lm.z - prev.z),
-        };
-      })
-    );
-    smoothCacheRef.current = smoothed;
-    return smoothed;
-  }
 
   useEffect(() => {
     mountedRef.current = true;
@@ -162,11 +113,8 @@ const HandTracker = ({ onLandmarks, numHands = 1 }) => {
         }
 
         const isLowEnd = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
-        const multiHand = numHands >= 2;
-        const camW = multiHand ? 320 : (isLowEnd ? 240 : 320);
-        const camH = multiHand ? 240 : (isLowEnd ? 180 : 240);
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: { ideal: camW }, height: { ideal: camH }, facingMode: 'user', frameRate: { ideal: 30 } }
+          video: { width: { ideal: isLowEnd ? 160 : 320 }, height: { ideal: isLowEnd ? 120 : 240 }, facingMode: 'user', frameRate: { ideal: isLowEnd ? 15 : 30 } }
         });
         if (cancelled) { stream.getTracks().forEach(t => t.stop()); return; }
         streamRef.current = stream;
@@ -185,10 +133,10 @@ const HandTracker = ({ onLandmarks, numHands = 1 }) => {
         const predictLoop = async () => {
           if (!mountedRef.current) return;
 
-          const multiHand = numHands >= 2;
-          const skipFrames = multiHand ? 1 : 0;
+          const isLowEnd = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
+          const skipFrames = isLowEnd ? 3 : 2;
           frameSkipRef.current++;
-          if (skipFrames > 0 && frameSkipRef.current % (skipFrames + 1) !== 0) {
+          if (frameSkipRef.current % skipFrames !== 0) {
             animRef.current = requestAnimationFrame(predictLoop);
             return;
           }
@@ -202,18 +150,13 @@ const HandTracker = ({ onLandmarks, numHands = 1 }) => {
             const results = await handLandmarker.detectForVideo(video, performance.now());
 
             if (results.landmarks && results.landmarks.length > 0) {
-              let hands = results.landmarks.map((hand) =>
+              const mirrored = results.landmarks.map((hand) =>
                 hand.map(p => ({ ...p, x: 1 - p.x }))
               );
-              try {
-                if (!multiHand) hands = getClosestHand(hands);
-                hands = smoothLandmarks(hands);
-              } catch (_) {}
               if (lastLMCallbackRef.current) {
-                lastLMCallbackRef.current(hands);
+                lastLMCallbackRef.current(mirrored);
               }
             } else {
-              smoothCacheRef.current = null;
               if (lastLMCallbackRef.current) {
                 lastLMCallbackRef.current([]);
               }
