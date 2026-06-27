@@ -1,28 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getComponentSearchLinks, getCategoryLinks, type ProductLink } from '@/data/shopLinks';
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
-interface ShopLink {
-  shop: string; url: string;
-}
-
 interface BuildItem {
-  id: string; name: string; type: string; price: number; reason: string; link?: string; shops?: ShopLink[];
+  id: string; name: string; type: string; price: number; reason: string;
 }
 
 const CAREER_BUILDS: Record<string, { explanation: string; build: BuildItem[]; totalPrice: number; tips: string }> = {
   'ai engineer': {
     explanation: 'AI Engineer cần cấu hình mạnh về GPU để train model AI/deep learning. RAM lớn để xử lý dataset. CPU nhiều nhân cho data preprocessing.',
     build: [
-      { id: 'cpu_r9_7950x', name: 'AMD Ryzen 9 7950X', type: 'CPU', price: 14975000, reason: '16 nhân cho training AI', link: 'https://gearvn.com/products/amd-ryzen-9-7950x' },
-      { id: 'gpu_rtx_4090', name: 'NVIDIA RTX 4090 24GB', type: 'GPU', price: 40000000, reason: 'GPU mạnh nhất cho deep learning', link: 'https://gearvn.com/products/nvidia-geforce-rtx-4090' },
-      { id: 'ram_d5_64G', name: '64GB (2x32GB) DDR5-6400', type: 'RAM', price: 5500000, reason: 'RAM lớn cho dataset', link: 'https://gearvn.com/collections/ram-desktop-ddr5' },
-      { id: 'storage_2tb_ssd', name: '2TB NVMe Gen4', type: 'Storage', price: 3250000, reason: 'Ổ cứng nhanh cho dữ liệu', link: 'https://gearvn.com/collections/ssd-nvme' },
-      { id: 'psu_1000w', name: '1000W 80+ Platinum', type: 'PSU', price: 4500000, reason: 'Nguồn khỏe cho GPU', link: 'https://gearvn.com/collections/psu' },
-      { id: 'mb_b650_amd', name: 'B650 Tomahawk WiFi (AM5)', type: 'Mainboard', price: 5000000, reason: 'Bo mạch hỗ trợ PCIe 5.0', link: 'https://gearvn.com/collections/mainboard' },
-      { id: 'cooler_aio', name: 'Tản Nhiệt Nước AIO 360mm', type: 'Cooler', price: 3500000, reason: 'Tản nhiệt cho CPU mạnh', link: 'https://gearvn.com/collections/tan-nhiet-nuoc-aio' },
+      { id: 'cpu_r9_7950x', name: 'AMD Ryzen 9 7950X', type: 'CPU', price: 14975000, reason: '16 nhân cho training AI' },
+      { id: 'gpu_rtx_4090', name: 'NVIDIA RTX 4090 24GB', type: 'GPU', price: 40000000, reason: 'GPU mạnh nhất cho deep learning' },
+      { id: 'ram_d5_64G', name: '64GB (2x32GB) DDR5-6400', type: 'RAM', price: 5500000, reason: 'RAM lớn cho dataset' },
+      { id: 'storage_2tb_ssd', name: '2TB NVMe Gen4', type: 'Storage', price: 3250000, reason: 'Ổ cứng nhanh cho dữ liệu' },
+      { id: 'psu_1000w', name: '1000W 80+ Platinum', type: 'PSU', price: 4500000, reason: 'Nguồn khỏe cho GPU' },
+      { id: 'mb_b650_amd', name: 'B650 Tomahawk WiFi (AM5)', type: 'Mainboard', price: 5000000, reason: 'Bo mạch hỗ trợ PCIe 5.0' },
+      { id: 'cooler_aio', name: 'Tản Nhiệt Nước AIO 360mm', type: 'Cooler', price: 3500000, reason: 'Tản nhiệt cho CPU mạnh' },
     ],
     totalPrice: 76275000,
     tips: 'Dùng thêm RAM 64GB+ nếu làm việc với dataset lớn. Cân nhắc thêm SSD riêng cho OS và data.',
@@ -30,13 +25,13 @@ const CAREER_BUILDS: Record<string, { explanation: string; build: BuildItem[]; t
   'it engineer': {
     explanation: 'Kỹ sư IT cần cấu hình mạnh để xử lý công việc lập trình, quản trị hệ thống, ảo hóa và chạy nhiều máy ảo. CPU đa nhân, RAM lớn là ưu tiên hàng đầu.',
     build: [
-      { id: 'cpu_i7_13700k', name: 'Intel Core i7-13700K', type: 'CPU', price: 9500000, reason: '16 nhân cho ảo hóa và compile', link: 'https://gearvn.com/products/intel-core-i7-13700k' },
-      { id: 'ram_d5_64G', name: '64GB (2x32GB) DDR5-6400', type: 'RAM', price: 5500000, reason: 'RAM 64GB cho nhiều máy ảo + container', link: 'https://gearvn.com/collections/ram-desktop-ddr5' },
-      { id: 'gpu_rtx_4060', name: 'NVIDIA RTX 4060 8GB', type: 'GPU', price: 8500000, reason: 'Đủ cho đa màn hình + đồ họa cơ bản', link: 'https://gearvn.com/products/nvidia-geforce-rtx-4060' },
-      { id: 'storage_2tb_ssd', name: '2TB NVMe Gen4', type: 'Storage', price: 3250000, reason: 'SSD dung lượng lớn cho nhiều OS', link: 'https://gearvn.com/collections/ssd-nvme' },
-      { id: 'psu_750w', name: '750W 80+ Gold Fully Modular', type: 'PSU', price: 2500000, reason: 'Nguồn ổn định 24/7', link: 'https://gearvn.com/collections/psu' },
-      { id: 'mb_z790', name: 'Z790 Aorus Master (LGA1700)', type: 'Mainboard', price: 9500000, reason: 'Bo mạch cao cấp hỗ trợ đầy đủ', link: 'https://gearvn.com/collections/mainboard' },
-      { id: 'cooler_aio', name: 'Tản Nhiệt Nước AIO 360mm', type: 'Cooler', price: 3500000, reason: 'Tản nhiệt cho CPU chạy liên tục', link: 'https://gearvn.com/collections/tan-nhiet-nuoc-aio' },
+      { id: 'cpu_i7_13700k', name: 'Intel Core i7-13700K', type: 'CPU', price: 9500000, reason: '16 nhân cho ảo hóa và compile' },
+      { id: 'ram_d5_64G', name: '64GB (2x32GB) DDR5-6400', type: 'RAM', price: 5500000, reason: 'RAM 64GB cho nhiều máy ảo + container' },
+      { id: 'gpu_rtx_4060', name: 'NVIDIA RTX 4060 8GB', type: 'GPU', price: 8500000, reason: 'Đủ cho đa màn hình + đồ họa cơ bản' },
+      { id: 'storage_2tb_ssd', name: '2TB NVMe Gen4', type: 'Storage', price: 3250000, reason: 'SSD dung lượng lớn cho nhiều OS' },
+      { id: 'psu_750w', name: '750W 80+ Gold Fully Modular', type: 'PSU', price: 2500000, reason: 'Nguồn ổn định 24/7' },
+      { id: 'mb_z790', name: 'Z790 Aorus Master (LGA1700)', type: 'Mainboard', price: 9500000, reason: 'Bo mạch cao cấp hỗ trợ đầy đủ' },
+      { id: 'cooler_aio', name: 'Tản Nhiệt Nước AIO 360mm', type: 'Cooler', price: 3500000, reason: 'Tản nhiệt cho CPU chạy liên tục' },
     ],
     totalPrice: 42250000,
     tips: 'Đầu tư 2-3 màn hình để tăng năng suất. Nên có UPS để bảo vệ thiết bị. SSD riêng cho từng hệ điều hành nếu chạy đa OS.',
@@ -44,14 +39,14 @@ const CAREER_BUILDS: Record<string, { explanation: string; build: BuildItem[]; t
   '3d designer': {
     explanation: '3D Designer cần GPU mạnh để render đồ họa, CPU đa nhân, RAM dung lượng lớn.',
     build: [
-      { id: 'cpu_i9_14900k', name: 'Intel Core i9-14900K', type: 'CPU', price: 13750000, reason: '24 nhân cho render nhanh', link: 'https://gearvn.com/products/intel-core-i9-14900k' },
-      { id: 'gpu_rtx_4080', name: 'NVIDIA RTX 4080 16GB', type: 'GPU', price: 28000000, reason: 'GPU cao cấp cho 3D rendering', link: 'https://gearvn.com/products/nvidia-geforce-rtx-4080' },
-      { id: 'ram_d5_32G', name: '32GB (2x16GB) DDR5-6000', type: 'RAM', price: 2750000, reason: 'RAM 32GB đủ cho đa số dự án', link: 'https://gearvn.com/collections/ram-desktop-ddr5' },
-      { id: 'storage_1tb_nvme_gen4', name: '1TB NVMe Gen4', type: 'Storage', price: 1800000, reason: 'Load project nhanh', link: 'https://gearvn.com/collections/ssd-nvme' },
-      { id: 'storage_4tb_hdd', name: '4TB HDD 7200rpm', type: 'Storage', price: 1500000, reason: 'Lưu trữ project lớn', link: 'https://gearvn.com/collections/hdd' },
-      { id: 'psu_850w', name: '850W 80+ Gold Fully Modular', type: 'PSU', price: 3000000, reason: 'Nguồn ổn định', link: 'https://gearvn.com/collections/psu' },
-      { id: 'mb_z790', name: 'Z790 Aorus Master (LGA1700)', type: 'Mainboard', price: 9500000, reason: 'Hỗ trợ ép xung', link: 'https://gearvn.com/collections/mainboard' },
-      { id: 'cooler_aio', name: 'Tản Nhiệt Nước AIO 360mm', type: 'Cooler', price: 3500000, reason: 'Giữ CPU mát khi render', link: 'https://gearvn.com/collections/tan-nhiet-nuoc-aio' },
+      { id: 'cpu_i9_14900k', name: 'Intel Core i9-14900K', type: 'CPU', price: 13750000, reason: '24 nhân cho render nhanh' },
+      { id: 'gpu_rtx_4080', name: 'NVIDIA RTX 4080 16GB', type: 'GPU', price: 28000000, reason: 'GPU cao cấp cho 3D rendering' },
+      { id: 'ram_d5_32G', name: '32GB (2x16GB) DDR5-6000', type: 'RAM', price: 2750000, reason: 'RAM 32GB đủ cho đa số dự án' },
+      { id: 'storage_1tb_nvme_gen4', name: '1TB NVMe Gen4', type: 'Storage', price: 1800000, reason: 'Load project nhanh' },
+      { id: 'storage_4tb_hdd', name: '4TB HDD 7200rpm', type: 'Storage', price: 1500000, reason: 'Lưu trữ project lớn' },
+      { id: 'psu_850w', name: '850W 80+ Gold Fully Modular', type: 'PSU', price: 3000000, reason: 'Nguồn ổn định' },
+      { id: 'mb_z790', name: 'Z790 Aorus Master (LGA1700)', type: 'Mainboard', price: 9500000, reason: 'Hỗ trợ ép xung' },
+      { id: 'cooler_aio', name: 'Tản Nhiệt Nước AIO 360mm', type: 'Cooler', price: 3500000, reason: 'Giữ CPU mát khi render' },
     ],
     totalPrice: 63800000,
     tips: 'Màn hình nên chọn loại 27" 2K+ có độ phủ màu cao (AdobeRGB >90%). Thêm RAM nếu render phức tạp.',
@@ -59,13 +54,13 @@ const CAREER_BUILDS: Record<string, { explanation: string; build: BuildItem[]; t
   'video editor': {
     explanation: 'Video Editor cần CPU mạnh để render, GPU hỗ trợ codec, RAM dung lượng lớn.',
     build: [
-      { id: 'cpu_i7_13700k', name: 'Intel Core i7-13700K', type: 'CPU', price: 9500000, reason: '16 nhân cho render mượt', link: 'https://gearvn.com/products/intel-core-i7-13700k' },
-      { id: 'gpu_rtx_4070', name: 'NVIDIA RTX 4070 12GB', type: 'GPU', price: 14000000, reason: 'Hỗ trợ NVENC codec', link: 'https://gearvn.com/products/nvidia-geforce-rtx-4070' },
-      { id: 'ram_d5_32G', name: '32GB (2x16GB) DDR5-6000', type: 'RAM', price: 2750000, reason: 'RAM 32GB đủ cho timeline 4K', link: 'https://gearvn.com/collections/ram-desktop-ddr5' },
-      { id: 'storage_2tb_ssd', name: '2TB NVMe Gen4', type: 'Storage', price: 3250000, reason: 'Load video nhanh', link: 'https://gearvn.com/collections/ssd-nvme' },
-      { id: 'storage_4tb_hdd', name: '4TB HDD 7200rpm', type: 'Storage', price: 1500000, reason: 'Lưu footage', link: 'https://gearvn.com/collections/hdd' },
-      { id: 'psu_750w', name: '750W 80+ Gold Fully Modular', type: 'PSU', price: 2500000, reason: 'Nguồn ổn định', link: 'https://gearvn.com/collections/psu' },
-      { id: 'mb_b660m', name: 'B660M Pro (Intel LGA1700)', type: 'Mainboard', price: 3000000, reason: 'Bo mạch ổn định', link: 'https://gearvn.com/collections/mainboard' },
+      { id: 'cpu_i7_13700k', name: 'Intel Core i7-13700K', type: 'CPU', price: 9500000, reason: '16 nhân cho render mượt' },
+      { id: 'gpu_rtx_4070', name: 'NVIDIA RTX 4070 12GB', type: 'GPU', price: 14000000, reason: 'Hỗ trợ NVENC codec' },
+      { id: 'ram_d5_32G', name: '32GB (2x16GB) DDR5-6000', type: 'RAM', price: 2750000, reason: 'RAM 32GB đủ cho timeline 4K' },
+      { id: 'storage_2tb_ssd', name: '2TB NVMe Gen4', type: 'Storage', price: 3250000, reason: 'Load video nhanh' },
+      { id: 'storage_4tb_hdd', name: '4TB HDD 7200rpm', type: 'Storage', price: 1500000, reason: 'Lưu footage' },
+      { id: 'psu_750w', name: '750W 80+ Gold Fully Modular', type: 'PSU', price: 2500000, reason: 'Nguồn ổn định' },
+      { id: 'mb_b660m', name: 'B660M Pro (Intel LGA1700)', type: 'Mainboard', price: 3000000, reason: 'Bo mạch ổn định' },
     ],
     totalPrice: 36500000,
     tips: 'Ưu tiên màn hình 4K với độ phủ màu cao. Thêm RAM nếu edit video 8K hoặc After Effects.',
@@ -73,13 +68,13 @@ const CAREER_BUILDS: Record<string, { explanation: string; build: BuildItem[]; t
   'streamer': {
     explanation: 'Streamer/Gamer cần GPU mạnh cho game, CPU đủ nhân cho stream + game cùng lúc.',
     build: [
-      { id: 'cpu_r7_7800x3d', name: 'AMD Ryzen 7 7800X3D', type: 'CPU', price: 10500000, reason: 'CPU gaming tốt nhất', link: 'https://gearvn.com/products/amd-ryzen-7-7800x3d' },
-      { id: 'gpu_rtx_4070', name: 'NVIDIA RTX 4070 12GB', type: 'GPU', price: 14000000, reason: 'Chơi game + stream mượt', link: 'https://gearvn.com/products/nvidia-geforce-rtx-4070' },
-      { id: 'ram_d5_32G', name: '32GB (2x16GB) DDR5-6000', type: 'RAM', price: 2750000, reason: 'Đủ cho game + stream', link: 'https://gearvn.com/collections/ram-desktop-ddr5' },
-      { id: 'storage_1tb_nvme_gen4', name: '1TB NVMe Gen4', type: 'Storage', price: 1800000, reason: 'Nạp game nhanh', link: 'https://gearvn.com/collections/ssd-nvme' },
-      { id: 'psu_750w', name: '750W 80+ Gold Fully Modular', type: 'PSU', price: 2500000, reason: 'Nguồn ổn định', link: 'https://gearvn.com/collections/psu' },
-      { id: 'mb_b650_amd', name: 'B650 Tomahawk WiFi (AM5)', type: 'Mainboard', price: 5000000, reason: 'Nền tảng AM5', link: 'https://gearvn.com/collections/mainboard' },
-      { id: 'cooler_air', name: 'Tản Nhiệt Khí Tiêu Chuẩn', type: 'Cooler', price: 350000, reason: 'Tản nhiệt cơ bản', link: 'https://gearvn.com/collections/tan-nhiet-khi' },
+      { id: 'cpu_r7_7800x3d', name: 'AMD Ryzen 7 7800X3D', type: 'CPU', price: 10500000, reason: 'CPU gaming tốt nhất' },
+      { id: 'gpu_rtx_4070', name: 'NVIDIA RTX 4070 12GB', type: 'GPU', price: 14000000, reason: 'Chơi game + stream mượt' },
+      { id: 'ram_d5_32G', name: '32GB (2x16GB) DDR5-6000', type: 'RAM', price: 2750000, reason: 'Đủ cho game + stream' },
+      { id: 'storage_1tb_nvme_gen4', name: '1TB NVMe Gen4', type: 'Storage', price: 1800000, reason: 'Nạp game nhanh' },
+      { id: 'psu_750w', name: '750W 80+ Gold Fully Modular', type: 'PSU', price: 2500000, reason: 'Nguồn ổn định' },
+      { id: 'mb_b650_amd', name: 'B650 Tomahawk WiFi (AM5)', type: 'Mainboard', price: 5000000, reason: 'Nền tảng AM5' },
+      { id: 'cooler_air', name: 'Tản Nhiệt Khí Tiêu Chuẩn', type: 'Cooler', price: 350000, reason: 'Tản nhiệt cơ bản' },
     ],
     totalPrice: 36900000,
     tips: 'Đầu tư webcam + microphone chất lượng. Màn hình 27" 1440p 165Hz+. Thêm capture card nếu stream console.',
@@ -87,12 +82,12 @@ const CAREER_BUILDS: Record<string, { explanation: string; build: BuildItem[]; t
   'coder': {
     explanation: 'Lập trình viên cần CPU mạnh để compile, RAM lớn cho IDE + container, SSD nhanh.',
     build: [
-      { id: 'cpu_i5_13600k', name: 'Intel Core i5-13600K', type: 'CPU', price: 7000000, reason: '14 nhân cho compile nhanh', link: 'https://gearvn.com/products/intel-core-i5-13600k' },
-      { id: 'gpu_gtx_1650', name: 'NVIDIA GTX 1650 4GB', type: 'GPU', price: 2800000, reason: 'Đủ cho đa màn hình', link: 'https://gearvn.com/products/nvidia-geforce-gtx-1650' },
-      { id: 'ram_d5_32G', name: '32GB (2x16GB) DDR5-6000', type: 'RAM', price: 2750000, reason: 'RAM lớn cho IDE + Docker', link: 'https://gearvn.com/collections/ram-desktop-ddr5' },
-      { id: 'storage_1tb_nvme_gen4', name: '1TB NVMe Gen4', type: 'Storage', price: 1800000, reason: 'SSD siêu nhanh', link: 'https://gearvn.com/collections/ssd-nvme' },
-      { id: 'psu_500w', name: '500W 80+ Bronze', type: 'PSU', price: 900000, reason: 'Nguồn tiết kiệm', link: 'https://gearvn.com/collections/psu' },
-      { id: 'mb_b660m', name: 'B660M Pro (Intel LGA1700)', type: 'Mainboard', price: 3000000, reason: 'Bo mạch ổn định', link: 'https://gearvn.com/collections/mainboard' },
+      { id: 'cpu_i5_13600k', name: 'Intel Core i5-13600K', type: 'CPU', price: 7000000, reason: '14 nhân cho compile nhanh' },
+      { id: 'gpu_gtx_1650', name: 'NVIDIA GTX 1650 4GB', type: 'GPU', price: 2800000, reason: 'Đủ cho đa màn hình' },
+      { id: 'ram_d5_32G', name: '32GB (2x16GB) DDR5-6000', type: 'RAM', price: 2750000, reason: 'RAM lớn cho IDE + Docker' },
+      { id: 'storage_1tb_nvme_gen4', name: '1TB NVMe Gen4', type: 'Storage', price: 1800000, reason: 'SSD siêu nhanh' },
+      { id: 'psu_500w', name: '500W 80+ Bronze', type: 'PSU', price: 900000, reason: 'Nguồn tiết kiệm' },
+      { id: 'mb_b660m', name: 'B660M Pro (Intel LGA1700)', type: 'Mainboard', price: 3000000, reason: 'Bo mạch ổn định' },
     ],
     totalPrice: 18250000,
     tips: 'Đầu tư 2 màn hình để tăng năng suất. Bàn phím cơ + chuột ergonomic. RAM 32GB+ nếu dùng nhiều container.',
@@ -100,11 +95,11 @@ const CAREER_BUILDS: Record<string, { explanation: string; build: BuildItem[]; t
   'office worker': {
     explanation: 'Dân văn phòng cần máy ổn định, tiết kiệm điện, đủ dùng cho Office + duyệt web.',
     build: [
-      { id: 'cpu_i3_12100', name: 'Intel Core i3-12100F', type: 'CPU', price: 2250000, reason: 'CPU tiết kiệm, đủ mạnh', link: 'https://gearvn.com/products/intel-core-i3-12100f' },
-      { id: 'ram_d4_16G', name: '16GB (2x8GB) DDR4-3200', type: 'RAM', price: 1000000, reason: 'RAM 16GB đủ văn phòng', link: 'https://gearvn.com/collections/ram-desktop-ddr4' },
-      { id: 'storage_500_ssd', name: '500GB NVMe Gen3', type: 'Storage', price: 700000, reason: 'SSD nhanh, khởi động mượt', link: 'https://gearvn.com/collections/ssd-nvme' },
-      { id: 'psu_350w', name: '350W Power Supply', type: 'PSU', price: 350000, reason: 'Nguồn tiết kiệm', link: 'https://gearvn.com/collections/psu' },
-      { id: 'mb_h510m_intel1200', name: 'H510M K (Intel LGA1200)', type: 'Mainboard', price: 1200000, reason: 'Bo mạch giá rẻ', link: 'https://gearvn.com/collections/mainboard' },
+      { id: 'cpu_i3_12100', name: 'Intel Core i3-12100F', type: 'CPU', price: 2250000, reason: 'CPU tiết kiệm, đủ mạnh' },
+      { id: 'ram_d4_16G', name: '16GB (2x8GB) DDR4-3200', type: 'RAM', price: 1000000, reason: 'RAM 16GB đủ văn phòng' },
+      { id: 'storage_500_ssd', name: '500GB NVMe Gen3', type: 'Storage', price: 700000, reason: 'SSD nhanh, khởi động mượt' },
+      { id: 'psu_350w', name: '350W Power Supply', type: 'PSU', price: 350000, reason: 'Nguồn tiết kiệm' },
+      { id: 'mb_h510m_intel1200', name: 'H510M K (Intel LGA1200)', type: 'Mainboard', price: 1200000, reason: 'Bo mạch giá rẻ' },
     ],
     totalPrice: 5500000,
     tips: 'Thêm màn hình 24" IPS để bảo vệ mắt. Cân nhắc thêm SSD 500GB nếu lưu nhiều tài liệu.',
@@ -116,9 +111,9 @@ const MAC_BUILDS: Record<string, { explanation: string; model: string; build: Bu
     explanation: 'MacBook Pro với chip Apple Silicon là lựa chọn tuyệt vời cho lập trình viên nhờ hiệu năng vượt trội, pin lâu và hệ sinh thái UNIX.',
     model: 'MacBook Pro 14" M4 Pro',
     build: [
-      { id: 'mac_m4pro_cpu', name: 'Apple M4 Pro (12 CPU, 18 GPU)', type: 'CPU', price: 0, reason: 'Chip Apple Silicon mạnh nhất cho compile và đa nhiệm', link: 'https://gearvn.com/collections/macbook-pro' },
-      { id: 'mac_m4pro_ram', name: '24GB Unified Memory', type: 'RAM', price: 0, reason: 'Bộ nhớ thống nhất đủ cho IDE, Docker, container', link: 'https://gearvn.com/collections/macbook-pro' },
-      { id: 'mac_m4pro_ssd', name: '512GB SSD', type: 'Storage', price: 0, reason: 'SSD siêu nhanh tích hợp', link: 'https://gearvn.com/collections/macbook-pro' },
+      { id: 'mac_m4pro_cpu', name: 'Apple M4 Pro (12 CPU, 18 GPU)', type: 'CPU', price: 0, reason: 'Chip Apple Silicon mạnh nhất cho compile và đa nhiệm' },
+      { id: 'mac_m4pro_ram', name: '24GB Unified Memory', type: 'RAM', price: 0, reason: 'Bộ nhớ thống nhất đủ cho IDE, Docker, container' },
+      { id: 'mac_m4pro_ssd', name: '512GB SSD', type: 'Storage', price: 0, reason: 'SSD siêu nhanh tích hợp' },
     ],
     totalPrice: 39990000,
     tips: 'Nếu cần nhiều RAM hơn, nâng lên 36GB hoặc 48GB. Màn hình 14" Liquid Retina XDR tuyệt đẹp cho coding.',
@@ -127,9 +122,9 @@ const MAC_BUILDS: Record<string, { explanation: string; model: string; build: Bu
     explanation: 'Mac Studio với M4 Max hoặc MacBook Pro Pro là lựa chọn hàng đầu cho video editor nhờ tối ưu hóa phần mềm Final Cut Pro.',
     model: 'Mac Studio M4 Max',
     build: [
-      { id: 'mac_m4max_cpu', name: 'Apple M4 Max (16 CPU, 40 GPU)', type: 'CPU', price: 0, reason: 'Chip mạnh nhất cho render video 8K', link: 'https://gearvn.com/collections/mac-studio' },
-      { id: 'mac_m4max_ram', name: '64GB Unified Memory', type: 'RAM', price: 0, reason: 'RAM lớn cho timeline phức tạp và After Effects', link: 'https://gearvn.com/collections/mac-studio' },
-      { id: 'mac_m4max_ssd', name: '1TB SSD', type: 'Storage', price: 0, reason: 'SSD nhanh cho dự án video', link: 'https://gearvn.com/collections/mac-studio' },
+      { id: 'mac_m4max_cpu', name: 'Apple M4 Max (16 CPU, 40 GPU)', type: 'CPU', price: 0, reason: 'Chip mạnh nhất cho render video 8K' },
+      { id: 'mac_m4max_ram', name: '64GB Unified Memory', type: 'RAM', price: 0, reason: 'RAM lớn cho timeline phức tạp và After Effects' },
+      { id: 'mac_m4max_ssd', name: '1TB SSD', type: 'Storage', price: 0, reason: 'SSD nhanh cho dự án video' },
     ],
     totalPrice: 64990000,
     tips: 'Kết hợp với màn hình Pro Display XDR hoặc Studio Display. Nâng SSD lên 2TB nếu làm việc với nhiều dự án 4K/8K.',
@@ -138,9 +133,9 @@ const MAC_BUILDS: Record<string, { explanation: string; model: string; build: Bu
     explanation: 'MacBook Air M4 là lựa chọn hoàn hảo cho dân văn phòng và học sinh: siêu nhẹ, pin cả ngày, đủ mạnh cho mọi tác vụ.',
     model: 'MacBook Air 13" M4',
     build: [
-      { id: 'mac_m4_cpu', name: 'Apple M4 (8 CPU, 10 GPU)', type: 'CPU', price: 0, reason: 'Chip tiết kiệm điện, đủ mạnh cho Office và web', link: 'https://gearvn.com/collections/macbook-air' },
-      { id: 'mac_m4_ram', name: '16GB Unified Memory', type: 'RAM', price: 0, reason: 'RAM 16GB đủ đa nhiệm văn phòng', link: 'https://gearvn.com/collections/macbook-air' },
-      { id: 'mac_m4_ssd', name: '256GB SSD', type: 'Storage', price: 0, reason: 'SSD nhanh, tiết kiệm điện', link: 'https://gearvn.com/collections/macbook-air' },
+      { id: 'mac_m4_cpu', name: 'Apple M4 (8 CPU, 10 GPU)', type: 'CPU', price: 0, reason: 'Chip tiết kiệm điện, đủ mạnh cho Office và web' },
+      { id: 'mac_m4_ram', name: '16GB Unified Memory', type: 'RAM', price: 0, reason: 'RAM 16GB đủ đa nhiệm văn phòng' },
+      { id: 'mac_m4_ssd', name: '256GB SSD', type: 'Storage', price: 0, reason: 'SSD nhanh, tiết kiệm điện' },
     ],
     totalPrice: 21990000,
     tips: 'MacBook Air cực kỳ phù hợp cho sinh viên nhờ pin 18 tiếng. Nâng lên 512GB nếu lưu nhiều tài liệu.',
@@ -257,12 +252,12 @@ function defaultBuild(careerName: string) {
     career: careerName,
     explanation: `Cấu hình PC đa năng phù hợp với "${careerName}". Đây là cấu hình cân bằng giữa hiệu năng và giá cả, phù hợp cho đa số nhu cầu.`,
     build: [
-      { id: 'cpu_r5_5600', name: 'AMD Ryzen 5 5600', type: 'CPU', price: 1800000, reason: 'CPU 6 nhân đa năng', link: 'https://gearvn.com/products/amd-ryzen-5-5600' },
-      { id: 'gpu_gtx_1650', name: 'NVIDIA GTX 1650 4GB', type: 'GPU', price: 2800000, reason: 'Card đồ họa cơ bản', link: 'https://gearvn.com/products/nvidia-geforce-gtx-1650' },
-      { id: 'ram_d4_16G', name: '16GB (2x8GB) DDR4-3200', type: 'RAM', price: 1000000, reason: 'RAM 16GB tiêu chuẩn', link: 'https://gearvn.com/collections/ram-desktop-ddr4' },
-      { id: 'storage_500_ssd', name: '500GB NVMe Gen3', type: 'Storage', price: 700000, reason: 'SSD khởi động nhanh', link: 'https://gearvn.com/collections/ssd-nvme' },
-      { id: 'psu_500w', name: '500W 80+ Bronze', type: 'PSU', price: 900000, reason: 'Nguồn ổn định', link: 'https://gearvn.com/collections/psu' },
-      { id: 'mb_b450_amd', name: 'B450M DS3H (AMD AM4)', type: 'Mainboard', price: 1000000, reason: 'Bo mạch AM4 giá tốt', link: 'https://gearvn.com/collections/mainboard' },
+      { id: 'cpu_r5_5600', name: 'AMD Ryzen 5 5600', type: 'CPU', price: 1800000, reason: 'CPU 6 nhân đa năng' },
+      { id: 'gpu_gtx_1650', name: 'NVIDIA GTX 1650 4GB', type: 'GPU', price: 2800000, reason: 'Card đồ họa cơ bản' },
+      { id: 'ram_d4_16G', name: '16GB (2x8GB) DDR4-3200', type: 'RAM', price: 1000000, reason: 'RAM 16GB tiêu chuẩn' },
+      { id: 'storage_500_ssd', name: '500GB NVMe Gen3', type: 'Storage', price: 700000, reason: 'SSD khởi động nhanh' },
+      { id: 'psu_500w', name: '500W 80+ Bronze', type: 'PSU', price: 900000, reason: 'Nguồn ổn định' },
+      { id: 'mb_b450_amd', name: 'B450M DS3H (AMD AM4)', type: 'Mainboard', price: 1000000, reason: 'Bo mạch AM4 giá tốt' },
     ],
     totalPrice: 8200000,
     tips: 'Bạn có thể nâng cấp RAM lên 32GB và thêm SSD dung lượng lớn nếu cần. Card đồ họa có thể nâng cấp sau.',
@@ -276,9 +271,9 @@ function defaultMacBuild(careerName: string) {
     isMac: true,
     explanation: `MacBook Air M4 là lựa chọn tuyệt vời cho "${careerName}" với hiệu năng vượt trội, pin lâu và độ bền cao.`,
     build: [
-      { id: 'mac_m4_base', name: 'Apple M4 (8 CPU, 10 GPU)', type: 'CPU', price: 0, reason: 'Chip Apple Silicon mạnh mẽ, tiết kiệm điện', link: 'https://gearvn.com/collections/macbook-air' },
-      { id: 'mac_m4_ram', name: '16GB Unified Memory', type: 'RAM', price: 0, reason: 'Bộ nhớ thống nhất đủ đa nhiệm', link: 'https://gearvn.com/collections/macbook-air' },
-      { id: 'mac_m4_ssd', name: '256GB SSD', type: 'Storage', price: 0, reason: 'SSD nhanh tích hợp', link: 'https://gearvn.com/collections/macbook-air' },
+      { id: 'mac_m4_base', name: 'Apple M4 (8 CPU, 10 GPU)', type: 'CPU', price: 0, reason: 'Chip Apple Silicon mạnh mẽ, tiết kiệm điện' },
+      { id: 'mac_m4_ram', name: '16GB Unified Memory', type: 'RAM', price: 0, reason: 'Bộ nhớ thống nhất đủ đa nhiệm' },
+      { id: 'mac_m4_ssd', name: '256GB SSD', type: 'Storage', price: 0, reason: 'SSD nhanh tích hợp' },
     ],
     totalPrice: 21990000,
     tips: 'MacBook Air cực kỳ phù hợp cho công việc văn phòng và học tập. Pin lên đến 18 tiếng.',
@@ -350,18 +345,9 @@ export async function POST(request: NextRequest) {
       result = analyzeCareer(careerName) || defaultBuild(careerName);
     }
 
-    const enrich = (items: BuildItem[]) => items.map((item: BuildItem) => {
-      let link = item.link;
-      if (!link) link = getGearVnLink(item);
-      const searchLinks = getComponentSearchLinks(item.name, item.type);
-      const shops: ShopLink[] = searchLinks.map(sl => ({ shop: sl.shop, url: sl.url }));
-      const categoryLinks: ShopLink[] = (getCategoryLinks(item.type) || []).map(cl => ({ shop: cl.shop, url: cl.url }));
-      const allShops = [...shops]
-      for (const cl of categoryLinks) {
-        if (!allShops.find(s => s.shop === cl.shop)) allShops.push(cl)
-      }
-      return { ...item, link, shops: allShops, image: getComponentImage(item.type) };
-    });
+    const enrich = (items: BuildItem[]) => items.map((item: BuildItem) => ({
+      ...item, image: getComponentImage(item.type),
+    }));
 
     const response: any = { ...result, build: enrich(result.build) };
 
