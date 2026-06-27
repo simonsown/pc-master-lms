@@ -34,6 +34,7 @@ const HandTracker = ({ onLandmarks, numHands = 1 }) => {
   const streamRef = useRef(null);
   const animRef = useRef(null);
   const mountedRef = useRef(true);
+  const frameSkipRef = useRef(0);
   const lastLMCallbackRef = useRef(null);
 
   useEffect(() => {
