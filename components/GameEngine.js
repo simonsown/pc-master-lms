@@ -4,8 +4,8 @@ import { useEffect, useRef, useState, useImperativeHandle, forwardRef, useCallba
 import confetti from 'canvas-confetti';
 import { IMAGE_MAP } from './imageAssets';
 
-const GRAB_THRESHOLD = 0.07; // Pinch to grab (lower = easier to grab)
-const RELEASE_THRESHOLD = 0.10; // Release when fingers open wider (hysteresis prevents jitter)
+const GRAB_THRESHOLD = 0.07;
+const RELEASE_THRESHOLD = 0.10;
 
 const imgCache = new Map();
 

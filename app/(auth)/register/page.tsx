@@ -10,7 +10,7 @@ function RegisterForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const isOauth = searchParams.get('oauth') === 'true'
-  const initialStep = isOauth ? 2 : (searchParams.get('step') ? parseInt(searchParams.get('step')!) : 1)
+  const initialStep = isOauth ? 1 : (searchParams.get('step') ? parseInt(searchParams.get('step')!) : 1)
 
   const [isLogin, setIsLogin] = useState(false)
   useEffect(() => { if (isLogin) router.push('/login') }, [isLogin, router])
@@ -30,6 +30,30 @@ function RegisterForm() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
 
+  // Pre-fill Google user info on mount
+  useEffect(() => {
+    if (isOauth && typeof window !== 'undefined') {
+      const fetchUserInfo = async () => {
+        try {
+          const { createBrowserClient } = await import('@supabase/ssr')
+          const supabase = createBrowserClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+          )
+          const { data: { user } } = await supabase.auth.getUser()
+          if (user?.user_metadata?.full_name) {
+            setFormData(prev => ({ ...prev, fullName: user.user_metadata.full_name }))
+          } else if (user?.email) {
+            setFormData(prev => ({ ...prev, fullName: user.email.split('@')[0] }))
+          }
+        } catch (e) {
+          console.warn('Could not fetch Google user info:', e)
+        }
+      }
+      fetchUserInfo()
+    }
+  }, [isOauth])
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target as HTMLInputElement
     const checked = (e.target as HTMLInputElement).checked
@@ -45,7 +69,10 @@ function RegisterForm() {
 
   const handleNext = () => {
     setError(null)
-    if (isOauth && step === 1) { setStep(2); return }
+    if (isOauth && step === 1) {
+      if (!formData.fullName.trim()) { setError('Vui lòng nhập họ và tên của bạn.'); return }
+      setStep(2); return
+    }
     if (step === 1) {
       if (!formData.fullName || !formData.email || !formData.password || !formData.confirmPassword) { setError('Vui lòng điền đủ thông tin.'); return }
       if (formData.password !== formData.confirmPassword) { setError('Mật khẩu xác nhận không khớp.'); return }
@@ -55,7 +82,7 @@ function RegisterForm() {
     } else if (step === 2) {
       if (formData.role === 'parent' && (!formData.schoolName || !formData.classCode)) { setError('Vui lòng nhập đầy đủ thông tin liên kết tài khoản con.'); return }
     }
-    setStep(prev => Math.min(prev + 1, 3))
+    setStep(prev => Math.min(prev + 1, isOauth ? 2 : 3))
   }
 
   const handlePrev = () => { setStep(prev => Math.max(prev - 1, 1)); setError(null) }
@@ -65,8 +92,9 @@ function RegisterForm() {
     if (!formData.termsAccepted) { setError('Bạn cần đồng ý với Điều khoản dịch vụ.'); return }
     setLoading(true)
     const submitData = new FormData()
+    submitData.append('full_name', formData.fullName)
     submitData.append('role', formData.role)
-    if (!isOauth) { submitData.append('full_name', formData.fullName); submitData.append('email', formData.email); submitData.append('password', formData.password) }
+    if (!isOauth) { submitData.append('email', formData.email); submitData.append('password', formData.password) }
     if (formData.teacherCode) submitData.append('teacher_code', formData.teacherCode)
     if (formData.classCode) submitData.append('class_code', formData.classCode)
     if (formData.schoolCode) submitData.append('school_code', formData.schoolCode)
@@ -111,15 +139,15 @@ function RegisterForm() {
             {isOauth ? 'Hoàn tất hồ sơ' : 'Tạo tài khoản'}
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '14px', margin: 0 }}>
-            {step === 1 && 'Thông tin cơ bản'}
-            {step === 2 && 'Bạn là học sinh hay giáo viên?'}
+            {step === 1 && (isOauth ? 'Thông tin của bạn' : 'Thông tin cơ bản')}
+            {step === 2 && (isOauth ? 'Hoàn thiện hồ sơ' : 'Bạn là học sinh hay giáo viên?')}
             {step === 3 && 'Hoàn thiện hồ sơ để bắt đầu'}
           </p>
         </div>
 
         {/* Steps indicator */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '28px' }}>
-          {[1, 2, 3].map(i => (
+          {Array.from({ length: isOauth ? 2 : 3 }, (_, i) => i + 1).map(i => (
             <React.Fragment key={i}>
               <div style={{
                 width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -128,7 +156,7 @@ function RegisterForm() {
                 color: step >= i ? '#fff' : 'var(--text-muted)',
                 border: `2px solid ${step >= i ? 'var(--brand-primary)' : 'var(--border-default)'}`
               }}>{step > i ? <Check size={16} /> : i}</div>
-              {i < 3 && <div style={{ flex: 1, maxWidth: '60px', height: '3px', borderRadius: '2px', background: step > i ? 'var(--brand-primary)' : 'var(--border-default)' }} />}
+              {i < (isOauth ? 2 : 3) && <div style={{ flex: 1, maxWidth: '60px', height: '3px', borderRadius: '2px', background: step > i ? 'var(--brand-primary)' : 'var(--border-default)' }} />}
             </React.Fragment>
           ))}
         </div>
@@ -148,7 +176,44 @@ function RegisterForm() {
 
         <form onSubmit={handleSubmit}>
           {/* Step 1: Basic Info */}
-          {step === 1 && (
+          {step === 1 && isOauth && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ position: 'relative' }}>
+                <User size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <input type="text" name="fullName" placeholder="Họ và tên *" value={formData.fullName} onChange={handleInputChange} required style={inputStyle} />
+              </div>
+              <div style={{ padding: '12px 16px', borderRadius: '10px', background: 'rgba(8,158,96,0.06)', border: '1px solid rgba(8,158,96,0.15)', color: 'var(--text-muted)', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Mail size={16} style={{ color: 'var(--brand-primary)' }} />
+                <span>Bạn đã đăng nhập bằng Google. Email sẽ được tự động lưu.</span>
+              </div>
+              {/* Role selection inline */}
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '10px', display: 'block' }}>Bạn là ai?</label>
+                <div className="register-role-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                  {[
+                    { role: 'student', icon: <GraduationCap size={20} />, title: 'Học sinh', desc: 'Học & thực hành' },
+                    { role: 'teacher', icon: <User size={20} />, title: 'Giáo viên', desc: 'Dạy & quản lý' },
+                    { role: 'parent', icon: <Users size={20} />, title: 'Phụ huynh', desc: 'Theo dõi con học' },
+                  ].map(({ role, icon, title, desc }) => (
+                    <button key={role} type="button" onClick={() => setFormData(p => ({ ...p, role }))}
+                      style={{
+                        padding: '14px 10px', borderRadius: '12px', cursor: 'pointer', textAlign: 'center',
+                        background: formData.role === role ? 'rgba(8,158,96,0.08)' : 'var(--bg-elevated)',
+                        border: `2px solid ${formData.role === role ? 'var(--brand-primary)' : 'var(--border-default)'}`,
+                        transition: 'all 0.2s', fontFamily: 'inherit'
+                      }}>
+                      <div style={{ width: '36px', height: '36px', borderRadius: '50%', margin: '0 auto 6px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: formData.role === role ? 'var(--brand-primary)' : 'var(--bg-base)', color: formData.role === role ? '#fff' : 'var(--text-muted)' }}>
+                        {icon}
+                      </div>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>{title}</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+          {step === 1 && !isOauth && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{ position: 'relative' }}>
                 <User size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
@@ -180,8 +245,8 @@ function RegisterForm() {
             </div>
           )}
 
-          {/* Step 2: Role Selection */}
-          {step === 2 && (
+          {/* Step 2: Role Selection (for non-OAuth) OR Complete Profile (for OAuth) */}
+          {step === 2 && !isOauth && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div className="register-role-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
                 {[
@@ -244,8 +309,39 @@ function RegisterForm() {
             </div>
           )}
 
-          {/* Step 3: Complete Profile */}
-          {step === 3 && (
+          {/* Step 2 for OAuth: School info + Complete Profile */}
+          {step === 2 && isOauth && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {formData.role === 'student' && (
+                <div style={{ position: 'relative' }}>
+                  <Building size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                  <input type="text" name="schoolName" placeholder="Tên trường học của bạn" value={formData.schoolName} onChange={handleInputChange} style={inputStyle} />
+                </div>
+              )}
+              {formData.role === 'teacher' && (
+                <div style={{ position: 'relative' }}>
+                  <Building size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                  <input type="text" name="schoolCode" placeholder="Mã trường / Tổ chức" value={formData.schoolCode} onChange={handleInputChange} style={inputStyle} />
+                </div>
+              )}
+              {formData.role === 'parent' && (
+                <div style={{ position: 'relative' }}>
+                  <User size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                  <input type="text" name="classCode" placeholder="Mã học sinh của con (để liên kết)" value={formData.classCode} onChange={handleInputChange} style={inputStyle} />
+                </div>
+              )}
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer', marginTop: '4px' }}>
+                <input type="checkbox" name="termsAccepted" checked={formData.termsAccepted} onChange={handleInputChange}
+                  style={{ width: '18px', height: '18px', marginTop: '2px', accentColor: 'var(--brand-primary)' }} />
+                <span style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                  Tôi đồng ý với <Link href="#" style={{ color: 'var(--brand-primary)', fontWeight: 600, textDecoration: 'none' }}>Điều khoản dịch vụ</Link> và <Link href="#" style={{ color: 'var(--brand-primary)', fontWeight: 600, textDecoration: 'none' }}>Chính sách bảo mật</Link>.
+                </span>
+              </label>
+            </div>
+          )}
+
+          {/* Step 3: Complete Profile (non-OAuth) */}
+          {step === 3 && !isOauth && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
                 <div style={{ width: '80px', height: '80px', borderRadius: '50%', border: '2px dashed var(--border-default)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', cursor: 'pointer', position: 'relative', overflow: 'hidden', background: avatarPreview ? 'transparent' : 'var(--bg-elevated)' }}>
@@ -297,13 +393,13 @@ function RegisterForm() {
 
           {/* Navigation Buttons */}
           <div style={{ display: 'flex', gap: '12px', marginTop: '32px' }}>
-            {step > (isOauth ? 2 : 1) && (
+            {step > 1 && (
               <button type="button" onClick={handlePrev} disabled={loading}
                 style={{ flex: 1, padding: '12px', borderRadius: '10px', fontWeight: 700, border: '1px solid var(--border-default)', background: 'var(--bg-elevated)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '14px', fontFamily: 'inherit' }}>
                 Quay lại
               </button>
             )}
-            {step < 3 ? (
+            {step < (isOauth ? 2 : 3) ? (
               <button type="button" onClick={handleNext}
                 style={{ flex: 2, padding: '12px', borderRadius: '10px', fontWeight: 700, border: 'none', background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-dark))', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '14px', fontFamily: 'inherit' }}>
                 Tiếp tục <ChevronRight size={18} />

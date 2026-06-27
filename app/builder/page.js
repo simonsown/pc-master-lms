@@ -413,12 +413,13 @@ function Home(props) {
                 <div style={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, alignItems: 'center', justifyContent: ['course','market'].includes(appMode) ? 'flex-start' : 'center', overflow: 'auto' }}>
                     <div style={{ width: '100%', maxWidth: ['course','market'].includes(appMode) ? '100%' : '1400px', position: 'relative', height: ['course','market'].includes(appMode) ? '100%' : 'auto', padding: ['course','market'].includes(appMode) ? '0' : '0' }}>
                         {appMode === 'assembly' ? (
-                            <div style={{ display: 'flex', gap: '16px', width: '100%' }}>
+                            <div style={{ display: 'flex', gap: '16px', width: '100%', height: '100%' }}>
                                 <PartPickerSidebar
                                     lang={lang}
                                     onSelect={handlePartSelect}
                                     placedCounts={placedCounts}
                                 />
+                                <div style={{ flex: 1, position: 'relative', display: 'flex', gap: '12px', maxWidth: '1200px' }}>
                                 <div style={{ flex: 1, position: 'relative' }}>
                                 <h2 style={{ color: 'var(--success)', marginTop: 0 }}>
                                     {lang === 'en' ? 'Free Practice' : 'Luyện tập tự do'}
@@ -483,6 +484,31 @@ function Home(props) {
                                     )}
                                 </div>
                             </div>
+                            {/* Camera preview on the right side */}
+                            <div style={{
+                                width: '160px', flexShrink: 0, borderRadius: '12px', overflow: 'hidden',
+                                border: `1px solid ${cameraEnabled ? 'rgba(0,212,170,0.3)' : 'rgba(255,80,80,0.3)'}`,
+                                boxShadow: cameraEnabled ? '0 0 20px rgba(0,212,170,0.2)' : 'none',
+                                cursor: 'pointer', transition: 'all 0.3s', height: 'fit-content',
+                                opacity: cameraEnabled ? 1 : 0.5,
+                                background: '#0f172a',
+                            }} onClick={() => setCameraEnabled(!cameraEnabled)}>
+                                <div style={{ padding: '8px 10px', background: 'rgba(0,212,170,0.1)', borderBottom: '1px solid rgba(0,212,170,0.2)', fontSize: '11px', fontWeight: 700, color: 'var(--brand-primary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <span>📷 Camera</span>
+                                    <span style={{ fontSize: '10px', color: cameraEnabled ? 'var(--success)' : 'var(--danger)' }}>
+                                        {cameraEnabled ? 'Bật' : 'Tắt'}
+                                    </span>
+                                </div>
+                                <div style={{ width: '100%', aspectRatio: '4/3', minHeight: '120px' }}>
+                                    {cameraEnabled && <HandTracker onLandmarks={handleLandmarks} />}
+                                    {!cameraEnabled && (
+                                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ff5050', fontSize: 11, fontWeight: 600 }}>
+                                            Camera TẮT<br />Nhấn để bật
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            </div>
                             </div>
                         ) : appMode === 'market' ? (
                             <Marketplace
@@ -497,7 +523,8 @@ function Home(props) {
                                 onCancel={() => setAppMode('menu')}
                             />
                         ) : appMode === 'mission_assembly' ? (
-                            <div style={{ width: '100%', position: 'relative' }}>
+                            <div style={{ width: '100%', position: 'relative', display: 'flex', gap: '12px' }}>
+                                <div style={{ flex: 1 }}>
                                 <h2 style={{ color: 'var(--brand-primary)', marginTop: 0 }}>
                                     {lang === 'en' ? `Lab: ${missionData?.missionId || missionData?.scenarioName}` : `Phòng Lab: ${missionData?.missionId || missionData?.scenarioName}`}
                                 </h2>
@@ -509,6 +536,30 @@ function Home(props) {
                                     purchasedItems={missionData?.purchasedItems}
                                     imageMode={imageMode}
                                 />
+                                </div>
+                                <div style={{
+                                    width: '160px', flexShrink: 0, borderRadius: '12px', overflow: 'hidden',
+                                    border: `1px solid ${cameraEnabled ? 'rgba(0,212,170,0.3)' : 'rgba(255,80,80,0.3)'}`,
+                                    boxShadow: cameraEnabled ? '0 0 20px rgba(0,212,170,0.2)' : 'none',
+                                    cursor: 'pointer', transition: 'all 0.3s', height: 'fit-content',
+                                    opacity: cameraEnabled ? 1 : 0.5,
+                                    background: '#0f172a',
+                                }} onClick={() => setCameraEnabled(!cameraEnabled)}>
+                                    <div style={{ padding: '8px 10px', background: 'rgba(0,212,170,0.1)', borderBottom: '1px solid rgba(0,212,170,0.2)', fontSize: '11px', fontWeight: 700, color: 'var(--brand-primary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                        <span>📷 Camera</span>
+                                        <span style={{ fontSize: '10px', color: cameraEnabled ? 'var(--success)' : 'var(--danger)' }}>
+                                            {cameraEnabled ? 'Bật' : 'Tắt'}
+                                        </span>
+                                    </div>
+                                    <div style={{ width: '100%', aspectRatio: '4/3', minHeight: '120px' }}>
+                                        {cameraEnabled && <HandTracker onLandmarks={handleLandmarks} />}
+                                        {!cameraEnabled && (
+                                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ff5050', fontSize: 11, fontWeight: 600 }}>
+                                                Camera TẮT<br />Nhấn để bật
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         ) : appMode === 'course' ? (
                             <LectureCourse lang={lang} onBack={() => setAppMode('menu')} />
@@ -527,15 +578,37 @@ function Home(props) {
                                 }}
                             />
                         ) : appMode === 'multiplayer' ? (
-                            <div style={{ width: '100%' }}>
-                                <h2 style={{ color: 'var(--brand-primary)', textAlign: 'center', marginTop: 0 }}>
-                                    {lang === 'en' ? '2-Player Versus Mode' : 'Chế độ 2 Người Chơi'}
-                                </h2>
-                                <MultiplayerEngine
-                                    landmarks={landmarks}
-                                    onGameEvent={handleGameEvent}
-                                    lang={lang}
-                                />
+                            <div style={{ width: '100%', display: 'flex', gap: '12px' }}>
+                                <div style={{ flex: 1 }}>
+                                    <MultiplayerEngine
+                                        landmarks={landmarks}
+                                        onGameEvent={handleGameEvent}
+                                        lang={lang}
+                                    />
+                                </div>
+                                <div style={{
+                                    width: '160px', flexShrink: 0, borderRadius: '12px', overflow: 'hidden',
+                                    border: `1px solid ${cameraEnabled ? 'rgba(0,212,170,0.3)' : 'rgba(255,80,80,0.3)'}`,
+                                    boxShadow: cameraEnabled ? '0 0 20px rgba(0,212,170,0.2)' : 'none',
+                                    cursor: 'pointer', transition: 'all 0.3s', height: 'fit-content',
+                                    opacity: cameraEnabled ? 1 : 0.5,
+                                    background: '#0f172a',
+                                }} onClick={() => setCameraEnabled(!cameraEnabled)}>
+                                    <div style={{ padding: '8px 10px', background: 'rgba(0,212,170,0.1)', borderBottom: '1px solid rgba(0,212,170,0.2)', fontSize: '11px', fontWeight: 700, color: 'var(--brand-primary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                        <span>📷 Camera</span>
+                                        <span style={{ fontSize: '10px', color: cameraEnabled ? 'var(--success)' : 'var(--danger)' }}>
+                                            {cameraEnabled ? 'Bật' : 'Tắt'}
+                                        </span>
+                                    </div>
+                                    <div style={{ width: '100%', aspectRatio: '4/3', minHeight: '120px' }}>
+                                        {cameraEnabled && <HandTracker onLandmarks={handleLandmarks} />}
+                                        {!cameraEnabled && (
+                                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ff5050', fontSize: 11, fontWeight: 600 }}>
+                                                Camera TẮT<br />Nhấn để bật
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         ) : appMode === 'exams' ? (
                             <ExamsList lang={lang} onBack={() => setAppMode('menu')} />
@@ -606,8 +679,8 @@ function Home(props) {
         <StudentDashboardContent onClose={() => setShowStudentDashboard(false)} />
       )}
 
-      {/* Webcam Hand Tracking - preview + toggle gộp chung */}
-      {['learning', 'assembly', 'mission_assembly', 'multiplayer'].includes(appMode) && (
+      {/* Webcam Hand Tracking - for learning mode */}
+      {appMode === 'learning' && (
         <div
           onClick={() => setCameraEnabled(!cameraEnabled)}
           style={{

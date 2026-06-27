@@ -69,13 +69,14 @@ const HandTracker = ({ onLandmarks }) => {
           const vision = await FilesetResolver.forVisionTasks(MODEL_URLS[visionUrlIdx]);
           if (cancelled) return;
 
+          const isLowEnd = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
           const landmarker = await HandLandmarker.createFromOptions(vision, {
             baseOptions: {
               modelAssetPath: LANDMARKER_URLS[modelUrlIdx],
-              delegate: hasWebGL ? 'GPU' : 'CPU'
+              delegate: isLowEnd ? 'CPU' : (hasWebGL ? 'GPU' : 'CPU')
             },
             runningMode: 'VIDEO',
-            numHands: 1
+            numHands: 2
           });
 
           if (cancelled) return;
@@ -112,8 +113,9 @@ const HandTracker = ({ onLandmarks }) => {
           return;
         }
 
+        const isLowEnd = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: { ideal: 320 }, height: { ideal: 240 }, facingMode: 'user', frameRate: { ideal: 30 } }
+          video: { width: { ideal: isLowEnd ? 160 : 320 }, height: { ideal: isLowEnd ? 120 : 240 }, facingMode: 'user', frameRate: { ideal: isLowEnd ? 15 : 30 } }
         });
         if (cancelled) { stream.getTracks().forEach(t => t.stop()); return; }
         streamRef.current = stream;
@@ -132,8 +134,10 @@ const HandTracker = ({ onLandmarks }) => {
         const predictLoop = async () => {
           if (!mountedRef.current) return;
 
+          const isLowEnd = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
+          const skipFrames = isLowEnd ? 3 : 2;
           frameSkipRef.current++;
-          if (frameSkipRef.current % 2 !== 0) {
+          if (frameSkipRef.current % skipFrames !== 0) {
             animRef.current = requestAnimationFrame(predictLoop);
             return;
           }

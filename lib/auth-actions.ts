@@ -254,6 +254,7 @@ export async function completeOAuthRegistration(formData: FormData) {
   }
 
   const role = formData.get('role') as string || 'student'
+  const fullName = formData.get('full_name') as string || user.user_metadata?.full_name || user.email?.split('@')[0] || ''
   const schoolCode = formData.get('school_code') as string
   const schoolName = formData.get('school_name') as string
   
@@ -272,7 +273,7 @@ export async function completeOAuthRegistration(formData: FormData) {
   const { error: profileError } = await supabase.from('profiles').upsert({
     id: user.id,
     email: user.email,
-    full_name: user.user_metadata?.full_name || '',
+    full_name: fullName,
     role: role,
     school_id: schoolId,
     school_name: schoolName,
