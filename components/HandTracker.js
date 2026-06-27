@@ -22,16 +22,18 @@ function checkWebGLSupport() {
   } catch { return false; }
 }
 
-const SMOOTHING_ALPHA = 0.35;
+const SMOOTHING_ALPHA = 0.3;
 
 function getClosestHand(hands) {
   if (!hands || hands.length <= 1) return hands;
-  let maxScale = 0;
+  let maxScale = -1;
   let closest = [hands[0]];
   for (const hand of hands) {
-    if (hand[0] && hand[5]) {
-      const dx = hand[5].x - hand[0].x;
-      const dy = hand[5].y - hand[0].y;
+    const w = hand?.[0];
+    const i = hand?.[5];
+    if (w && i && w.x != null && i.x != null) {
+      const dx = i.x - w.x;
+      const dy = i.y - w.y;
       const scale = dx * dx + dy * dy;
       if (scale > maxScale) {
         maxScale = scale;
@@ -119,7 +121,7 @@ const HandTracker = ({ onLandmarks, numHands = 1 }) => {
           const landmarker = await HandLandmarker.createFromOptions(vision, {
             baseOptions: {
               modelAssetPath: LANDMARKER_URLS[modelUrlIdx],
-              delegate: 'CPU'
+              delegate: isLowEnd ? 'CPU' : (hasWebGL ? 'GPU' : 'CPU')
             },
             runningMode: 'VIDEO',
             numHands: numHands
@@ -203,10 +205,12 @@ const HandTracker = ({ onLandmarks, numHands = 1 }) => {
               let hands = results.landmarks.map((hand) =>
                 hand.map(p => ({ ...p, x: 1 - p.x }))
               );
-              if (!multiHand) hands = getClosestHand(hands);
-              const smoothed = smoothLandmarks(hands);
+              try {
+                if (!multiHand) hands = getClosestHand(hands);
+                hands = smoothLandmarks(hands);
+              } catch (_) {}
               if (lastLMCallbackRef.current) {
-                lastLMCallbackRef.current(smoothed);
+                lastLMCallbackRef.current(hands);
               }
             } else {
               smoothCacheRef.current = null;
