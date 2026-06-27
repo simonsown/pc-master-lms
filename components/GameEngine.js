@@ -4,8 +4,8 @@ import { useEffect, useRef, useState, useImperativeHandle, forwardRef, useCallba
 import confetti from 'canvas-confetti';
 import { IMAGE_MAP } from './imageAssets';
 
-const GRAB_THRESHOLD = 0.07;
-const RELEASE_THRESHOLD = 0.10;
+const GRAB_THRESHOLD = 0.06;
+const RELEASE_THRESHOLD = 0.09;
 
 const imgCache = new Map();
 
@@ -178,7 +178,7 @@ const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems, default
     // Input States
     const mouseRef = useRef({ x: 0, y: 0, isDown: false });
     const landmarksRef = useRef(null);
-    const cursorFilterRef = useRef({ x: null, y: null, alpha: 0.35 }); // Smooth but responsive cursor filter
+    const cursorFilterRef = useRef({ x: null, y: null, alpha: 0.3 }); // Smooth but responsive cursor filter
     const grabLockRef = useRef({ x: null, y: null, active: false }); // Freeze cursor when pinching
     const pinchStateRef = useRef(false); // Hysteresis: track actual pinch state
 

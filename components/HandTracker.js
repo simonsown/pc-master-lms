@@ -114,7 +114,7 @@ const HandTracker = ({ onLandmarks, numHands = 1 }) => {
 
         const isLowEnd = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: { ideal: isLowEnd ? 160 : 320 }, height: { ideal: isLowEnd ? 120 : 240 }, facingMode: 'user', frameRate: { ideal: isLowEnd ? 15 : 30 } }
+          video: { width: { ideal: 320 }, height: { ideal: 240 }, facingMode: 'user', frameRate: { ideal: isLowEnd ? 20 : 30 } }
         });
         if (cancelled) { stream.getTracks().forEach(t => t.stop()); return; }
         streamRef.current = stream;
