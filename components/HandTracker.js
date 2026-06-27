@@ -22,7 +22,7 @@ function checkWebGLSupport() {
   } catch { return false; }
 }
 
-const HandTracker = ({ onLandmarks }) => {
+const HandTracker = ({ onLandmarks, numHands = 1 }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [handLandmarker, setHandLandmarker] = useState(null);
@@ -76,7 +76,7 @@ const HandTracker = ({ onLandmarks }) => {
               delegate: isLowEnd ? 'CPU' : (hasWebGL ? 'GPU' : 'CPU')
             },
             runningMode: 'VIDEO',
-            numHands: 2
+            numHands: numHands
           });
 
           if (cancelled) return;
@@ -114,8 +114,12 @@ const HandTracker = ({ onLandmarks }) => {
         }
 
         const isLowEnd = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
+        const multiHand = numHands >= 2;
+        const camW = multiHand ? (isLowEnd ? 320 : 480) : (isLowEnd ? 240 : 480);
+        const camH = multiHand ? (isLowEnd ? 240 : 360) : (isLowEnd ? 180 : 360);
+        const camFps = isLowEnd ? 20 : 30;
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: { ideal: isLowEnd ? 160 : 320 }, height: { ideal: isLowEnd ? 120 : 240 }, facingMode: 'user', frameRate: { ideal: isLowEnd ? 15 : 30 } }
+          video: { width: { ideal: camW }, height: { ideal: camH }, facingMode: 'user', frameRate: { ideal: camFps } }
         });
         if (cancelled) { stream.getTracks().forEach(t => t.stop()); return; }
         streamRef.current = stream;
@@ -135,7 +139,8 @@ const HandTracker = ({ onLandmarks }) => {
           if (!mountedRef.current) return;
 
           const isLowEnd = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
-          const skipFrames = isLowEnd ? 3 : 2;
+          const multiHand = numHands >= 2;
+          const skipFrames = multiHand ? (isLowEnd ? 3 : 2) : (isLowEnd ? 1 : 0);
           frameSkipRef.current++;
           if (frameSkipRef.current % skipFrames !== 0) {
             animRef.current = requestAnimationFrame(predictLoop);

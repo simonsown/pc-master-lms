@@ -267,7 +267,7 @@ const LearningMode = ({
                                 </span>
                             </div>
                             <div style={{ width: '100%', aspectRatio: '4/3', minHeight: '140px', position: 'relative' }}>
-                                {cameraEnabled && <HandTracker onLandmarks={onLandmarks} />}
+                                {cameraEnabled && <HandTracker onLandmarks={onLandmarks} numHands={1} />}
                                 {!cameraEnabled && (
                                     <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a', color: '#ef4444', fontSize: 11, fontWeight: 600, textAlign: 'center' }}>
                                         Camera TẮT
@@ -385,7 +385,7 @@ const LearningMode = ({
                         </div>
                         <div style={{ width: '100%', aspectRatio: '4/3', minHeight: '140px', position: 'relative' }}>
                             {cameraEnabled && (
-                                <HandTracker onLandmarks={onLandmarks} />
+                                <HandTracker onLandmarks={onLandmarks} numHands={1} />
                             )}
                             {!cameraEnabled && (
                                 <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a', color: '#ef4444', fontSize: 11, fontWeight: 600, textAlign: 'center' }}>

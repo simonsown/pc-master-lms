@@ -500,7 +500,7 @@ function Home(props) {
                                     </span>
                                 </div>
                                 <div style={{ width: '100%', aspectRatio: '4/3', minHeight: '120px' }}>
-                                    {cameraEnabled && <HandTracker onLandmarks={handleLandmarks} />}
+                                    {cameraEnabled && <HandTracker onLandmarks={handleLandmarks} numHands={1} />}
                                     {!cameraEnabled && (
                                         <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ff5050', fontSize: 11, fontWeight: 600 }}>
                                             Camera TẮT<br />Nhấn để bật
@@ -552,7 +552,7 @@ function Home(props) {
                                         </span>
                                     </div>
                                     <div style={{ width: '100%', aspectRatio: '4/3', minHeight: '120px' }}>
-                                        {cameraEnabled && <HandTracker onLandmarks={handleLandmarks} />}
+                                        {cameraEnabled && <HandTracker onLandmarks={handleLandmarks} numHands={1} />}
                                         {!cameraEnabled && (
                                             <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ff5050', fontSize: 11, fontWeight: 600 }}>
                                                 Camera TẮT<br />Nhấn để bật
@@ -602,7 +602,7 @@ function Home(props) {
                                         </span>
                                     </div>
                                     <div style={{ width: '100%', aspectRatio: '4/3', minHeight: '120px' }}>
-                                        {cameraEnabled && <HandTracker onLandmarks={handleLandmarks} />}
+                                        {cameraEnabled && <HandTracker onLandmarks={handleLandmarks} numHands={2} />}
                                         {!cameraEnabled && (
                                             <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ff5050', fontSize: 11, fontWeight: 600 }}>
                                                 Camera TẮT<br />Nhấn để bật
