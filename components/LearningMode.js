@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import GameEngine from './GameEngine';
 import LearningRoadmap from './LearningRoadmap';
+import HandTracker from './HandTracker';
 
 
 const HARDWARE_DATA = {
@@ -63,6 +64,7 @@ const LearningMode = ({
     appMode, 
     landmarks, 
     cameraEnabled, 
+    onLandmarks,
     onHover, 
     onGameEvent, 
     onTakeQuiz, 
@@ -231,23 +233,50 @@ const LearningMode = ({
     // --- Free Practice sub-mode ---
     if (subMode === 'free') {
         return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h2 className="neon-text-green" style={{ margin: 0 }}>
+                    <h2 className="neon-text-green" style={{ margin: 0, fontSize: '18px' }}>
                         {lang === 'en' ? '🛠️ Free Practice' : '🛠️ Luyện Tập Tự Do'}
                     </h2>
                     <button onClick={() => setSubMode('select')} style={{
-                        padding: '8px 18px', background: 'transparent', color: 'var(--text-primary)',
-                        border: '1px solid var(--border-default)', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold'
+                        padding: '6px 14px', background: 'transparent', color: 'var(--text-primary)',
+                        border: '1px solid var(--border-default)', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px'
                     }}>
                         {lang === 'en' ? '← Back' : '← Quay lại'}
                     </button>
                 </div>
-                <GameEngine
-                    onHover={onHover}
-                    onGameEvent={onGameEvent}
-                    landmarks={landmarks}
-                />
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                    <div style={{ flex: 1, maxWidth: '800px' }}>
+                        <GameEngine
+                            onHover={onHover}
+                            onGameEvent={onGameEvent}
+                            landmarks={landmarks}
+                        />
+                    </div>
+                    <div style={{ width: '220px', flexShrink: 0 }}>
+                        <div style={{
+                            borderRadius: '12px', overflow: 'hidden',
+                            border: '1px solid rgba(0,212,170,0.25)',
+                            boxShadow: '0 0 16px rgba(0,212,170,0.15)',
+                            background: '#0f172a',
+                        }}>
+                            <div style={{ padding: '6px 10px', background: 'rgba(0,212,170,0.08)', borderBottom: '1px solid rgba(0,212,170,0.15)', fontSize: '11px', fontWeight: 700, color: '#00d4aa', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <span>📷 Camera</span>
+                                <span style={{ fontSize: '10px', color: cameraEnabled ? '#10b981' : '#ef4444' }}>
+                                    {cameraEnabled ? 'Bật' : 'Tắt'}
+                                </span>
+                            </div>
+                            <div style={{ width: '100%', aspectRatio: '4/3', minHeight: '140px', position: 'relative' }}>
+                                {cameraEnabled && <HandTracker onLandmarks={onLandmarks} />}
+                                {!cameraEnabled && (
+                                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a', color: '#ef4444', fontSize: 11, fontWeight: 600, textAlign: 'center' }}>
+                                        Camera TẮT
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }
@@ -319,18 +348,19 @@ const LearningMode = ({
     const targetHardware = getTargetForLevel(currentLevelId);
 
     return (
-        <div className="practice-layout" style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h2 className="neon-text-green" style={{ margin: 0 }}>
-                        {lang === 'en' ? `Level ${currentLevelId}: Action` : `Level ${currentLevelId}: Thực hành`}
-                    </h2>
-                    <button onClick={() => setView('roadmap')} style={{ padding: '0.5rem 1rem', background: 'transparent', color: 'var(--text-primary)', border: '1px solid var(--accent-blue)', borderRadius: '8px', cursor: 'pointer' }}>
-                        {lang === 'en' ? '⬅ Back to Roadmap' : '⬅ Về Lộ Trình'}
-                    </button>
-                </div>
+        <div className="practice-layout" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2 className="neon-text-green" style={{ margin: 0, fontSize: '18px' }}>
+                    {lang === 'en' ? `Level ${currentLevelId}: Action` : `Level ${currentLevelId}: Thực hành`}
+                </h2>
+                <button onClick={() => setView('roadmap')} style={{ padding: '6px 14px', background: 'transparent', color: 'var(--text-primary)', border: '1px solid var(--accent-blue)', borderRadius: '8px', cursor: 'pointer', fontSize: '13px' }}>
+                    {lang === 'en' ? '⬅ Back' : '⬅ Về'}
+                </button>
+            </div>
 
-                <div style={{ width: '100%', position: 'relative' }}>
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                {/* Left: Mainboard game area - compact */}
+                <div style={{ flex: 1, maxWidth: '800px', position: 'relative' }}>
                     <GameEngine
                         onHover={onHover}
                         onGameEvent={onGameEvent}
@@ -338,32 +368,51 @@ const LearningMode = ({
                     />
                 </div>
 
-                <div className="glass-panel" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                    <h3 className="neon-text-blue">{targetHardware}</h3>
-                    <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6', fontSize: '1rem' }}>
-                        {HARDWARE_DATA[targetHardware === 'Screws' ? 'Screws' : targetHardware]?.[lang]}
-                    </p>
+                {/* Right: Camera on top + Info below */}
+                <div style={{ width: '220px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {/* Camera */}
+                    <div style={{
+                        borderRadius: '12px', overflow: 'hidden',
+                        border: '1px solid rgba(0,212,170,0.25)',
+                        boxShadow: '0 0 16px rgba(0,212,170,0.15)',
+                        background: '#0f172a',
+                    }}>
+                        <div style={{ padding: '6px 10px', background: 'rgba(0,212,170,0.08)', borderBottom: '1px solid rgba(0,212,170,0.15)', fontSize: '11px', fontWeight: 700, color: '#00d4aa', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <span>📷 Camera</span>
+                            <span style={{ fontSize: '10px', color: cameraEnabled ? '#10b981' : '#ef4444' }}>
+                                {cameraEnabled ? 'Bật' : 'Tắt'}
+                            </span>
+                        </div>
+                        <div style={{ width: '100%', aspectRatio: '4/3', minHeight: '140px', position: 'relative' }}>
+                            {cameraEnabled && (
+                                <HandTracker onLandmarks={onLandmarks} />
+                            )}
+                            {!cameraEnabled && (
+                                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a', color: '#ef4444', fontSize: 11, fontWeight: 600, textAlign: 'center' }}>
+                                    Camera TẮT
+                                </div>
+                            )}
+                        </div>
+                    </div>
 
-                    <p style={{ color: 'var(--brand-primary)', fontWeight: 'bold' }}>
-                        {lang === 'en'
-                            ? (targetHardware === 'Screws' ? "Click below or assemble components to trigger the quiz!" : `Please assemble the ${targetHardware} to the proper location.`)
-                            : (targetHardware === 'Screws' ? "Click nút dưới hoặc lắp đúng linh kiện để mở bài kiểm tra!" : `Vui lòng lắp đặt ${targetHardware} vào vị trí chính xác.`)}
-                    </p>
-
-                    <button
-                        onClick={() => triggerQuizForLevel(currentLevelId, targetHardware)}
-                        style={{
-                            padding: '1rem', background: 'var(--accent-blue)', color: 'white',
-                            border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer',
-                            boxShadow: '0 0 15px var(--accent-blue)'
-                        }}
-                    >
-                        {lang === 'en' ? 'Manually Trigger Quiz ➜' : 'Chạy Bài Kiểm Tra ➜'}
-                    </button>
+                    {/* Hardware Info Panel */}
+                    <div className="glass-panel" style={{ padding: '14px', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <h3 style={{ color: '#60a5fa', margin: 0, fontSize: '14px', fontWeight: 800 }}>{targetHardware}</h3>
+                        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.5, fontSize: '13px', margin: 0 }}>
+                            {HARDWARE_DATA[targetHardware === 'Screws' ? 'Screws' : targetHardware]?.[lang]}
+                        </p>
+                        <p style={{ color: '#00d4aa', fontWeight: 700, fontSize: '12px', margin: 0 }}>
+                            {lang === 'en'
+                                ? (targetHardware === 'Screws' ? "Assemble to trigger the quiz!" : `Place the ${targetHardware}.`)
+                                : (targetHardware === 'Screws' ? "Lắp đúng linh kiện để mở bài kiểm tra!" : `Lắp ${targetHardware} vào vị trí.`)}
+                        </p>
+                        <button onClick={() => triggerQuizForLevel(currentLevelId, targetHardware)}
+                            style={{ padding: '10px', background: 'var(--accent-blue)', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', fontSize: '13px', fontFamily: 'inherit' }}>
+                            {lang === 'en' ? 'Start Quiz ➜' : 'Làm Bài Kiểm Tra ➜'}
+                        </button>
+                    </div>
                 </div>
             </div>
-
-            
         </div>
     );
 };

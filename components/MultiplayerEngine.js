@@ -10,7 +10,7 @@ const SUCCESS_COLOR = '#10b981';
 const T = {
     vi: {
         title: 'CHẾ ĐỘ 2 NGƯỜI CHƠI',
-        subtitle: 'Mỗi người đứng 1 bên — tay trái P1, tay phải P2',
+        subtitle: 'Mỗi người đứng 1 bên — Giơ tay lên để sẵn sàng!',
         p1Label: 'NGƯỜI CHƠI 1',
         p2Label: 'NGƯỜI CHƠI 2',
         waiting: 'Đang chờ người chơi...',
@@ -26,12 +26,13 @@ const T = {
         handOk: 'Đã thấy tay',
         handRaised: 'Đã giơ lên',
         handMissing: 'Đưa tay vào khung',
-        p1Desc: 'Giơ tay trái lên',
-        p2Desc: 'Giơ tay phải lên',
+        handsCount: 'Cả 2 tay',
+        p1Desc: 'Giơ 1 tay lên cao!',
+        p2Desc: 'Giơ 1 tay lên cao!',
     },
     en: {
         title: '2-PLAYER MODE',
-        subtitle: 'Stand on opposite sides — Left hand P1, Right hand P2',
+        subtitle: 'Stand on opposite sides — Raise your hand to ready up!',
         p1Label: 'PLAYER 1',
         p2Label: 'PLAYER 2',
         waiting: 'Waiting for players...',
@@ -47,8 +48,9 @@ const T = {
         handOk: 'Hand detected',
         handRaised: 'Hand raised',
         handMissing: 'Show your hand',
-        p1Desc: 'Raise your LEFT hand',
-        p2Desc: 'Raise your RIGHT hand',
+        handsCount: 'Both hands',
+        p1Desc: 'Raise your hand!',
+        p2Desc: 'Raise your hand!',
     },
 };
 
@@ -154,14 +156,22 @@ const MultiplayerEngine = ({ landmarks, onGameEvent, lang, trackingSensitivity }
 
                     <div style={{ display: 'flex', gap: '16px', width: '100%', maxWidth: '700px', alignItems: 'stretch' }}>
                         {[{ id: 1, state: p1State, color: P1_COLOR, label: L('p1Label', lang), desc: L('p1Desc', lang), landmarks: p1Landmarks, side: 'left' },
-                          { id: 2, state: p2State, color: P2_COLOR, label: L('p2Label', lang), desc: L('p2Desc', lang), landmarks: p2Landmarks, side: 'right' }].map(p => (
+                          { id: 2, state: p2State, color: P2_COLOR, label: L('p2Label', lang), desc: L('p2Desc', lang), landmarks: p2Landmarks, side: 'right' }].map(p => {
+                            const handsCount = p.landmarks ? p.landmarks.length : 0;
+                            return (
                             <div key={p.id} style={{
                                 flex: 1, textAlign: 'center', padding: '20px 16px', borderRadius: '16px',
                                 border: p.state.ready ? `2px solid ${p.color}` : '1px solid rgba(255,255,255,0.08)',
                                 background: p.state.ready ? `${p.color}15` : 'rgba(255,255,255,0.02)',
-                                transition: 'all 0.3s',
+                                transition: 'all 0.3s', position: 'relative', overflow: 'hidden',
                             }}>
-                                <div style={{ fontSize: '32px', marginBottom: '8px', filter: p.state.detected ? 'none' : 'grayscale(0.5)', opacity: p.state.detected ? 1 : 0.4 }}>
+                                {/* Hand count badge */}
+                                {handsCount > 0 && (
+                                    <div style={{ position: 'absolute', top: '8px', right: '8px', padding: '2px 8px', borderRadius: '10px', background: p.color, color: '#fff', fontSize: '10px', fontWeight: 700 }}>
+                                        {handsCount} {L('handOk', lang)}
+                                    </div>
+                                )}
+                                <div style={{ fontSize: '32px', marginBottom: '6px', filter: p.state.detected ? 'none' : 'grayscale(0.5)', opacity: p.state.detected ? 1 : 0.4 }}>
                                     {p.state.ready ? '✋' : p.state.detected ? '🖐️' : '👤'}
                                 </div>
                                 <h3 style={{ color: p.color, margin: '0 0 4px 0', fontSize: '14px', fontWeight: 800, letterSpacing: '1px' }}>{p.label}</h3>
@@ -173,8 +183,29 @@ const MultiplayerEngine = ({ landmarks, onGameEvent, lang, trackingSensitivity }
                                         READY
                                     </div>
                                 )}
+                                {/* Hand position dots */}
+                                {p.landmarks && p.landmarks.map((hand, hi) => {
+                                    const tip = hand?.[8];
+                                    if (!tip) return null;
+                                    return (
+                                        <div key={hi} style={{
+                                            position: 'absolute',
+                                            top: `${Math.min(tip.y * 100, 90)}%`,
+                                            left: `${Math.min(tip.x * 100, 90)}%`,
+                                            width: '10px', height: '10px',
+                                            background: p.color,
+                                            borderRadius: '50%',
+                                            border: '2px solid rgba(255,255,255,0.8)',
+                                            boxShadow: `0 0 8px ${p.color}`,
+                                            transform: 'translate(-50%, -50%)',
+                                            opacity: 0.8,
+                                            transition: 'all 0.15s',
+                                        }} />
+                                    );
+                                })}
                             </div>
-                        ))}
+                            );
+                        })}
                     </div>
 
                     {countdown > 0 ? (

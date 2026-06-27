@@ -570,6 +570,7 @@ function Home(props) {
                                 appMode={appMode}
                                 landmarks={landmarks}
                                 cameraEnabled={cameraEnabled}
+                                onLandmarks={handleLandmarks}
                                 onHover={handleHover}
                                 onGameEvent={handleGameEvent}
                                 onTakeQuiz={(topic, level, onSuccess) => {
@@ -679,30 +680,7 @@ function Home(props) {
         <StudentDashboardContent onClose={() => setShowStudentDashboard(false)} />
       )}
 
-      {/* Webcam Hand Tracking - for learning mode */}
-      {appMode === 'learning' && (
-        <div
-          onClick={() => setCameraEnabled(!cameraEnabled)}
-          style={{
-            position: 'fixed', bottom: 16, right: 16, zIndex: 9998,
-            width: 160, height: 120, borderRadius: 8, overflow: 'hidden',
-            border: `1px solid ${cameraEnabled ? 'rgba(0,212,170,0.3)' : 'rgba(255,80,80,0.3)'}`,
-            boxShadow: '0 0 20px rgba(0,0,0,0.5)', cursor: 'pointer',
-            opacity: cameraEnabled ? 1 : 0.5,
-          }}
-        >
-          {cameraEnabled && <HandTracker onLandmarks={handleLandmarks} />}
-          {!cameraEnabled && (
-            <div style={{
-              width: '100%', height: '100%', background: '#0f172a',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#ff5050', fontSize: 11, fontWeight: 600, fontFamily: 'inherit',
-            }}>
-              Camera TẮT<br />Nhấn để bật
-            </div>
-          )}
-        </div>
-      )}
+
 
       <style jsx>{``}</style>
     </div>
