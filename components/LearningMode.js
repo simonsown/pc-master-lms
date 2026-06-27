@@ -61,6 +61,8 @@ const LearningMode = ({
     lang, 
     externalSelection, 
     appMode, 
+    landmarks, 
+    cameraEnabled, 
     onHover, 
     onGameEvent, 
     onTakeQuiz, 
@@ -244,6 +246,7 @@ const LearningMode = ({
                 <GameEngine
                     onHover={onHover}
                     onGameEvent={onGameEvent}
+                    landmarks={landmarks}
                 />
             </div>
         );
@@ -271,7 +274,7 @@ const LearningMode = ({
                     </div>
                 </div>
                 <div style={{ width: '100vw', height: '100vh' }}>
-                    <GameEngine defaultPlaced={true} />
+                    <GameEngine defaultPlaced={true} landmarks={landmarks} />
                 </div>
             </div>
         );
@@ -306,6 +309,7 @@ const LearningMode = ({
                     unlockedLevels={unlockedLevels}
                     completedLevels={completedLevels}
                     onNodeClick={handleNodeClick}
+                    landmarks={landmarks}
                 />
             </div>
         );
@@ -315,7 +319,7 @@ const LearningMode = ({
     const targetHardware = getTargetForLevel(currentLevelId);
 
     return (
-        <div className="practice-layout">
+        <div className="practice-layout" style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h2 className="neon-text-green" style={{ margin: 0 }}>
@@ -330,6 +334,7 @@ const LearningMode = ({
                     <GameEngine
                         onHover={onHover}
                         onGameEvent={onGameEvent}
+                        landmarks={landmarks}
                     />
                 </div>
 

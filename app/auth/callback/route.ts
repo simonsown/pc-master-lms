@@ -16,10 +16,12 @@ export async function GET(request: Request) {
         .eq('id', user.id)
         .single()
 
+      // New OAuth user - redirect to register completion to select role
       if (!profile || !profile.role) {
-        return NextResponse.redirect(new URL('/onboarding', requestUrl.origin))
+        return NextResponse.redirect(new URL('/register?oauth=true', requestUrl.origin))
       }
 
+      // Existing user - redirect based on role
       const dashboardUrl = {
         teacher: '/teacher',
         admin: '/admin',

@@ -318,7 +318,7 @@ const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems, default
             oCtx.strokeRect(250, 610, 220, 180);
 
 
-            // Shift mainboard down slightly to center components
+            // Shift mainboard down to center CPU socket in view
             oCtx.save();
             oCtx.translate(0, 40);
 
@@ -409,15 +409,15 @@ const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems, default
             for (let i = 590; i < 810; i += 12) { oCtx.fillRect(i, 58, 4, 44); oCtx.fillRect(i + 1, 65, 2, 30); }
             for (let i = 130; i < 290; i += 12) { oCtx.fillRect(588, i, 34, 4); oCtx.fillRect(595, i + 1, 20, 2); }
 
-            // CPU Socket Area Bracket (Silver Metal LGA1151 Style Match)
-            // Metal Base framing the pins
-            draw3DBox(oCtx, 720, 170, 120, 120, 8, '#d1d5db', '#e5e7eb', '#9ca3af', '#6b7280');
+            // CPU Socket Area Bracket (Silver Metal LGA1700/AM5 Style)
+            // Outer reinforcement plate
+            draw3DBox(oCtx, 715, 165, 130, 130, 8, '#a1a1aa', '#d4d4d8', '#71717a', '#52525b');
 
             // Inner hollow for pins
             oCtx.fillStyle = '#111827';
             oCtx.fillRect(735, 185, 90, 90);
 
-            // Socket pins bed
+            // Socket pins bed (LGA style - dense gold contact array)
             oCtx.fillStyle = '#030712';
             oCtx.fillRect(740, 190, 80, 80);
             oCtx.fillStyle = '#fef08a'; // Bright gold pins
@@ -427,11 +427,31 @@ const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems, default
                 }
             }
 
+            // CPU Socket alignment triangle marker (gold corner)
+            oCtx.fillStyle = '#fbbf24';
+            oCtx.beginPath();
+            oCtx.moveTo(785, 182);
+            oCtx.lineTo(795, 182);
+            oCtx.lineTo(790, 190);
+            oCtx.closePath();
+            oCtx.fill();
+            oCtx.fillStyle = '#fff';
+            oCtx.font = 'bold 7px monospace';
+            oCtx.textAlign = 'center';
+            oCtx.fillText('▲', 790, 193);
+
+            // "LGA1700/AM5" text on socket
+            oCtx.fillStyle = '#94a3b8';
+            oCtx.font = 'bold 7px monospace';
+            oCtx.textAlign = 'left';
+            oCtx.fillText('LGA', 742, 205);
+            oCtx.fillText('1700', 742, 214);
+
             // Top Hinge Bracket & Bottom Locking Clasp (Silver)
             draw3DBox(oCtx, 730, 160, 100, 15, 6, '#cbd5e1', '#f1f5f9', '#94a3b8'); // Top hinge
             draw3DBox(oCtx, 750, 285, 60, 12, 6, '#cbd5e1', '#f1f5f9', '#94a3b8');  // Bottom lip
 
-            // Locking Metal Lever (Right side)
+            // Locking Metal Lever (Right side) - improved detail
             oCtx.strokeStyle = '#e2e8f0'; oCtx.lineWidth = 5;
             oCtx.shadowBlur = 4; oCtx.shadowColor = 'rgba(0,0,0,0.5)';
             oCtx.beginPath();
@@ -441,6 +461,14 @@ const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems, default
             oCtx.lineTo(845, 150); // Top hook
             oCtx.stroke();
             oCtx.shadowBlur = 0;
+
+            // Load lever highlight
+            oCtx.strokeStyle = '#fef08a';
+            oCtx.lineWidth = 2;
+            oCtx.beginPath();
+            oCtx.moveTo(850, 280);
+            oCtx.lineTo(865, 280);
+            oCtx.stroke();
 
             // Strict Proportion: Exactly 4 RAM Slots (Dual Channel Configuration)
             // Alternating colors: Elite dark gray and jet black
@@ -558,6 +586,45 @@ const GameEngine = forwardRef(({ landmarks, onGameEvent, purchasedItems, default
             ctx.shadowBlur = 10; ctx.shadowColor = `rgba(245, 158, 11, ${pulse})`;
             ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 2; ctx.strokeRect(970, 640, 90, 90);
             ctx.shadowBlur = 0;
+
+            // --- Component Slot Labels ---
+            ctx.save();
+            ctx.font = 'bold 11px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            ctx.shadowBlur = 4;
+            ctx.shadowColor = 'rgba(0,0,0,0.9)';
+
+            // CPU Socket Label
+            ctx.fillStyle = '#fbbf24';
+            ctx.fillText('CPU SOCKET', 780, 165);
+            // Cooler Label
+            ctx.fillStyle = '#60a5fa';
+            ctx.fillText('COOLER', 780, 310);
+            // RAM Slots Label
+            ctx.fillStyle = '#34d399';
+            ctx.fillText('DDR5 RAM (Kênh đôi → Khe 2 & 4)', 960, 110);
+            // GPU Slot Label (PCIe)
+            ctx.fillStyle = '#f472b6';
+            ctx.fillText('PCIe x16 (GPU)', 760, 545);
+            // M.2 SSD Label
+            ctx.fillStyle = '#a78bfa';
+            ctx.fillText('M.2 NVMe', 715, 475);
+            // CMOS Battery Label
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '9px monospace';
+            ctx.fillText('CMOS', 1000, 575);
+            // Standoff screw labels
+            ctx.font = '8px monospace';
+            ctx.fillStyle = '#9ca3af';
+            ctx.fillText('⦿', 520, 68);
+            ctx.fillText('⦿', 1130, 68);
+            ctx.fillText('⦿', 520, 748);
+            ctx.fillText('⦿', 1130, 748);
+            ctx.fillText('⦿', 520, 408);
+            ctx.fillText('⦿', 1130, 408);
+
+            ctx.restore();
 
             ctx.restore();
         };

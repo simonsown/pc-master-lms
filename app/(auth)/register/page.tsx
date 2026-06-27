@@ -10,7 +10,7 @@ function RegisterForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const isOauth = searchParams.get('oauth') === 'true'
-  const initialStep = searchParams.get('step') ? parseInt(searchParams.get('step')!) : 1
+  const initialStep = isOauth ? 2 : (searchParams.get('step') ? parseInt(searchParams.get('step')!) : 1)
 
   const [isLogin, setIsLogin] = useState(false)
   useEffect(() => { if (isLogin) router.push('/login') }, [isLogin, router])

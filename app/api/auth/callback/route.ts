@@ -4,7 +4,6 @@ import { createClient } from '@/lib/supabase-ssr-server'
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/builder'
 
   if (code) {
     const supabase = await createClient()
@@ -18,7 +17,15 @@ export async function GET(request: Request) {
         .single()
 
       if (!profile || !profile.role) {
-        return NextResponse.redirect(`${origin}/onboarding`)
+        const fullName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'
+        await supabase.from('profiles').upsert({
+          id: user.id,
+          email: user.email,
+          full_name: fullName,
+          role: 'student',
+          updated_at: new Date().toISOString(),
+        })
+        return NextResponse.redirect(`${origin}/builder`)
       }
 
       const userRole = profile.role

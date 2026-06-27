@@ -30,6 +30,7 @@ import { withTracking } from '@/lib/tracking';
 import BuilderLab from '@/components/builder/BuilderLab';
 import CollaborationStatus from '@/components/builder/CollaborationStatus';
 import VoiceController from '@/components/VoiceController';
+import HandTracker from '@/components/HandTracker';
 import {} from 'lucide-react';
 
 function Home(props) {
@@ -61,6 +62,17 @@ function Home(props) {
     return 'dark'
   });
 
+  const [landmarks, setLandmarks] = useState(null);
+  const [cameraEnabled, setCameraEnabled] = useState(true);
+  const landmarksRef = useRef(null);
+  const landmarThrottleRef = useRef(0);
+  const handleLandmarks = useCallback((lm) => {
+    landmarksRef.current = lm;
+    const now = Date.now();
+    if (now - landmarThrottleRef.current < 60) return;
+    landmarThrottleRef.current = now;
+    setLandmarks(lm);
+  }, []);
   const [isDemo, setIsDemo] = useState(false);
   const [sessionId, setSessionId] = useState(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -415,6 +427,7 @@ function Home(props) {
                                     ref={gameEngineRef}
                                     onHover={handleHover}
                                     onGameEvent={handleGameEvent}
+                                    landmarks={landmarks}
                                     imageMode={imageMode}
                                 />
                                 {/* Checklist + Debug */}
@@ -492,6 +505,7 @@ function Home(props) {
                                     ref={gameEngineRef}
                                     onHover={handleHover}
                                     onGameEvent={handleGameEvent}
+                                    landmarks={landmarks}
                                     purchasedItems={missionData?.purchasedItems}
                                     imageMode={imageMode}
                                 />
@@ -503,6 +517,8 @@ function Home(props) {
                                 lang={lang}
                                 externalSelection={lastPlaced}
                                 appMode={appMode}
+                                landmarks={landmarks}
+                                cameraEnabled={cameraEnabled}
                                 onHover={handleHover}
                                 onGameEvent={handleGameEvent}
                                 onTakeQuiz={(topic, level, onSuccess) => {
@@ -516,6 +532,7 @@ function Home(props) {
                                     {lang === 'en' ? '2-Player Versus Mode' : 'Chế độ 2 Người Chơi'}
                                 </h2>
                                 <MultiplayerEngine
+                                    landmarks={landmarks}
                                     onGameEvent={handleGameEvent}
                                     lang={lang}
                                 />
@@ -587,6 +604,31 @@ function Home(props) {
 
       {showStudentDashboard && (
         <StudentDashboardContent onClose={() => setShowStudentDashboard(false)} />
+      )}
+
+      {/* Webcam Hand Tracking - preview + toggle gộp chung */}
+      {['learning', 'assembly', 'mission_assembly', 'multiplayer'].includes(appMode) && (
+        <div
+          onClick={() => setCameraEnabled(!cameraEnabled)}
+          style={{
+            position: 'fixed', bottom: 16, right: 16, zIndex: 9998,
+            width: 160, height: 120, borderRadius: 8, overflow: 'hidden',
+            border: `1px solid ${cameraEnabled ? 'rgba(0,212,170,0.3)' : 'rgba(255,80,80,0.3)'}`,
+            boxShadow: '0 0 20px rgba(0,0,0,0.5)', cursor: 'pointer',
+            opacity: cameraEnabled ? 1 : 0.5,
+          }}
+        >
+          {cameraEnabled && <HandTracker onLandmarks={handleLandmarks} />}
+          {!cameraEnabled && (
+            <div style={{
+              width: '100%', height: '100%', background: '#0f172a',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#ff5050', fontSize: 11, fontWeight: 600, fontFamily: 'inherit',
+            }}>
+              Camera TẮT<br />Nhấn để bật
+            </div>
+          )}
+        </div>
       )}
 
       <style jsx>{``}</style>

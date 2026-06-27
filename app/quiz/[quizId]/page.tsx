@@ -5,12 +5,16 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
 import { QUIZ_BANK } from '@/data/quiz-bank'
 import { 
-  Trophy, Flame, Clock, 
-  CheckCircle, XCircle, ChevronRight, 
-  Loader2, AlertCircle, Sparkles, Star
+  Trophy, Flame, Clock, Swords,
+  CheckCircle, XCircle, ChevronRight, Crosshair,
+  Loader2, Sparkles, Star, Heart, Skull,
+  Target, Diamond, Zap
 } from 'lucide-react'
 import confetti from 'canvas-confetti'
 import Link from 'next/link'
+
+const SHAPES = ['⬠', '◆', '●', '■']
+const COLORS = ['#ef4444', '#3b82f6', '#f59e0b', '#8b5cf6']
 
 export default function MiniQuizPage({ params }: { params: Promise<{ quizId: string }> }) {
   const resolvedParams = use(params);
@@ -22,10 +26,12 @@ export default function MiniQuizPage({ params }: { params: Promise<{ quizId: str
   const [streak, setStreak] = useState(0)
   const [loading, setLoading] = useState(true)
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null)
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null)
   const [timeLeft, setTimeLeft] = useState(15)
   const [gameEnded, setGameEnded] = useState(false)
   const [quizTitle, setQuizTitle] = useState('')
   const [quizXp, setQuizXp] = useState(100)
+  const [shake, setShake] = useState(false)
 
   useEffect(() => {
     initQuiz()
@@ -34,8 +40,6 @@ export default function MiniQuizPage({ params }: { params: Promise<{ quizId: str
   async function initQuiz() {
     try {
       setLoading(true)
-
-      // Check if quizId is from QUIZ_BANK first
       const bankTopic = QUIZ_BANK.find(q => q.id === quizId)
       if (bankTopic) {
         const qs = bankTopic.questions.map((q: any) => ({
@@ -51,18 +55,13 @@ export default function MiniQuizPage({ params }: { params: Promise<{ quizId: str
         setCurrentIdx(0)
         return
       }
-
-      // Fallback: Fetch Lesson Section from Supabase
       const { data: section } = await supabase
         .from('lesson_sections')
         .select('*, lessons(*)')
         .eq('id', quizId)
         .single()
-
       if (!section) throw new Error('Không tìm thấy bài trắc nghiệm')
-
       setQuizTitle(section.lessons?.title || 'Trắc nghiệm')
-
       const res = await fetch('/api/ai/generate-quiz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -82,11 +81,10 @@ export default function MiniQuizPage({ params }: { params: Promise<{ quizId: str
     }
   }
 
-  // Timer Logic
   useEffect(() => {
     if (currentIdx < 0 || gameEnded || feedback) return
     if (timeLeft <= 0) {
-      handleAnswer(-1) // Time out
+      handleAnswer(-1)
       return
     }
     const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000)
@@ -94,7 +92,8 @@ export default function MiniQuizPage({ params }: { params: Promise<{ quizId: str
   }, [timeLeft, currentIdx, gameEnded, feedback])
 
   const handleAnswer = (index: number) => {
-    if (feedback) return // Prevent double click
+    if (feedback) return
+    setSelectedIdx(index)
     
     const correct = index === questions[currentIdx].correctIndex
     if (correct) {
@@ -103,151 +102,374 @@ export default function MiniQuizPage({ params }: { params: Promise<{ quizId: str
       const streakBonus = streak * 50
       setScore(prev => prev + 100 + timeBonus + streakBonus)
       setStreak(prev => prev + 1)
-      confetti({ particleCount: 30, spread: 40, origin: { y: 0.8 } })
+      confetti({ particleCount: 40, spread: 50, origin: { y: 0.7 }, colors: ['#00d4aa', '#00f3ff', '#a78bfa'] })
     } else {
       setFeedback('wrong')
       setStreak(0)
+      setShake(true)
+      setTimeout(() => setShake(false), 500)
     }
 
-    // Move to next after delay
     setTimeout(() => {
       if (currentIdx < questions.length - 1) {
         setCurrentIdx(prev => prev + 1)
         setFeedback(null)
+        setSelectedIdx(null)
         setTimeLeft(15)
       } else {
         setGameEnded(true)
-        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } })
+        confetti({ particleCount: 200, spread: 80, origin: { y: 0.5 }, colors: ['#00d4aa', '#00f3ff', '#fbbf24', '#a78bfa'] })
       }
-    }, 2500)
+    }, 3000)
   }
 
   if (loading) return (
-    <div className="min-h-screen bg-[#0f0f1a] flex flex-col items-center justify-center text-white p-10 text-center">
-       <Loader2 className="animate-spin text-[#00d2a0] mb-6" size={64} />
-       <h1 className="text-3xl font-black mb-2 animate-pulse">Đang tải câu hỏi...</h1>
-       <p className="text-slate-500 font-bold uppercase tracking-widest text-sm">Chuẩn bị bộ đề cho bạn</p>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-base)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px', textAlign: 'center' }}>
+      <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}>
+        <Crosshair size={64} style={{ color: 'var(--brand-primary)' }} />
+      </motion.div>
+      <h1 style={{ fontSize: '28px', fontWeight: 900, marginTop: '24px', marginBottom: '8px', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '2px' }}>
+        LOADING...
+      </h1>
+      <p style={{ color: 'var(--text-muted)', fontSize: '13px', fontFamily: 'var(--font-mono)' }}>
+        Chuẩn bị vũ khí cho bạn
+      </p>
     </div>
   )
 
   if (gameEnded) return (
-    <div className="min-h-screen bg-[#0f0f1a] flex flex-col items-center justify-center text-white p-10">
-       <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center">
-          <Trophy className="text-[#f59e0b] mx-auto mb-6" size={120} />
-          <h1 className="text-5xl font-black mb-4">HOÀN THÀNH!</h1>
-          <p className="text-xl text-slate-400 mb-4">{quizTitle}</p>
-          <div className="text-8xl font-black text-[#00d2a0] mb-2">{score}</div>
-          <p className="text-slate-500 mb-8">điểm</p>
-          <div className="flex gap-4 justify-center">
-             <Link href="/quiz-bank" className="px-10 py-4 bg-[#16213e] border border-[#1e293b] rounded-2xl font-black uppercase">Về ngân hàng đề</Link>
-             <button onClick={() => window.location.reload()} className="px-10 py-4 bg-[#00d2a0] text-black rounded-2xl font-black uppercase">Chơi lại</button>
-          </div>
-       </motion.div>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-base)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
+      <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ textAlign: 'center' }}>
+        <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+          <Trophy size={100} style={{ color: 'var(--accent-amber)', margin: '0 auto 24px' }} />
+        </motion.div>
+        <h1 style={{ fontSize: '42px', fontWeight: 900, marginBottom: '12px', letterSpacing: '3px', fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
+          VICTORY!
+        </h1>
+        <p style={{ fontSize: '18px', color: 'var(--text-muted)', marginBottom: '12px', fontFamily: 'var(--font-mono)' }}>
+          {quizTitle}
+        </p>
+        {/* Pixel score display */}
+        <div style={{
+          display: 'inline-block',
+          padding: '16px 32px',
+          background: 'var(--bg-surface)',
+          border: '2px solid var(--brand-primary)',
+          marginBottom: '24px',
+        }}>
+          <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px', fontFamily: 'var(--font-mono)', letterSpacing: '1px' }}>SCORE</div>
+          <div style={{ fontSize: '56px', fontWeight: 900, color: 'var(--brand-primary)', fontFamily: 'var(--font-mono)', lineHeight: 1 }}>{score}</div>
+        </div>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+          <Link href="/quiz-bank" style={{
+            padding: '12px 28px',
+            border: '1px solid var(--border-strong)',
+            color: 'var(--text-primary)',
+            fontSize: '13px',
+            fontWeight: 700,
+            fontFamily: 'var(--font-mono)',
+            letterSpacing: '1px',
+            textDecoration: 'none',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+          }}>
+            ← VỀ TRANG CHỦ
+          </Link>
+          <button onClick={() => window.location.reload()} style={{
+            padding: '12px 28px',
+            background: 'var(--brand-primary)',
+            color: 'var(--bg-base)',
+            border: 'none',
+            fontSize: '13px',
+            fontWeight: 700,
+            fontFamily: 'var(--font-mono)',
+            letterSpacing: '1px',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+          }}>
+            ★ CHƠI LẠI
+          </button>
+        </div>
+      </motion.div>
     </div>
   )
 
   const q = questions[currentIdx]
-  const colors = ['#ef4444', '#3b82f6', '#f59e0b', '#8b5cf6']
 
   return (
-    <div className="min-h-screen bg-[#0f0f1a] text-white flex flex-col p-6 overflow-hidden">
+    <div style={{
+      minHeight: '100vh',
+      background: 'var(--bg-base)',
+      color: 'var(--text-primary)',
+      display: 'flex',
+      flexDirection: 'column',
+      padding: '16px',
+      overflow: 'hidden',
+      position: 'relative',
+    }}>
+      {/* Pixel grid background */}
+      <div style={{
+        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+        backgroundImage: `
+          linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)
+        `,
+        backgroundSize: '32px 32px',
+        pointerEvents: 'none',
+        zIndex: 0,
+      }} />
       
-      {/* HUD */}
-      <header className="flex items-center justify-between mb-6">
-         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-           <div className="bg-[#16213e] px-4 py-2 rounded-full border border-[#1e293b]">
-              <span className="text-xs font-black text-[#00d2a0]">{(currentIdx+1)}/{questions.length}</span>
-           </div>
-           <div className="bg-[#16213e] px-4 py-2 rounded-full border border-[#1e293b] flex items-center gap-2">
-              <Star size={12} className="text-[#f59e0b]" />
-              <span className="text-xs font-black text-slate-400">{quizXp} XP</span>
-           </div>
-         </div>
-         <div className="flex items-center gap-4">
+      <div style={{ position: 'relative', zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
+        {/* HUD */}
+        <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{
+              padding: '6px 14px',
+              border: '1px solid var(--border-default)',
+              background: 'var(--bg-surface)',
+            }}>
+              <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-primary)', fontFamily: 'var(--font-mono)' }}>
+                {(currentIdx+1)}/{questions.length}
+              </span>
+            </div>
+            <div style={{
+              padding: '6px 14px',
+              border: '1px solid var(--border-default)',
+              background: 'var(--bg-surface)',
+              display: 'flex', alignItems: 'center', gap: '6px',
+            }}>
+              <Star size={11} style={{ color: 'var(--accent-amber)' }} />
+              <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>{quizXp} XP</span>
+            </div>
+            {/* HP Bar */}
+            <div style={{
+              padding: '6px 12px',
+              border: '1px solid var(--border-default)',
+              background: 'var(--bg-surface)',
+              display: 'flex', alignItems: 'center', gap: '6px',
+            }}>
+              <Heart size={11} style={{ color: streak > 0 ? '#ef4444' : 'var(--text-muted)' }} />
+              <div style={{ width: '50px', height: '8px', background: 'var(--border-subtle)', border: '1px solid var(--border-default)' }}>
+                <div style={{
+                  width: `${Math.max(10, 100 - (streak > 0 ? 0 : 30))}%`,
+                  height: '100%',
+                  background: streak > 0 ? '#ef4444' : 'var(--text-muted)',
+                  transition: 'width 0.3s',
+                }} />
+              </div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             {streak > 1 && (
-              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center gap-2 text-orange-500 font-black">
-                <Flame className="animate-bounce" /> x{streak}
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent-amber)', fontFamily: 'var(--font-mono)', fontWeight: 900, fontSize: '13px' }}>
+                <Flame size={16} style={{ color: 'var(--accent-amber)' }} /> x{streak}
               </motion.div>
             )}
-            <div className="bg-[#16213e] px-6 py-3 rounded-2xl border border-[#1e293b] text-2xl font-mono font-bold">
-               {timeLeft}s
+            <div style={{
+              padding: '8px 20px',
+              border: '1px solid var(--border-default)',
+              background: timeLeft <= 5 ? 'color-mix(in srgb, #ef4444 15%, transparent)' : 'var(--bg-surface)',
+              fontSize: '22px', fontWeight: 900,
+              fontFamily: 'var(--font-mono)',
+              color: timeLeft <= 5 ? '#ef4444' : 'var(--text-primary)',
+              transition: 'all 0.3s',
+            }}>
+              {timeLeft}s
             </div>
-         </div>
-      </header>
-      <div className="bg-[#16213e] px-4 py-2 rounded-xl border border-[#1e293b] text-center mb-6">
-        <span className="text-sm font-bold text-slate-300">{quizTitle}</span>
-      </div>
+          </div>
+        </header>
 
-      {/* Progress Bar */}
-      <div className="w-full h-2 bg-[#16213e] rounded-full mb-12 overflow-hidden">
-         <motion.div 
-           className="h-full bg-[#00d2a0]" 
-           initial={{ width: 0 }}
-           animate={{ width: `${((currentIdx + 1) / questions.length) * 100}%` }}
-         />
-      </div>
+        {/* Title bar */}
+        <div style={{
+          padding: '8px 14px',
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border-default)',
+          textAlign: 'center',
+          marginBottom: '16px',
+        }}>
+          <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', letterSpacing: '1px' }}>
+            ▸ {quizTitle} ◂
+          </span>
+        </div>
 
-      {/* Question Card */}
-      <main className="flex-1 max-w-5xl mx-auto w-full flex flex-col gap-10">
-         <AnimatePresence mode="wait">
+        {/* Progress Bar */}
+        <div style={{ width: '100%', height: '8px', background: 'var(--border-subtle)', marginBottom: '32px', border: '1px solid var(--border-default)' }}>
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${((currentIdx + 1) / questions.length) * 100}%` }}
+            style={{
+              height: '100%',
+              background: 'repeating-linear-gradient(90deg, var(--brand-primary) 0px, var(--brand-primary) 4px, var(--brand-light) 4px, var(--brand-light) 8px)',
+              transition: 'width 0.5s',
+            }}
+          />
+        </div>
+
+        {/* Question Card */}
+        <main style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <AnimatePresence mode="wait">
             <motion.div
               key={currentIdx}
               initial={{ x: 300, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
+              animate={{ x: 0, opacity: 1, ...(shake ? { x: [-8, 8, -6, 6, -3, 3, 0] } : {}) }}
               exit={{ x: -300, opacity: 0 }}
-              className="bg-[#16213e] p-10 rounded-[40px] border border-[#1e293b] text-center shadow-2xl relative"
+              transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+              style={{
+                background: 'var(--bg-surface)',
+                padding: '32px',
+                border: '1px solid var(--border-default)',
+                textAlign: 'center',
+                position: 'relative',
+                overflow: 'hidden',
+              }}
             >
-               <h2 className="text-3xl md:text-5xl font-black leading-tight">
-                 {q.question}
-               </h2>
-               
-               {/* Feedback Overlay */}
-               <AnimatePresence>
-                 {feedback && (
-                   <motion.div 
-                     initial={{ scale: 0, opacity: 0 }}
-                     animate={{ scale: 1, opacity: 1 }}
-                     className={`absolute inset-0 z-10 flex flex-col items-center justify-center rounded-[40px] backdrop-blur-md
-                       ${feedback === 'correct' ? 'bg-[#00d2a0]/80' : 'bg-[#ef4444]/80'}
-                     `}
-                   >
-                     {feedback === 'correct' ? <CheckCircle size={100} color="black" /> : <XCircle size={100} color="white" />}
-                     <h3 className="text-4xl font-black mt-4 text-black">
-                       {feedback === 'correct' ? 'CHÍNH XÁC!' : 'SAI RỒI!'}
-                     </h3>
-                     <p className="mt-4 px-10 text-lg font-bold text-black/70 italic">
-                        {q.explanation}
-                     </p>
-                   </motion.div>
-                 )}
-               </AnimatePresence>
+              {/* Pixel corner decorations */}
+              <div style={{ position: 'absolute', top: 0, left: 0, width: '8px', height: '8px', borderTop: '2px solid var(--brand-primary)', borderLeft: '2px solid var(--brand-primary)' }} />
+              <div style={{ position: 'absolute', top: 0, right: 0, width: '8px', height: '8px', borderTop: '2px solid var(--brand-primary)', borderRight: '2px solid var(--brand-primary)' }} />
+              <div style={{ position: 'absolute', bottom: 0, left: 0, width: '8px', height: '8px', borderBottom: '2px solid var(--brand-primary)', borderLeft: '2px solid var(--brand-primary)' }} />
+              <div style={{ position: 'absolute', bottom: 0, right: 0, width: '8px', height: '8px', borderBottom: '2px solid var(--brand-primary)', borderRight: '2px solid var(--brand-primary)' }} />
+
+              {/* Question number badge */}
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: '6px',
+                padding: '4px 12px',
+                border: '1px solid color-mix(in srgb, var(--accent-blue) 30%, transparent)',
+                color: 'var(--accent-blue)',
+                fontSize: '10px', fontWeight: 700,
+                fontFamily: 'var(--font-mono)',
+                marginBottom: '16px',
+                letterSpacing: '1px',
+              }}>
+                <Target size={12} />
+                QUESTION {currentIdx + 1}
+              </div>
+
+              <h2 style={{
+                fontSize: 'clamp(20px, 4vw, 36px)',
+                fontWeight: 900,
+                lineHeight: 1.3,
+                fontFamily: 'var(--font-sans)',
+              }}>
+                {q.question}
+              </h2>
+
+              {/* Feedback Overlay */}
+              <AnimatePresence>
+                {feedback && (
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    style={{
+                      position: 'absolute', inset: 0, zIndex: 10,
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                      background: feedback === 'correct'
+                        ? 'color-mix(in srgb, var(--brand-primary) 85%, transparent)'
+                        : 'color-mix(in srgb, var(--danger) 85%, transparent)',
+                      backdropFilter: 'blur(4px)',
+                    }}
+                  >
+                    <motion.div initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 200 }}>
+                      {feedback === 'correct'
+                        ? <Diamond size={80} style={{ color: 'var(--bg-base)' }} />
+                        : <Skull size={80} style={{ color: '#fff' }} />
+                      }
+                    </motion.div>
+                    <h3 style={{
+                      fontSize: '32px', fontWeight: 900, marginTop: '12px',
+                      fontFamily: 'var(--font-mono)',
+                      letterSpacing: '2px',
+                      color: feedback === 'correct' ? 'var(--bg-base)' : '#fff',
+                    }}>
+                      {feedback === 'correct' ? 'CHÍNH XÁC!' : 'SAI RỒI!'}
+                    </h3>
+                    {/* Show correct answer when wrong */}
+                    {feedback === 'wrong' && (
+                      <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+                        style={{ marginTop: '8px', fontSize: '15px', fontWeight: 700, color: 'rgba(255,255,255,0.9)', fontFamily: 'var(--font-mono)' }}>
+                        Đáp án đúng: <span style={{ color: '#00d4aa' }}>{q.options[q.correctIndex]}</span>
+                      </motion.p>
+                    )}
+                    <p style={{ marginTop: '12px', padding: '0 24px', fontSize: '13px', fontWeight: 500, color: feedback === 'correct' ? 'var(--bg-base)' : 'rgba(255,255,255,0.7)', maxWidth: '500px' }}>
+                      {q.explanation}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
-         </AnimatePresence>
+          </AnimatePresence>
 
-         {/* 4 Answer Buttons (Kahoot Style) */}
-         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {q.options.map((opt: string, i: number) => (
-               <motion.button
-                 key={i}
-                 whileHover={{ scale: 1.02 }}
-                 whileTap={{ scale: 0.98 }}
-                 onClick={() => handleAnswer(i)}
-                 disabled={!!feedback}
-                 style={{ background: colors[i] }}
-                 className="p-8 rounded-3xl text-2xl font-black text-white text-left flex items-center gap-6 shadow-xl hover:brightness-110 transition-all disabled:opacity-50"
-               >
-                 <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center text-3xl">
-                    {['▲', '◆', '●', '■'][i]}
-                 </div>
-                 {opt}
-               </motion.button>
-            ))}
-         </div>
-      </main>
+          {/* Answer Buttons */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
+            {q.options.map((opt: string, i: number) => {
+              const isCorrectOption = feedback && i === q.correctIndex
+              const isWrongSelected = feedback === 'wrong' && selectedIdx === i
 
-      {/* Decorative floating icons */}
-      <div className="absolute top-1/4 left-10 opacity-10 animate-pulse"><Sparkles size={100} /></div>
-      <div className="absolute bottom-1/4 right-10 opacity-10 animate-bounce"><Trophy size={100} /></div>
+              return (
+                <motion.button
+                  key={i}
+                  whileHover={!feedback ? { scale: 1.02, y: -2 } : {}}
+                  whileTap={!feedback ? { scale: 0.98 } : {}}
+                  onClick={() => handleAnswer(i)}
+                  disabled={!!feedback}
+                  style={{
+                    background: isCorrectOption
+                      ? 'var(--brand-primary)'
+                      : isWrongSelected
+                        ? 'var(--danger)'
+                        : COLORS[i],
+                    padding: '16px 20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '14px',
+                    color: '#fff',
+                    fontWeight: 700,
+                    fontSize: '16px',
+                    textAlign: 'left',
+                    border: 'none',
+                    cursor: feedback ? 'default' : 'pointer',
+                    opacity: feedback && !isCorrectOption && !isWrongSelected ? 0.4 : 1,
+                    transition: 'all 0.2s',
+                    fontFamily: 'var(--font-sans)',
+                    position: 'relative',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {/* Shape indicator */}
+                  <div style={{
+                    width: '40px', height: '40px',
+                    background: 'rgba(255,255,255,0.15)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '20px',
+                    flexShrink: 0,
+                  }}>
+                    {SHAPES[i]}
+                  </div>
+                  <span style={{ flex: 1 }}>{opt}</span>
+                  {isCorrectOption && <CheckCircle size={20} />}
+                  {isWrongSelected && <XCircle size={20} />}
+                </motion.button>
+              )
+            })}
+          </div>
+        </main>
+
+        {/* Footer */}
+        <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '11px', fontFamily: 'var(--font-mono)' }}>
+            <Zap size={12} style={{ color: 'var(--accent-amber)' }} />
+            SCORE: {score}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '11px', fontFamily: 'var(--font-mono)' }}>
+            <Swords size={12} />
+            STREAK: x{streak}
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

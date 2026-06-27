@@ -18,11 +18,6 @@ function checkWebGLSupport() {
     const canvas = document.createElement('canvas');
     const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
     if (!gl) return false;
-    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-    if (debugInfo) {
-      const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-      if (renderer && renderer.includes('SwiftShader')) return false;
-    }
     return true;
   } catch { return false; }
 }
@@ -39,6 +34,12 @@ const HandTracker = ({ onLandmarks }) => {
   const streamRef = useRef(null);
   const animRef = useRef(null);
   const mountedRef = useRef(true);
+  const frameSkipRef = useRef(0);
+  const lastLMCallbackRef = useRef(null);
+
+  useEffect(() => {
+    lastLMCallbackRef.current = onLandmarks;
+  }, [onLandmarks]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -74,7 +75,7 @@ const HandTracker = ({ onLandmarks }) => {
               delegate: hasWebGL ? 'GPU' : 'CPU'
             },
             runningMode: 'VIDEO',
-            numHands: 4
+            numHands: 1
           });
 
           if (cancelled) return;
@@ -112,7 +113,7 @@ const HandTracker = ({ onLandmarks }) => {
         }
 
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }
+          video: { width: { ideal: 320 }, height: { ideal: 240 }, facingMode: 'user', frameRate: { ideal: 30 } }
         });
         if (cancelled) { stream.getTracks().forEach(t => t.stop()); return; }
         streamRef.current = stream;
@@ -127,10 +128,16 @@ const HandTracker = ({ onLandmarks }) => {
 
         const canvas = canvasRef.current;
         if (!canvas) return;
-        const ctx = canvas.getContext('2d');
 
         const predictLoop = async () => {
           if (!mountedRef.current) return;
+
+          frameSkipRef.current++;
+          if (frameSkipRef.current % 2 !== 0) {
+            animRef.current = requestAnimationFrame(predictLoop);
+            return;
+          }
+
           if (video.videoWidth > 0 && video.videoHeight > 0) {
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
@@ -138,19 +145,17 @@ const HandTracker = ({ onLandmarks }) => {
 
           try {
             const results = await handLandmarker.detectForVideo(video, performance.now());
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            if (results.landmarks) {
-              const mirrored = results.landmarks.map((hand, i) => {
-                const h = hand.map(p => ({ ...p, x: 1 - p.x }));
-                if (results.handednesses?.[i]) h.handedness = results.handednesses[i][0].categoryName;
-                return h;
+            if (results.landmarks && results.landmarks.length > 0) {
+              const mirrored = results.landmarks.map((hand) => {
+                return hand.map(p => ({ ...p, x: 1 - p.x }));
               });
-              onLandmarks?.(mirrored);
-
-              for (const landmarks of results.landmarks) {
-                drawConnectors(ctx, landmarks, HAND_CONNECTIONS, { color: '#00FF00', lineWidth: 3 });
-                drawLandmarks(ctx, landmarks, { color: '#FF0000', lineWidth: 2 });
+              if (lastLMCallbackRef.current) {
+                lastLMCallbackRef.current(mirrored);
+              }
+            } else {
+              if (lastLMCallbackRef.current) {
+                lastLMCallbackRef.current([]);
               }
             }
           } catch (e) {
@@ -171,7 +176,7 @@ const HandTracker = ({ onLandmarks }) => {
 
     startCamera();
     return () => { cancelled = true; if (animRef.current) cancelAnimationFrame(animRef.current); };
-  }, [handLandmarker, webcamRunning, onLandmarks]);
+  }, [handLandmarker, webcamRunning]);
 
   useEffect(() => {
     return () => {
@@ -189,7 +194,6 @@ const HandTracker = ({ onLandmarks }) => {
     setLoading(true);
     setLoadingMessage('Đang thử lại...');
     retryCountRef.current = 0;
-    const { FilesetResolver, HandLandmarker } = require('@mediapipe/tasks-vision');
   };
 
   if (error) {
@@ -216,7 +220,7 @@ const HandTracker = ({ onLandmarks }) => {
       />
       <canvas
         ref={canvasRef}
-        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', transform: 'scaleX(-1)' }}
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', transform: 'scaleX(-1)', display: 'none' }}
       />
       {loading && (
         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px', background: '#020617' }}>
@@ -228,35 +232,6 @@ const HandTracker = ({ onLandmarks }) => {
       <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
     </div>
   );
-};
-
-const HAND_CONNECTIONS = [
-  [0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],
-  [0,9],[9,10],[10,11],[11,12],[0,13],[13,14],[14,15],[15,16],
-  [0,17],[17,18],[18,19],[19,20],[5,9],[9,13],[13,17]
-];
-
-const drawConnectors = (ctx, landmarks, connections, style) => {
-  ctx.strokeStyle = style.color;
-  ctx.lineWidth = style.lineWidth;
-  for (const [i, j] of connections) {
-    const a = landmarks[i], b = landmarks[j];
-    if (a && b) {
-      ctx.beginPath();
-      ctx.moveTo(a.x * ctx.canvas.width, a.y * ctx.canvas.height);
-      ctx.lineTo(b.x * ctx.canvas.width, b.y * ctx.canvas.height);
-      ctx.stroke();
-    }
-  }
-};
-
-const drawLandmarks = (ctx, landmarks, style) => {
-  ctx.fillStyle = style.color;
-  for (const p of landmarks) {
-    ctx.beginPath();
-    ctx.arc(p.x * ctx.canvas.width, p.y * ctx.canvas.height, 3, 0, 2 * Math.PI);
-    ctx.fill();
-  }
 };
 
 export default HandTracker;
