@@ -746,32 +746,15 @@ export default function GameScene() {
         {/* Whiteboard on back wall */}
         <Whiteboard position={[0, 0, -4.85]} />
 
-        {/* ===== DESKS WITH MONITORS ===== */}
+        {/* ===== 4 BÀN HỌC SINH ===== */}
         <Desk position={[-2.8, 0, -2.5]} />
         <Monitor position={[-2.8, 0.72, -2.5]} />
-
-        {/* Main assembly desk */}
-        <mesh position={[0, 0, -0.2]} castShadow>
-          <RoundedBox args={[4.5, 0.06, 5]} radius={0.02}>
-            <meshPhysicalMaterial color="#8B7355" roughness={0.5} metalness={0.05} />
-          </RoundedBox>
-        </mesh>
-
-        {/* Pc Case */}
-        <PcCaseDetailed />
-
-        {/* ===== COMPONENTS ON DESK FROM 3D WAREHOUSE ===== */}
-        {[
-          { t: 'motherboard', p: [0, 0.96, 0.2] as [number, number, number], s: 'motherboard_1' },
-          { t: 'cpu', p: [-1.5, 0.96, 1.5] as [number, number, number], s: 'cpu_1' },
-          { t: 'cooler', p: [-0.5, 0.96, 1.5] as [number, number, number], s: 'cooler_1' },
-          { t: 'ram', p: [0.5, 0.96, 1.5] as [number, number, number], s: 'ram_1' },
-          { t: 'gpu', p: [1.5, 0.96, 1.5] as [number, number, number], s: 'gpu_1' },
-          { t: 'psu', p: [-1.5, 0.96, -1.7] as [number, number, number], s: 'psu_1' },
-          { t: 'ssd', p: [1.5, 0.96, -1.7] as [number, number, number], s: 'ssd_1' },
-        ].map(({ t, p, s }) => (
-          <ComponentOnTable key={t} type={t} position={p} slotId={s} />
-        ))}
+        <Desk position={[2.8, 0, -2.5]} />
+        <Monitor position={[2.8, 0.72, -2.5]} />
+        <Desk position={[-2.8, 0, 2.5]} />
+        <Monitor position={[-2.8, 0.72, 2.5]} />
+        <Desk position={[2.8, 0, 2.5]} />
+        <Monitor position={[2.8, 0.72, 2.5]} />
       </Canvas>
     </div>
   );
