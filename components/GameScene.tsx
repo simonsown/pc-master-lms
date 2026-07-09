@@ -516,19 +516,19 @@ function Monitor({ position }: { position: [number, number, number] }) {
 function Whiteboard({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
-      <mesh position={[0, 1.1, 0]}>
-        <boxGeometry args={[3.2, 2.0, 0.04]} />
+      <mesh position={[0, 1.3, 0]}>
+        <boxGeometry args={[3.2, 2.2, 0.04]} />
         <meshPhysicalMaterial color="#f0f0f0" roughness={0.4} />
       </mesh>
-      <mesh position={[0, 1.1, 0.025]}>
-        <planeGeometry args={[3.1, 1.9]} />
+      <mesh position={[0, 1.3, 0.025]}>
+        <planeGeometry args={[3.1, 2.1]} />
         <meshPhysicalMaterial color="#ffffff" roughness={0.3} />
       </mesh>
-      <mesh position={[0, 2.12, 0]}>
+      <mesh position={[0, 2.42, 0]}>
         <boxGeometry args={[3.24, 0.04, 0.06]} />
         <meshPhysicalMaterial color="#94a3b8" metalness={0.3} roughness={0.4} />
       </mesh>
-      <mesh position={[0, 0.08, 0]}>
+      <mesh position={[0, 0.18, 0]}>
         <boxGeometry args={[3.24, 0.04, 0.06]} />
         <meshPhysicalMaterial color="#94a3b8" metalness={0.3} roughness={0.4} />
       </mesh>
@@ -675,15 +675,11 @@ function ComponentOnTable({ type, position, slotId }: { type: string; position: 
 function PcCaseShell({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
-      <RoundedBox args={[2.6, 1.3, 2.0]} radius={0.02}>
+      <RoundedBox args={[3.0, 1.5, 1.0]} radius={0.02}>
         <meshPhysicalMaterial color="#2a3a5c" metalness={0.7} roughness={0.25} envMapIntensity={0.8} />
       </RoundedBox>
-      <mesh position={[-1.305, 0, 0]}>
-        <planeGeometry args={[1.98, 1.26]} />
-        <meshPhysicalMaterial color="#88ccff" metalness={0.3} roughness={0.05} transparent opacity={0.15} side={THREE.DoubleSide} envMapIntensity={1.5} />
-      </mesh>
-      <mesh position={[0, 0.04, 1.015]}>
-        <planeGeometry args={[0.35, 0.025]} />
+      <mesh position={[0, 0.04, 0.505]}>
+        <planeGeometry args={[0.3, 0.025]} />
         <meshPhysicalMaterial color="#4488ff" transparent opacity={0.2} emissive="#4488ff" emissiveIntensity={0.3} />
       </mesh>
     </group>
@@ -766,22 +762,22 @@ export default function GameScene() {
         {/* Whiteboard on back wall */}
         <Whiteboard position={[0, 0, -4.85]} />
 
-        {/* ===== 4 BÀN HỌC SINH VỚI MONITOR + CASE ===== */}
+        {/* ===== 4 BÀN HỌC SINH VỚI MONITOR + CASE NHỎ TRÊN BÀN ===== */}
         <Desk position={[-2.8, 0, -2.5]} />
         <Monitor position={[-2.8, 0.72, -2.5]} />
-        <PcCaseShell position={[-2.8, 0, -1.8]} />
+        <PcCaseShell position={[-2.8, 0.78, -3.0]} />
 
         <Desk position={[2.8, 0, -2.5]} />
         <Monitor position={[2.8, 0.72, -2.5]} />
-        <PcCaseShell position={[2.8, 0, -1.8]} />
+        <PcCaseShell position={[2.8, 0.78, -3.0]} />
 
         <Desk position={[-2.8, 0, 2.5]} />
         <Monitor position={[-2.8, 0.72, 2.5]} />
-        <PcCaseShell position={[-2.8, 0, 3.2]} />
+        <PcCaseShell position={[-2.8, 0.78, 3.0]} />
 
         <Desk position={[2.8, 0, 2.5]} />
         <Monitor position={[2.8, 0.72, 2.5]} />
-        <PcCaseShell position={[2.8, 0, 3.2]} />
+        <PcCaseShell position={[2.8, 0.78, 3.0]} />
       </Canvas>
     </div>
   );
