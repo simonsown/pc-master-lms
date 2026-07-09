@@ -45,20 +45,27 @@ Khi edit component trong `/creator`:
 | File | Vai trò |
 |------|---------|
 | `components/GameScene.tsx` | Scene chính: CameraRig, PcCaseSimple, VrComponent |
-| `components/ShowroomScene.tsx` | Showroom: large space, click component → inspect + hand rotate |
-| `components/hand-rotation-shared.ts` | Shared ref cho hand tracking rotation |
-| `components/HeadTracker.tsx` | Face tracking + camera điều khiển |
-| `components/head-tracker-shared.ts` | Shared ref tránh re-render |
+| `components/ShowroomScene.tsx` | Showroom: orbiting GLB, point/pinch interaction |
+| `components/UnifiedTracker.tsx` | Combined face + hand tracking từ 1 camera |
+| `components/hand-shared.ts` | Shared ref cho hand landmarks |
+| `components/HeadTracker.tsx` | Face tracking (dùng trong GameScene) |
+| `components/head-tracker-shared.ts` | Shared ref cho head tracking |
 | `lib/useStore.ts` | Zustand store: components, slots, boot |
-| `app/builder/3d-viewer/page.tsx` | Page chứa GameScene + instructions + AI chat |
+| `app/builder/3d-viewer/page.tsx` | Page chứa GameScene |
 | `app/builder/showroom/page.tsx` | Page chứa ShowroomScene |
+| `app/landing/page.tsx` | Landing page QR + animation |
 
-### Showroom
-- `/builder/showroom` — không gian lớn tối màu, 4 pedestal trưng bày CPU/RAM/Cooler/GLB
-- Bấm linh kiện → bay ra trước mặt, auto xoay
-- Vẫy tay trước webcam → xoay linh kiện theo tay
-- ESC hoặc bấm lại → trả về pedestal
-- Navigation: nút `Showroom` ở 3d-viewer, nút `Classroom` ở showroom
+### Showroom (`/builder/showroom`)
+- Không gian sáng, 1 GLB model duy nhất quay quanh người dùng (orbit)
+- `UnifiedTracker` — 1 camera 640x480 chạy đồng thời FaceLandmarker + HandLandmarker (MediaPipe)
+- Tay 3D: 21 joint + bone, theo landmarks thực tế
+- Chỉ tay → component chạy lại gần (radius 2→0.6)
+- Chụm ngón (thumb+index) → component xoay tròn
+- Load nhanh: preload GLB, single camera, no delay
+
+### Landing (`/landing`)
+- Giới thiệu dự án với particle animation, QR code
+- Link tới Showroom và VR Classroom
 
 ### Debug production error
 - Lỗi runtime `Minified React error #185` = Maximum update depth exceeded
