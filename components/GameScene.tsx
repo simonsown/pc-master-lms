@@ -718,22 +718,6 @@ function TableImages({ position }: { position: [number, number, number] }) {
   const topTex = useTexture('/cpu_top_view.png');
   const sideTex = useTexture('/cpu_side_flat_left.png');
 
-  const cpuPins = useMemo(() => {
-    const arr: [number, number][] = [];
-    for (let x = -0.4; x <= 0.4; x += 0.27)
-      for (let z = -0.4; z <= 0.4; z += 0.27)
-        arr.push([x, z]);
-    return arr;
-  }, []);
-
-  const cornerCaps = useMemo(() => {
-    const arr: [number, number][] = [];
-    for (let x = -0.45; x <= 0.45; x += 0.9)
-      for (let z = -0.45; z <= 0.45; z += 0.9)
-        if (x !== 0 || z !== 0) arr.push([x, z]);
-    return arr;
-  }, []);
-
   const sideMats = useMemo(() => {
     const m = new THREE.MeshStandardMaterial({ map: sideTex });
     return [m, m, m, m, m, m];
@@ -746,21 +730,15 @@ function TableImages({ position }: { position: [number, number, number] }) {
 
   return (
     <group position={position}>
-      <mesh position={[0.6, 0.74, 0]} material={sideMats} castShadow>
-        <boxGeometry args={[0.14, 0.035, 0.14]} />
+      <mesh position={[0.6, 0.743, 0]} material={sideMats} castShadow>
+        <boxGeometry args={[0.1, 0.025, 0.1]} />
       </mesh>
-      <mesh position={[0.6, 0.756, 0]} material={topMats}>
-        <boxGeometry args={[0.15, 0.005, 0.15]} />
+      <mesh position={[0.6, 0.754, 0]} material={topMats}>
+        <boxGeometry args={[0.105, 0.004, 0.105]} />
       </mesh>
-      <mesh position={[0.6, 0.725, 0]} material={topMats}>
-        <boxGeometry args={[0.15, 0.005, 0.15]} />
+      <mesh position={[0.6, 0.733, 0]} material={topMats}>
+        <boxGeometry args={[0.105, 0.004, 0.105]} />
       </mesh>
-      {cornerCaps.map(([x, z]) => (
-        <mesh key={`cap-${x}-${z}`} position={[0.6 + x, 0.766, z]}>
-          <sphereGeometry args={[0.012, 8, 8]} />
-          <meshPhysicalMaterial color="#888" metalness={0.3} roughness={0.5} />
-        </mesh>
-      ))}
     </group>
   );
 }
@@ -840,6 +818,26 @@ export default function GameScene() {
 
         {/* Whiteboard on back wall */}
         <Whiteboard position={[0, 0, -6.85]} />
+
+        {/* AC unit on left wall */}
+        <group position={[-6.8, 2, 0]}>
+          <mesh position={[0, 0, 0]}>
+            <boxGeometry args={[0.06, 0.8, 0.6]} />
+            <meshPhysicalMaterial color="#f0f0f0" roughness={0.3} />
+          </mesh>
+          <mesh position={[0.02, 0.08, 0.22]}>
+            <boxGeometry args={[0.02, 0.4, 0.12]} />
+            <meshPhysicalMaterial color="#e0e0e0" roughness={0.5} />
+          </mesh>
+          <mesh position={[0.02, -0.04, 0.22]}>
+            <boxGeometry args={[0.02, 0.02, 0.05]} />
+            <meshPhysicalMaterial color="#00ff88" emissive="#00ff88" emissiveIntensity={0.3} transparent opacity={0.6} />
+          </mesh>
+          <mesh position={[0.02, -0.2, 0.25]} rotation={[0.4, 0, 0]}>
+            <boxGeometry args={[0.01, 0.15, 0.01]} />
+            <meshPhysicalMaterial color="#888" />
+          </mesh>
+        </group>
 
         {/* ===== BÀN LỚN Ở GIỮA ===== */}
         <CentralTable position={[0, 0, 0]} />
