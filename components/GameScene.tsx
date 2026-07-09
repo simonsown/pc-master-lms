@@ -739,6 +739,29 @@ function TableImages({ position }: { position: [number, number, number] }) {
       <mesh position={[0.6, 0.733, 0]} material={topMats}>
         <boxGeometry args={[0.105, 0.004, 0.105]} />
       </mesh>
+
+      {/* CPU Cooler beside the CPU */}
+      <mesh position={[0.68, 0.72, 0]}>
+        <boxGeometry args={[0.06, 0.002, 0.06]} />
+        <meshPhysicalMaterial color="#333333" />
+      </mesh>
+      <mesh position={[0.68, 0.73, 0]}>
+        <cylinderGeometry args={[0.02, 0.02, 0.016, 12]} />
+        <meshPhysicalMaterial color="#222222" />
+      </mesh>
+      {[0, 1, 2, 3, 4, 5].map((i) => {
+        const angle = (i / 6) * Math.PI * 2;
+        return (
+          <mesh key={`blade-${i}`} position={[0.68 + Math.sin(angle) * 0.02, 0.74, Math.cos(angle) * 0.02]} rotation={[0, -angle, 0.6]}>
+            <boxGeometry args={[0.004, 0.004, 0.04]} />
+            <meshPhysicalMaterial color="#5588cc" transparent opacity={0.5} />
+          </mesh>
+        );
+      })}
+      <mesh position={[0.68, 0.74, 0]}>
+        <torusGeometry args={[0.03, 0.002, 8, 20]} />
+        <meshPhysicalMaterial color="#4466aa" roughness={0.4} />
+      </mesh>
     </group>
   );
 }
