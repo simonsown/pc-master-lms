@@ -97,6 +97,16 @@ export default function Viewer3DPage() {
         )}
 
         <GameScene />
+        <a href="/builder/showroom"
+          style={{
+            position: 'fixed', top: 16, right: 16, zIndex: 50,
+            padding: '8px 16px', borderRadius: 8,
+            background: 'rgba(0,0,0,0.5)', color: '#8af',
+            fontFamily: 'monospace', fontSize: 12, textDecoration: 'none',
+            border: '1px solid rgba(100,100,255,0.2)', backdropFilter: 'blur(4px)',
+          }}>
+          Showroom
+        </a>
       </div>
     </ErrorBoundary>
   );
