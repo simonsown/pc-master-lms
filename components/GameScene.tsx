@@ -699,16 +699,15 @@ function CentralTable({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
       <mesh position={[0, 0.7, 0]} castShadow>
-        <boxGeometry args={[2.4, 0.04, 1.2]} />
+        <boxGeometry args={[3.2, 0.04, 1.6]} />
         <meshPhysicalMaterial color={topColor} roughness={0.6} metalness={0.05} />
       </mesh>
-      {[[-1.05, 0.35, -0.55], [-1.05, 0.35, 0.55], [1.05, 0.35, -0.55], [1.05, 0.35, 0.55]].map((p, i) => (
+      {[[-1.45, 0.35, -0.75], [-1.45, 0.35, 0.75], [1.45, 0.35, -0.75], [1.45, 0.35, 0.75]].map((p, i) => (
         <mesh key={i} position={p as [number, number, number]}>
-          <cylinderGeometry args={[0.035, 0.04, 0.7, 8]} />
+          <cylinderGeometry args={[0.04, 0.045, 0.7, 8]} />
           <meshPhysicalMaterial color="#94a3b8" roughness={0.3} metalness={0.4} />
         </mesh>
       ))}
-      {/* CPU images on the right side of the table */}
       <TableImages position={[0, 0, 0]} />
     </group>
   );
@@ -786,89 +785,158 @@ function TableImages({ position }: { position: [number, number, number] }) {
         </group>
       </ClickablePart>
 
-      {[0.06, -0.06].map((z, idx) => (
-        <ClickablePart key={`ram-${idx}`} position={[0.42, 0.72, z]} label={`DDR5 ${idx+1}`} color="#6366f1">
-          <group>
-            {/* Main PCB */}
-            <mesh position={[0, 0.002, 0]}>
-              <boxGeometry args={[0.028, 0.004, 0.13]} />
-              <meshPhysicalMaterial color="#111111" roughness={0.7} metalness={0.05} />
-            </mesh>
-            {/* PCB traces */}
-            {[0, 1, 2].map((i) => (
-              <mesh key={`trace-${i}`} position={[-0.01 + i * 0.01, 0.005, -0.04 + i * 0.035]}>
-                <boxGeometry args={[0.002, 0.001, 0.06]} />
-                <meshPhysicalMaterial color="#c8a050" metalness={0.6} roughness={0.3} transparent opacity={0.4} />
-              </mesh>
-            ))}
-            {/* Left heatsink */}
-            <mesh position={[-0.016, 0.008, 0]}>
-              <RoundedBox args={[0.006, 0.01, 0.1]} radius={0.003}>
-                <meshPhysicalMaterial color="#1a1a1a" roughness={0.4} metalness={0.3} />
-              </RoundedBox>
-            </mesh>
-            {/* Right heatsink */}
-            <mesh position={[0.016, 0.008, 0]}>
-              <RoundedBox args={[0.006, 0.01, 0.1]} radius={0.003}>
-                <meshPhysicalMaterial color="#1a1a1a" roughness={0.4} metalness={0.3} />
-              </RoundedBox>
-            </mesh>
-            {/* Heatsink fins — CNC-cut style */}
-            {Array.from({ length: 12 }).map((_, i) => (
-              <mesh key={`fin-${i}`} position={[-0.016, 0.013, -0.045 + i * 0.0082]}>
-                <boxGeometry args={[0.007, 0.001, 0.003]} />
-                <meshPhysicalMaterial color="#222" metalness={0.5} roughness={0.3} />
-              </mesh>
-            ))}
-            {Array.from({ length: 12 }).map((_, i) => (
-              <mesh key={`fin-r-${i}`} position={[0.016, 0.013, -0.045 + i * 0.0082]}>
-                <boxGeometry args={[0.007, 0.001, 0.003]} />
-                <meshPhysicalMaterial color="#222" metalness={0.5} roughness={0.3} />
-              </mesh>
-            ))}
-            {/* Gold connector pins — 18 individual contacts */}
-            {Array.from({ length: 18 }).map((_, i) => (
-              <mesh key={`pin-${i}`} position={[-0.012 + i * 0.0014, 0.001, 0.064]}>
-                <boxGeometry args={[0.001, 0.002, 0.004]} />
-                <meshPhysicalMaterial color="#d4a017" metalness={0.8} roughness={0.15} />
-              </mesh>
-            ))}
-            {/* SMD components */}
-            <mesh position={[-0.008, 0.005, -0.04]}>
-              <boxGeometry args={[0.003, 0.001, 0.002]} />
-              <meshPhysicalMaterial color="#333" roughness={0.6} />
-            </mesh>
-            <mesh position={[0.008, 0.005, -0.04]}>
-              <boxGeometry args={[0.003, 0.001, 0.002]} />
-              <meshPhysicalMaterial color="#333" roughness={0.6} />
-            </mesh>
-            <mesh position={[-0.01, 0.005, 0.035]}>
-              <boxGeometry args={[0.004, 0.0015, 0.003]} />
-              <meshPhysicalMaterial color="#2a2a2a" roughness={0.5} />
-            </mesh>
-            {/* Center notch */}
-            <mesh position={[0, 0.003, 0]}>
-              <boxGeometry args={[0.002, 0.002, 0.002]} />
-              <meshPhysicalMaterial color="#1a1a2e" roughness={0.7} />
-            </mesh>
-            {/* DDR5 text label */}
-            <sprite position={[0, 0.018, -0.01]} scale={[0.07, 0.02, 1]}>
-              <spriteMaterial map={(() => {
-                const c = document.createElement('canvas'); c.width = 256; c.height = 64;
-                const ctx = c.getContext('2d')!;
-                ctx.fillStyle = 'rgba(0,0,0,0)'; ctx.fillRect(0, 0, 256, 64);
-                ctx.fillStyle = '#aabbcc'; ctx.font = 'bold 11px monospace';
-                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                ctx.fillText('DDR5', 128, 18);
-                ctx.fillStyle = '#8899aa'; ctx.font = '8px monospace';
-                ctx.fillText('32GB 6400 MT/s CL32', 128, 42);
-                const t = new THREE.CanvasTexture(c); t.needsUpdate = true;
-                return t;
-              })()} transparent opacity={0.9} depthTest={false} />
-            </sprite>
-          </group>
-        </ClickablePart>
+      {/* RAM 1 */}
+      <ClickablePart position={[0.42, 0.72, 0.12]} label="DDR5 1" color="#6366f1">
+        <RamModel />
+      </ClickablePart>
+      {/* RAM 2 */}
+      <ClickablePart position={[0.42, 0.72, -0.08]} label="DDR5 2" color="#6366f1">
+        <RamModel />
+      </ClickablePart>
+
+      {/* CPU Cooler */}
+      <ClickablePart position={[-0.45, 0.72, 0.35]} label="Cooler" color="#00aaff">
+        <CoolerModel />
+      </ClickablePart>
+    </group>
+  );
+}
+
+function RamModel() {
+  return (
+    <group>
+      <mesh position={[0, 0.002, 0]}>
+        <boxGeometry args={[0.028, 0.004, 0.13]} />
+        <meshPhysicalMaterial color="#111111" roughness={0.7} metalness={0.05} />
+      </mesh>
+      {[0, 1, 2].map((i) => (
+        <mesh key={`trace-${i}`} position={[-0.01 + i * 0.01, 0.005, -0.04 + i * 0.035]}>
+          <boxGeometry args={[0.002, 0.001, 0.06]} />
+          <meshPhysicalMaterial color="#c8a050" metalness={0.6} roughness={0.3} transparent opacity={0.4} />
+        </mesh>
       ))}
+      <mesh position={[-0.016, 0.008, 0]}>
+        <RoundedBox args={[0.006, 0.01, 0.1]} radius={0.003}>
+          <meshPhysicalMaterial color="#1a1a1a" roughness={0.4} metalness={0.3} />
+        </RoundedBox>
+      </mesh>
+      <mesh position={[0.016, 0.008, 0]}>
+        <RoundedBox args={[0.006, 0.01, 0.1]} radius={0.003}>
+          <meshPhysicalMaterial color="#1a1a1a" roughness={0.4} metalness={0.3} />
+        </RoundedBox>
+      </mesh>
+      {Array.from({ length: 12 }).map((_, i) => (
+        <mesh key={`fin-${i}`} position={[-0.016, 0.013, -0.045 + i * 0.0082]}>
+          <boxGeometry args={[0.007, 0.001, 0.003]} />
+          <meshPhysicalMaterial color="#222" metalness={0.5} roughness={0.3} />
+        </mesh>
+      ))}
+      {Array.from({ length: 12 }).map((_, i) => (
+        <mesh key={`fin-r-${i}`} position={[0.016, 0.013, -0.045 + i * 0.0082]}>
+          <boxGeometry args={[0.007, 0.001, 0.003]} />
+          <meshPhysicalMaterial color="#222" metalness={0.5} roughness={0.3} />
+        </mesh>
+      ))}
+      {Array.from({ length: 18 }).map((_, i) => (
+        <mesh key={`pin-${i}`} position={[-0.012 + i * 0.0014, 0.001, 0.064]}>
+          <boxGeometry args={[0.001, 0.002, 0.004]} />
+          <meshPhysicalMaterial color="#d4a017" metalness={0.8} roughness={0.15} />
+        </mesh>
+      ))}
+      <mesh position={[-0.008, 0.005, -0.04]}>
+        <boxGeometry args={[0.003, 0.001, 0.002]} />
+        <meshPhysicalMaterial color="#333" roughness={0.6} />
+      </mesh>
+      <mesh position={[0.008, 0.005, -0.04]}>
+        <boxGeometry args={[0.003, 0.001, 0.002]} />
+        <meshPhysicalMaterial color="#333" roughness={0.6} />
+      </mesh>
+      <mesh position={[-0.01, 0.005, 0.035]}>
+        <boxGeometry args={[0.004, 0.0015, 0.003]} />
+        <meshPhysicalMaterial color="#2a2a2a" roughness={0.5} />
+      </mesh>
+      <mesh position={[0, 0.003, 0]}>
+        <boxGeometry args={[0.002, 0.002, 0.002]} />
+        <meshPhysicalMaterial color="#1a1a2e" roughness={0.7} />
+      </mesh>
+      <sprite position={[0, 0.018, -0.01]} scale={[0.07, 0.02, 1]}>
+        <spriteMaterial map={(() => {
+          const c = document.createElement('canvas'); c.width = 256; c.height = 64;
+          const ctx = c.getContext('2d')!;
+          ctx.fillStyle = 'rgba(0,0,0,0)'; ctx.fillRect(0, 0, 256, 64);
+          ctx.fillStyle = '#aabbcc'; ctx.font = 'bold 11px monospace';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText('DDR5', 128, 18);
+          ctx.fillStyle = '#8899aa'; ctx.font = '8px monospace';
+          ctx.fillText('32GB 6400 MT/s CL32', 128, 42);
+          const t = new THREE.CanvasTexture(c); t.needsUpdate = true;
+          return t;
+        })()} transparent opacity={0.9} depthTest={false} />
+      </sprite>
+    </group>
+  );
+}
+
+function CoolerModel() {
+  return (
+    <group>
+      {/* Base plate */}
+      <mesh position={[0, 0.003, 0]}>
+        <RoundedBox args={[0.08, 0.006, 0.08]} radius={0.003}>
+          <meshPhysicalMaterial color="#c0c0c0" metalness={0.6} roughness={0.3} />
+        </RoundedBox>
+      </mesh>
+      {/* Heat pipes — 4 copper pipes */}
+      {[[-0.025, 0, -0.025], [-0.025, 0, 0.025], [0.025, 0, -0.025], [0.025, 0, 0.025]].map((p, i) => (
+        <mesh key={`hp-${i}`} position={[p[0], 0.035, p[1]]}>
+          <cylinderGeometry args={[0.007, 0.007, 0.07, 8]} />
+          <meshPhysicalMaterial color="#b8860b" metalness={0.5} roughness={0.3} />
+        </mesh>
+      ))}
+      {/* Fin stack — 15 aluminum fins */}
+      {Array.from({ length: 15 }).map((_, i) => (
+        <mesh key={`fin-${i}`} position={[0, 0.01 + i * 0.005, 0]}>
+          <boxGeometry args={[0.075, 0.002, 0.075]} />
+          <meshPhysicalMaterial color="#d0d0d0" metalness={0.3} roughness={0.4} transparent opacity={0.7} />
+        </mesh>
+      ))}
+      {/* Fan frame */}
+      <mesh position={[0, 0.075, 0]}>
+        <torusGeometry args={[0.055, 0.005, 8, 28]} />
+        <meshPhysicalMaterial color="#222" roughness={0.6} metalness={0.2} />
+      </mesh>
+      {/* Fan blades — 7 blades */}
+      {Array.from({ length: 7 }).map((_, i) => {
+        const angle = (i / 7) * Math.PI * 2;
+        return (
+          <mesh key={`blade-${i}`} position={[Math.sin(angle) * 0.032, 0.075, Math.cos(angle) * 0.032]}
+            rotation={[0, -angle, 0.55]}>
+            <boxGeometry args={[0.005, 0.003, 0.045]} />
+            <meshPhysicalMaterial color="#4488cc" transparent opacity={0.35} />
+          </mesh>
+        );
+      })}
+      {/* Fan hub */}
+      <mesh position={[0, 0.075, 0]}>
+        <cylinderGeometry args={[0.018, 0.018, 0.004, 14]} />
+        <meshPhysicalMaterial color="#111" />
+      </mesh>
+      {/* LED ring (off) */}
+      <mesh position={[0, 0.075, 0]}>
+        <torusGeometry args={[0.035, 0.002, 8, 28]} />
+        <meshPhysicalMaterial color="#4488cc" transparent opacity={0.2} roughness={0.3} />
+      </mesh>
+      {/* Fan struts */}
+      {Array.from({ length: 3 }).map((_, i) => {
+        const angle = (i / 3) * Math.PI * 2;
+        return (
+          <mesh key={`strut-${i}`} position={[Math.sin(angle) * 0.028, 0.075, Math.cos(angle) * 0.028]}
+            rotation={[0, -angle + Math.PI / 2, 0]}>
+            <boxGeometry args={[0.002, 0.003, 0.022]} />
+            <meshPhysicalMaterial color="#333" />
+          </mesh>
+        );
+      })}
     </group>
   );
 }
