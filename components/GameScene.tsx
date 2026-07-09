@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useMemo, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { RoundedBox, Text, useTexture } from '@react-three/drei';
+import { RoundedBox, Text, useTexture, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import dynamic from 'next/dynamic';
 import { useAssemblyStore, type ComponentType } from '@/lib/useStore';
@@ -798,6 +798,68 @@ function TableImages({ position }: { position: [number, number, number] }) {
       <ClickablePart position={[-0.45, 0.72, 0.35]} label="Cooler" color="#00aaff">
         <CoolerModel />
       </ClickablePart>
+
+      {/* GLB Model Viewer */}
+      <GltfViewer position={[-0.45, 0.72, -0.3]} />
+    </group>
+  );
+}
+
+function GltfViewer({ position }: { position: [number, number, number] }) {
+  const { scene } = useGLTF('/models/computer_components.glb');
+  const groupRef = useRef<THREE.Group>(null);
+  const [hovered, setHovered] = useState(false);
+  const speedRef = useRef(0.5);
+
+  useEffect(() => {
+    if (!scene) return;
+    scene.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+  }, [scene]);
+
+  useFrame((_, delta) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.y += delta * speedRef.current;
+    }
+  });
+
+  const handleClick = () => {
+    speedRef.current = speedRef.current === 0.5 ? 2.5 : 0.5;
+  };
+
+  return (
+    <group position={position}>
+      <mesh position={[0, -0.015, 0]}>
+        <RoundedBox args={[0.25, 0.006, 0.25]} radius={0.008}>
+          <meshStandardMaterial color="#00aaff" metalness={0.2} roughness={0.3}
+            emissive="#00aaff" emissiveIntensity={hovered ? 0.5 : 0.05} />
+        </RoundedBox>
+      </mesh>
+      <group ref={groupRef} scale={0.5}
+        onPointerOver={(e) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = 'pointer'; }}
+        onPointerOut={() => { setHovered(false); document.body.style.cursor = 'default'; }}
+        onClick={(e) => { e.stopPropagation(); handleClick(); }}>
+        <primitive object={scene} />
+      </group>
+      {hovered && (
+        <sprite position={[0, 0.12, 0]} scale={[0.22, 0.06, 1]}>
+          <spriteMaterial map={(() => {
+            const c = document.createElement('canvas'); c.width = 200; c.height = 36;
+            const ctx = c.getContext('2d')!;
+            ctx.fillStyle = 'rgba(0,0,0,0.7)';
+            ctx.beginPath(); (ctx as any).roundRect(0, 0, 200, 36, 6); ctx.fill();
+            ctx.fillStyle = '#00aaff'; ctx.font = 'bold 12px monospace';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText('Click để tăng tốc xoay', 100, 18);
+            const t = new THREE.CanvasTexture(c); t.needsUpdate = true;
+            return t;
+          })()} transparent opacity={0.95} depthTest={false} />
+        </sprite>
+      )}
     </group>
   );
 }
