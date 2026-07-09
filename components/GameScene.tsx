@@ -746,18 +746,18 @@ function TableImages({ position }: { position: [number, number, number] }) {
 
   return (
     <group position={position}>
-      <mesh position={[0.6, 0.742, 0]} material={sideMats} castShadow>
-        <boxGeometry args={[0.22, 0.055, 0.22]} />
+      <mesh position={[0.6, 0.74, 0]} material={sideMats} castShadow>
+        <boxGeometry args={[0.14, 0.035, 0.14]} />
       </mesh>
-      <mesh position={[0.6, 0.768, 0]} material={topMats}>
-        <boxGeometry args={[0.235, 0.008, 0.235]} />
+      <mesh position={[0.6, 0.756, 0]} material={topMats}>
+        <boxGeometry args={[0.15, 0.005, 0.15]} />
       </mesh>
-      <mesh position={[0.6, 0.717, 0]} material={topMats}>
-        <boxGeometry args={[0.235, 0.008, 0.235]} />
+      <mesh position={[0.6, 0.725, 0]} material={topMats}>
+        <boxGeometry args={[0.15, 0.005, 0.15]} />
       </mesh>
       {cornerCaps.map(([x, z]) => (
-        <mesh key={`cap-${x}-${z}`} position={[0.6 + x, 0.78, z]}>
-          <sphereGeometry args={[0.018, 8, 8]} />
+        <mesh key={`cap-${x}-${z}`} position={[0.6 + x, 0.766, z]}>
+          <sphereGeometry args={[0.012, 8, 8]} />
           <meshPhysicalMaterial color="#888" metalness={0.3} roughness={0.5} />
         </mesh>
       ))}
