@@ -717,6 +717,9 @@ function CentralTable({ position }: { position: [number, number, number] }) {
 function TableImages({ position }: { position: [number, number, number] }) {
   const topTex = useTexture('/cpu_top_view.png');
   const sideTex = useTexture('/cpu_side_flat_left.png');
+  const ramTopTex = useTexture('/ram_top.png');
+  const ramFrontTex = useTexture('/ram_front.png');
+  const ramLeftTex = useTexture('/ram_left.png');
 
   const sideMats = useMemo(() => {
     const m = new THREE.MeshStandardMaterial({ map: sideTex });
@@ -727,6 +730,11 @@ function TableImages({ position }: { position: [number, number, number] }) {
     const m = new THREE.MeshStandardMaterial({ map: topTex });
     return [m, m, m, m, m, m];
   }, [topTex]);
+
+  const ramMaterials = useMemo(() => {
+    const m = new THREE.MeshStandardMaterial({ map: ramLeftTex });
+    return [m, m, m, m, m, m];
+  }, [ramLeftTex]);
 
   return (
     <group position={position}>
@@ -739,6 +747,29 @@ function TableImages({ position }: { position: [number, number, number] }) {
       <mesh position={[0.6, 0.733, 0]} material={topMats}>
         <boxGeometry args={[0.105, 0.004, 0.105]} />
       </mesh>
+
+      {/* 2 RAM sticks on the table */}
+      {/* The ram_left image wraps the side faces, ram_top for top/bottom, ram_front for front/back */}
+      <group position={[0.45, 0.72, 0.05]} rotation={[0, 0.3, 0]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.06, 0.03, 0.1]} />
+          <meshStandardMaterial map={ramFrontTex} />
+        </mesh>
+        <mesh position={[0, 0.018, 0]}>
+          <boxGeometry args={[0.065, 0.004, 0.105]} />
+          <meshStandardMaterial map={ramTopTex} />
+        </mesh>
+      </group>
+      <group position={[0.45, 0.72, -0.06]} rotation={[0, 0.3, 0]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.06, 0.03, 0.1]} />
+          <meshStandardMaterial map={ramFrontTex} />
+        </mesh>
+        <mesh position={[0, 0.018, 0]}>
+          <boxGeometry args={[0.065, 0.004, 0.105]} />
+          <meshStandardMaterial map={ramTopTex} />
+        </mesh>
+      </group>
     </group>
   );
 }
