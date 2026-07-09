@@ -1,6 +1,6 @@
 'use client';
 
-import { Component, type ReactNode } from 'react';
+import { useState, Component, type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
@@ -20,20 +20,12 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
 const ShowroomScene = dynamic(() => import('@/components/ShowroomScene'), { ssr: false });
 
 export default function ShowroomPage() {
+  const [component, setComponent] = useState<string | null>(null);
+
   return (
-    <div className="w-full h-screen bg-[#f0f4ff] relative">
+    <div className="w-full h-screen bg-[#0a0a1e] relative">
       <ErrorBoundary>
-        <ShowroomScene />
-        <a href="/builder/3d-viewer"
-          style={{
-            position: 'fixed', top: 16, right: 16, zIndex: 50,
-            padding: '8px 16px', borderRadius: 8,
-            background: 'rgba(0,0,0,0.5)', color: '#8af',
-            fontFamily: 'monospace', fontSize: 12, textDecoration: 'none',
-            border: '1px solid rgba(100,100,255,0.2)', backdropFilter: 'blur(4px)',
-          }}>
-          Lop hoc
-        </a>
+        <ShowroomScene component={component} onBack={() => setComponent(null)} />
       </ErrorBoundary>
     </div>
   );
