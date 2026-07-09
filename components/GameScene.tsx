@@ -773,19 +773,19 @@ export default function GameScene() {
         {/* ===== 4 BÀN HỌC SINH VỚI MONITOR + CASE NHỎ ĐỨNG BÊN PHẢI ===== */}
         <Desk position={[-2.8, 0, -2.5]} />
         <Monitor position={[-2.8, 0.72, -2.5]} />
-        <PcCaseShell position={[-2.6, 0.895, -2.5]} />
+        <PcCaseShell position={[-2.4, 0.895, -2.5]} />
 
         <Desk position={[2.8, 0, -2.5]} />
         <Monitor position={[2.8, 0.72, -2.5]} />
-        <PcCaseShell position={[3.0, 0.895, -2.5]} />
+        <PcCaseShell position={[3.2, 0.895, -2.5]} />
 
         <Desk position={[-2.8, 0, 2.5]} />
         <Monitor position={[-2.8, 0.72, 2.5]} />
-        <PcCaseShell position={[-2.6, 0.895, 2.5]} />
+        <PcCaseShell position={[-2.4, 0.895, 2.5]} />
 
         <Desk position={[2.8, 0, 2.5]} />
         <Monitor position={[2.8, 0.72, 2.5]} />
-        <PcCaseShell position={[3.0, 0.895, 2.5]} />
+        <PcCaseShell position={[3.2, 0.895, 2.5]} />
       </Canvas>
     </div>
   );
