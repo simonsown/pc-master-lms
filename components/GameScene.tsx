@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useMemo, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { RoundedBox, Text } from '@react-three/drei';
+import { RoundedBox, Text, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import dynamic from 'next/dynamic';
 import { useAssemblyStore, type ComponentType } from '@/lib/useStore';
@@ -708,6 +708,26 @@ function CentralTable({ position }: { position: [number, number, number] }) {
           <meshPhysicalMaterial color="#94a3b8" roughness={0.3} metalness={0.4} />
         </mesh>
       ))}
+      {/* CPU images on the right side of the table */}
+      <TableImages position={[0, 0, 0]} />
+    </group>
+  );
+}
+
+function TableImages({ position }: { position: [number, number, number] }) {
+  const topTex = useTexture('/cpu_top_view.png');
+  const sideTex = useTexture('/cpu_side_flat_left.png');
+
+  return (
+    <group position={position}>
+      <mesh position={[0.7, 0.74, 0.12]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[0.22, 0.22]} />
+        <meshStandardMaterial map={topTex} />
+      </mesh>
+      <mesh position={[0.7, 0.74, -0.12]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[0.22, 0.22]} />
+        <meshStandardMaterial map={sideTex} />
+      </mesh>
     </group>
   );
 }
