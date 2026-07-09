@@ -718,20 +718,49 @@ function TableImages({ position }: { position: [number, number, number] }) {
   const topTex = useTexture('/cpu_top_view.png');
   const sideTex = useTexture('/cpu_side_flat_left.png');
 
-  const mats = useMemo(() => [
-    new THREE.MeshStandardMaterial({ map: sideTex }),
-    new THREE.MeshStandardMaterial({ map: sideTex }),
-    new THREE.MeshStandardMaterial({ map: topTex }),
-    new THREE.MeshStandardMaterial({ map: topTex }),
-    new THREE.MeshStandardMaterial({ map: sideTex }),
-    new THREE.MeshStandardMaterial({ map: sideTex }),
-  ], [topTex, sideTex]);
+  const cpuPins = useMemo(() => {
+    const arr: [number, number][] = [];
+    for (let x = -0.4; x <= 0.4; x += 0.27)
+      for (let z = -0.4; z <= 0.4; z += 0.27)
+        arr.push([x, z]);
+    return arr;
+  }, []);
+
+  const cornerCaps = useMemo(() => {
+    const arr: [number, number][] = [];
+    for (let x = -0.45; x <= 0.45; x += 0.9)
+      for (let z = -0.45; z <= 0.45; z += 0.9)
+        if (x !== 0 || z !== 0) arr.push([x, z]);
+    return arr;
+  }, []);
+
+  const sideMats = useMemo(() => {
+    const m = new THREE.MeshStandardMaterial({ map: sideTex });
+    return [m, m, m, m, m, m];
+  }, [sideTex]);
+
+  const topMats = useMemo(() => {
+    const m = new THREE.MeshStandardMaterial({ map: topTex });
+    return [m, m, m, m, m, m];
+  }, [topTex]);
 
   return (
     <group position={position}>
-      <mesh position={[0.6, 0.76, 0]} material={mats} castShadow>
-        <boxGeometry args={[0.28, 0.08, 0.28]} />
+      <mesh position={[0.6, 0.742, 0]} material={sideMats} castShadow>
+        <boxGeometry args={[0.22, 0.055, 0.22]} />
       </mesh>
+      <mesh position={[0.6, 0.768, 0]} material={topMats}>
+        <boxGeometry args={[0.235, 0.008, 0.235]} />
+      </mesh>
+      <mesh position={[0.6, 0.717, 0]} material={topMats}>
+        <boxGeometry args={[0.235, 0.008, 0.235]} />
+      </mesh>
+      {cornerCaps.map(([x, z]) => (
+        <mesh key={`cap-${x}-${z}`} position={[0.6 + x, 0.78, z]}>
+          <sphereGeometry args={[0.018, 8, 8]} />
+          <meshPhysicalMaterial color="#888" metalness={0.3} roughness={0.5} />
+        </mesh>
+      ))}
     </group>
   );
 }
