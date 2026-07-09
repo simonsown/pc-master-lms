@@ -94,14 +94,14 @@ export default function Viewer3DPage() {
               PC Master Builder <span style={{ color: '#00ffcc' }}>3D VR</span>
             </h1>
             <div style={{ maxWidth: 480, textAlign: 'center', color: '#88bbcc', fontSize: 14, lineHeight: 1.8 }}>
-              {T(lang, 'Build your PC in a VR workshop. Use WASD to move, webcam to look around, drag parts into the PC case.',
-                'Lắp ráp PC trong phòng thí nghiệm VR. Dùng WASD di chuyển, webcam nhìn xung quanh, kéo thả linh kiện vào thùng máy.')}
+              {T(lang, 'Build your PC in a VR workshop. Use WASD to move, webcam to look around. Drag parts from the table into the PC case.',
+                'Lắp ráp PC trong phòng thí nghiệm VR. Dùng WASD di chuyển, webcam nhìn xung quanh. Kéo thả linh kiện từ bàn vào thùng máy.')}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%', maxWidth: 400 }}>
               {[
-                { num: '1', text: T(lang, 'Toggle Explore to walk around the room (WASD + head tracking)', 'Bật Khám phá để đi lại trong phòng (WASD + theo dõi đầu)'), color: '#00ffcc' },
-                { num: '2', text: T(lang, 'Click Start Assembly to build your PC', 'Nhấn Bắt đầu lắp ráp để ráp PC'), color: '#44aaff' },
-                { num: '3', text: T(lang, 'Drag parts into the case — press POWER!', 'Kéo linh kiện vào thùng máy — nhấn KHỞI ĐỘNG!'), color: '#8866ff' },
+                { num: '1', text: T(lang, 'Use WASD to walk — you cannot walk through furniture (collision enabled)', 'Dùng WASD di chuyển — không thể đi xuyên qua bàn ghế (có va chạm)'), color: '#00ffcc' },
+                { num: '2', text: T(lang, 'Click and drag components from the table into the PC case', 'Nhấn và kéo linh kiện từ bàn vào thùng máy'), color: '#44aaff' },
+                { num: '3', text: T(lang, 'Follow color-coded slots: CPU=teal, Cooler=blue, RAM=purple, GPU=red, PSU=amber, SSD=green', 'Theo màu: CPU=xanh ngọc, Tản nhiệt=xanh dương, RAM=tím, GPU=đỏ, Nguồn=hổ phách, SSD=xanh lá'), color: '#8866ff' },
               ].map((step, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', background: 'rgba(255,255,255,0.03)', borderRadius: 10, border: `1px solid ${step.color}22` }}>
                   <span style={{ width: 30, height: 30, borderRadius: 8, background: `${step.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: step.color, fontWeight: 800, fontSize: 13 }}>{step.num}</span>

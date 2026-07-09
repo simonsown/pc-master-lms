@@ -86,7 +86,7 @@ const DEFAULT_SLOTS: ComponentSlot[] = [
     rotation: [0, 0, 0],
     size: [0.6, 0.06, 0.6],
     dependsOn: ['motherboard'],
-    locked: true,
+    locked: false,
   },
   {
     id: 'cooler_1',
@@ -96,7 +96,7 @@ const DEFAULT_SLOTS: ComponentSlot[] = [
     rotation: [0, 0, 0],
     size: [0.7, 0.15, 0.7],
     dependsOn: ['cpu'],
-    locked: true,
+    locked: false,
   },
   {
     id: 'ram_1',
@@ -106,7 +106,7 @@ const DEFAULT_SLOTS: ComponentSlot[] = [
     rotation: [0, 0, 0],
     size: [0.08, 0.4, 0.02],
     dependsOn: ['motherboard'],
-    locked: true,
+    locked: false,
   },
   {
     id: 'ram_2',
@@ -116,7 +116,7 @@ const DEFAULT_SLOTS: ComponentSlot[] = [
     rotation: [0, 0, 0],
     size: [0.08, 0.4, 0.02],
     dependsOn: ['motherboard'],
-    locked: true,
+    locked: false,
   },
   {
     id: 'ram_3',
@@ -126,7 +126,7 @@ const DEFAULT_SLOTS: ComponentSlot[] = [
     rotation: [0, 0, 0],
     size: [0.08, 0.4, 0.02],
     dependsOn: ['motherboard'],
-    locked: true,
+    locked: false,
   },
   {
     id: 'ram_4',
@@ -136,7 +136,7 @@ const DEFAULT_SLOTS: ComponentSlot[] = [
     rotation: [0, 0, 0],
     size: [0.08, 0.4, 0.02],
     dependsOn: ['motherboard'],
-    locked: true,
+    locked: false,
   },
   {
     id: 'gpu_1',
@@ -146,7 +146,7 @@ const DEFAULT_SLOTS: ComponentSlot[] = [
     rotation: [0, 0, 0],
     size: [1.6, 0.15, 0.6],
     dependsOn: ['motherboard'],
-    locked: true,
+    locked: false,
   },
   {
     id: 'psu_1',
@@ -156,7 +156,7 @@ const DEFAULT_SLOTS: ComponentSlot[] = [
     rotation: [0, 0, 0],
     size: [1.2, 0.4, 0.7],
     dependsOn: ['motherboard'],
-    locked: true,
+    locked: false,
   },
   {
     id: 'ssd_1',
@@ -166,7 +166,7 @@ const DEFAULT_SLOTS: ComponentSlot[] = [
     rotation: [0, 0, 0],
     size: [0.8, 0.02, 0.2],
     dependsOn: ['motherboard'],
-    locked: true,
+    locked: false,
   },
 ];
 

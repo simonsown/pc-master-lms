@@ -1,700 +1,673 @@
 'use client';
 
-import React, { useRef, useState, useEffect } from 'react';
-import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber';
+import React, { useRef, useState, useMemo, useEffect } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { RoundedBox, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import dynamic from 'next/dynamic';
-import { useAssemblyStore } from '@/lib/useStore';
+import { useAssemblyStore, type ComponentType } from '@/lib/useStore';
+import { headTrackingRef } from './head-tracker-shared';
 
 const HeadTracker = dynamic(() => import('./HeadTracker'), { ssr: false });
 
+const COLLIDERS = [
+  { x: [-2.25, 2.25], z: [-2.5, 0.5] },
+  { x: [-3.5, -1.5], z: [1.0, 2.0] },
+  { x: [2.0, 4.0], z: [0.5, 1.5] },
+];
+
+function checkCollision(x: number, z: number, radius = 0.3): boolean {
+  for (const b of COLLIDERS) {
+    if (x + radius > b.x[0] && x - radius < b.x[1] && z + radius > b.z[0] && z - radius < b.z[1]) return true;
+  }
+  return false;
+}
+
 function CameraRig() {
   const { camera } = useThree();
-  const cameraCoords = useAssemblyStore((s) => s.cameraCoords);
-  const keys = useRef({ w: false, a: false, s: false, d: false });
+  const k = useRef({ w: false, a: false, s: false, d: false });
   const euler = useRef(new THREE.Euler(0, 0, 0, 'YXZ'));
-  const moveSpeed = 4;
-  const faceSensitivity = 3.0;
+  const ay = useRef(0);
+  const py = useRef(0);
 
-  const accumulatedYaw = useRef(0);
-  const prevFaceYaw = useRef(0);
-  const stillnessTimer = useRef(0);
-  const viewSaved = useRef(false);
-  const mainView2 = useRef({ position: new THREE.Vector3(), quaternion: new THREE.Quaternion() });
-  const initialized = useRef(false);
-
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => { const k = e.key.toLowerCase(); if (k in keys.current) (keys.current as any)[k] = true; };
-    const up = (e: KeyboardEvent) => { const k = e.key.toLowerCase(); if (k in keys.current) (keys.current as any)[k] = false; };
+  React.useEffect(() => {
+    const down = (e: KeyboardEvent) => { const key = e.key.toLowerCase(); if (key in k.current) (k.current as any)[key] = true; };
+    const up = (e: KeyboardEvent) => { const key = e.key.toLowerCase(); if (key in k.current) (k.current as any)[key] = false; };
     window.addEventListener('keydown', down);
     window.addEventListener('keyup', up);
-
-    camera.position.set(0, 1.6, 4.5);
+    camera.position.set(0, 1.6, 3.5);
     euler.current.set(0, 0, 0, 'YXZ');
     camera.quaternion.setFromEuler(euler.current);
-    initialized.current = true;
-
     return () => { window.removeEventListener('keydown', down); window.removeEventListener('keyup', up); };
   }, []);
 
   useFrame((_, dt) => {
-    const delta = Math.min(dt, 0.05);
-
-    const rawPitch = -cameraCoords.pitch * 2.2;
-    const rawYaw = cameraCoords.yaw * faceSensitivity;
-    const yawMovement = Math.abs(rawYaw - prevFaceYaw.current);
-
-    if (yawMovement > 0.008) {
-      const diff = (rawYaw - prevFaceYaw.current) * 0.6;
-      accumulatedYaw.current += diff;
-      prevFaceYaw.current = rawYaw;
-      stillnessTimer.current = 0;
-      viewSaved.current = false;
-    } else {
-      stillnessTimer.current += delta;
-      if (stillnessTimer.current >= 1.0 && !viewSaved.current && initialized.current) {
-        mainView2.current.position.copy(camera.position);
-        mainView2.current.quaternion.copy(camera.quaternion);
-        viewSaved.current = true;
-        stillnessTimer.current = 0;
-      }
+    const d = Math.min(dt, 0.05);
+    const rp = -headTrackingRef.pitch * 2.2;
+    const ry = headTrackingRef.yaw * 3;
+    const ym = Math.abs(ry - py.current);
+    if (ym > 0.008) {
+      ay.current += (ry - py.current) * 0.6;
+      py.current = ry;
     }
-
-    euler.current.set(rawPitch, accumulatedYaw.current, 0, 'YXZ');
+    euler.current.set(rp, ay.current, 0, 'YXZ');
     camera.quaternion.setFromEuler(euler.current);
-
-    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
-    forward.y = 0; forward.normalize();
+    const fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+    fwd.y = 0; fwd.normalize();
     const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
     right.y = 0; right.normalize();
-    const move = new THREE.Vector3();
-    if (keys.current.w) move.add(forward);
-    if (keys.current.s) move.sub(forward);
-    if (keys.current.a) move.sub(right);
-    if (keys.current.d) move.add(right);
-    if (move.length() > 0) move.normalize().multiplyScalar(moveSpeed * delta);
-    camera.position.add(move);
-    camera.position.x = THREE.MathUtils.clamp(camera.position.x, -4.5, 4.5);
-    camera.position.z = THREE.MathUtils.clamp(camera.position.z, -4.5, 4.0);
-    camera.position.y = 1.6;
+    const m = new THREE.Vector3();
+    if (k.current.w) m.add(fwd);
+    if (k.current.s) m.sub(fwd);
+    if (k.current.a) m.sub(right);
+    if (k.current.d) m.add(right);
+    if (m.length() > 0) {
+      m.normalize().multiplyScalar(4 * d);
+      const np = camera.position.clone().add(m);
+      np.x = THREE.MathUtils.clamp(np.x, -4.5, 4.5);
+      np.z = THREE.MathUtils.clamp(np.z, -4.5, 4);
+      np.y = 1.6;
+      if (!checkCollision(np.x, np.z)) camera.position.copy(np);
+      else {
+        const sx = new THREE.Vector3(np.x, 1.6, camera.position.z);
+        if (!checkCollision(sx.x, sx.z)) camera.position.copy(sx);
+        else {
+          const sz = new THREE.Vector3(camera.position.x, 1.6, np.z);
+          if (!checkCollision(sz.x, sz.z)) camera.position.copy(sz);
+        }
+      }
+    }
   });
-
   return null;
 }
 
-function LabBench({ position, size = [3.0, 0.9, 1.2], color = '#cbd5e1' }: { position: [number, number, number]; size?: [number, number, number]; color?: string }) {
-  const [w, h, d] = size;
+const COLORS: Record<string, string> = {
+  cpu: '#00d4aa', cooler: '#00aaff', ram: '#6366f1',
+  gpu: '#ef4444', psu: '#f59e0b', ssd: '#22c55e', motherboard: '#8b5cf6',
+};
+
+/* ========== DETAILED 3D COMPONENT MODELS ========== */
+
+function CPUModel() {
+  const pinPositions = useMemo(() => {
+    const arr: [number, number][] = [];
+    for (let x = -0.75; x <= 0.75; x += 0.25)
+      for (let z = -0.75; z <= 0.75; z += 0.25)
+        arr.push([x, z]);
+    return arr;
+  }, []);
+  const capPositions = useMemo(() => {
+    const arr: [number, number][] = [];
+    for (let x = -0.82; x <= 0.82; x += 0.82)
+      for (let z = -0.82; z <= 0.82; z += 0.82)
+        if (x !== 0 || z !== 0) arr.push([x, z]);
+    return arr;
+  }, []);
+
   return (
-    <group position={position}>
-      <mesh position={[0, h, 0]} castShadow>
-        <boxGeometry args={[w, 0.06, d]} />
-        <meshPhysicalMaterial color={color} roughness={0.2} metalness={0.4} />
+    <group>
+      <mesh position={[0, 0.2, 0]}>
+        <boxGeometry args={[1.6, 0.08, 1.6]} />
+        <meshPhysicalMaterial color="#c0c0c0" metalness={0.7} roughness={0.3} />
       </mesh>
-      <mesh position={[0, h + 0.03, 0]}>
-        <boxGeometry args={[w - 0.1, 0.008, d - 0.1]} />
-        <meshPhysicalMaterial color="#f1f5f9" roughness={0.1} metalness={0.3} />
+      <mesh position={[0, 0.16, 0]}>
+        <boxGeometry args={[1.7, 0.02, 1.7]} />
+        <meshPhysicalMaterial color="#a0a0a0" metalness={0.5} roughness={0.4} />
       </mesh>
-      {([[-w / 2 + 0.1, h / 2, -d / 2 + 0.1], [-w / 2 + 0.1, h / 2, d / 2 - 0.1], [w / 2 - 0.1, h / 2, -d / 2 + 0.1], [w / 2 - 0.1, h / 2, d / 2 - 0.1]] as const).map((p, i) => (
-        <mesh key={i} position={p}>
-          <cylinderGeometry args={[0.04, 0.05, h, 8]} />
-          <meshPhysicalMaterial color="#94a3b8" roughness={0.3} metalness={0.5} />
+      <mesh position={[0, -0.05, 0]}>
+        <boxGeometry args={[1.8, 0.1, 1.8]} />
+        <meshPhysicalMaterial color="#2a1a0a" roughness={0.9} />
+      </mesh>
+      {pinPositions.map(([x, z]) => (
+        <mesh key={`pin-${x}-${z}`} position={[x, -0.12, z]}>
+          <cylinderGeometry args={[0.025, 0.035, 0.06, 6]} />
+          <meshPhysicalMaterial color="#b8860b" metalness={0.6} roughness={0.4} />
+        </mesh>
+      ))}
+      <mesh position={[-0.8, 0.25, 0.8]} rotation={[0, 0, Math.PI / 4]}>
+        <boxGeometry args={[0.08, 0.01, 0.08]} />
+        <meshPhysicalMaterial color="#ff4444" />
+      </mesh>
+      {capPositions.map(([x, z]) => (
+        <mesh key={`cap-${x}-${z}`} position={[x, 0.22, z]}>
+          <sphereGeometry args={[0.025, 8, 8]} />
+          <meshPhysicalMaterial color="#888" metalness={0.3} roughness={0.5} />
         </mesh>
       ))}
     </group>
   );
 }
 
-function Beaker({ position, color = '#60a5fa', height = 0.25, radius = 0.08 }: { position: [number, number, number]; color?: string; height?: number; radius?: number }) {
-  return (
-    <group position={position}>
-      <mesh position={[0, height / 2, 0]} castShadow>
-        <cylinderGeometry args={[radius * 0.85, radius, height, 16]} />
-        <meshPhysicalMaterial color="#e2e8f0" roughness={0.05} metalness={0.1} transparent opacity={0.4} />
-      </mesh>
-      <mesh position={[0, height * 0.35, 0]}>
-        <cylinderGeometry args={[radius * 0.75, radius * 0.75, height * 0.35, 16]} />
-        <meshPhysicalMaterial color={color} roughness={0.1} transparent opacity={0.7} />
-      </mesh>
-      <mesh position={[0, height + 0.02, 0]}>
-        <torusGeometry args={[radius * 0.8, 0.008, 8, 16]} />
-        <meshPhysicalMaterial color="#94a3b8" roughness={0.3} metalness={0.2} />
-      </mesh>
-    </group>
-  );
-}
+function GPUModel() {
+  const fanRef1 = useRef<THREE.Group>(null);
+  const fanRef2 = useRef<THREE.Group>(null);
+  const fanRef3 = useRef<THREE.Group>(null);
 
-function Flask({ position, color = '#f97316' }: { position: [number, number, number]; color?: string }) {
-  return (
-    <group position={position}>
-      <mesh position={[0, 0.2, 0]}>
-        <cylinderGeometry args={[0.06, 0.06, 0.25, 12]} />
-        <meshPhysicalMaterial color="#e2e8f0" roughness={0.05} transparent opacity={0.35} />
-      </mesh>
-      <mesh position={[0, 0.06, 0]}>
-        <sphereGeometry args={[0.1, 12, 12]} />
-        <meshPhysicalMaterial color="#e2e8f0" roughness={0.05} transparent opacity={0.35} />
-      </mesh>
-      <mesh position={[0, 0.06, 0]}>
-        <sphereGeometry args={[0.08, 12, 12]} />
-        <meshPhysicalMaterial color={color} roughness={0.1} transparent opacity={0.6} />
-      </mesh>
-    </group>
-  );
-}
+  useFrame((_, delta) => {
+    const speed = delta * 1.5;
+    if (fanRef1.current) fanRef1.current.rotation.y += speed;
+    if (fanRef2.current) fanRef2.current.rotation.y += speed;
+    if (fanRef3.current) fanRef3.current.rotation.y += speed;
+  });
 
-function TestTubes({ position }: { position: [number, number, number] }) {
-  const colors = ['#ef4444', '#22c55e', '#3b82f6', '#eab308', '#a855f7'];
-  return (
-    <group position={position}>
-      {colors.map((c, i) => (
-        <group key={i} position={[-0.1 + i * 0.05, 0, 0]}>
-          <mesh position={[0, 0.12, 0]}>
-            <cylinderGeometry args={[0.02, 0.025, 0.2, 8]} />
-            <meshPhysicalMaterial color="#e2e8f0" roughness={0.05} transparent opacity={0.3} />
-          </mesh>
-          <mesh position={[0, 0.06, 0]}>
-            <cylinderGeometry args={[0.018, 0.022, 0.08, 8]} />
-            <meshPhysicalMaterial color={c} roughness={0.1} transparent opacity={0.6} />
-          </mesh>
+  function FanGroup({ pos, radius, fanRef }: { pos: [number, number, number]; radius: number; fanRef: React.RefObject<THREE.Group | null> }) {
+    const blades = useMemo(() => {
+      const arr: { angle: number }[] = [];
+      for (let i = 0; i < 8; i++) arr.push({ angle: (i / 8) * Math.PI * 2 });
+      return arr;
+    }, []);
+    return (
+      <group position={pos}>
+        <mesh position={[0, 0, 0]}>
+          <cylinderGeometry args={[0.1, 0.1, 0.03, 16]} />
+          <meshPhysicalMaterial color="#333" />
+        </mesh>
+        <group ref={fanRef}>
+          {blades.map((_, i) => {
+            const angle = (i / 8) * Math.PI * 2;
+            return (
+              <mesh key={i} position={[Math.sin(angle) * radius * 0.5, 0, Math.cos(angle) * radius * 0.5]}
+                rotation={[0, -angle, Math.PI / 6]}>
+                <boxGeometry args={[0.06, 0.01, 0.2]} />
+                <meshPhysicalMaterial color="#555" transparent opacity={0.85} />
+              </mesh>
+            );
+          })}
         </group>
+        <mesh position={[0, 0, 0]}>
+          <torusGeometry args={[radius, 0.015, 8, 24]} />
+          <meshPhysicalMaterial color="#444" transparent opacity={0.5} />
+        </mesh>
+      </group>
+    );
+  }
+
+  return (
+    <group>
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[2.8, 0.06, 1.2]} />
+        <meshPhysicalMaterial color="#2d2d2d" roughness={0.8} />
+      </mesh>
+      <mesh position={[0, 0.04, 0]}>
+        <boxGeometry args={[2.7, 0.01, 1.1]} />
+        <meshPhysicalMaterial color="#1a1a1a" roughness={0.9} />
+      </mesh>
+      {[-0.6, -0.2, 0.2, 0.6].map((x) => (
+        <mesh key={`fin-${x}`} position={[x, 0.12, 0]}>
+          <boxGeometry args={[0.04, 0.15, 0.9]} />
+          <meshPhysicalMaterial color="#c0c0c0" metalness={0.6} roughness={0.3} />
+        </mesh>
+      ))}
+      <mesh position={[0, 0.08, 0]}>
+        <boxGeometry args={[2.0, 0.03, 0.8]} />
+        <meshPhysicalMaterial color="#a0a0a0" metalness={0.5} roughness={0.4} />
+      </mesh>
+      <FanGroup pos={[-0.7, 0.18, 0]} radius={0.28} fanRef={fanRef1} />
+      <FanGroup pos={[0, 0.18, 0]} radius={0.28} fanRef={fanRef2} />
+      <FanGroup pos={[0.7, 0.18, 0]} radius={0.28} fanRef={fanRef3} />
+      <mesh position={[0.5, -0.06, 0]}>
+        <boxGeometry args={[1.2, 0.02, 0.08]} />
+        <meshPhysicalMaterial color="#b8860b" metalness={0.5} roughness={0.4} />
+      </mesh>
+      <mesh position={[1.25, 0.04, 0]}>
+        <boxGeometry args={[0.12, 0.025, 0.14]} />
+        <meshPhysicalMaterial color="#333" />
+      </mesh>
+    </group>
+  );
+}
+
+function RAMModel({ color }: { color: string }) {
+  const finPositions = useMemo(() => {
+    const arr: number[] = [];
+    for (let i = 0; i < 8; i++) arr.push(0.05 + i * 0.065);
+    return arr;
+  }, []);
+  const chipPositions = useMemo(() => {
+    const arr: { x: number; y: number }[] = [];
+    for (let side = 0; side < 2; side++)
+      for (let i = 0; i < 4; i++)
+        arr.push({ x: side === 0 ? -0.035 : 0.035, y: 0.32 + i * 0.07 });
+    return arr;
+  }, []);
+
+  return (
+    <group>
+      <mesh position={[0, 0.15, 0]}>
+        <boxGeometry args={[0.12, 0.6, 0.025]} />
+        <meshPhysicalMaterial color="#2a2a2a" roughness={0.8} />
+      </mesh>
+      <mesh position={[-0.075, 0.15, 0]}>
+        <boxGeometry args={[0.025, 0.55, 0.04]} />
+        <meshPhysicalMaterial color={color} metalness={0.4} roughness={0.4} />
+      </mesh>
+      <mesh position={[0.075, 0.15, 0]}>
+        <boxGeometry args={[0.025, 0.55, 0.04]} />
+        <meshPhysicalMaterial color={color} metalness={0.4} roughness={0.4} />
+      </mesh>
+      {finPositions.map((y, i) => (
+        <React.Fragment key={`fins-${i}`}>
+          <mesh position={[-0.09, y, 0]}>
+            <boxGeometry args={[0.012, 0.04, 0.045]} />
+            <meshPhysicalMaterial color={color} metalness={0.3} roughness={0.5} opacity={0.7} transparent />
+          </mesh>
+          <mesh position={[0.09, y, 0]}>
+            <boxGeometry args={[0.012, 0.04, 0.045]} />
+            <meshPhysicalMaterial color={color} metalness={0.3} roughness={0.5} opacity={0.7} transparent />
+          </mesh>
+        </React.Fragment>
+      ))}
+      <mesh position={[0, -0.18, 0]}>
+        <boxGeometry args={[0.11, 0.08, 0.018]} />
+        <meshPhysicalMaterial color="#d4a017" metalness={0.8} roughness={0.2} />
+      </mesh>
+      {chipPositions.map((p, i) => (
+        <mesh key={`chip-${i}`} position={[p.x, p.y, 0]}>
+          <boxGeometry args={[0.025, 0.025, 0.02]} />
+          <meshPhysicalMaterial color="#111" />
+        </mesh>
       ))}
     </group>
   );
 }
 
-function Centrifuge({ position }: { position: [number, number, number] }) {
-  return (
-    <group position={position}>
-      <mesh position={[0, 0.2, 0]}>
-        <boxGeometry args={[0.4, 0.4, 0.4]} />
-        <meshPhysicalMaterial color="#94a3b8" roughness={0.2} metalness={0.6} />
-      </mesh>
-      <mesh position={[0, 0.42, 0]}>
-        <cylinderGeometry args={[0.22, 0.22, 0.04, 20]} />
-        <meshPhysicalMaterial color="#e2e8f0" roughness={0.3} />
-      </mesh>
-      <mesh position={[0, 0.44, 0]}>
-        <cylinderGeometry args={[0.1, 0.15, 0.06, 20]} />
-        <meshPhysicalMaterial color="#64748b" roughness={0.3} transparent opacity={0.5} />
-      </mesh>
-    </group>
-  );
-}
+function PSUModel() {
+  const fanRef = useRef<THREE.Group>(null);
 
-function Microscope({ position }: { position: [number, number, number] }) {
-  return (
-    <group position={position}>
-      <mesh position={[0, 0.1, 0]}>
-        <boxGeometry args={[0.2, 0.2, 0.25]} />
-        <meshPhysicalMaterial color="#475569" roughness={0.2} metalness={0.5} />
-      </mesh>
-      <mesh position={[0, 0.25, 0.08]}>
-        <cylinderGeometry args={[0.03, 0.03, 0.15, 8]} />
-        <meshPhysicalMaterial color="#94a3b8" roughness={0.3} metalness={0.4} />
-      </mesh>
-      <mesh position={[0, 0.35, 0.12]}>
-        <cylinderGeometry args={[0.06, 0.04, 0.04, 12]} />
-        <meshPhysicalMaterial color="#1e293b" roughness={0.3} />
-      </mesh>
-      <mesh position={[0.12, 0.18, 0]}>
-        <boxGeometry args={[0.04, 0.04, 0.15]} />
-        <meshPhysicalMaterial color="#1e293b" roughness={0.3} />
-      </mesh>
-    </group>
-  );
-}
+  useFrame((_, delta) => {
+    if (fanRef.current) fanRef.current.rotation.y += delta;
+  });
 
-function DistillationApparatus({ position }: { position: [number, number, number] }) {
-  return (
-    <group position={position}>
-      {/* Base platform */}
-      <mesh position={[0, 0.03, 0]}>
-        <boxGeometry args={[0.6, 0.06, 0.5]} />
-        <meshPhysicalMaterial color="#64748b" roughness={0.2} metalness={0.6} />
-      </mesh>
-      {/* Main boiling flask */}
-      <mesh position={[-0.15, 0.2, 0]}>
-        <sphereGeometry args={[0.15, 16, 16]} />
-        <meshPhysicalMaterial color="#e2e8f0" roughness={0.05} transparent opacity={0.35} />
-      </mesh>
-      <mesh position={[-0.15, 0.2, 0]}>
-        <sphereGeometry args={[0.12, 16, 16]} />
-        <meshPhysicalMaterial color="#f97316" roughness={0.1} transparent opacity={0.5} />
-      </mesh>
-      {/* Neck / column */}
-      <mesh position={[-0.15, 0.4, 0]}>
-        <cylinderGeometry args={[0.04, 0.05, 0.25, 12]} />
-        <meshPhysicalMaterial color="#e2e8f0" roughness={0.05} transparent opacity={0.35} />
-      </mesh>
-      {/* Condenser coil */}
-      <mesh position={[0.1, 0.5, 0]}>
-        <cylinderGeometry args={[0.06, 0.06, 0.3, 12]} />
-        <meshPhysicalMaterial color="#e2e8f0" roughness={0.05} transparent opacity={0.25} />
-      </mesh>
-      <mesh position={[0.1, 0.5, 0]}>
-        <cylinderGeometry args={[0.03, 0.03, 0.3, 6]} />
-        <meshPhysicalMaterial color="#94a3b8" roughness={0.2} metalness={0.4} />
-      </mesh>
-      {/* Collection flask */}
-      <mesh position={[0.35, 0.18, 0]}>
-        <sphereGeometry args={[0.12, 16, 16]} />
-        <meshPhysicalMaterial color="#e2e8f0" roughness={0.05} transparent opacity={0.35} />
-      </mesh>
-      <mesh position={[0.35, 0.18, 0]}>
-        <sphereGeometry args={[0.09, 16, 16]} />
-        <meshPhysicalMaterial color="#22c55e" roughness={0.1} transparent opacity={0.5} />
-      </mesh>
-      {/* Connector tube */}
-      <mesh position={[0.0, 0.35, 0]}>
-        <boxGeometry args={[0.25, 0.02, 0.02]} />
-        <meshPhysicalMaterial color="#94a3b8" roughness={0.2} metalness={0.3} />
-      </mesh>
-      {/* Digital console */}
-      <mesh position={[0, 0.08, 0.28]}>
-        <boxGeometry args={[0.3, 0.1, 0.04]} />
-        <meshPhysicalMaterial color="#1e293b" roughness={0.2} />
-      </mesh>
-      <mesh position={[0, 0.08, 0.3]}>
-        <planeGeometry args={[0.25, 0.06]} />
-        <meshPhysicalMaterial color="#22d3ee" roughness={0.1} emissive="#22d3ee" emissiveIntensity={0.3} />
-      </mesh>
-    </group>
-  );
-}
-
-function RoboticArmSection() {
-  return (
-    <group position={[3.5, 0, 0]} rotation={[0, -Math.PI / 6, 0]}>
-      {/* Base */}
-      <mesh position={[0, 0.08, 0]}>
-        <cylinderGeometry args={[0.2, 0.25, 0.16, 16]} />
-        <meshPhysicalMaterial color="#475569" roughness={0.2} metalness={0.7} />
-      </mesh>
-      {/* Arm segment 1 */}
-      <mesh position={[0, 0.35, 0.08]} castShadow>
-        <boxGeometry args={[0.12, 0.3, 0.12]} />
-        <meshPhysicalMaterial color="#94a3b8" roughness={0.2} metalness={0.6} />
-      </mesh>
-      {/* Joint */}
-      <mesh position={[0, 0.52, 0.08]}>
-        <sphereGeometry args={[0.07, 12, 12]} />
-        <meshPhysicalMaterial color="#64748b" roughness={0.2} metalness={0.5} />
-      </mesh>
-      {/* Arm segment 2 */}
-      <mesh position={[0.15, 0.58, 0.08]} rotation={[0, 0, -0.4]}>
-        <boxGeometry args={[0.25, 0.08, 0.08]} />
-        <meshPhysicalMaterial color="#94a3b8" roughness={0.2} metalness={0.6} />
-      </mesh>
-      {/* Gripper */}
-      <mesh position={[0.3, 0.6, 0.08]}>
-        <boxGeometry args={[0.06, 0.1, 0.06]} />
-        <meshPhysicalMaterial color="#64748b" roughness={0.3} metalness={0.5} />
-      </mesh>
-      <mesh position={[0.33, 0.6, 0.04]}>
-        <boxGeometry args={[0.04, 0.06, 0.02]} />
-        <meshPhysicalMaterial color="#475569" roughness={0.3} metalness={0.5} />
-      </mesh>
-      <mesh position={[0.33, 0.6, 0.12]}>
-        <boxGeometry args={[0.04, 0.06, 0.02]} />
-        <meshPhysicalMaterial color="#475569" roughness={0.3} metalness={0.5} />
-      </mesh>
-      {/* Flask being held */}
-      <mesh position={[0.38, 0.55, 0.08]}>
-        <sphereGeometry args={[0.06, 10, 10]} />
-        <meshPhysicalMaterial color="#e2e8f0" roughness={0.05} transparent opacity={0.35} />
-      </mesh>
-      <mesh position={[0.38, 0.55, 0.08]}>
-        <sphereGeometry args={[0.04, 10, 10]} />
-        <meshPhysicalMaterial color="#a855f7" roughness={0.1} transparent opacity={0.5} />
-      </mesh>
-      {/* Dispenser unit next to it */}
-      <mesh position={[0.5, 0.2, -0.2]}>
-        <boxGeometry args={[0.2, 0.4, 0.2]} />
-        <meshPhysicalMaterial color="#64748b" roughness={0.2} metalness={0.6} />
-      </mesh>
-      <mesh position={[0.5, 0.42, -0.2]}>
-        <cylinderGeometry args={[0.04, 0.04, 0.05, 8]} />
-        <meshPhysicalMaterial color="#1e293b" roughness={0.3} />
-      </mesh>
-    </group>
-  );
-}
-
-function ComputerStation() {
-  const screenData = useRef(new THREE.CanvasTexture(document.createElement('canvas')));
-  const [screenReady, setScreenReady] = useState(false);
-
-  useEffect(() => {
-    const c = document.createElement('canvas');
-    c.width = 256; c.height = 160;
-    const ctx = c.getContext('2d'); if (!ctx) return;
-    ctx.fillStyle = '#0c1929'; ctx.fillRect(0, 0, 256, 160);
-    for (let i = 0; i < 30; i++) {
-      ctx.fillStyle = `hsl(190, 80%, ${40 + Math.random() * 40}%)`;
-      ctx.fillRect(10 + Math.random() * 200, 10 + Math.random() * 120, 3 + Math.random() * 20, 2 + Math.random() * 15);
+  const fanBladePositions = useMemo(() => {
+    const arr: { x: number; z: number; angle: number }[] = [];
+    for (let i = 0; i < 7; i++) {
+      const angle = (i / 7) * Math.PI * 2;
+      arr.push({ x: Math.sin(angle) * 0.18, z: Math.cos(angle) * 0.18, angle });
     }
-    for (let i = 0; i < 20; i++) {
-      ctx.beginPath();
-      ctx.arc(40 + Math.random() * 180, 30 + Math.random() * 100, 3 + Math.random() * 8, 0, Math.PI * 2);
-      ctx.strokeStyle = `hsla(140, 70%, 50%, ${0.3 + Math.random() * 0.4})`;
-      ctx.lineWidth = 1; ctx.stroke();
-      ctx.fillStyle = `hsla(140, 70%, 50%, ${0.1 + Math.random() * 0.2})`;
-      ctx.fill();
-    }
-    ctx.font = '10px monospace'; ctx.fillStyle = '#22d3ee'; ctx.textAlign = 'center';
-    ctx.fillText('MOLECULAR ANALYSIS v3.2', 128, 148);
-    const t = new THREE.CanvasTexture(c);
-    t.needsUpdate = true;
-    screenData.current = t;
-    setScreenReady(true);
+    return arr;
   }, []);
 
   return (
-    <group position={[-3.5, 0, -0.5]} rotation={[0, 0.3, 0]}>
-      {/* Desk */}
-      <mesh position={[0, 0.55, 0]} castShadow>
-        <boxGeometry args={[1.6, 0.04, 0.9]} />
-        <meshPhysicalMaterial color="#64748b" roughness={0.2} metalness={0.5} />
+    <group>
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[2.2, 0.6, 1.4]} />
+        <meshPhysicalMaterial color="#2a2a2a" metalness={0.3} roughness={0.6} />
       </mesh>
-      {([[-0.7, 0.27, -0.38], [-0.7, 0.27, 0.38], [0.7, 0.27, -0.38], [0.7, 0.27, 0.38]] as const).map((p, i) => (
-        <mesh key={i} position={p}>
-          <cylinderGeometry args={[0.03, 0.04, 0.55, 8]} />
+      <mesh position={[0, 0.32, 0]}>
+        <boxGeometry args={[2.18, 0.02, 1.38]} />
+        <meshPhysicalMaterial color="#333" metalness={0.2} roughness={0.7} />
+      </mesh>
+      <mesh position={[0, 0.2, 0.72]}>
+        <boxGeometry args={[0.6, 0.15, 0.01]} />
+        <meshPhysicalMaterial color="#1a1a1a" />
+      </mesh>
+      <mesh position={[0, 0.32, 0]}>
+        <torusGeometry args={[0.35, 0.015, 8, 24]} />
+        <meshPhysicalMaterial color="#111" metalness={0.2} />
+      </mesh>
+      <group ref={fanRef} position={[0, 0.32, 0]}>
+        {fanBladePositions.map((p, i) => (
+          <mesh key={i} position={[p.x, 0, p.z]} rotation={[0, -p.angle, 0.3]}>
+            <boxGeometry args={[0.04, 0.005, 0.15]} />
+            <meshPhysicalMaterial color="#444" transparent opacity={0.8} />
+          </mesh>
+        ))}
+        <mesh position={[0, 0, 0]}>
+          <cylinderGeometry args={[0.06, 0.06, 0.01, 12]} />
+          <meshPhysicalMaterial color="#333" />
+        </mesh>
+      </group>
+      <mesh position={[1.12, 0.1, 0]}>
+        <boxGeometry args={[0.03, 0.2, 0.3]} />
+        <meshPhysicalMaterial color="#111" />
+      </mesh>
+      {[-0.1, -0.04, 0.02, 0.08, 0.14, 0.2].map((y, i) => (
+        <mesh key={`conn-${i}`} position={[1.14, y, 0]}>
+          <cylinderGeometry args={[0.015, 0.015, 0.04, 6]} />
+          <meshPhysicalMaterial color="#555" />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function SSDModel() {
+  return (
+    <group rotation={[0, 0, 0]}>
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[1.6, 0.015, 0.25]} />
+        <meshPhysicalMaterial color="#1a1a1a" roughness={0.85} />
+      </mesh>
+      <mesh position={[-0.15, 0.015, 0]}>
+        <boxGeometry args={[0.2, 0.02, 0.15]} />
+        <meshPhysicalMaterial color="#333" roughness={0.7} />
+      </mesh>
+      {[-0.5, 0.2, 0.55].map((x) => (
+        <mesh key={`nand-${x}`} position={[x, 0.015, 0]}>
+          <boxGeometry args={[0.18, 0.02, 0.16]} />
+          <meshPhysicalMaterial color="#2a2a2a" roughness={0.7} />
+        </mesh>
+      ))}
+      <mesh position={[0.85, 0, 0]}>
+        <boxGeometry args={[0.04, 0.012, 0.24]} />
+        <meshPhysicalMaterial color="#d4a017" metalness={0.8} roughness={0.2} />
+      </mesh>
+      <mesh position={[-0.75, 0, 0]}>
+        <cylinderGeometry args={[0.03, 0.03, 0.02, 12]} />
+        <meshPhysicalMaterial color="#666" metalness={0.3} roughness={0.5} />
+      </mesh>
+    </group>
+  );
+}
+
+function MainboardModel() {
+  return (
+    <group>
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[3.0, 0.02, 2.4]} />
+        <meshPhysicalMaterial color="#1a3a1a" roughness={0.9} />
+      </mesh>
+      <mesh position={[0, 0.015, 0]}>
+        <boxGeometry args={[2.9, 0.005, 2.3]} />
+        <meshPhysicalMaterial color="#1e4a1e" roughness={0.95} />
+      </mesh>
+      <mesh position={[0, 0.03, 0.3]}>
+        <boxGeometry args={[0.7, 0.015, 0.7]} />
+        <meshPhysicalMaterial color="#c0c0c0" metalness={0.4} roughness={0.5} />
+      </mesh>
+      {(() => {
+        const holes: { x: number; z: number }[] = [];
+        for (let x = 0; x < 5; x++)
+          for (let z = 0; z < 5; z++)
+            holes.push({ x: -0.25 + x * 0.125, z: 0.2 + z * 0.125 });
+        return holes.map((p, i) => (
+          <mesh key={`hole-${i}`} position={[p.x, 0.04, p.z]}>
+            <cylinderGeometry args={[0.015, 0.015, 0.02, 6]} />
+            <meshPhysicalMaterial color="#333" />
+          </mesh>
+        ));
+      })()}
+      {[0, 1].map((i) => (
+        <mesh key={`ram-l${i}`} position={[-0.75 - i * 0.07, 0.03, 0.5]}>
+          <boxGeometry args={[0.05, 0.015, 0.35]} />
+          <meshPhysicalMaterial color="#333" roughness={0.7} />
+        </mesh>
+      ))}
+      {[0, 1].map((i) => (
+        <mesh key={`ram-r${i}`} position={[0.75 + i * 0.07, 0.03, 0.5]}>
+          <boxGeometry args={[0.05, 0.015, 0.35]} />
+          <meshPhysicalMaterial color="#333" roughness={0.7} />
+        </mesh>
+      ))}
+      {[0, 1, 2].map((i) => (
+        <mesh key={`pcie-${i}`} position={[0, 0.03, -0.4 - i * 0.25]}>
+          <boxGeometry args={[1.2, 0.012, 0.06]} />
+          <meshPhysicalMaterial color="#444" roughness={0.6} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function DetailedComponentModel({ type }: { type: string }) {
+  const c = COLORS[type] || '#888';
+  switch (type) {
+    case 'cpu': return <CPUModel />;
+    case 'cooler': return (
+      <group>
+        <mesh position={[0, 0.08, 0]}>
+          <boxGeometry args={[0.8, 0.15, 0.8]} />
+          <meshPhysicalMaterial color="#c0c0c0" metalness={0.6} roughness={0.3} />
+        </mesh>
+        <mesh position={[0, 0.18, 0]}>
+          <boxGeometry args={[0.7, 0.04, 0.7]} />
+          <meshPhysicalMaterial color="#00aaff" metalness={0.3} roughness={0.5} emissive="#00aaff" emissiveIntensity={0.1} />
+        </mesh>
+        {[0, 1, 2].map((i) => {
+          const angle = (i / 3) * Math.PI * 2;
+          return (
+            <mesh key={`heatpipe-${i}`} position={[Math.sin(angle) * 0.2, 0.04, Math.cos(angle) * 0.2]} rotation={[0, -angle, 0.3]}>
+              < cylinderGeometry args={[0.015, 0.015, 0.3, 6]} />
+              <meshPhysicalMaterial color="#888" metalness={0.5} roughness={0.3} />
+            </mesh>
+          );
+        })}
+      </group>
+    );
+    case 'ram': return <RAMModel color={c} />;
+    case 'gpu': return <GPUModel />;
+    case 'psu': return <PSUModel />;
+    case 'ssd': return <SSDModel />;
+    case 'motherboard': return <MainboardModel />;
+    default: return <mesh><boxGeometry args={[0.5, 0.06, 0.5]} /><meshPhysicalMaterial color={c} /></mesh>;
+  }
+}
+
+/* ====== IT CLASSROOM FURNITURE ====== */
+
+function CeilingFan({ position }: { position: [number, number, number] }) {
+  const bladeRef = useRef<THREE.Group>(null);
+  useFrame((_, delta) => {
+    if (bladeRef.current) bladeRef.current.rotation.y += delta * 4;
+  });
+
+  return (
+    <group position={position}>
+      <mesh position={[0, -0.3, 0]}>
+        <cylinderGeometry args={[0.06, 0.08, 0.08, 12]} />
+        <meshPhysicalMaterial color="#555" metalness={0.3} roughness={0.5} />
+      </mesh>
+      <group ref={bladeRef} position={[0, -0.34, 0]}>
+        {Array.from({ length: 4 }).map((_, i) => {
+          const angle = (i / 4) * Math.PI * 2;
+          return (
+            <mesh key={i} position={[Math.sin(angle) * 0.5, 0, Math.cos(angle) * 0.5]} rotation={[0, -angle, 0.02]}>
+              <boxGeometry args={[0.08, 0.008, 0.9]} />
+              <meshPhysicalMaterial color="#e2e8f0" roughness={0.6} />
+            </mesh>
+          );
+        })}
+      </group>
+    </group>
+  );
+}
+
+function Desk({ position }: { position: [number, number, number] }) {
+  const topColor = '#8B7355';
+  return (
+    <group position={position}>
+      <mesh position={[0, 0.7, 0]} castShadow>
+        <boxGeometry args={[1.6, 0.04, 0.9]} />
+        <meshPhysicalMaterial color={topColor} roughness={0.6} metalness={0.05} />
+      </mesh>
+      {[[-0.7, 0.35, -0.38], [-0.7, 0.35, 0.38], [0.7, 0.35, -0.38], [0.7, 0.35, 0.38]].map((p, i) => (
+        <mesh key={i} position={p as [number, number, number]}>
+          <cylinderGeometry args={[0.025, 0.03, 0.7, 8]} />
           <meshPhysicalMaterial color="#94a3b8" roughness={0.3} metalness={0.4} />
         </mesh>
       ))}
-      {/* Main screen */}
-      <mesh position={[-0.25, 0.95, -0.08]}>
-        <boxGeometry args={[0.5, 0.35, 0.03]} />
-        <meshPhysicalMaterial color="#0f172a" roughness={0.1} />
-      </mesh>
-      <mesh position={[-0.25, 0.95, -0.05]}>
-        <planeGeometry args={[0.45, 0.3]} />
-        {screenReady && <meshPhysicalMaterial map={screenData.current} roughness={0.05} />}
-      </mesh>
-      {/* Second screen */}
-      <mesh position={[0.35, 0.9, -0.08]}>
-        <boxGeometry args={[0.4, 0.28, 0.03]} />
-        <meshPhysicalMaterial color="#0f172a" roughness={0.1} />
-      </mesh>
-      <mesh position={[0.35, 0.9, -0.05]}>
-        <planeGeometry args={[0.35, 0.23]} />
-        {screenReady && <meshPhysicalMaterial map={screenData.current} roughness={0.05} />}
-      </mesh>
-      {/* Keyboard */}
-      <mesh position={[0, 0.58, 0.15]}>
-        <boxGeometry args={[0.35, 0.02, 0.12]} />
-        <meshPhysicalMaterial color="#1e293b" roughness={0.5} />
-      </mesh>
-      {/* Chair */}
-      <mesh position={[-0.6, 0.25, 0.45]}>
-        <cylinderGeometry args={[0.15, 0.18, 0.05, 12]} />
-        <meshPhysicalMaterial color="#334155" roughness={0.7} />
-      </mesh>
-      <mesh position={[-0.6, 0.48, 0.45]}>
-        <cylinderGeometry args={[0.12, 0.12, 0.42, 12]} />
-        <meshPhysicalMaterial color="#1e293b" roughness={0.6} />
-      </mesh>
-      <mesh position={[-0.6, 0.7, 0.4]}>
-        <boxGeometry args={[0.3, 0.04, 0.25]} />
-        <meshPhysicalMaterial color="#334155" roughness={0.7} />
-      </mesh>
     </group>
   );
 }
 
-function Hologram() {
-  const [frame] = useState(() => Math.floor(Math.random() * 100));
-
-  return (
-    <group position={[-1.5, 1.0, -1.0]}>
-      <mesh position={[0, 0.02, 0]}>
-        <cylinderGeometry args={[0.12, 0.2, 0.04, 20]} />
-        <meshPhysicalMaterial color="#64748b" roughness={0.2} metalness={0.5} />
-      </mesh>
-      <mesh position={[0, 0.4, 0]}>
-        <cylinderGeometry args={[0.02, 0.02, 0.7, 8]} />
-        <meshPhysicalMaterial color="#22d3ee" roughness={0.1} emissive="#22d3ee" emissiveIntensity={0.3} transparent opacity={0.4} />
-      </mesh>
-      {/* Molecule hologram */}
-      {([[0, 0.65, 0], [-0.08, 0.75, 0.05], [0.1, 0.8, -0.03], [-0.05, 0.9, -0.04], [0.12, 0.85, 0.06], [0.0, 0.95, 0.0], [-0.1, 0.7, -0.06]] as const).map((pos, i) => (
-        <mesh key={i} position={pos}>
-          <sphereGeometry args={[0.03, 8, 8]} />
-          <meshPhysicalMaterial color="#22d3ee" roughness={0.1} emissive="#22d3ee" emissiveIntensity={0.5} transparent opacity={0.5} />
-        </mesh>
-      ))}
-      {([[-0.04, 0.7, 0.03], [0.01, 0.72, -0.02], [-0.07, 0.72, -0.01], [0.05, 0.72, 0.01]] as const).map((pos, i) => (
-        <mesh key={i + 10} position={pos}>
-          <boxGeometry args={[0.06, 0.005, 0.005]} />
-          <meshPhysicalMaterial color="#67e8f9" roughness={0.1} emissive="#67e8f9" emissiveIntensity={0.3} transparent opacity={0.3} />
-        </mesh>
-      ))}
-      {/* Glow ring */}
-      <mesh position={[0, 0.65, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[0.08, 0.12, 24]} />
-        <meshPhysicalMaterial color="#22d3ee" roughness={0.1} emissive="#22d3ee" emissiveIntensity={0.4} transparent opacity={0.3} side={THREE.DoubleSide} />
-      </mesh>
-    </group>
-  );
-}
-
-function StorageCabinet({ position }: { position: [number, number, number] }) {
+function Monitor({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
-      <mesh position={[0, 0.6, 0]}>
-        <boxGeometry args={[1.0, 1.2, 0.5]} />
-        <meshPhysicalMaterial color="#64748b" roughness={0.2} metalness={0.6} />
+      <mesh position={[0, 0.12, -0.02]}>
+        <boxGeometry args={[0.45, 0.3, 0.02]} />
+        <meshPhysicalMaterial color="#1a1a2e" roughness={0.3} />
       </mesh>
-      <mesh position={[0, 0.6, 0.27]}>
-        <boxGeometry args={[0.9, 1.1, 0.02]} />
-        <meshPhysicalMaterial color="#94a3b8" roughness={0.3} metalness={0.3} />
+      <mesh position={[0, 0.12, 0]}>
+        <planeGeometry args={[0.4, 0.26]} />
+        <meshPhysicalMaterial color="#0a1628" roughness={0.05} emissive="#112244" emissiveIntensity={0.3} />
       </mesh>
-      {/* Shelves visible through glass */}
-      <mesh position={[0, 0.3, 0.27]}>
-        <boxGeometry args={[0.85, 0.02, 0.02]} />
-        <meshPhysicalMaterial color="#475569" roughness={0.4} />
+      <mesh position={[0, 0, -0.02]}>
+        <boxGeometry args={[0.12, 0.06, 0.02]} />
+        <meshPhysicalMaterial color="#333" roughness={0.5} />
       </mesh>
-      <mesh position={[0, 0.7, 0.27]}>
-        <boxGeometry args={[0.85, 0.02, 0.02]} />
-        <meshPhysicalMaterial color="#475569" roughness={0.4} />
-      </mesh>
-      {/* Hazmat symbol */}
-      <mesh position={[0, 0.9, 0.3]}>
-        <planeGeometry args={[0.15, 0.15]} />
-        <meshPhysicalMaterial color="#ef4444" roughness={0.5} />
-      </mesh>
-      <mesh position={[0, 0.9, 0.3]}>
-        <planeGeometry args={[0.08, 0.08]} />
-        <meshPhysicalMaterial color="#fef2f2" roughness={0.5} />
+      <mesh position={[0, -0.05, 0]}>
+        <cylinderGeometry args={[0.02, 0.025, 0.06, 8]} />
+        <meshPhysicalMaterial color="#555" metalness={0.3} />
       </mesh>
     </group>
   );
 }
 
-function LabWindow() {
-  const [campusTex, setCampusTex] = useState<THREE.CanvasTexture | null>(null);
-
-  useEffect(() => {
-    const c = document.createElement('canvas');
-    c.width = 512; c.height = 384;
-    const ctx = c.getContext('2d'); if (!ctx) return;
-    // Sky
-    const sky = ctx.createLinearGradient(0, 0, 0, 384);
-    sky.addColorStop(0, '#94a3b8'); sky.addColorStop(0.5, '#cbd5e1'); sky.addColorStop(1, '#e2e8f0');
-    ctx.fillStyle = sky; ctx.fillRect(0, 0, 512, 384);
-    // Buildings
-    ctx.fillStyle = '#64748b'; ctx.fillRect(80, 160, 60, 140);
-    ctx.fillStyle = '#475569'; ctx.fillRect(100, 140, 50, 160);
-    ctx.fillStyle = '#64748b'; ctx.fillRect(170, 130, 80, 170);
-    ctx.fillStyle = '#334155'; ctx.fillRect(200, 110, 60, 190);
-    ctx.fillStyle = '#64748b'; ctx.fillRect(280, 150, 70, 150);
-    ctx.fillStyle = '#475569'; ctx.fillRect(320, 120, 50, 180);
-    ctx.fillStyle = '#64748b'; ctx.fillRect(380, 160, 60, 140);
-    // Windows on buildings
-    ctx.fillStyle = '#94a3b8';
-    for (let bx = 0; bx < 5; bx++) {
-      for (let by = 0; by < 4; by++) {
-        ctx.fillRect(290 + bx * 15, 160 + by * 25, 8, 14);
-      }
-    }
-    // Trees
-    ctx.fillStyle = '#4a7c59'; ctx.fillRect(30, 220, 15, 80);
-    ctx.beginPath(); ctx.arc(37, 210, 25, 0, Math.PI * 2); ctx.fillStyle = '#3b6b47'; ctx.fill();
-    ctx.fillStyle = '#4a7c59'; ctx.fillRect(440, 200, 18, 100);
-    ctx.beginPath(); ctx.arc(449, 190, 30, 0, Math.PI * 2); ctx.fillStyle = '#3b6b47'; ctx.fill();
-    // Greenery
-    ctx.fillStyle = '#5a8f6a'; ctx.fillRect(0, 300, 512, 84);
-    ctx.fillStyle = '#4a7c59'; ctx.fillRect(0, 310, 512, 20);
-    // Road
-    ctx.fillStyle = '#475569'; ctx.fillRect(0, 340, 512, 20);
-    ctx.fillStyle = '#eab308'; ctx.fillRect(200, 348, 8, 4); ctx.fillRect(300, 348, 8, 4);
-    const t = new THREE.CanvasTexture(c);
-    t.needsUpdate = true;
-    setCampusTex(t);
-  }, []);
-
+function Whiteboard({ position }: { position: [number, number, number] }) {
   return (
-    <group position={[4.85, 1.6, 1.5]}>
-      <mesh position={[0, 0, 0]}>
-        <boxGeometry args={[0.06, 1.8, 2.0]} />
-        <meshPhysicalMaterial color="#334155" roughness={0.8} side={THREE.DoubleSide} />
+    <group position={position}>
+      <mesh position={[0, 0.9, 0]}>
+        <boxGeometry args={[3.2, 1.8, 0.04]} />
+        <meshPhysicalMaterial color="#f0f0f0" roughness={0.4} />
       </mesh>
-      <mesh position={[0.02, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
-        <planeGeometry args={[2.0, 1.8]} />
-        <meshPhysicalMaterial color="#87ceeb" roughness={0.1} transparent opacity={0.2} />
+      <mesh position={[0, 0.9, 0.025]}>
+        <planeGeometry args={[3.1, 1.7]} />
+        <meshPhysicalMaterial color="#ffffff" roughness={0.3} />
       </mesh>
-      <mesh position={[0.03, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
-        <planeGeometry args={[1.8, 1.6]} />
-        {campusTex && <meshPhysicalMaterial map={campusTex} roughness={0.2} />}
+      <mesh position={[0, 1.82, 0]}>
+        <boxGeometry args={[3.24, 0.04, 0.06]} />
+        <meshPhysicalMaterial color="#94a3b8" metalness={0.3} roughness={0.4} />
       </mesh>
-      {/* Frame */}
-      <mesh position={[0, 0.93, 0]}>
-        <boxGeometry args={[0.08, 0.06, 2.04]} />
-        <meshPhysicalMaterial color="#475569" roughness={0.5} />
-      </mesh>
-      <mesh position={[0, -0.93, 0]}>
-        <boxGeometry args={[0.08, 0.06, 2.04]} />
-        <meshPhysicalMaterial color="#475569" roughness={0.5} />
-      </mesh>
-      <mesh position={[0, 0, 1.03]}>
-        <boxGeometry args={[0.08, 1.86, 0.06]} />
-        <meshPhysicalMaterial color="#475569" roughness={0.5} />
-      </mesh>
-      <mesh position={[0, 0, -1.03]}>
-        <boxGeometry args={[0.08, 1.86, 0.06]} />
-        <meshPhysicalMaterial color="#475569" roughness={0.5} />
+      <mesh position={[0, -0.02, 0]}>
+        <boxGeometry args={[3.24, 0.04, 0.06]} />
+        <meshPhysicalMaterial color="#94a3b8" metalness={0.3} roughness={0.4} />
       </mesh>
     </group>
   );
 }
 
-function Window() {
+function PcCaseDetailed() {
+  const bootStatusVal = useAssemblyStore((s) => s.bootStatus);
+  const mb = useAssemblyStore((s) => s.components.some((c) => c.slotId === 'motherboard_1' && c.installed));
+  const cpu = useAssemblyStore((s) => s.components.some((c) => c.slotId === 'cpu_1' && c.installed));
+  const cooler = useAssemblyStore((s) => s.components.some((c) => c.slotId === 'cooler_1' && c.installed));
+  const ram = useAssemblyStore((s) => s.components.some((c) => c.slotId === 'ram_1' && c.installed));
+  const gpu = useAssemblyStore((s) => s.components.some((c) => c.slotId === 'gpu_1' && c.installed));
+  const psu = useAssemblyStore((s) => s.components.some((c) => c.slotId === 'psu_1' && c.installed));
+  const ssd = useAssemblyStore((s) => s.components.some((c) => c.slotId === 'ssd_1' && c.installed));
+
+  const count = (mb ? 1 : 0) + (cpu ? 1 : 0) + (cooler ? 1 : 0) + (ram ? 1 : 0) + (gpu ? 1 : 0) + (psu ? 1 : 0) + (ssd ? 1 : 0);
+
+  const glowColor = bootStatusVal === 'success' ? '#00ffcc' : bootStatusVal === 'failed' ? '#ff4466' : '#4488ff';
+  const glowIntensity = bootStatusVal === 'success' ? 1 : bootStatusVal === 'failed' ? 0.6 : 0.2;
+
+  const installedByType = useMemo(() => ({
+    motherboard: mb, cpu, cooler, ram, gpu, psu, ssd,
+  }), [mb, cpu, cooler, ram, gpu, psu, ssd]);
+
+  const PARTS = useMemo(() => [
+    { type: 'motherboard' as const, pos: [0, -0.15, 0] as [number, number, number] },
+    { type: 'cpu' as const, pos: [0.3, 0.3, 0.12] as [number, number, number] },
+    { type: 'cooler' as const, pos: [0.3, 0.42, 0.12] as [number, number, number] },
+    { type: 'ram' as const, pos: [0.52, 0.27, 0.28] as [number, number, number] },
+    { type: 'gpu' as const, pos: [0.3, 0.15, -0.45] as [number, number, number] },
+    { type: 'psu' as const, pos: [0, -0.3, 0.6] as [number, number, number] },
+    { type: 'ssd' as const, pos: [0.32, 0.18, -0.25] as [number, number, number] },
+  ], []);
+
   return (
-    <group position={[4.85, 1.5, -1.5]}>
-      <mesh position={[0, 0, 0]}>
-        <boxGeometry args={[0.04, 1.6, 1.4]} />
-        <meshPhysicalMaterial color="#f8fafc" roughness={0.5} transparent opacity={0.15} />
+    <group position={[0, 0.9, -0.3]}>
+      <RoundedBox args={[2.6, 1.3, 2.0]} radius={0.02}>
+        <meshPhysicalMaterial color="#2a3a5c" metalness={0.7} roughness={0.25} envMapIntensity={0.8} />
+      </RoundedBox>
+
+      <mesh position={[-1.305, 0, 0]}>
+        <planeGeometry args={[1.98, 1.26]} />
+        <meshPhysicalMaterial color="#88ccff" metalness={0.3} roughness={0.05} transparent opacity={0.15} side={THREE.DoubleSide} envMapIntensity={1.5} />
       </mesh>
-      <mesh position={[0.01, 0, 0]}>
-        <planeGeometry args={[1.5, 1.7]} />
-        <meshPhysicalMaterial color="#87ceeb" roughness={0.1} metalness={0.05} transparent opacity={0.35} />
+
+      <mesh position={[0, 0.04, 1.015]}>
+        <planeGeometry args={[0.35, 0.025]} />
+        <meshPhysicalMaterial color={glowColor} transparent opacity={glowIntensity} emissive={glowColor} emissiveIntensity={glowIntensity * 3} />
       </mesh>
-      <mesh position={[0, 0.86, 0]}>
-        <boxGeometry args={[0.06, 0.04, 1.44]} />
-        <meshPhysicalMaterial color="#e2e8f0" roughness={0.5} />
-      </mesh>
-      <mesh position={[0, -0.86, 0]}>
-        <boxGeometry args={[0.06, 0.04, 1.44]} />
-        <meshPhysicalMaterial color="#e2e8f0" roughness={0.5} />
-      </mesh>
-      <mesh position={[0, 0, 0.73]}>
-        <boxGeometry args={[0.06, 1.64, 0.04]} />
-        <meshPhysicalMaterial color="#e2e8f0" roughness={0.5} />
-      </mesh>
-      <mesh position={[0, 0, -0.73]}>
-        <boxGeometry args={[0.06, 1.64, 0.04]} />
-        <meshPhysicalMaterial color="#e2e8f0" roughness={0.5} />
-      </mesh>
-      <mesh position={[0, 0, 0]}>
-        <boxGeometry args={[0.06, 1.64, 1.44]} />
-        <meshPhysicalMaterial color="#475569" roughness={0.6} transparent opacity={0.08} />
-      </mesh>
-      <mesh position={[0.02, 0.3, 0.15]}>
-        <planeGeometry args={[0.5, 0.4]} />
-        <meshPhysicalMaterial color="#fbbf24" roughness={0.3} emissive="#fbbf24" emissiveIntensity={0.6} transparent opacity={0.5} />
-      </mesh>
-      <lineSegments>
-        <edgesGeometry args={[new THREE.BoxGeometry(0.08, 1.64, 1.44)]} />
-        <lineBasicMaterial color="#94a3b8" />
-      </lineSegments>
+
+      <pointLight position={[0, 0.3, 0.8]} intensity={glowIntensity} color={glowColor} distance={2.5} decay={0.5} />
+
+      <Text fontSize={0.08} color="#ffffff" anchorX="center" anchorY="middle" position={[0, 0.7, 0]}>
+        {`${count}/7`}
+      </Text>
+
+      {PARTS.map(({ type, pos }) => {
+        const installed = installedByType[type];
+        if (!installed) return null;
+        return (
+          <group key={type} position={pos}>
+            <group scale={0.35}>
+              <DetailedComponentModel type={type} />
+            </group>
+          </group>
+        );
+      })}
     </group>
   );
 }
 
-function LabPoster() {
-  const tex = useLoader(THREE.TextureLoader, '/lab-poster.png');
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 16;
-  tex.minFilter = THREE.LinearMipmapLinearFilter;
-  tex.magFilter = THREE.LinearFilter;
+function ComponentOnTable({ type, position, slotId }: { type: string; position: [number, number, number]; slotId: string }) {
+  const [hovered, setHovered] = useState(false);
+  const [msg, setMsg] = useState('');
+  const installed = useAssemblyStore((s) => s.components.some((c) => c.slotId === slotId && c.installed));
+
+  const handleClick = () => {
+    if (installed) return;
+    const dep = useAssemblyStore.getState().checkDependencies(slotId);
+    if (!dep.ok) { setMsg('Cần mainboard trước!'); setTimeout(() => setMsg(''), 1500); return; }
+    useAssemblyStore.getState().installComponent(slotId, `comp_${slotId}`);
+  };
+
+  if (installed) return null;
 
   return (
-    <group position={[-4.85, 1.5, 0]}>
-      <mesh position={[0, 0, 0]}>
-        <boxGeometry args={[0.06, 1.45, 2.78]} />
-        <meshPhysicalMaterial color="#1e293b" roughness={0.6} metalness={0.3} />
+    <group position={position}>
+      <mesh position={[0, 0.15, 0]}
+        onPointerOver={(e) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = 'pointer'; }}
+        onPointerOut={() => { setHovered(false); document.body.style.cursor = 'default'; }}
+        onClick={handleClick}>
+        <boxGeometry args={[0.8, 0.3, 0.8]} />
+        <meshBasicMaterial transparent opacity={0} />
       </mesh>
-      <mesh position={[0.031, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
-        <planeGeometry args={[2.6, 1.3]} />
-        <meshPhysicalMaterial map={tex} roughness={0.15} metalness={0.05} side={THREE.DoubleSide} />
+      <group scale={0.35}>
+        <DetailedComponentModel type={type} />
+      </group>
+      <mesh position={[0, -0.3, 0]}>
+        <RoundedBox args={[0.7, 0.02, 0.7]} radius={0.01}>
+          <meshStandardMaterial color={COLORS[type] || '#888'} metalness={0.2} roughness={0.3}
+          emissive={COLORS[type] || '#888'} emissiveIntensity={hovered ? 0.4 : 0.05} />
+        </RoundedBox>
       </mesh>
-      <mesh position={[0, 0.67, 0]}>
-        <boxGeometry args={[0.08, 0.05, 2.75]} />
-        <meshPhysicalMaterial color="#475569" roughness={0.4} metalness={0.5} />
-      </mesh>
-      <mesh position={[0, -0.67, 0]}>
-        <boxGeometry args={[0.08, 0.05, 2.75]} />
-        <meshPhysicalMaterial color="#475569" roughness={0.4} metalness={0.5} />
-      </mesh>
-      <mesh position={[-1.37, 0, 0]}>
-        <boxGeometry args={[0.08, 1.4, 0.05]} />
-        <meshPhysicalMaterial color="#475569" roughness={0.4} metalness={0.5} />
-      </mesh>
-      <mesh position={[1.37, 0, 0]}>
-        <boxGeometry args={[0.08, 1.4, 0.05]} />
-        <meshPhysicalMaterial color="#475569" roughness={0.4} metalness={0.5} />
-      </mesh>
-    </group>
-  );
-}
-
-function LabPoster2() {
-  const tex = useLoader(THREE.TextureLoader, '/lab-poster2.jpg');
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 16;
-  tex.minFilter = THREE.LinearMipmapLinearFilter;
-  tex.magFilter = THREE.LinearFilter;
-
-  return (
-    <group position={[4.85, 1.5, 0]}>
-      <mesh position={[0, 0, 0]}>
-        <boxGeometry args={[0.06, 1.5, 1.5]} />
-        <meshPhysicalMaterial color="#0f172a" roughness={0.7} metalness={0.2} />
-      </mesh>
-      <mesh position={[-0.031, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
-        <planeGeometry args={[1.4, 1.4]} />
-        <meshPhysicalMaterial map={tex} roughness={0.15} metalness={0.05} side={THREE.DoubleSide} />
-      </mesh>
-      <mesh position={[0, 0.72, 0]}>
-        <boxGeometry args={[0.06, 0.04, 1.46]} />
-        <meshPhysicalMaterial color="#1e293b" roughness={0.4} metalness={0.4} />
-      </mesh>
-      <mesh position={[0, -0.72, 0]}>
-        <boxGeometry args={[0.06, 0.04, 1.46]} />
-        <meshPhysicalMaterial color="#1e293b" roughness={0.4} metalness={0.4} />
-      </mesh>
-      <mesh position={[0, 0, -0.72]}>
-        <boxGeometry args={[0.06, 1.46, 0.04]} />
-        <meshPhysicalMaterial color="#1e293b" roughness={0.4} metalness={0.4} />
-      </mesh>
-      <mesh position={[0, 0, 0.72]}>
-        <boxGeometry args={[0.06, 1.46, 0.04]} />
-        <meshPhysicalMaterial color="#1e293b" roughness={0.4} metalness={0.4} />
-      </mesh>
-    </group>
-  );
-}
-
-function Door() {
-  return (
-    <group position={[0, 0, 4.85]}>
-      <mesh position={[0, 1.1, 0]}>
-        <boxGeometry args={[1.2, 2.2, 0.06]} />
-        <meshPhysicalMaterial color="#94a3b8" roughness={0.3} metalness={0.4} />
-      </mesh>
-      <mesh position={[0, 1.1, 0.04]}>
-        <boxGeometry args={[1.15, 2.15, 0.01]} />
-        <meshPhysicalMaterial color="#e2e8f0" roughness={0.2} metalness={0.3} />
-      </mesh>
-      <mesh position={[-0.6, 1.1, 0]}>
-        <boxGeometry args={[0.04, 2.22, 0.1]} />
-        <meshPhysicalMaterial color="#475569" roughness={0.3} metalness={0.5} />
-      </mesh>
-      <mesh position={[0.6, 1.1, 0]}>
-        <boxGeometry args={[0.04, 2.22, 0.1]} />
-        <meshPhysicalMaterial color="#475569" roughness={0.3} metalness={0.5} />
-      </mesh>
-      <mesh position={[0, 2.21, 0]}>
-        <boxGeometry args={[1.24, 0.04, 0.1]} />
-        <meshPhysicalMaterial color="#475569" roughness={0.3} metalness={0.5} />
-      </mesh>
-      <mesh position={[0.45, 1.0, 0.08]}>
-        <sphereGeometry args={[0.04, 8, 8]} />
-        <meshPhysicalMaterial color="#94a3b8" roughness={0.2} metalness={0.8} />
-      </mesh>
-      <mesh position={[0, 1.1, 0.06]}>
-        <planeGeometry args={[0.1, 0.1]} />
-        <meshPhysicalMaterial color="#ef4444" roughness={0.5} transparent opacity={0.3} />
-      </mesh>
+      <sprite position={[0, 0.4, 0]} scale={[0.5, 0.18, 1]}>
+        <spriteMaterial map={(() => {
+          const c = document.createElement('canvas');
+          c.width = 128; c.height = 48;
+          const ctx = c.getContext('2d')!;
+          ctx.fillStyle = 'rgba(0,0,0,0.7)';
+          ctx.beginPath(); (ctx as any).roundRect(0, 0, 128, 48, 8); ctx.fill();
+          ctx.fillStyle = COLORS[type] || '#fff';
+          ctx.font = 'bold 16px monospace';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(type.toUpperCase(), 64, 24);
+          const t = new THREE.CanvasTexture(c);
+          t.needsUpdate = true;
+          return t;
+        })()} transparent opacity={0.9} depthTest={false} />
+      </sprite>
+      {msg && (
+        <sprite position={[0, 0.5, 0]} scale={[0.6, 0.12, 1]}>
+          <spriteMaterial map={(() => {
+            const c = document.createElement('canvas');
+            c.width = 200; c.height = 40;
+            const ctx = c.getContext('2d')!;
+            ctx.fillStyle = 'rgba(255,50,50,0.85)';
+            ctx.beginPath(); (ctx as any).roundRect(0, 0, 200, 40, 8); ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 14px monospace';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(msg, 100, 20);
+            const t = new THREE.CanvasTexture(c);
+            t.needsUpdate = true;
+            return t;
+          })()} transparent opacity={0.9} depthTest={false} />
+        </sprite>
+      )}
     </group>
   );
 }
@@ -703,160 +676,102 @@ export default function GameScene() {
   return (
     <div className="w-full h-screen bg-[#f8fafc] relative overflow-hidden">
       <HeadTracker />
-      <Canvas shadows camera={{ position: [0, 1.6, 4.5], fov: 60, near: 0.1, far: 25 }}>
-        <color attach="background" args={['#ffffff']} />
-
+      <Canvas shadows camera={{ position: [0, 1.6, 3.5], fov: 60, near: 0.1, far: 25 }}>
+        <color attach="background" args={['#e8edf2']} />
         <CameraRig />
 
-        <ambientLight intensity={1.4} color="#e8f4ff" />
-        <hemisphereLight args={['#ffffff', '#c8dfff', 0.8]} />
-        <directionalLight position={[8, 12, 6]} intensity={1.4} color="#ffffff" castShadow shadow-mapSize={[1024, 1024]} shadow-bias={-0.001} />
-        <directionalLight position={[-5, 8, 8]} intensity={1.2} color="#ffffff" />
-        <pointLight position={[0, 3.5, 0]} intensity={1.6} color="#ffffff" />
-        <pointLight position={[2, 3.5, -2]} intensity={0.8} color="#ffffff" />
-        <pointLight position={[-2, 3.5, 2]} intensity={0.8} color="#ffffff" />
+        <ambientLight intensity={0.7} color="#d0d8e8" />
+        <hemisphereLight args={['#d0dff0', '#8899aa', 0.6]} />
+        <directionalLight position={[8, 12, 6]} intensity={1.0} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.001} />
+        <directionalLight position={[-4, 8, 4]} intensity={0.4} color="#c8d8e8" />
+        <pointLight position={[0, 3.5, 0]} intensity={0.3} color="#e0e8f0" />
 
-        <mesh position={[0, -0.01, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        {/* Floor tiles */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow position={[0, -0.01, 0]}>
           <planeGeometry args={[10, 10]} />
-          <meshPhysicalMaterial color="#8ba0b8" roughness={0.3} />
+          <meshPhysicalMaterial color="#8ba0b8" roughness={0.4} />
         </mesh>
 
-        <mesh position={[0, 0.002, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[10, 10]} />
-          <meshPhysicalMaterial color="#9ab0c8" roughness={0.4} transparent opacity={0.25} />
-        </mesh>
+        {/* Floor grid lines */}
+        {Array.from({ length: 11 }).map((_, i) => (
+          <React.Fragment key={`fline-${i}`}>
+            <mesh position={[-5 + i, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+              <planeGeometry args={[0.008, 10]} />
+              <meshPhysicalMaterial color="#9ab0c8" transparent opacity={0.15} />
+            </mesh>
+            <mesh position={[0, 0, -5 + i]} rotation={[-Math.PI / 2, 0, 0]}>
+              <planeGeometry args={[10, 0.008]} />
+              <meshPhysicalMaterial color="#9ab0c8" transparent opacity={0.15} />
+            </mesh>
+          </React.Fragment>
+        ))}
 
-        {([
-          { pos: [0, 0.01, -4.98], size: [10, 0.02, 0.015], c: '#6b8199' },
-          { pos: [0, 0.01, -3.32], size: [10, 0.02, 0.015], c: '#6b8199' },
-          { pos: [0, 0.01, -1.66], size: [10, 0.02, 0.015], c: '#6b8199' },
-          { pos: [0, 0.01, 0], size: [10, 0.02, 0.015], c: '#6b8199' },
-          { pos: [0, 0.01, 1.66], size: [10, 0.02, 0.015], c: '#6b8199' },
-          { pos: [0, 0.01, 3.32], size: [10, 0.02, 0.015], c: '#6b8199' },
-          { pos: [-4.98, 0.01, 0], size: [0.015, 0.02, 10], c: '#6b8199' },
-          { pos: [-3.32, 0.01, 0], size: [0.015, 0.02, 10], c: '#6b8199' },
-          { pos: [-1.66, 0.01, 0], size: [0.015, 0.02, 10], c: '#6b8199' },
-          { pos: [1.66, 0.01, 0], size: [0.015, 0.02, 10], c: '#6b8199' },
-          { pos: [3.32, 0.01, 0], size: [0.015, 0.02, 10], c: '#6b8199' },
-          { pos: [4.98, 0.01, 0], size: [0.015, 0.02, 10], c: '#6b8199' },
-        ] as const).map((item, i) => (
-          <mesh key={i} position={item.pos}>
-            <boxGeometry args={item.size} />
-            <meshPhysicalMaterial color={item.c} roughness={0.5} transparent opacity={0.6} />
+        {/* Walls */}
+        <mesh position={[0, 1.5, -5]}><boxGeometry args={[10, 3, 0.18]} /><meshPhysicalMaterial color="#e8ecf0" roughness={0.9} side={THREE.DoubleSide} /></mesh>
+        <mesh position={[0, 1.5, 5]}><boxGeometry args={[10, 3, 0.18]} /><meshPhysicalMaterial color="#e8ecf0" roughness={0.9} side={THREE.DoubleSide} /></mesh>
+        <mesh position={[-5, 1.5, 0]}><boxGeometry args={[0.18, 3, 10]} /><meshPhysicalMaterial color="#e8ecf0" roughness={0.9} side={THREE.DoubleSide} /></mesh>
+        <mesh position={[5, 1.5, 0]}><boxGeometry args={[0.18, 3, 10]} /><meshPhysicalMaterial color="#e8ecf0" roughness={0.9} side={THREE.DoubleSide} /></mesh>
+
+        {/* Baseboard */}
+        {[[0, 0.08, -4.98], [0, 0.08, 4.98], [-4.98, 0.08, 0], [4.98, 0.08, 0]].map((pos, i) => (
+          <mesh key={`base-${i}`} position={pos as [number, number, number]}>
+            <boxGeometry args={i < 2 ? [10, 0.15, 0.06] : [0.06, 0.15, 10]} />
+            <meshPhysicalMaterial color="#94a3b8" roughness={0.6} />
           </mesh>
         ))}
 
-        <mesh position={[0, 1.5, -5]} receiveShadow>
-          <boxGeometry args={[10, 3, 0.18]} />
-          <meshPhysicalMaterial color="#52525b" roughness={0.9} side={THREE.DoubleSide} />
-        </mesh>
-        <mesh position={[-2.8, 1.0, -4.9]}>
-          <boxGeometry args={[1.2, 0.8, 0.04]} />
-          <meshPhysicalMaterial color="#94a3b8" roughness={0.1} transparent opacity={0.35} metalness={0.2} />
-        </mesh>
-        <mesh position={[2.8, 1.0, -4.9]}>
-          <boxGeometry args={[1.2, 0.8, 0.04]} />
-          <meshPhysicalMaterial color="#94a3b8" roughness={0.1} transparent opacity={0.35} metalness={0.2} />
-        </mesh>
-        <mesh position={[0, 2.3, -4.9]}>
-          <boxGeometry args={[3, 0.4, 0.04]} />
-          <meshPhysicalMaterial color="#94a3b8" roughness={0.1} transparent opacity={0.25} metalness={0.2} />
-        </mesh>
-
-        <mesh position={[0, 1.5, 5]}>
-          <boxGeometry args={[10, 3, 0.18]} />
-          <meshPhysicalMaterial color="#52525b" roughness={0.9} side={THREE.DoubleSide} />
-        </mesh>
-        <mesh position={[3.5, 1.5, 4.9]}>
-          <boxGeometry args={[2, 1.2, 0.04]} />
-          <meshPhysicalMaterial color="#94a3b8" roughness={0.1} transparent opacity={0.35} metalness={0.2} />
-        </mesh>
-        <mesh position={[-3.5, 1.5, 4.9]}>
-          <boxGeometry args={[2, 1.2, 0.04]} />
-          <meshPhysicalMaterial color="#94a3b8" roughness={0.1} transparent opacity={0.35} metalness={0.2} />
-        </mesh>
-
-        <mesh position={[-5, 1.5, 0]}>
-          <boxGeometry args={[0.18, 3, 10]} />
-          <meshPhysicalMaterial color="#52525b" roughness={0.9} side={THREE.DoubleSide} />
-        </mesh>
-        <mesh position={[-4.9, 1.8, -2.8]}>
-          <boxGeometry args={[0.04, 1.0, 1.0]} />
-          <meshPhysicalMaterial color="#94a3b8" roughness={0.1} transparent opacity={0.35} metalness={0.2} />
-        </mesh>
-        <mesh position={[-4.9, 1.8, 2.8]}>
-          <boxGeometry args={[0.04, 1.0, 1.0]} />
-          <meshPhysicalMaterial color="#94a3b8" roughness={0.1} transparent opacity={0.35} metalness={0.2} />
-        </mesh>
-
-        <mesh position={[5, 1.5, 0]}>
-          <boxGeometry args={[0.18, 3, 10]} />
-          <meshPhysicalMaterial color="#52525b" roughness={0.9} side={THREE.DoubleSide} />
-        </mesh>
-        <mesh position={[4.9, 1.8, -3.8]}>
-          <boxGeometry args={[0.04, 1.0, 0.8]} />
-          <meshPhysicalMaterial color="#94a3b8" roughness={0.1} transparent opacity={0.35} metalness={0.2} />
-        </mesh>
-        <mesh position={[4.9, 1.8, 3.8]}>
-          <boxGeometry args={[0.04, 1.0, 0.8]} />
-          <meshPhysicalMaterial color="#94a3b8" roughness={0.1} transparent opacity={0.35} metalness={0.2} />
-        </mesh>
-
+        {/* Ceiling */}
         <mesh position={[0, 3, 0]} rotation={[Math.PI / 2, 0, 0]}>
           <planeGeometry args={[10, 10]} />
-          <meshPhysicalMaterial color="#f1f5f9" roughness={0.8} />
+          <meshPhysicalMaterial color="#f0f2f5" roughness={0.8} />
         </mesh>
-        <mesh position={[0, 2.98, -4]}>
-          <boxGeometry args={[0.15, 0.04, 3]} />
-          <meshPhysicalMaterial color="#f8faff" roughness={0.3} emissive="#dce8ff" emissiveIntensity={0.6} />
-        </mesh>
+
+        {/* Ceiling lights */}
         <mesh position={[0, 2.98, 0]}>
-          <boxGeometry args={[0.15, 0.04, 3]} />
-          <meshPhysicalMaterial color="#f8faff" roughness={0.3} emissive="#dce8ff" emissiveIntensity={0.6} />
+          <boxGeometry args={[1.2, 0.03, 0.2]} />
+          <meshPhysicalMaterial color="#f0f9ff" roughness={0.3} emissive="#d0e8ff" emissiveIntensity={0.6} />
         </mesh>
-        <mesh position={[0, 2.98, 4]}>
-          <boxGeometry args={[0.15, 0.04, 3]} />
-          <meshPhysicalMaterial color="#f8faff" roughness={0.3} emissive="#dce8ff" emissiveIntensity={0.6} />
+        <mesh position={[0, 2.98, -2]}>
+          <boxGeometry args={[1.2, 0.03, 0.2]} />
+          <meshPhysicalMaterial color="#f0f9ff" roughness={0.3} emissive="#d0e8ff" emissiveIntensity={0.6} />
+        </mesh>
+        <mesh position={[0, 2.98, 2]}>
+          <boxGeometry args={[1.2, 0.03, 0.2]} />
+          <meshPhysicalMaterial color="#f0f9ff" roughness={0.3} emissive="#d0e8ff" emissiveIntensity={0.6} />
         </mesh>
 
-        {([[0, 0, -4.9], [0, 0, 4.9], [-4.9, 0, 0], [4.9, 0, 0]] as const).map((pos, i) => (
-          <mesh key={i} position={pos}>
-            <boxGeometry args={i < 2 ? [10, 0.08, 0.02] : [0.02, 0.08, 10]} />
-            <meshPhysicalMaterial color="#6b8199" roughness={0.4} />
-          </mesh>
+        {/* Ceiling Fan */}
+        <CeilingFan position={[0, 2.9, -1.2]} />
+
+        {/* Whiteboard on back wall */}
+        <Whiteboard position={[0, 0, -4.85]} />
+
+        {/* ===== DESKS WITH MONITORS ===== */}
+        <Desk position={[-2.8, 0, -2.5]} />
+        <Monitor position={[-2.8, 0.72, -2.5]} />
+
+        {/* Main assembly desk */}
+        <mesh position={[0, 0, -0.2]} castShadow>
+          <RoundedBox args={[4.5, 0.06, 5]} radius={0.02}>
+            <meshPhysicalMaterial color="#8B7355" roughness={0.5} metalness={0.05} />
+          </RoundedBox>
+        </mesh>
+
+        {/* Pc Case */}
+        <PcCaseDetailed />
+
+        {/* ===== COMPONENTS ON DESK FROM 3D WAREHOUSE ===== */}
+        {[
+          { t: 'motherboard', p: [0, 0.96, 0.2] as [number, number, number], s: 'motherboard_1' },
+          { t: 'cpu', p: [-1.5, 0.96, 1.5] as [number, number, number], s: 'cpu_1' },
+          { t: 'cooler', p: [-0.5, 0.96, 1.5] as [number, number, number], s: 'cooler_1' },
+          { t: 'ram', p: [0.5, 0.96, 1.5] as [number, number, number], s: 'ram_1' },
+          { t: 'gpu', p: [1.5, 0.96, 1.5] as [number, number, number], s: 'gpu_1' },
+          { t: 'psu', p: [-1.5, 0.96, -1.7] as [number, number, number], s: 'psu_1' },
+          { t: 'ssd', p: [1.5, 0.96, -1.7] as [number, number, number], s: 'ssd_1' },
+        ].map(({ t, p, s }) => (
+          <ComponentOnTable key={t} type={t} position={p} slotId={s} />
         ))}
-
-        {/* Back wall: storage cabinets */}
-        <StorageCabinet position={[-3.5, 0, -4.85]} />
-        <StorageCabinet position={[-2.3, 0, -4.85]} />
-        <StorageCabinet position={[2.5, 0, -4.85]} />
-        <StorageCabinet position={[3.7, 0, -4.85]} />
-
-        {/* Center bench - main work table */}
-        <LabBench position={[0, 0, -1.0]} size={[3.5, 0.9, 2.0]} />
-
-        {/* Left bench with computer station */}
-        <LabBench position={[-2.5, 0, 1.5]} size={[2.0, 0.9, 1.0]} />
-        <ComputerStation />
-
-        {/* Right bench with equipment */}
-        <LabBench position={[3.0, 0, 1.0]} size={[2.0, 0.9, 1.0]} />
-        <Centrifuge position={[3.0, 0.9, 1.0]} />
-        <Microscope position={[2.5, 0.9, 1.3]} />
-        <Beaker position={[3.5, 0.9, 1.2]} color="#22c55e" />
-        <Flask position={[3.0, 0.9, 0.6]} color="#ef4444" />
-
-        {/* Robotic arm section */}
-        <RoboticArmSection />
-        <LabBench position={[4.2, 0, -1.8]} size={[1.2, 0.9, 0.8]} color="#94a3b8" />
-        <Beaker position={[4.2, 0.9, -1.6]} color="#eab308" height={0.3} radius={0.1} />
-        <Beaker position={[4.6, 0.9, -1.8]} color="#ef4444" height={0.2} radius={0.07} />
-
-        {/* Window (right wall, front corner) */}
-        <LabWindow />
-        <LabPoster />
-        <LabPoster2 />
-        <Door />
       </Canvas>
     </div>
   );
