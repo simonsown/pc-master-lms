@@ -714,12 +714,47 @@ function CentralTable({ position }: { position: [number, number, number] }) {
   );
 }
 
+function ClickablePart({ children, position, label, color, onClick }: {
+  children: React.ReactNode; position: [number, number, number];
+  label: string; color: string; onClick?: () => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <group position={position}>
+      <mesh
+        onPointerOver={(e) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = 'pointer'; }}
+        onPointerOut={() => { setHovered(false); document.body.style.cursor = 'default'; }}
+        onClick={(e) => { e.stopPropagation(); onClick?.(); }}>
+        {children}
+      </mesh>
+      <mesh position={[0, -0.02, 0]}>
+        <RoundedBox args={[0.12, 0.008, 0.12]} radius={0.005}>
+          <meshStandardMaterial color={color} metalness={0.2} roughness={0.3}
+            emissive={color} emissiveIntensity={hovered ? 0.5 : 0.05} />
+        </RoundedBox>
+      </mesh>
+      {hovered && (
+        <sprite position={[0, 0.04, 0]} scale={[0.2, 0.07, 1]}>
+          <spriteMaterial map={(() => {
+            const c = document.createElement('canvas'); c.width = 128; c.height = 32;
+            const ctx = c.getContext('2d')!;
+            ctx.fillStyle = 'rgba(0,0,0,0.7)';
+            ctx.beginPath(); (ctx as any).roundRect(0, 0, 128, 32, 6); ctx.fill();
+            ctx.fillStyle = color; ctx.font = 'bold 12px monospace';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(label, 64, 16);
+            const t = new THREE.CanvasTexture(c); t.needsUpdate = true;
+            return t;
+          })()} transparent opacity={0.95} depthTest={false} />
+        </sprite>
+      )}
+    </group>
+  );
+}
+
 function TableImages({ position }: { position: [number, number, number] }) {
   const topTex = useTexture('/cpu_top_view.png');
   const sideTex = useTexture('/cpu_side_flat_left.png');
-  const ramTopTex = useTexture('/ram_top.png');
-  const ramFrontTex = useTexture('/ram_front.png');
-  const ramLeftTex = useTexture('/ram_left.png');
 
   const sideMats = useMemo(() => {
     const m = new THREE.MeshStandardMaterial({ map: sideTex });
@@ -731,45 +766,39 @@ function TableImages({ position }: { position: [number, number, number] }) {
     return [m, m, m, m, m, m];
   }, [topTex]);
 
-  const ramMaterials = useMemo(() => {
-    const sideM = new THREE.MeshStandardMaterial({ map: ramLeftTex });
-    const topM = new THREE.MeshStandardMaterial({ map: ramTopTex });
-    const frontM = new THREE.MeshStandardMaterial({ map: ramFrontTex });
-    return [sideM, sideM, topM, topM, frontM, frontM];
-  }, [ramLeftTex, ramTopTex, ramFrontTex]);
-
   return (
     <group position={position}>
-      <mesh position={[0.6, 0.743, 0]} material={sideMats} castShadow>
-        <boxGeometry args={[0.1, 0.025, 0.1]} />
-      </mesh>
-      <mesh position={[0.6, 0.754, 0]} material={topMats}>
-        <boxGeometry args={[0.105, 0.004, 0.105]} />
-      </mesh>
-      <mesh position={[0.6, 0.733, 0]} material={topMats}>
-        <boxGeometry args={[0.105, 0.004, 0.105]} />
-      </mesh>
+      <ClickablePart position={[0.6, 0.733, 0]} label="CPU" color="#00d4aa">
+        <mesh material={sideMats} castShadow>
+          <boxGeometry args={[0.1, 0.025, 0.1]} />
+        </mesh>
+        <mesh material={topMats}>
+          <boxGeometry args={[0.105, 0.004, 0.105]} />
+        </mesh>
+        <mesh material={topMats}>
+          <boxGeometry args={[0.105, 0.004, 0.105]} />
+        </mesh>
+      </ClickablePart>
 
-      {/* 2 RAM sticks — 3D style from 2D design */}
       {[0.06, -0.06].map((z, idx) => (
-        <group key={`ram-${idx}`} position={[0.45, 0.72, z]}>
-          <mesh position={[0, 0.055, 0]} castShadow>
-            <boxGeometry args={[0.012, 0.11, 0.06]} />
+        <ClickablePart key={`ram-${idx}`} position={[0.42, 0.725, z]} label={`RAM ${idx+1}`} color="#6366f1">
+          <mesh castShadow>
+            <boxGeometry args={[0.012, 0.004, 0.12]} />
             <meshPhysicalMaterial color="#1a1a2e" roughness={0.7} metalness={0.1} />
           </mesh>
-          <mesh position={[0, 0.07, 0]}>
-            <boxGeometry args={[0.01, 0.06, 0.05]} />
+          <mesh>
+            <boxGeometry args={[0.01, 0.003, 0.09]} />
             <meshPhysicalMaterial color="#2a2a2a" roughness={0.6} metalness={0.3} />
           </mesh>
-          <mesh position={[0, 0.008, 0]}>
-            <boxGeometry args={[0.01, 0.015, 0.055]} />
+          <mesh position={[0, -0.003, 0.052]}>
+            <boxGeometry args={[0.012, 0.002, 0.015]} />
             <meshPhysicalMaterial color="#c0a030" metalness={0.7} roughness={0.3} />
           </mesh>
-          <mesh position={[0.007, 0.05, 0]}>
-            <boxGeometry args={[0.002, 0.08, 0.04]} />
+          <mesh position={[0.006, 0, -0.01]}>
+            <boxGeometry args={[0.002, 0.002, 0.08]} />
             <meshPhysicalMaterial color="#ff6600" emissive="#ff6600" emissiveIntensity={0.08} transparent opacity={0.4} />
           </mesh>
-        </group>
+        </ClickablePart>
       ))}
     </group>
   );
