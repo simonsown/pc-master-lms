@@ -55,8 +55,8 @@ function CameraRig() {
     if (m.length() > 0) {
       m.normalize().multiplyScalar(4 * d);
       const np = camera.position.clone().add(m);
-      np.x = THREE.MathUtils.clamp(np.x, -4.5, 4.5);
-      np.z = THREE.MathUtils.clamp(np.z, -4.5, 4);
+      np.x = THREE.MathUtils.clamp(np.x, -6.5, 6.5);
+      np.z = THREE.MathUtils.clamp(np.z, -6.5, 6);
       np.y = 1.6;
       camera.position.copy(np);
     }
@@ -694,6 +694,24 @@ function PcCaseShell({ position }: { position: [number, number, number] }) {
   );
 }
 
+function CentralTable({ position }: { position: [number, number, number] }) {
+  const topColor = '#8B7355';
+  return (
+    <group position={position}>
+      <mesh position={[0, 0.7, 0]} castShadow>
+        <boxGeometry args={[2.4, 0.04, 1.2]} />
+        <meshPhysicalMaterial color={topColor} roughness={0.6} metalness={0.05} />
+      </mesh>
+      {[[-1.05, 0.35, -0.55], [-1.05, 0.35, 0.55], [1.05, 0.35, -0.55], [1.05, 0.35, 0.55]].map((p, i) => (
+        <mesh key={i} position={p as [number, number, number]}>
+          <cylinderGeometry args={[0.035, 0.04, 0.7, 8]} />
+          <meshPhysicalMaterial color="#94a3b8" roughness={0.3} metalness={0.4} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
 export default function GameScene() {
   return (
     <div className="w-full h-screen bg-[#f8fafc] relative overflow-hidden">
@@ -712,41 +730,41 @@ export default function GameScene() {
 
         {/* Floor tiles */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow position={[0, -0.01, 0]}>
-          <planeGeometry args={[10, 10]} />
+          <planeGeometry args={[14, 14]} />
           <meshPhysicalMaterial color="#8ba0b8" roughness={0.4} />
         </mesh>
 
         {/* Floor grid lines */}
-        {Array.from({ length: 11 }).map((_, i) => (
+        {Array.from({ length: 15 }).map((_, i) => (
           <React.Fragment key={`fline-${i}`}>
-            <mesh position={[-5 + i, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-              <planeGeometry args={[0.008, 10]} />
+            <mesh position={[-7 + i, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+              <planeGeometry args={[0.008, 14]} />
               <meshPhysicalMaterial color="#9ab0c8" transparent opacity={0.15} />
             </mesh>
-            <mesh position={[0, 0, -5 + i]} rotation={[-Math.PI / 2, 0, 0]}>
-              <planeGeometry args={[10, 0.008]} />
+            <mesh position={[0, 0, -7 + i]} rotation={[-Math.PI / 2, 0, 0]}>
+              <planeGeometry args={[14, 0.008]} />
               <meshPhysicalMaterial color="#9ab0c8" transparent opacity={0.15} />
             </mesh>
           </React.Fragment>
         ))}
 
         {/* Walls */}
-        <mesh position={[0, 1.5, -5]}><boxGeometry args={[10, 3, 0.18]} /><meshPhysicalMaterial color="#e8ecf0" roughness={0.9} side={THREE.DoubleSide} /></mesh>
-        <mesh position={[0, 1.5, 5]}><boxGeometry args={[10, 3, 0.18]} /><meshPhysicalMaterial color="#e8ecf0" roughness={0.9} side={THREE.DoubleSide} /></mesh>
-        <mesh position={[-5, 1.5, 0]}><boxGeometry args={[0.18, 3, 10]} /><meshPhysicalMaterial color="#e8ecf0" roughness={0.9} side={THREE.DoubleSide} /></mesh>
-        <mesh position={[5, 1.5, 0]}><boxGeometry args={[0.18, 3, 10]} /><meshPhysicalMaterial color="#e8ecf0" roughness={0.9} side={THREE.DoubleSide} /></mesh>
+        <mesh position={[0, 1.5, -7]}><boxGeometry args={[14, 3, 0.18]} /><meshPhysicalMaterial color="#e8ecf0" roughness={0.9} side={THREE.DoubleSide} /></mesh>
+        <mesh position={[0, 1.5, 7]}><boxGeometry args={[14, 3, 0.18]} /><meshPhysicalMaterial color="#e8ecf0" roughness={0.9} side={THREE.DoubleSide} /></mesh>
+        <mesh position={[-7, 1.5, 0]}><boxGeometry args={[0.18, 3, 14]} /><meshPhysicalMaterial color="#e8ecf0" roughness={0.9} side={THREE.DoubleSide} /></mesh>
+        <mesh position={[7, 1.5, 0]}><boxGeometry args={[0.18, 3, 14]} /><meshPhysicalMaterial color="#e8ecf0" roughness={0.9} side={THREE.DoubleSide} /></mesh>
 
         {/* Baseboard */}
-        {[[0, 0.08, -4.98], [0, 0.08, 4.98], [-4.98, 0.08, 0], [4.98, 0.08, 0]].map((pos, i) => (
+        {[[0, 0.08, -6.98], [0, 0.08, 6.98], [-6.98, 0.08, 0], [6.98, 0.08, 0]].map((pos, i) => (
           <mesh key={`base-${i}`} position={pos as [number, number, number]}>
-            <boxGeometry args={i < 2 ? [10, 0.15, 0.06] : [0.06, 0.15, 10]} />
+            <boxGeometry args={i < 2 ? [14, 0.15, 0.06] : [0.06, 0.15, 14]} />
             <meshPhysicalMaterial color="#94a3b8" roughness={0.6} />
           </mesh>
         ))}
 
         {/* Ceiling */}
         <mesh position={[0, 3, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[10, 10]} />
+          <planeGeometry args={[14, 14]} />
           <meshPhysicalMaterial color="#f0f2f5" roughness={0.8} />
         </mesh>
 
@@ -755,37 +773,40 @@ export default function GameScene() {
           <boxGeometry args={[1.2, 0.03, 0.2]} />
           <meshPhysicalMaterial color="#f0f9ff" roughness={0.3} emissive="#d0e8ff" emissiveIntensity={0.6} />
         </mesh>
-        <mesh position={[0, 2.98, -2]}>
+        <mesh position={[0, 2.98, -3]}>
           <boxGeometry args={[1.2, 0.03, 0.2]} />
           <meshPhysicalMaterial color="#f0f9ff" roughness={0.3} emissive="#d0e8ff" emissiveIntensity={0.6} />
         </mesh>
-        <mesh position={[0, 2.98, 2]}>
+        <mesh position={[0, 2.98, 3]}>
           <boxGeometry args={[1.2, 0.03, 0.2]} />
           <meshPhysicalMaterial color="#f0f9ff" roughness={0.3} emissive="#d0e8ff" emissiveIntensity={0.6} />
         </mesh>
 
         {/* Ceiling Fan */}
-        <CeilingFan position={[0, 2.9, -1.2]} />
+        <CeilingFan position={[0, 2.9, 0]} />
 
         {/* Whiteboard on back wall */}
-        <Whiteboard position={[0, 0, -4.85]} />
+        <Whiteboard position={[0, 0, -6.85]} />
+
+        {/* ===== BÀN LỚN Ở GIỮA ===== */}
+        <CentralTable position={[0, 0, 0]} />
 
         {/* ===== 4 BÀN HỌC SINH VỚI MONITOR + CASE NHỎ ĐỨNG BÊN PHẢI ===== */}
-        <Desk position={[-2.8, 0, -2.5]} />
-        <Monitor position={[-2.8, 0.72, -2.5]} />
-        <PcCaseShell position={[-2.4, 0.895, -2.5]} />
+        <Desk position={[-3.5, 0, -3.5]} />
+        <Monitor position={[-3.5, 0.72, -3.5]} />
+        <PcCaseShell position={[-3.1, 0.895, -3.5]} />
 
-        <Desk position={[2.8, 0, -2.5]} />
-        <Monitor position={[2.8, 0.72, -2.5]} />
-        <PcCaseShell position={[3.2, 0.895, -2.5]} />
+        <Desk position={[3.5, 0, -3.5]} />
+        <Monitor position={[3.5, 0.72, -3.5]} />
+        <PcCaseShell position={[3.9, 0.895, -3.5]} />
 
-        <Desk position={[-2.8, 0, 2.5]} />
-        <Monitor position={[-2.8, 0.72, 2.5]} />
-        <PcCaseShell position={[-2.4, 0.895, 2.5]} />
+        <Desk position={[-3.5, 0, 3.5]} />
+        <Monitor position={[-3.5, 0.72, 3.5]} />
+        <PcCaseShell position={[-3.1, 0.895, 3.5]} />
 
-        <Desk position={[2.8, 0, 2.5]} />
-        <Monitor position={[2.8, 0.72, 2.5]} />
-        <PcCaseShell position={[3.2, 0.895, 2.5]} />
+        <Desk position={[3.5, 0, 3.5]} />
+        <Monitor position={[3.5, 0.72, 3.5]} />
+        <PcCaseShell position={[3.9, 0.895, 3.5]} />
       </Canvas>
     </div>
   );
