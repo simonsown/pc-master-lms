@@ -718,15 +718,19 @@ function TableImages({ position }: { position: [number, number, number] }) {
   const topTex = useTexture('/cpu_top_view.png');
   const sideTex = useTexture('/cpu_side_flat_left.png');
 
+  const mats = useMemo(() => [
+    new THREE.MeshStandardMaterial({ map: sideTex }),
+    new THREE.MeshStandardMaterial({ map: sideTex }),
+    new THREE.MeshStandardMaterial({ map: topTex }),
+    new THREE.MeshStandardMaterial({ map: topTex }),
+    new THREE.MeshStandardMaterial({ map: sideTex }),
+    new THREE.MeshStandardMaterial({ map: sideTex }),
+  ], [topTex, sideTex]);
+
   return (
     <group position={position}>
-      <mesh position={[0.7, 0.74, 0.12]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[0.22, 0.22]} />
-        <meshStandardMaterial map={topTex} />
-      </mesh>
-      <mesh position={[0.7, 0.74, -0.12]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[0.22, 0.22]} />
-        <meshStandardMaterial map={sideTex} />
+      <mesh position={[0.6, 0.76, 0]} material={mats} castShadow>
+        <boxGeometry args={[0.28, 0.08, 0.28]} />
       </mesh>
     </group>
   );
