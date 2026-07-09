@@ -10,16 +10,7 @@ import { headTrackingRef } from './head-tracker-shared';
 
 const HeadTracker = dynamic(() => import('./HeadTracker'), { ssr: false });
 
-const COLLIDERS = [
-  { x: [-2.25, 2.25], z: [-2.5, 0.5] },
-  { x: [-3.5, -1.5], z: [1.0, 2.0] },
-  { x: [2.0, 4.0], z: [0.5, 1.5] },
-];
-
-function checkCollision(x: number, z: number, radius = 0.3): boolean {
-  for (const b of COLLIDERS) {
-    if (x + radius > b.x[0] && x - radius < b.x[1] && z + radius > b.z[0] && z - radius < b.z[1]) return true;
-  }
+function checkCollision(_x: number, _z: number, _radius = 0.3): boolean {
   return false;
 }
 
@@ -67,15 +58,7 @@ function CameraRig() {
       np.x = THREE.MathUtils.clamp(np.x, -4.5, 4.5);
       np.z = THREE.MathUtils.clamp(np.z, -4.5, 4);
       np.y = 1.6;
-      if (!checkCollision(np.x, np.z)) camera.position.copy(np);
-      else {
-        const sx = new THREE.Vector3(np.x, 1.6, camera.position.z);
-        if (!checkCollision(sx.x, sx.z)) camera.position.copy(sx);
-        else {
-          const sz = new THREE.Vector3(camera.position.x, 1.6, np.z);
-          if (!checkCollision(sz.x, sz.z)) camera.position.copy(sz);
-        }
-      }
+      camera.position.copy(np);
     }
   });
   return null;
@@ -675,11 +658,15 @@ function ComponentOnTable({ type, position, slotId }: { type: string; position: 
 function PcCaseShell({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
-      <RoundedBox args={[3.0, 1.5, 1.0]} radius={0.02}>
+      <RoundedBox args={[0.3, 0.35, 0.15]} radius={0.01}>
         <meshPhysicalMaterial color="#2a3a5c" metalness={0.7} roughness={0.25} envMapIntensity={0.8} />
       </RoundedBox>
-      <mesh position={[0, 0.04, 0.505]}>
-        <planeGeometry args={[0.3, 0.025]} />
+      <mesh position={[0, 0.18, 0.08]}>
+        <planeGeometry args={[0.12, 0.08]} />
+        <meshPhysicalMaterial color="#88ccff" metalness={0.3} roughness={0.05} transparent opacity={0.2} side={THREE.DoubleSide} />
+      </mesh>
+      <mesh position={[0.155, 0.05, 0]}>
+        <boxGeometry args={[0.008, 0.15, 0.08]} />
         <meshPhysicalMaterial color="#4488ff" transparent opacity={0.2} emissive="#4488ff" emissiveIntensity={0.3} />
       </mesh>
     </group>
