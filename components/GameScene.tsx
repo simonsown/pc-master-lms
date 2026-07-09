@@ -740,28 +740,64 @@ function TableImages({ position }: { position: [number, number, number] }) {
         <boxGeometry args={[0.105, 0.004, 0.105]} />
       </mesh>
 
-      {/* CPU Cooler beside the CPU */}
-      <mesh position={[0.68, 0.72, 0]}>
-        <boxGeometry args={[0.06, 0.002, 0.06]} />
-        <meshPhysicalMaterial color="#333333" />
-      </mesh>
-      <mesh position={[0.68, 0.73, 0]}>
-        <cylinderGeometry args={[0.02, 0.02, 0.016, 12]} />
-        <meshPhysicalMaterial color="#222222" />
-      </mesh>
-      {[0, 1, 2, 3, 4, 5].map((i) => {
-        const angle = (i / 6) * Math.PI * 2;
-        return (
-          <mesh key={`blade-${i}`} position={[0.68 + Math.sin(angle) * 0.02, 0.74, Math.cos(angle) * 0.02]} rotation={[0, -angle, 0.6]}>
-            <boxGeometry args={[0.004, 0.004, 0.04]} />
-            <meshPhysicalMaterial color="#5588cc" transparent opacity={0.5} />
+      {/* CPU Cooler — detailed 3D tower cooler beside the CPU */}
+      <group position={[0.68, 0.7, 0]}>
+        {/* Heat sink base */}
+        <mesh position={[0, 0, 0]}>
+          <boxGeometry args={[0.1, 0.008, 0.1]} />
+          <meshPhysicalMaterial color="#c0c0c0" metalness={0.6} roughness={0.3} />
+        </mesh>
+        {/* Heat pipes */}
+        {[[-0.03, 0, -0.03], [-0.03, 0, 0.03], [0.03, 0, -0.03], [0.03, 0, 0.03]].map((p, i) => (
+          <mesh key={`pipe-${i}`} position={[p[0], 0.03, p[1]]}>
+            <cylinderGeometry args={[0.006, 0.006, 0.06, 6]} />
+            <meshPhysicalMaterial color="#b8860b" metalness={0.5} roughness={0.3} />
           </mesh>
-        );
-      })}
-      <mesh position={[0.68, 0.74, 0]}>
-        <torusGeometry args={[0.03, 0.002, 8, 20]} />
-        <meshPhysicalMaterial color="#4466aa" roughness={0.4} />
-      </mesh>
+        ))}
+        {/* Fin stack */}
+        {Array.from({ length: 10 }).map((_, i) => (
+          <mesh key={`fin-${i}`} position={[0, 0.01 + i * 0.006, 0]}>
+            <boxGeometry args={[0.09, 0.003, 0.09]} />
+            <meshPhysicalMaterial color="#d0d0d0" metalness={0.3} roughness={0.4} transparent opacity={0.7} />
+          </mesh>
+        ))}
+        {/* Fan housing frame */}
+        <mesh position={[0, 0.07, 0]}>
+          <torusGeometry args={[0.06, 0.006, 8, 24]} />
+          <meshPhysicalMaterial color="#222222" roughness={0.6} />
+        </mesh>
+        {/* Fan blades — 6 blades with LED look */}
+        {[0, 1, 2, 3, 4, 5].map((i) => {
+          const angle = (i / 6) * Math.PI * 2;
+          return (
+            <mesh key={`blade-${i}`} position={[Math.sin(angle) * 0.035, 0.07, Math.cos(angle) * 0.035]} rotation={[0, -angle, 0.5]}>
+              <boxGeometry args={[0.006, 0.003, 0.05]} />
+              <meshPhysicalMaterial color="#4488cc" transparent opacity={0.4} />
+            </mesh>
+          );
+        })}
+        {/* Fan hub */}
+        <mesh position={[0, 0.07, 0]}>
+          <cylinderGeometry args={[0.02, 0.02, 0.004, 12]} />
+          <meshPhysicalMaterial color="#111111" />
+        </mesh>
+        {/* LED ring glow (off — no emissive) */}
+        <mesh position={[0, 0.07, 0]}>
+          <torusGeometry args={[0.04, 0.003, 8, 24]} />
+          <meshPhysicalMaterial color="#4488cc" transparent opacity={0.35} roughness={0.3} />
+        </mesh>
+        {/* Fan struts */}
+        {[0, 1, 2].map((i) => {
+          const angle = (i / 3) * Math.PI * 2;
+          return (
+            <mesh key={`strut-${i}`} position={[Math.sin(angle) * 0.03, 0.07, Math.cos(angle) * 0.03]}
+              rotation={[0, -angle + Math.PI / 2, 0]}>
+              <boxGeometry args={[0.003, 0.003, 0.03]} />
+              <meshPhysicalMaterial color="#333" />
+            </mesh>
+          );
+        })}
+      </group>
     </group>
   );
 }
