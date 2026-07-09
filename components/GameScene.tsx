@@ -732,9 +732,11 @@ function TableImages({ position }: { position: [number, number, number] }) {
   }, [topTex]);
 
   const ramMaterials = useMemo(() => {
-    const m = new THREE.MeshStandardMaterial({ map: ramLeftTex });
-    return [m, m, m, m, m, m];
-  }, [ramLeftTex]);
+    const sideM = new THREE.MeshStandardMaterial({ map: ramLeftTex });
+    const topM = new THREE.MeshStandardMaterial({ map: ramTopTex });
+    const frontM = new THREE.MeshStandardMaterial({ map: ramFrontTex });
+    return [sideM, sideM, topM, topM, frontM, frontM];
+  }, [ramLeftTex, ramTopTex, ramFrontTex]);
 
   return (
     <group position={position}>
@@ -748,26 +750,23 @@ function TableImages({ position }: { position: [number, number, number] }) {
         <boxGeometry args={[0.105, 0.004, 0.105]} />
       </mesh>
 
-      {/* 2 RAM sticks on the table */}
-      {/* The ram_left image wraps the side faces, ram_top for top/bottom, ram_front for front/back */}
-      <group position={[0.45, 0.72, 0.05]} rotation={[0, 0.3, 0]}>
-        <mesh castShadow>
-          <boxGeometry args={[0.06, 0.03, 0.1]} />
-          <meshStandardMaterial map={ramFrontTex} />
+      {/* 2 RAM sticks standing vertical */}
+      <group position={[0.45, 0.72, 0.06]}>
+        <mesh castShadow material={ramMaterials}>
+          <boxGeometry args={[0.015, 0.13, 0.065]} />
         </mesh>
-        <mesh position={[0, 0.018, 0]}>
-          <boxGeometry args={[0.065, 0.004, 0.105]} />
-          <meshStandardMaterial map={ramTopTex} />
+        <mesh position={[0, 0.015, 0]}>
+          <boxGeometry args={[0.008, 0.02, 0.055]} />
+          <meshPhysicalMaterial color="#c0c0c0" metalness={0.5} roughness={0.3} />
         </mesh>
       </group>
-      <group position={[0.45, 0.72, -0.06]} rotation={[0, 0.3, 0]}>
-        <mesh castShadow>
-          <boxGeometry args={[0.06, 0.03, 0.1]} />
-          <meshStandardMaterial map={ramFrontTex} />
+      <group position={[0.45, 0.72, -0.06]}>
+        <mesh castShadow material={ramMaterials}>
+          <boxGeometry args={[0.015, 0.13, 0.065]} />
         </mesh>
-        <mesh position={[0, 0.018, 0]}>
-          <boxGeometry args={[0.065, 0.004, 0.105]} />
-          <meshStandardMaterial map={ramTopTex} />
+        <mesh position={[0, 0.015, 0]}>
+          <boxGeometry args={[0.008, 0.02, 0.055]} />
+          <meshPhysicalMaterial color="#c0c0c0" metalness={0.5} roughness={0.3} />
         </mesh>
       </group>
     </group>
