@@ -721,12 +721,16 @@ function ClickablePart({ children, position, label, color, onClick }: {
   const [hovered, setHovered] = useState(false);
   return (
     <group position={position}>
-      <mesh
-        onPointerOver={(e) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = 'pointer'; }}
-        onPointerOut={() => { setHovered(false); document.body.style.cursor = 'default'; }}
-        onClick={(e) => { e.stopPropagation(); onClick?.(); }}>
+      <group>
         {children}
-      </mesh>
+        <mesh position={[0, 0.01, 0]}
+          onPointerOver={(e) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = 'pointer'; }}
+          onPointerOut={() => { setHovered(false); document.body.style.cursor = 'default'; }}
+          onClick={(e) => { e.stopPropagation(); onClick?.(); }}>
+          <boxGeometry args={[0.14, 0.04, 0.14]} />
+          <meshBasicMaterial transparent opacity={0} />
+        </mesh>
+      </group>
       <mesh position={[0, -0.02, 0]}>
         <RoundedBox args={[0.12, 0.008, 0.12]} radius={0.005}>
           <meshStandardMaterial color={color} metalness={0.2} roughness={0.3}
@@ -768,16 +772,18 @@ function TableImages({ position }: { position: [number, number, number] }) {
 
   return (
     <group position={position}>
-      <ClickablePart position={[0.6, 0.733, 0]} label="CPU" color="#00d4aa">
-        <mesh material={sideMats} castShadow>
-          <boxGeometry args={[0.1, 0.025, 0.1]} />
-        </mesh>
-        <mesh material={topMats}>
-          <boxGeometry args={[0.105, 0.004, 0.105]} />
-        </mesh>
-        <mesh material={topMats}>
-          <boxGeometry args={[0.105, 0.004, 0.105]} />
-        </mesh>
+      <ClickablePart position={[0.6, 0.72, 0]} label="CPU" color="#00d4aa">
+        <group>
+          <mesh position={[0, 0.011, 0]} material={sideMats} castShadow>
+            <boxGeometry args={[0.1, 0.025, 0.1]} />
+          </mesh>
+          <mesh position={[0, 0.022, 0]} material={topMats}>
+            <boxGeometry args={[0.105, 0.004, 0.105]} />
+          </mesh>
+          <mesh position={[0, 0.001, 0]} material={topMats}>
+            <boxGeometry args={[0.105, 0.004, 0.105]} />
+          </mesh>
+        </group>
       </ClickablePart>
 
       {[0.06, -0.06].map((z, idx) => (
