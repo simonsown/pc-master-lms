@@ -9,7 +9,7 @@ const WASM_BASE = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.32/
 const FACE_MODEL = 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task';
 const HAND_MODEL = 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
 
-export default function UnifiedTracker() {
+export default function UnifiedTracker({ onReady }: { onReady?: () => void }) {
   const setCameraCoords = useAssemblyStore((s) => s.setCameraCoords);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -31,13 +31,16 @@ export default function UnifiedTracker() {
         const vision = await FilesetResolver.forVisionTasks(WASM_BASE);
         if (cancelled) return;
 
+        const isLowEnd = (navigator as any).hardwareConcurrency <= 4;
+        const delegate = isLowEnd ? 'CPU' : 'GPU';
+
         const [fl, hl] = await Promise.all([
           FaceLandmarker.createFromOptions(vision, {
-            baseOptions: { modelAssetPath: FACE_MODEL, delegate: 'GPU' },
+            baseOptions: { modelAssetPath: FACE_MODEL, delegate },
             runningMode: 'VIDEO', numFaces: 1, outputFaceBlendshapes: false,
           }),
           HandLandmarker.createFromOptions(vision, {
-            baseOptions: { modelAssetPath: HAND_MODEL, delegate: 'GPU' },
+            baseOptions: { modelAssetPath: HAND_MODEL, delegate },
             runningMode: 'VIDEO', numHands: 1,
           }),
         ]);
@@ -47,8 +50,8 @@ export default function UnifiedTracker() {
 
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            width: { ideal: 640 }, height: { ideal: 480 },
-            facingMode: 'user', frameRate: { ideal: 30 },
+            width: { ideal: 320 }, height: { ideal: 240 },
+            facingMode: 'user', frameRate: { ideal: 20 },
           },
         });
         if (cancelled) { stream.getTracks().forEach(t => t.stop()); return; }
@@ -58,6 +61,8 @@ export default function UnifiedTracker() {
         video.srcObject = stream;
         video.setAttribute('playsinline', '');
         await video.play();
+
+        onReady?.();
 
         let smoothPitch = 0, smoothYaw = 0;
         let skip = 0;

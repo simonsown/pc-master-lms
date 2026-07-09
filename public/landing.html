@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PC Master LMS — Hoc lap rap may tinh 3D VR</title>
+<meta name="description" content="Hoc lap rap, chan doan va xay dung may tinh trong khong gian 3D VR voi dieu khien bang tay thuc te.">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { min-height: 100vh; background: #0a0a1e; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; overflow-x: hidden; position: relative; }
+canvas#particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.content { position: relative; z-index: 1; text-align: center; padding: 0 24px; max-width: 720px; }
+.logo { width: 80px; height: 80px; border-radius: 24px; background: linear-gradient(135deg, #00ffcc, #4488ff); display: flex; align-items: center; justify-content: center; margin: 0 auto 32px; box-shadow: 0 0 80px rgba(0,255,204,0.3); animation: pulse 2s ease-in-out infinite; }
+.logo svg { width: 40px; height: 40px; }
+h1 { font-size: clamp(32px, 8vw, 56px); font-weight: 900; color: #fff; margin: 0 0 8px; letter-spacing: -1.5px; line-height: 1.1; }
+h1 span { background: linear-gradient(135deg, #00ffcc, #4488ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+p.sub { font-size: clamp(14px, 2.5vw, 18px); color: #88bbcc; margin: 0 0 48px; line-height: 1.6; max-width: 560px; margin-left: auto; margin-right: auto; }
+.btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 48px; }
+.btn { padding: 14px 36px; border-radius: 12px; border: none; font-size: clamp(14px, 2vw, 16px); font-weight: 800; text-decoration: none; letter-spacing: 0.5px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, background 0.2s; }
+.btn-primary { background: linear-gradient(135deg, #00ffcc, #4488ff); color: #000; box-shadow: 0 4px 30px rgba(0,255,204,0.3); }
+.btn-primary:hover { transform: scale(1.05); box-shadow: 0 6px 40px rgba(0,255,204,0.5); }
+.btn-secondary { padding: 14px 36px; border-radius: 12px; border: 1px solid rgba(68,136,255,0.4); background: rgba(255,255,255,0.05); color: #8af; font-size: clamp(14px, 2vw, 16px); font-weight: 700; text-decoration: none; letter-spacing: 0.5px; transition: transform 0.2s, background 0.2s; }
+.btn-secondary:hover { transform: scale(1.05); background: rgba(255,255,255,0.1); }
+.features { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 48px; text-align: left; }
+.feature-card { padding: 16px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); transition: background 0.3s; }
+.feature-card:hover { background: rgba(255,255,255,0.08); }
+.feature-icon { font-size: 24px; margin-bottom: 6px; }
+.feature-title { color: #ddeeff; font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+.feature-desc { color: #6688aa; font-size: 11px; }
+.qr-box { display: inline-flex; flex-direction: column; align-items: center; gap: 12px; padding: 20px; border-radius: 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); animation: fadeIn 0.6s ease-out; }
+.qr-code { width: 140px; height: 140px; border-radius: 12px; background: #fff; display: flex; align-items: center; justify-content: center; }
+.qr-label { color: #6688aa; font-size: 11px; font-family: monospace; }
+.footer { position: relative; z-index: 1; margin-top: 40px; color: #445566; font-size: 11px; font-family: monospace; }
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.9; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 480px) {
+  .features { grid-template-columns: repeat(2, 1fr); }
+  .btns { flex-direction: column; align-items: center; }
+  .btn, .btn-secondary { width: 100%; max-width: 280px; text-align: center; }
+}
+</style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="content">
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+      <circle cx="12" cy="12" r="3"/>
+    </svg>
+  </div>
+  <h1>PC Master <span>LMS</span></h1>
+  <p class="sub">Hoc lap rap, chan doan va xay dung may tinh trong khong gian 3D VR. Tu phong hoc ao den showroom linh kien voi dieu khien bang tay thuc te.</p>
+  <div class="btns">
+    <a href="https://pc-master-lms.vercel.app/builder/showroom" class="btn btn-primary">Showroom 3D</a>
+    <a href="https://pc-master-lms.vercel.app/builder/3d-viewer" class="btn btn-secondary">Phong hoc VR</a>
+  </div>
+  <div class="features">
+    <div class="feature-card">
+      <div class="feature-icon">&#x1F5A5;</div>
+      <div class="feature-title">3D Components</div>
+      <div class="feature-desc">CPU, RAM, Cooler chi tiet</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#x261D;</div>
+      <div class="feature-title">Hand Tracking</div>
+      <div class="feature-desc">Chon bang tay thuc te</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#x1F3AE;</div>
+      <div class="feature-title">VR Classroom</div>
+      <div class="feature-desc">Phong hoc tuong tac</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#x1F4F1;</div>
+      <div class="feature-title">QR Access</div>
+      <div class="feature-desc">Quet ma de vao ngay</div>
+    </div>
+  </div>
+  <div class="qr-box" id="qrBox">
+    <div class="qr-code" id="qrCode"></div>
+    <div class="qr-label">Quet ma QR de truy cap</div>
+  </div>
+</div>
+<div class="footer">PC Master LMS — Du an giao duc cong nghe</div>
+
+<script>
+(function() {
+  // Particles
+  var canvas = document.getElementById('particles');
+  var ctx = canvas.getContext('2d');
+  var w, h, pts = [], count = 60;
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  for (var i = 0; i < count; i++) {
+    pts.push({
+      x: Math.random() * w, y: Math.random() * h,
+      vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5,
+      r: Math.random() * 2 + 1
+    });
+  }
+
+  function drawParticles() {
+    ctx.clearRect(0, 0, w, h);
+    for (var i = 0; i < count; i++) {
+      var p = pts[i];
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
+      if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(68, 136, 255, 0.3)';
+      ctx.fill();
+    }
+    for (var i = 0; i < count; i++) {
+      for (var j = i + 1; j < count; j++) {
+        var dx = pts[i].x - pts[j].x;
+        var dy = pts[i].y - pts[j].y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) {
+          ctx.beginPath();
+          ctx.moveTo(pts[i].x, pts[i].y);
+          ctx.lineTo(pts[j].x, pts[j].y);
+          ctx.strokeStyle = 'rgba(68, 136, 255, ' + (0.15 * (1 - dist / 120)) + ')';
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(drawParticles);
+  }
+  drawParticles();
+
+  // QR Code (simple visual)
+  var qr = document.getElementById('qrCode');
+  var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('width', '120');
+  svg.setAttribute('height', '120');
+  svg.setAttribute('viewBox', '0 0 120 120');
+  var rows = 11;
+  for (var r = 0; r < rows; r++) {
+    for (var c = 0; c < rows; c++) {
+      var isBlack =
+        (r < 5 && c < 5 && (r === 0 || r === 4 || c === 0 || c === 4)) ||
+        (r < 5 && c > 5 && (r === 0 || r === 4 || c === 6 || c === 10)) ||
+        (r > 5 && c < 5 && (r === 6 || r === 10 || c === 0 || c === 4)) ||
+        (r === 5 || c === 5) ||
+        (r % 2 === 0 && c % 2 === 0 && r > 1 && r < 9 && c > 1 && c < 9) ||
+        (r === 7 && c === 7) || (r === 3 && c === 8) || (r === 8 && c === 3) ||
+        (r === 2 && c === 7) || (r === 7 && c === 2);
+      var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      rect.setAttribute('x', c * 11);
+      rect.setAttribute('y', r * 11);
+      rect.setAttribute('width', 8);
+      rect.setAttribute('height', 8);
+      rect.setAttribute('fill', isBlack ? '#000' : '#fff');
+      svg.appendChild(rect);
+    }
+  }
+  qr.appendChild(svg);
+
+  // Show QR with delay
+  setTimeout(function() {
+    document.getElementById('qrBox').style.opacity = '1';
+  }, 500);
+})();
+</script>
+</body>
+</html>

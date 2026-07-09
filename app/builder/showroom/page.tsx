@@ -9,7 +9,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
   render() {
     if (this.state.error) {
       return <div style={{ color: '#ff4466', padding: 40, fontFamily: 'monospace', fontSize: 12 }}>
-        <h2>Error: {this.state.error.message}</h2>
+        <h2>Loi: {this.state.error.message}</h2>
         <pre style={{ color: '#88bbcc', marginTop: 12 }}>{this.state.error.stack}</pre>
       </div>;
     }
@@ -32,7 +32,7 @@ export default function ShowroomPage() {
             fontFamily: 'monospace', fontSize: 12, textDecoration: 'none',
             border: '1px solid rgba(100,100,255,0.2)', backdropFilter: 'blur(4px)',
           }}>
-          Classroom
+          Lop hoc
         </a>
       </ErrorBoundary>
     </div>

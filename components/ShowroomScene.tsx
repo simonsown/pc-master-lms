@@ -2,10 +2,11 @@
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { RoundedBox, useGLTF } from '@react-three/drei';
+import { RoundedBox, useGLTF, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { headTrackingRef } from './head-tracker-shared';
 import { handDataRef } from './hand-shared';
+import { showroomRef } from './showroom-shared';
 import UnifiedTracker from './UnifiedTracker';
 
 /* ========== FLOOR ========== */
@@ -13,22 +14,22 @@ function Floor() {
   return (
     <group>
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow position={[0, -0.01, 0]}>
-        <circleGeometry args={[8, 32]} />
+        <circleGeometry args={[8, 24]} />
         <meshPhysicalMaterial color="#e8ecf0" roughness={0.4} />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.005, 0]}>
-        <ringGeometry args={[7.5, 7.8, 32]} />
+        <ringGeometry args={[7.5, 7.8, 24]} />
         <meshPhysicalMaterial color="#d0d8e0" roughness={0.3} transparent opacity={0.4} side={THREE.DoubleSide} />
       </mesh>
       <mesh position={[0, 3, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[8, 32]} />
+        <circleGeometry args={[8, 24]} />
         <meshPhysicalMaterial color="#f0f2f5" roughness={0.8} side={THREE.DoubleSide} />
       </mesh>
     </group>
   );
 }
 
-/* ========== CAMERA LOOK (face tracking) ========== */
+/* ========== CAMERA LOOK ========== */
 function CameraLook() {
   const { camera } = useThree();
   const euler = useRef(new THREE.Euler(0, 0, 0, 'YXZ'));
@@ -62,16 +63,18 @@ function Hand3D() {
   const [pts, setPts] = useState<THREE.Vector3[] | null>(null);
   const locRef = useRef<THREE.Vector3[]>([]);
   const [pointing, setPointing] = useState(false);
-  const [pinching, setPinching] = useState(false);
 
   useFrame(() => {
     const h = handDataRef;
     if (!h.active || !h.landmarks || h.landmarks.length < 21) {
-      setPts(null); setPointing(false); setPinching(false);
+      setPts(null); setPointing(false);
+      showroomRef.handActive = false;
+      showroomRef.pointing = false;
       return;
     }
     setPointing(h.pointing);
-    setPinching(h.pinch);
+    showroomRef.handActive = true;
+    showroomRef.pointing = h.pointing;
 
     const lm = h.landmarks;
     const scale = 0.35;
@@ -86,6 +89,11 @@ function Hand3D() {
     const pos = camera.position.clone().add(fwd.multiplyScalar(1.0));
     groupRef.current.position.copy(pos);
     groupRef.current.quaternion.copy(camera.quaternion);
+
+    const idxTip = pts3[8].clone();
+    idxTip.applyQuaternion(camera.quaternion);
+    idxTip.add(pos);
+    showroomRef.indexTipWorld.copy(idxTip);
   });
 
   if (!pts || pts.length < 21) return null;
@@ -96,8 +104,8 @@ function Hand3D() {
         <mesh key={`j-${i}`} position={p}>
           <sphereGeometry args={[0.01, 6, 6]} />
           <meshPhysicalMaterial
-            color={pointing && i === 8 ? '#00ff88' : pinching && (i === 4 || i === 8) ? '#ff8800' : '#ffccaa'}
-            emissive={pointing && i === 8 ? '#00ff88' : pinching && (i === 4 || i === 8) ? '#ff8800' : '#ff8844'}
+            color={pointing && i === 8 ? '#00ff88' : '#ffccaa'}
+            emissive={pointing && i === 8 ? '#00ff88' : '#ff8844'}
             emissiveIntensity={0.6}
             roughness={0.5} metalness={0.1} />
         </mesh>
@@ -117,43 +125,19 @@ function Hand3D() {
           </mesh>
         );
       })}
-      {pointing && (
-        <sprite position={[pts[8].x, pts[8].y + 0.03, pts[8].z]} scale={[0.05, 0.018, 1]}>
-          <spriteMaterial map={(() => {
-            const c = document.createElement('canvas'); c.width = 64; c.height = 20;
-            const ctx = c.getContext('2d')!;
-            ctx.fillStyle = '#00ff88'; ctx.font = 'bold 9px monospace';
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText('CHON', 32, 10);
-            return new THREE.CanvasTexture(c);
-          })()} transparent opacity={0.9} depthTest={false} />
-        </sprite>
-      )}
-      {pinching && (
-        <sprite position={[pts[4].x + 0.02, pts[4].y + 0.02, pts[4].z]} scale={[0.05, 0.018, 1]}>
-          <spriteMaterial map={(() => {
-            const c = document.createElement('canvas'); c.width = 64; c.height = 20;
-            const ctx = c.getContext('2d')!;
-            ctx.fillStyle = '#ff8800'; ctx.font = 'bold 9px monospace';
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText('XOAY', 32, 10);
-            return new THREE.CanvasTexture(c);
-          })()} transparent opacity={0.9} depthTest={false} />
-        </sprite>
-      )}
     </group>
   );
 }
 
 /* ========== ORBITING GLB ========== */
-function OrbitingGlb() {
+function OrbitingGlb({ onLoaded }: { onLoaded: () => void }) {
   const { scene } = useGLTF('/models/computer_components.glb');
   const groupRef = useRef<THREE.Group>(null);
   const angleRef = useRef(0);
   const radiusRef = useRef(2.0);
   const targetRadius = useRef(2.0);
-  const spinRef = useRef(0);
-  const [state, setState] = useState<'orbit' | 'approaching' | 'showing' | 'spinning'>('orbit');
+  const [ready, setReady] = useState(false);
+  const touched = useRef(false);
 
   useEffect(() => {
     if (!scene) return;
@@ -163,58 +147,39 @@ function OrbitingGlb() {
         child.receiveShadow = true;
       }
     });
+    setReady(true);
+    onLoaded();
   }, [scene]);
 
   useFrame((_, delta) => {
-    if (!groupRef.current) return;
-    const h = handDataRef;
+    if (!groupRef.current || !ready) return;
 
-    if (h.pointing && state === 'orbit') {
-      setState('approaching');
-    }
-    if (h.pinch && (state === 'showing' || state === 'approaching')) {
-      setState('spinning');
-    }
-    if (!h.active && state !== 'orbit') {
-      setState('orbit');
+    const idx = showroomRef.indexTipWorld;
+    const compPos = groupRef.current.position;
+    const dist = idx.distanceTo(compPos);
+
+    if (showroomRef.handActive && showroomRef.pointing && dist < 2.5) {
+      touched.current = true;
     }
 
-    switch (state) {
-      case 'orbit':
-        angleRef.current += delta * 0.4;
-        targetRadius.current = 2.0;
-        break;
-      case 'approaching':
-        angleRef.current += delta * 0.1;
-        targetRadius.current = 0.6;
-        if (Math.abs(radiusRef.current - 0.6) < 0.02) setState('showing');
-        break;
-      case 'showing':
-        targetRadius.current = 0.6;
-        if (h.pinch) setState('spinning');
-        if (!h.active) setState('orbit');
-        break;
-      case 'spinning':
-        targetRadius.current = 0.6;
-        spinRef.current += delta * 2.0;
-        groupRef.current.rotation.x = Math.sin(spinRef.current) * 0.3;
-        groupRef.current.rotation.z = Math.cos(spinRef.current * 0.7) * 0.2;
-        if (!h.pinch) setState('showing');
-        if (!h.active) setState('orbit');
-        break;
+    if (touched.current) {
+      targetRadius.current = 0.5;
+      const targetAngle = angleRef.current;
+      angleRef.current += (targetAngle - angleRef.current) * 3 * delta;
+    } else {
+      angleRef.current += delta * 0.3;
+      targetRadius.current = 2.0;
     }
 
     radiusRef.current += (targetRadius.current - radiusRef.current) * 3 * delta;
     const x = Math.sin(angleRef.current) * radiusRef.current;
     const z = Math.cos(angleRef.current) * radiusRef.current;
     groupRef.current.position.set(x, 0.6, z);
-    groupRef.current.lookAt(0, 0.6, 0);
 
-    if (state !== 'spinning') {
-      spinRef.current += delta * 0.5;
-      groupRef.current.rotation.x = 0;
-      groupRef.current.rotation.z = 0;
+    if (!touched.current) {
+      groupRef.current.rotation.y += delta * 0.3;
     }
+    groupRef.current.lookAt(0, 0.6, 0);
   });
 
   return (
@@ -222,12 +187,14 @@ function OrbitingGlb() {
       <mesh position={[0, 0.05, 0]}>
         <RoundedBox args={[0.4, 0.006, 0.4]} radius={0.008}>
           <meshStandardMaterial color="#4488ff" roughness={0.2} metalness={0.3}
-            emissive="#4488ff" emissiveIntensity={state !== 'orbit' ? 0.8 : 0.05} />
+            emissive="#4488ff" emissiveIntensity={touched.current ? 0.9 : 0.05} />
         </RoundedBox>
       </mesh>
-      <group ref={groupRef} position={[2, 0.6, 0]} scale={0.12}>
-        <primitive object={scene} />
-      </group>
+      {ready && (
+        <group ref={groupRef} position={[2, 0.6, 0]} scale={0.12}>
+          <primitive object={scene} />
+        </group>
+      )}
     </group>
   );
 }
@@ -242,24 +209,44 @@ function Overlay() {
       borderRadius: 12, padding: '8px 20px', zIndex: 10,
       border: '1px solid rgba(255,255,255,0.08)',
     }}>
-      <span style={{ color: '#8af', fontSize: 12, fontFamily: 'monospace' }}>Chi tay → linh kien chay lai</span>
-      <span style={{ color: '#888', fontSize: 12, fontFamily: 'monospace' }}>|</span>
-      <span style={{ color: '#f80', fontSize: 12, fontFamily: 'monospace' }}>Chup ngon tay → xoay linh kien</span>
+      <span style={{ color: '#8af', fontSize: 12, fontFamily: 'monospace' }}>Chi tay vao linh kien</span>
     </div>
   );
 }
 
 /* ========== MAIN ========== */
+function LoadingScreen({ progress }: { progress: { tracker: boolean; glb: boolean } }) {
+  const pct = [progress.tracker, progress.glb].filter(Boolean).length / 2;
+  return (
+    <div style={{
+      position: 'absolute', inset: 0, zIndex: 20,
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      background: '#f0f4ff', color: '#4488ff', fontFamily: 'monospace', fontSize: 13,
+      transition: 'opacity 0.5s', opacity: pct >= 1 ? 0 : 1, pointerEvents: pct >= 1 ? 'none' : 'auto',
+    }}>
+      <div style={{ marginBottom: 20 }}>Dang tai...</div>
+      <div style={{ width: 160, height: 3, background: '#d0d8e0', borderRadius: 2, overflow: 'hidden', marginBottom: 8 }}>
+        <div style={{ width: `${pct * 100}%`, height: '100%', background: '#4488ff', borderRadius: 2, transition: 'width 0.3s' }} />
+      </div>
+      <div style={{ color: '#88aacc', fontSize: 11 }}>
+        {!progress.tracker ? 'Dang tai AI...' : !progress.glb ? 'Dang tai mo hinh 3D...' : 'San sang!'}
+      </div>
+    </div>
+  );
+}
+
 export default function ShowroomScene() {
   useGLTF.preload('/models/computer_components.glb');
+  const [progress, setProgress] = useState({ tracker: false, glb: false });
 
   return (
     <div className="w-full h-screen bg-[#f0f4ff] relative overflow-hidden">
-      <UnifiedTracker />
-      <Canvas shadows camera={{ position: [0, 1.6, 3.5], fov: 60, near: 0.1, far: 15 }}>
+      <LoadingScreen progress={progress} />
+      <UnifiedTracker onReady={() => setProgress(p => ({ ...p, tracker: true }))} />
+      <Canvas shadows camera={{ position: [0, 1.6, 3.5], fov: 60, near: 0.1, far: 15 }}
+        onCreated={() => setProgress(p => ({ ...p, glb: p.glb }))}>
         <color attach="background" args={['#f0f4ff']} />
         <CameraLook />
-
         <ambientLight intensity={1.4} color="#d8e8ff" />
         <hemisphereLight args={['#c8d8ff', '#aabbcc', 0.6]} />
         <directionalLight position={[6, 10, 6]} intensity={1.6} castShadow shadow-mapSize={[1024, 1024]} />
@@ -267,9 +254,8 @@ export default function ShowroomScene() {
         <pointLight position={[0, 3.5, 0]} intensity={0.8} color="#c0d8ff" />
         <pointLight position={[3, 3, 3]} intensity={0.4} color="#d0e8ff" />
         <pointLight position={[-3, 3, -3]} intensity={0.4} color="#d0e8ff" />
-
         <Floor />
-        <OrbitingGlb />
+        <OrbitingGlb onLoaded={() => setProgress(p => ({ ...p, glb: true }))} />
         <Hand3D />
       </Canvas>
       <Overlay />
