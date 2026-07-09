@@ -25,11 +25,7 @@ function T(lang: 'en' | 'vn', en: string, vn: string) {
 
 export default function Viewer3DPage() {
   const [showInstructions, setShowInstructions] = useState(true);
-  const [showChat, setShowChat] = useState(false);
-  const [chatMessages, setChatMessages] = useState<{ role: string; content: string }[]>([]);
-  const [chatInput, setChatInput] = useState('');
   const [lang, setLang] = useState<'en' | 'vn'>('vn');
-  const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     try {
@@ -38,31 +34,8 @@ export default function Viewer3DPage() {
     } catch {}
   }, []);
 
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatMessages]);
-
-  const handleChatSend = async () => {
-    if (!chatInput.trim()) return;
-    const userMsg = chatInput;
-    setChatInput('');
-    setChatMessages(prev => [...prev, { role: 'user', content: userMsg }]);
-    try {
-      const res = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMsg, history: [] }),
-      });
-      const data = await res.json();
-      setChatMessages(prev => [...prev, { role: 'bot', content: data.reply || 'Xin lỗi, tôi chưa thể trả lời.' }]);
-    } catch {
-      setChatMessages(prev => [...prev, { role: 'bot', content: 'Xin lỗi, tôi gặp sự cố kết nối.' }]);
-    }
-  };
-
   return (
     <ErrorBoundary>
-      {/* Hide global AI Guru on this page */}
       <style>{`
         .fixed.bottom-8.right-8.z-\\[1000\\],
         button:has(> .absolute.-inset-1),
@@ -94,14 +67,14 @@ export default function Viewer3DPage() {
               PC Master Builder <span style={{ color: '#00ffcc' }}>3D VR</span>
             </h1>
             <div style={{ maxWidth: 480, textAlign: 'center', color: '#88bbcc', fontSize: 14, lineHeight: 1.8 }}>
-              {T(lang, 'Build your PC in a VR workshop. Use WASD to move, webcam to look around. Drag parts from the table into the PC case.',
-                'Lắp ráp PC trong phòng thí nghiệm VR. Dùng WASD di chuyển, webcam nhìn xung quanh. Kéo thả linh kiện từ bàn vào thùng máy.')}
+              {T(lang, 'Explore the IT classroom in VR. Use WASD to move and webcam to look around.',
+                'Khám phá phòng tin học trong VR. Dùng WASD di chuyển, webcam nhìn xung quanh.')}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%', maxWidth: 400 }}>
               {[
-                { num: '1', text: T(lang, 'Use WASD to walk — you cannot walk through furniture (collision enabled)', 'Dùng WASD di chuyển — không thể đi xuyên qua bàn ghế (có va chạm)'), color: '#00ffcc' },
-                { num: '2', text: T(lang, 'Click and drag components from the table into the PC case', 'Nhấn và kéo linh kiện từ bàn vào thùng máy'), color: '#44aaff' },
-                { num: '3', text: T(lang, 'Follow color-coded slots: CPU=teal, Cooler=blue, RAM=purple, GPU=red, PSU=amber, SSD=green', 'Theo màu: CPU=xanh ngọc, Tản nhiệt=xanh dương, RAM=tím, GPU=đỏ, Nguồn=hổ phách, SSD=xanh lá'), color: '#8866ff' },
+                { num: '1', text: T(lang, 'Use WASD to walk — collision enabled', 'Dùng WASD di chuyển — có va chạm'), color: '#00ffcc' },
+                { num: '2', text: T(lang, 'Look around using your webcam', 'Nhìn xung quanh bằng webcam'), color: '#44aaff' },
+                { num: '3', text: T(lang, 'Explore desks with PC cases and monitors', 'Khám phá bàn máy tính có thùng case'), color: '#8866ff' },
               ].map((step, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', background: 'rgba(255,255,255,0.03)', borderRadius: 10, border: `1px solid ${step.color}22` }}>
                   <span style={{ width: 30, height: 30, borderRadius: 8, background: `${step.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: step.color, fontWeight: 800, fontSize: 13 }}>{step.num}</span>
@@ -118,96 +91,12 @@ export default function Viewer3DPage() {
                 fontFamily: 'inherit', letterSpacing: 1, boxShadow: '0 4px 30px rgba(0,255,204,0.3)',
               }}
             >
-              {T(lang, 'ENTER VR WORKSHOP', 'VÀO PHÒNG VR')}
+              {T(lang, 'ENTER VR CLASSROOM', 'VÀO PHÒNG HỌC')}
             </button>
           </div>
         )}
 
         <GameScene />
-
-        {/* Small chatbot button - bottom right corner */}
-        {!showInstructions && (
-          <>
-            {!showChat && (
-              <button
-                onClick={() => setShowChat(true)}
-                style={{
-                  position: 'fixed', bottom: '20px', right: '20px', zIndex: 9999,
-                  width: '40px', height: '40px', borderRadius: '50%',
-                  border: 'none', cursor: 'pointer',
-                  background: 'linear-gradient(135deg, #00ffcc, #44aaff)',
-                  color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 2px 12px rgba(0,255,204,0.4)',
-                  fontSize: '18px',
-                }}
-                title="AI Guru"
-              >
-                💬
-              </button>
-            )}
-
-            {/* Chat panel */}
-            {showChat && (
-              <div style={{
-                position: 'fixed', bottom: '70px', right: '20px', zIndex: 9999,
-                width: '300px', height: '380px', borderRadius: '16px',
-                background: '#1a1a2e', border: '1px solid rgba(0,255,204,0.2)',
-                display: 'flex', flexDirection: 'column', overflow: 'hidden',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-              }}>
-                <div style={{
-                  padding: '10px 14px', background: '#16213e',
-                  borderBottom: '1px solid rgba(0,255,204,0.15)',
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                }}>
-                  <span style={{ color: '#00ffcc', fontSize: '12px', fontWeight: 700 }}>AI Guru</span>
-                  <button onClick={() => setShowChat(false)}
-                    style={{ background: 'none', border: 'none', color: '#8899aa', cursor: 'pointer', fontSize: '16px', padding: '2px' }}>
-                    ✕
-                  </button>
-                </div>
-                <div style={{ flex: 1, overflowY: 'auto', padding: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {chatMessages.length === 0 && (
-                    <div style={{ color: '#667788', fontSize: '12px', textAlign: 'center', padding: '20px 0' }}>
-                      Hỏi AI Guru về PC...
-                    </div>
-                  )}
-                  {chatMessages.map((m, i) => (
-                    <div key={i} style={{
-                      alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
-                      maxWidth: '85%', padding: '8px 12px', borderRadius: '12px',
-                      fontSize: '12px', lineHeight: 1.5,
-                      background: m.role === 'user' ? '#00d4aa' : '#0f3460',
-                      color: m.role === 'user' ? '#000' : '#ddeeff',
-                    }}>
-                      {m.content}
-                    </div>
-                  ))}
-                  <div ref={chatEndRef} />
-                </div>
-                <div style={{ padding: '8px', borderTop: '1px solid rgba(0,255,204,0.1)', display: 'flex', gap: '6px' }}>
-                  <input
-                    value={chatInput}
-                    onChange={e => setChatInput(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter') handleChatSend(); }}
-                    placeholder="Nhập tin nhắn..."
-                    style={{
-                      flex: 1, padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(0,255,204,0.2)',
-                      background: '#0d1b2a', color: '#fff', fontSize: '12px', fontFamily: 'inherit', outline: 'none',
-                    }}
-                  />
-                  <button onClick={handleChatSend}
-                    style={{
-                      padding: '8px 12px', borderRadius: '8px', border: 'none',
-                      background: '#00ffcc', color: '#000', cursor: 'pointer', fontWeight: 700, fontSize: '12px',
-                    }}>
-                    Gửi
-                  </button>
-                </div>
-              </div>
-            )}
-          </>
-        )}
       </div>
     </ErrorBoundary>
   );

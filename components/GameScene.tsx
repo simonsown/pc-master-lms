@@ -516,19 +516,19 @@ function Monitor({ position }: { position: [number, number, number] }) {
 function Whiteboard({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
-      <mesh position={[0, 0.9, 0]}>
-        <boxGeometry args={[3.2, 1.8, 0.04]} />
+      <mesh position={[0, 1.1, 0]}>
+        <boxGeometry args={[3.2, 2.0, 0.04]} />
         <meshPhysicalMaterial color="#f0f0f0" roughness={0.4} />
       </mesh>
-      <mesh position={[0, 0.9, 0.025]}>
-        <planeGeometry args={[3.1, 1.7]} />
+      <mesh position={[0, 1.1, 0.025]}>
+        <planeGeometry args={[3.1, 1.9]} />
         <meshPhysicalMaterial color="#ffffff" roughness={0.3} />
       </mesh>
-      <mesh position={[0, 1.82, 0]}>
+      <mesh position={[0, 2.12, 0]}>
         <boxGeometry args={[3.24, 0.04, 0.06]} />
         <meshPhysicalMaterial color="#94a3b8" metalness={0.3} roughness={0.4} />
       </mesh>
-      <mesh position={[0, -0.02, 0]}>
+      <mesh position={[0, 0.08, 0]}>
         <boxGeometry args={[3.24, 0.04, 0.06]} />
         <meshPhysicalMaterial color="#94a3b8" metalness={0.3} roughness={0.4} />
       </mesh>
@@ -672,19 +672,39 @@ function ComponentOnTable({ type, position, slotId }: { type: string; position: 
   );
 }
 
+function PcCaseShell({ position }: { position: [number, number, number] }) {
+  return (
+    <group position={position}>
+      <RoundedBox args={[2.6, 1.3, 2.0]} radius={0.02}>
+        <meshPhysicalMaterial color="#2a3a5c" metalness={0.7} roughness={0.25} envMapIntensity={0.8} />
+      </RoundedBox>
+      <mesh position={[-1.305, 0, 0]}>
+        <planeGeometry args={[1.98, 1.26]} />
+        <meshPhysicalMaterial color="#88ccff" metalness={0.3} roughness={0.05} transparent opacity={0.15} side={THREE.DoubleSide} envMapIntensity={1.5} />
+      </mesh>
+      <mesh position={[0, 0.04, 1.015]}>
+        <planeGeometry args={[0.35, 0.025]} />
+        <meshPhysicalMaterial color="#4488ff" transparent opacity={0.2} emissive="#4488ff" emissiveIntensity={0.3} />
+      </mesh>
+    </group>
+  );
+}
+
 export default function GameScene() {
   return (
     <div className="w-full h-screen bg-[#f8fafc] relative overflow-hidden">
       <HeadTracker />
       <Canvas shadows camera={{ position: [0, 1.6, 3.5], fov: 60, near: 0.1, far: 25 }}>
-        <color attach="background" args={['#e8edf2']} />
+        <color attach="background" args={['#f0f4ff']} />
         <CameraRig />
 
-        <ambientLight intensity={0.7} color="#d0d8e8" />
-        <hemisphereLight args={['#d0dff0', '#8899aa', 0.6]} />
-        <directionalLight position={[8, 12, 6]} intensity={1.0} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.001} />
-        <directionalLight position={[-4, 8, 4]} intensity={0.4} color="#c8d8e8" />
-        <pointLight position={[0, 3.5, 0]} intensity={0.3} color="#e0e8f0" />
+        <ambientLight intensity={1.2} color="#e0e8ff" />
+        <hemisphereLight args={['#e8f0ff', '#aabbcc', 0.8]} />
+        <directionalLight position={[8, 12, 6]} intensity={1.4} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.001} />
+        <directionalLight position={[-4, 8, 4]} intensity={0.6} color="#d0e0f0" />
+        <pointLight position={[0, 3.5, 0]} intensity={0.5} color="#e8f0ff" />
+        <pointLight position={[3, 3, 3]} intensity={0.3} color="#d0e8ff" />
+        <pointLight position={[-3, 3, -3]} intensity={0.3} color="#d0e8ff" />
 
         {/* Floor tiles */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow position={[0, -0.01, 0]}>
@@ -746,15 +766,22 @@ export default function GameScene() {
         {/* Whiteboard on back wall */}
         <Whiteboard position={[0, 0, -4.85]} />
 
-        {/* ===== 4 BÀN HỌC SINH ===== */}
+        {/* ===== 4 BÀN HỌC SINH VỚI MONITOR + CASE ===== */}
         <Desk position={[-2.8, 0, -2.5]} />
         <Monitor position={[-2.8, 0.72, -2.5]} />
+        <PcCaseShell position={[-2.8, 0, -1.8]} />
+
         <Desk position={[2.8, 0, -2.5]} />
         <Monitor position={[2.8, 0.72, -2.5]} />
+        <PcCaseShell position={[2.8, 0, -1.8]} />
+
         <Desk position={[-2.8, 0, 2.5]} />
         <Monitor position={[-2.8, 0.72, 2.5]} />
+        <PcCaseShell position={[-2.8, 0, 3.2]} />
+
         <Desk position={[2.8, 0, 2.5]} />
         <Monitor position={[2.8, 0.72, 2.5]} />
+        <PcCaseShell position={[2.8, 0, 3.2]} />
       </Canvas>
     </div>
   );
