@@ -750,25 +750,27 @@ function TableImages({ position }: { position: [number, number, number] }) {
         <boxGeometry args={[0.105, 0.004, 0.105]} />
       </mesh>
 
-      {/* 2 RAM sticks standing vertical */}
-      <group position={[0.45, 0.72, 0.06]}>
-        <mesh castShadow material={ramMaterials}>
-          <boxGeometry args={[0.015, 0.13, 0.065]} />
-        </mesh>
-        <mesh position={[0, 0.015, 0]}>
-          <boxGeometry args={[0.008, 0.02, 0.055]} />
-          <meshPhysicalMaterial color="#c0c0c0" metalness={0.5} roughness={0.3} />
-        </mesh>
-      </group>
-      <group position={[0.45, 0.72, -0.06]}>
-        <mesh castShadow material={ramMaterials}>
-          <boxGeometry args={[0.015, 0.13, 0.065]} />
-        </mesh>
-        <mesh position={[0, 0.015, 0]}>
-          <boxGeometry args={[0.008, 0.02, 0.055]} />
-          <meshPhysicalMaterial color="#c0c0c0" metalness={0.5} roughness={0.3} />
-        </mesh>
-      </group>
+      {/* 2 RAM sticks — 3D style from 2D design */}
+      {[0.06, -0.06].map((z, idx) => (
+        <group key={`ram-${idx}`} position={[0.45, 0.72, z]}>
+          <mesh position={[0, 0.055, 0]} castShadow>
+            <boxGeometry args={[0.012, 0.11, 0.06]} />
+            <meshPhysicalMaterial color="#1a1a2e" roughness={0.7} metalness={0.1} />
+          </mesh>
+          <mesh position={[0, 0.07, 0]}>
+            <boxGeometry args={[0.01, 0.06, 0.05]} />
+            <meshPhysicalMaterial color="#2a2a2a" roughness={0.6} metalness={0.3} />
+          </mesh>
+          <mesh position={[0, 0.008, 0]}>
+            <boxGeometry args={[0.01, 0.015, 0.055]} />
+            <meshPhysicalMaterial color="#c0a030" metalness={0.7} roughness={0.3} />
+          </mesh>
+          <mesh position={[0.007, 0.05, 0]}>
+            <boxGeometry args={[0.002, 0.08, 0.04]} />
+            <meshPhysicalMaterial color="#ff6600" emissive="#ff6600" emissiveIntensity={0.08} transparent opacity={0.4} />
+          </mesh>
+        </group>
+      ))}
     </group>
   );
 }
