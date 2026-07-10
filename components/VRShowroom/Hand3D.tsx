@@ -1,19 +1,9 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { handDataRef } from '../hand-shared';
-
-const LANDMARK_NAMES = ['WRIST', 'THUMB_CMC', 'THUMB_MCP', 'THUMB_IP', 'THUMB_TIP', 'INDEX_MCP', 'INDEX_PIP', 'INDEX_DIP', 'INDEX_TIP', 'MIDDLE_MCP', 'MIDDLE_PIP', 'MIDDLE_DIP', 'MIDDLE_TIP', 'RING_MCP', 'RING_PIP', 'RING_DIP', 'RING_TIP', 'PINKY_MCP', 'PINKY_PIP', 'PINKY_DIP', 'PINKY_TIP'];
-
-const FINGER_INDICES: [number, number, number][] = [
-  [1, 2, 3], [2, 3, 4],
-  [5, 6, 7], [6, 7, 8],
-  [9, 10, 11], [10, 11, 12],
-  [13, 14, 15], [14, 15, 16],
-  [17, 18, 19], [18, 19, 20],
-];
 
 const BONE_PAIRS: [number, number][] = [
   [0, 1], [1, 2], [2, 3], [3, 4],
@@ -24,107 +14,107 @@ const BONE_PAIRS: [number, number][] = [
   [5, 9], [9, 13], [13, 17],
 ];
 
+const BONE_COUNT = BONE_PAIRS.length; // 24
+const JOINT_COUNT = 21;
+
 const SKIN_COLOR = '#e8b88a';
-const JOINT_RADIUS = 0.008;
-const BONE_RADIUS = 0.005;
-
-function makeJointGeo() {
-  const geo = new THREE.SphereGeometry(JOINT_RADIUS, 8, 6);
-  return geo;
-}
-
-function makeBoneGeo(from: THREE.Vector3, to: THREE.Vector3) {
-  const dir = new THREE.Vector3().copy(to).sub(from);
-  const len = dir.length();
-  if (len < 0.001) return null;
-  const geo = new THREE.CylinderGeometry(BONE_RADIUS, BONE_RADIUS, len, 4, 1);
-  const mid = new THREE.Vector3().copy(from).add(dir.clone().multiplyScalar(0.5));
-  const quat = new THREE.Quaternion().setFromUnitVectors(
-    new THREE.Vector3(0, 1, 0),
-    dir.clone().normalize()
-  );
-  return { geo, pos: mid, quat };
-}
+const J_RAD = 0.008;
+const B_RAD = 0.005;
 
 export default function Hand3D() {
   const { camera } = useThree();
-  const groupRef = useRef<THREE.Group>(null);
-  const jointsRef = useRef<THREE.InstancedMesh | null>(null);
-  const bonesRef = useRef<THREE.Group>(null);
+  const rootRef = useRef<THREE.Group>(null);
+  const bonesRef = useRef<THREE.Mesh[]>([]);
+  const jointsRef = useRef<THREE.Mesh[]>([]);
   const palmRef = useRef<THREE.Mesh>(null);
-  const smoothLandmarks = useRef<number[][]>(Array.from({ length: 21 }, () => [0, 0, 0]));
-  const prevActive = useRef(false);
-
-  const jointMat = useRef(new THREE.MeshStandardMaterial({ color: SKIN_COLOR, roughness: 0.5, metalness: 0.1 }));
-  const boneMat = useRef(new THREE.MeshStandardMaterial({ color: SKIN_COLOR, roughness: 0.6, metalness: 0.05 }));
-  const palmMat = useRef(new THREE.MeshStandardMaterial({ color: SKIN_COLOR, roughness: 0.5, metalness: 0.05, transparent: true, opacity: 0.85 }));
+  const smooth = useRef<number[][]>(Array.from({ length: 21 }, () => [0, 0, 0]));
+  const skip = useRef(0);
+  const matJoint = useMemo(() => new THREE.MeshStandardMaterial({ color: SKIN_COLOR, roughness: 0.5 }), []);
+  const matBone = useMemo(() => new THREE.MeshStandardMaterial({ color: SKIN_COLOR, roughness: 0.6 }), []);
+  const matPalm = useMemo(() => new THREE.MeshStandardMaterial({ color: SKIN_COLOR, roughness: 0.5, transparent: true, opacity: 0.85 }), []);
 
   useFrame(() => {
-    const g = groupRef.current;
+    const g = rootRef.current;
     const h = handDataRef;
     if (!g) return;
 
     if (h.active && h.landmarks && h.landmarks.length >= 21) {
       g.visible = true;
-      prevActive.current = true;
+
+      skip.current = (skip.current + 1) % 3;
+      if (skip.current !== 0) return;
 
       const lm = h.landmarks;
       const fwd = new THREE.Vector3(0, 0, -0.7).applyQuaternion(camera.quaternion);
       g.position.copy(camera.position.clone().add(fwd));
       g.quaternion.copy(camera.quaternion);
 
-      const points: THREE.Vector3[] = [];
+      const pts: THREE.Vector3[] = [];
       for (let i = 0; i < 21; i++) {
-        const raw = lm[i];
-        smoothLandmarks.current[i][0] += (raw[0] - 0.5 - smoothLandmarks.current[i][0]) * 0.35;
-        smoothLandmarks.current[i][1] += (0.5 - raw[1] - smoothLandmarks.current[i][1]) * 0.35;
-        smoothLandmarks.current[i][2] += (-raw[2] - smoothLandmarks.current[i][2]) * 0.35;
-        points.push(new THREE.Vector3(
-          smoothLandmarks.current[i][0] * 0.25,
-          smoothLandmarks.current[i][1] * 0.25,
-          smoothLandmarks.current[i][2] * 0.25
+        const r = lm[i];
+        smooth.current[i][0] += (r[0] - 0.5 - smooth.current[i][0]) * 0.3;
+        smooth.current[i][1] += (0.5 - r[1] - smooth.current[i][1]) * 0.3;
+        smooth.current[i][2] += (-r[2] - smooth.current[i][2]) * 0.3;
+        pts.push(new THREE.Vector3(
+          smooth.current[i][0] * 0.25,
+          smooth.current[i][1] * 0.25,
+          smooth.current[i][2] * 0.25
         ));
       }
 
-      g.children.forEach(child => { if (child !== palmRef.current) g.remove(child); });
-
-      for (const [a, b] of BONE_PAIRS) {
-        const bone = makeBoneGeo(points[a], points[b]);
-        if (!bone) continue;
-        const mesh = new THREE.Mesh(bone.geo, boneMat.current);
-        mesh.position.copy(bone.pos);
-        mesh.quaternion.copy(bone.quat);
-        g.add(mesh);
+      while (bonesRef.current.length < BONE_COUNT) {
+        const geo = new THREE.CylinderGeometry(B_RAD, B_RAD, 1, 4, 1);
+        const m = new THREE.Mesh(geo, matBone);
+        g.add(m);
+        bonesRef.current.push(m);
       }
-
-      for (let i = 0; i < 21; i++) {
-        const joint = new THREE.Mesh(makeJointGeo(), jointMat.current);
-        joint.position.copy(points[i]);
-        g.add(joint);
+      while (jointsRef.current.length < JOINT_COUNT) {
+        const geo = new THREE.SphereGeometry(J_RAD, 6, 4);
+        const m = new THREE.Mesh(geo, matJoint);
+        g.add(m);
+        jointsRef.current.push(m);
+      }
+      for (let i = 0; i < BONE_COUNT; i++) {
+        const [a, b] = BONE_PAIRS[i];
+        const dir = new THREE.Vector3().copy(pts[b]).sub(pts[a]);
+        const len = dir.length();
+        const m = bonesRef.current[i];
+        if (len < 0.002) { m.visible = false; continue; }
+        m.visible = true;
+        m.scale.y = len;
+        const mid = new THREE.Vector3().copy(pts[a]).add(dir.clone().multiplyScalar(0.5));
+        m.position.copy(mid);
+        m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
+      }
+      for (let i = 0; i < JOINT_COUNT; i++) {
+        jointsRef.current[i].position.copy(pts[i]);
+        jointsRef.current[i].visible = true;
       }
 
       if (palmRef.current) {
-        const palmPos = new THREE.Vector3(0, 0, 0);
-        for (let i = 0; i < 5; i++) palmPos.add(points[i]);
-        palmPos.divideScalar(5);
-        palmRef.current.position.copy(palmPos);
-        const scaleX = points[5].distanceTo(points[17]) * 0.4;
-        const scaleZ = points[0].distanceTo(points[9]) * 0.3;
-        palmRef.current.scale.set(Math.max(scaleX, 0.04), 1, Math.max(scaleZ, 0.04));
+        const center = new THREE.Vector3();
+        for (let i = 0; i < 5; i++) center.add(pts[i]);
+        center.divideScalar(5);
+        palmRef.current.position.copy(center);
+        const sx = pts[5].distanceTo(pts[17]) * 0.4;
+        const sz = pts[0].distanceTo(pts[9]) * 0.3;
+        palmRef.current.scale.set(Math.max(sx, 0.04), 1, Math.max(sz, 0.04));
+        palmRef.current.visible = true;
       }
     } else {
-      if (prevActive.current) {
+      if (g.visible) {
         g.visible = false;
-        prevActive.current = false;
+        bonesRef.current = [];
+        jointsRef.current = [];
       }
     }
   });
 
   return (
-    <group ref={groupRef} visible={false}>
-      <mesh ref={palmRef}>
+    <group ref={rootRef} visible={false}>
+      <mesh ref={palmRef} visible={false}>
         <sphereGeometry args={[0.03, 8, 6]} />
-        <primitive object={palmMat.current} />
+        <primitive object={matPalm} />
       </mesh>
     </group>
   );

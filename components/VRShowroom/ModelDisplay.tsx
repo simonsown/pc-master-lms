@@ -23,12 +23,14 @@ function ModelFallback({ color }: { color: string }) {
 function GlbInner({ file, color, scale, hovered }: { file: string; color: string; scale: number; hovered: boolean }) {
   const { scene } = useGLTF(file);
   const [ready, setReady] = useState(false);
+  const emRef = useRef(0);
+  const skipRef = useRef(0);
 
   useEffect(() => {
     scene.traverse(c => {
       if (c instanceof THREE.Mesh) {
-        c.castShadow = true;
-        c.receiveShadow = true;
+        c.castShadow = false;
+        c.receiveShadow = false;
         c.material.transparent = false;
       }
     });
@@ -37,13 +39,15 @@ function GlbInner({ file, color, scale, hovered }: { file: string; color: string
 
   useFrame(() => {
     if (!ready) return;
-    const em = hovered ? 0.5 : 0;
+    skipRef.current = (skipRef.current + 1) % 3;
+    if (skipRef.current !== 0) return;
+    const target = hovered ? 0.5 : 0;
+    emRef.current += (target - emRef.current) * 0.1;
+    if (Math.abs(emRef.current - target) < 0.01) return;
     scene.traverse(c => {
       if (c instanceof THREE.Mesh && c.material) {
         const mat = c.material as THREE.MeshStandardMaterial;
-        if (mat.emissive) {
-          mat.emissiveIntensity += (em - mat.emissiveIntensity) * 0.08;
-        }
+        if (mat.emissive) mat.emissiveIntensity = emRef.current;
       }
     });
   });
@@ -78,8 +82,12 @@ export default function ModelDisplay({ file, color, position, scale = 0.1, onInt
   const speedRef = useRef(THREE.MathUtils.degToRad(6 + Math.random() * 4));
   const stoppedRef = useRef(false);
 
+  const skipFrame = useRef(0);
+
   useFrame(() => {
     if (!groupRef.current) return;
+    skipFrame.current = (skipFrame.current + 1) % 3;
+    if (skipFrame.current !== 0) return;
 
     const dist = playerPos.distanceTo(new THREE.Vector3(position[0], 0, position[2]));
     const shouldStop = dist < 2.5;
@@ -91,7 +99,7 @@ export default function ModelDisplay({ file, color, position, scale = 0.1, onInt
     }
 
     if (!stoppedRef.current && !hovered) {
-      rotRef.current += speedRef.current * 0.016;
+      rotRef.current += speedRef.current;
     }
 
     groupRef.current.rotation.y = rotRef.current;
