@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Suspense, useRef, useState, useEffect } from 'react';
+import React, { Suspense, useRef, useState, useEffect, Component } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, Text } from '@react-three/drei';
 import * as THREE from 'three';
@@ -20,21 +20,39 @@ const ITEMS = [
   { id: 'kit', file: '/models/computer_components.glb', name: 'PC Components Kit', desc: 'Bộ linh kiện máy tính đầy đủ', color: '#06b6d4', pos: [0, 0, 8] },
 ];
 
+class ModelBoundary extends Component<{ children: React.ReactNode; fallback: React.ReactNode }> {
+  state = { ok: true };
+  static getDerivedStateFromError() { return { ok: false }; }
+  render() { return this.state.ok ? this.props.children : this.props.fallback; }
+}
+
+function FallbackBox({ color }: { color: string }) {
+  return (
+    <mesh>
+      <boxGeometry args={[0.4, 0.4, 0.4]} />
+      <meshStandardMaterial color={color} roughness={0.3} metalness={0.1} />
+    </mesh>
+  );
+}
+
 function GlbInner({ file, color, scale }: { file: string; color: string; scale: number }) {
   const { scene } = useGLTF(file);
   const [ok, setOk] = useState(false);
   useEffect(() => {
-    scene.traverse(c => { if (c instanceof THREE.Mesh) { c.castShadow = false; c.receiveShadow = false; } }); setOk(true);
+    scene.traverse(c => { if (c instanceof THREE.Mesh) { c.castShadow = false; c.receiveShadow = false; c.material.transparent = false; } });
+    setOk(true);
   }, [scene]);
   if (!ok) return null;
   return <primitive object={scene} scale={scale} />;
 }
 
-function Glb(props: { file: string; color: string; scale?: number }) {
+function SafeGlb({ file, color, scale = 1 }: { file: string; color: string; scale?: number }) {
   return (
-    <Suspense fallback={<mesh><boxGeometry args={[0.3, 0.3, 0.3]} /><meshStandardMaterial color={props.color} /></mesh>}>
-      <GlbInner {...props} scale={props.scale ?? 1} />
-    </Suspense>
+    <ModelBoundary fallback={<FallbackBox color={color} />}>
+      <Suspense fallback={<FallbackBox color={color} />}>
+        <GlbInner file={file} color={color} scale={scale} />
+      </Suspense>
+    </ModelBoundary>
   );
 }
 
@@ -82,7 +100,6 @@ function ClickableItem({ item, onGrab, onRelease, grabbed }: {
   item: typeof ITEMS[0]; onGrab: (id: string) => void; onRelease: () => void; grabbed: boolean;
 }) {
   const ref = useRef<THREE.Group>(null);
-  const floatRef = useRef(0);
 
   useFrame(({ clock }) => {
     if (!ref.current || grabbed) return;
@@ -93,9 +110,7 @@ function ClickableItem({ item, onGrab, onRelease, grabbed }: {
     <group position={[item.pos[0], item.pos[1], item.pos[2]]}>
       <Pedestal color={item.color} />
       <group ref={ref} position={[0, 0.2, 0]}>
-        <group scale={0.1}>
-          <Glb file={item.file} color={item.color} />
-        </group>
+        <SafeGlb file={item.file} color={item.color} scale={0.1} />
       </group>
       <InfoHolo text={item.name} sub={item.desc} color={item.color} />
       <mesh position={[0, 0.4, 0]}
@@ -123,8 +138,7 @@ function HeldComponent({ item }: { item: typeof ITEMS[0] }) {
 
     const h = handDataRef;
     if (h.active && h.landmarks && h.landmarks.length >= 21) {
-      const lm = h.landmarks;
-      const dx = (lm[8][0] - 0.5) * 2;
+      const dx = (h.landmarks[8][0] - 0.5) * 2;
       rotRef.current += dx * 0.02;
     } else {
       rotRef.current += 0.01;
@@ -135,10 +149,23 @@ function HeldComponent({ item }: { item: typeof ITEMS[0] }) {
 
   return (
     <group ref={ref}>
-      <group scale={0.15}>
-        <Glb file={item.file} color={item.color} />
-      </group>
+      <SafeGlb file={item.file} color={item.color} scale={0.15} />
     </group>
+  );
+}
+
+class SceneErrorBoundary extends Component<{ children: React.ReactNode }> {
+  state = { ok: true };
+  static getDerivedStateFromError() { return { ok: false }; }
+  render() { return this.state.ok ? this.props.children : <FallbackScene />; }
+}
+
+function FallbackScene() {
+  return (
+    <mesh position={[0, 1, 0]}>
+      <boxGeometry args={[0.5, 0.5, 0.5]} />
+      <meshStandardMaterial color="#44aaff" />
+    </mesh>
   );
 }
 
@@ -148,39 +175,36 @@ function Hall() {
 
   return (
     <group>
-      <color attach="background" args={['#e8ecf4']} />
-      <fog attach="fog" args={['#e8ecf4', 25, 40]} />
-      <ambientLight intensity={0.9} color="#c8d8ff" />
-      <hemisphereLight args={['#d8e8ff', '#8899bb', 0.8]} />
-      <directionalLight position={[10, 20, 10]} intensity={1.6} castShadow shadow-mapSize={[1024, 1024]} />
-      <directionalLight position={[-6, 10, 6]} intensity={0.6} color="#b0c8ff" />
-      <directionalLight position={[4, 8, -6]} intensity={0.4} color="#d0e0ff" />
-      <pointLight position={[0, 8, 0]} intensity={1.8} color="#d0e0ff" distance={30} />
-      {[[-6, 8, -6], [6, 8, -6], [-6, 8, 6], [6, 8, 6]].map((p, i) => (
-        <pointLight key={i} position={p as [number, number, number]} intensity={0.8} color="#c0d8ff" distance={20} />
-      ))}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
+      <color attach="background" args={['#ffffff']} />
+      <fog attach="fog" args={['#ffffff', 30, 45]} />
+      <ambientLight intensity={1.2} color="#ffffff" />
+      <hemisphereLight args={['#ffffff', '#d0d8e8', 0.6]} />
+      <directionalLight position={[10, 20, 10]} intensity={1.0} />
+      <directionalLight position={[-10, 15, -10]} intensity={0.8} />
+      <directionalLight position={[0, 25, 0]} intensity={0.5} />
+      <pointLight position={[0, 10, 0]} intensity={0.6} distance={35} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]}>
         <planeGeometry args={[40, 40]} />
-        <meshPhysicalMaterial color="#c8d0dc" roughness={0.6} metalness={0.05} />
+        <meshPhysicalMaterial color="#e8ecf0" roughness={0.8} metalness={0} />
       </mesh>
-      {Array.from({ length: 21 }).map((_, i) => (
-        <React.Fragment key={i}>
-          <mesh position={[-10 + i, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[0.01, 20]} /><meshBasicMaterial color="#b0bcc8" transparent opacity={0.15} /></mesh>
-          <mesh position={[0, 0, -10 + i]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[20, 0.01]} /><meshBasicMaterial color="#b0bcc8" transparent opacity={0.15} /></mesh>
-        </React.Fragment>
-      ))}
-      <mesh position={[0, 5, -12]}><boxGeometry args={[16, 0.15, 0.3]} /><meshPhysicalMaterial color="#8899aa" /></mesh>
-      <mesh position={[0, 3, -11.85]}><planeGeometry args={[14, 3]} /><meshPhysicalMaterial color="#f0f4ff" roughness={0.05} emissive="#c8d8ff" emissiveIntensity={0.2} /></mesh>
+      <mesh position={[0, 2.5, -12]}>
+        <boxGeometry args={[18, 0.12, 0.3]} />
+        <meshPhysicalMaterial color="#d0d8e0" roughness={0.6} />
+      </mesh>
+      <mesh position={[0, 1.5, -11.85]}>
+        <planeGeometry args={[16, 2.5]} />
+        <meshPhysicalMaterial color="#f0f4ff" roughness={0.05} />
+      </mesh>
+      <Text position={[0, 3.0, -11.5]} fontSize={0.55} color="#334466" font="monospace" anchorX="center" anchorY="middle">
+        PHÒNG TRƯNG BÀY LINH KIỆN PC
+      </Text>
+      <Text position={[0, 2.55, -11.5]} fontSize={0.22} color="#667799" font="monospace" anchorX="center" anchorY="middle">
+        WASD di chuyển • Click cầm/nhả • Webcam xoay góc nhìn
+      </Text>
       {ITEMS.map((item) => (
         <ClickableItem key={item.id} item={item} onGrab={setGrabbed} onRelease={() => setGrabbed(null)} grabbed={grabbed === item.id} />
       ))}
       {item && <HeldComponent item={item} />}
-      <Text position={[0, 5.5, -11.5]} fontSize={0.6} color="#334466" font="monospace" anchorX="center" anchorY="middle">
-        PHÒNG TRƯNG BÀY LINH KIỆN PC
-      </Text>
-      <Text position={[0, 5.0, -11.5]} fontSize={0.25} color="#667799" font="monospace" anchorX="center" anchorY="middle">
-        WASD di chuyển • Click để cầm/nhả linh kiện • Webcam xoay góc nhìn
-      </Text>
     </group>
   );
 }
@@ -254,17 +278,41 @@ function HandTracker3D() {
   return <group ref={ref} visible={false} />;
 }
 
-export default function ShowroomScene() {
+function CameraPreview() {
   return (
-    <div className="w-full h-screen bg-[#e8ecf4] relative overflow-hidden">
-      <UnifiedTracker />
-      <Canvas shadows camera={{ position: [0, 1.7, 4], fov: 60, near: 0.1, far: 50 }}>
-        <Hall />
-        <PlayerController />
-        <HandTracker3D />
-      </Canvas>
+    <div style={{
+      position: 'fixed', top: 16, right: 16, zIndex: 9999,
+      width: 160, height: 120,
+      borderRadius: 12, overflow: 'hidden',
+      border: '2px solid rgba(0,255,136,0.4)',
+      boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+      background: '#000',
+    }}>
+      <div style={{
+        position: 'absolute', top: 4, left: 4,
+        background: 'rgba(0,0,0,0.6)', padding: '2px 6px', borderRadius: 4,
+        fontSize: 9, color: '#00ff88', fontFamily: 'monospace', zIndex: 1,
+      }}>
+        CAM • Face + Hand
+      </div>
     </div>
   );
 }
 
-ITEMS.forEach(item => useGLTF.preload(item.file));
+export default function ShowroomScene() {
+  return (
+    <div className="w-full h-screen bg-white relative overflow-hidden">
+      <UnifiedTracker />
+      <CameraPreview />
+      <SceneErrorBoundary>
+        <Canvas shadows camera={{ position: [0, 1.7, 4], fov: 60, near: 0.1, far: 50 }}
+          onCreated={({ gl }) => { gl.setClearColor('#ffffff'); }}
+        >
+          <Hall />
+          <PlayerController />
+          <HandTracker3D />
+        </Canvas>
+      </SceneErrorBoundary>
+    </div>
+  );
+}
