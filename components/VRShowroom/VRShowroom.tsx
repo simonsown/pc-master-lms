@@ -11,7 +11,7 @@ import InfoPanel from './InfoPanel';
 import UI from './UI';
 import { ITEMS } from './ITEMS';
 
-const isLowEnd = typeof navigator !== 'undefined' && (navigator.hardwareConcurrency || 4) <= 4;
+const isLowEnd = typeof navigator !== 'undefined' && (navigator.hardwareConcurrency || 4) <= 4; // i3 / low-end
 
 class MainErrorBoundary extends Component<{ children: React.ReactNode }> {
   state = { ok: true };
@@ -82,12 +82,12 @@ function Hall({ onInteract, playerPos }: { onInteract: (id: string) => void; pla
       <color attach="background" args={['#f0f4ff']} />
       <ambientLight intensity={1.0} color="#ffffff" />
       <hemisphereLight args={['#ffffff', '#c8d8f0', 0.5]} />
-      <directionalLight position={[10, 20, 8]} intensity={1.2} castShadow shadow-mapSize={isLowEnd ? [512, 512] : [1024, 1024]} />
-      <directionalLight position={[-8, 16, -6]} intensity={0.6} color="#d0e0ff" />
-      <directionalLight position={[0, 20, 0]} intensity={0.4} color="#ffffff" />
+      <directionalLight position={[10, 15, 8]} intensity={1.0} castShadow={!isLowEnd} shadow-mapSize={isLowEnd ? [256, 256] : [512, 512]} />
+      <directionalLight position={[-8, 12, -6]} intensity={0.5} color="#d0e0ff" />
+      <directionalLight position={[0, 15, 0]} intensity={0.3} color="#ffffff" />
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]}>
         <planeGeometry args={[40, 40]} />
-        <meshPhysicalMaterial color="#e0e4ec" roughness={0.6} metalness={0} />
+        <meshStandardMaterial color="#e0e4ec" roughness={0.6} />
       </mesh>
       {ITEMS.map((item) => (
         <ModelDisplay
@@ -131,12 +131,12 @@ export default function VRShowroom() {
     <MainErrorBoundary>
       <div className="w-full h-screen bg-[#f0f4ff] relative overflow-hidden">
         {camOn && <UnifiedTracker key={camKey.current} />}
-        <Canvas shadows camera={{ position: [0, 1.7, 5], fov: 60, near: 0.1, far: 35 }}
-          dpr={isLowEnd ? [0.5, 1] : [1, 1.5]}
-          gl={{ antialias: !isLowEnd }}
+        <Canvas camera={{ position: [0, 1.7, 5], fov: 55, near: 0.1, far: 30 }}
+          dpr={isLowEnd ? [0.5, 0.75] : [1, 1.2]}
+          gl={{ antialias: false, powerPreference: 'low-power' as const }}
           onCreated={({ gl }) => {
             gl.setClearColor('#f0f4ff');
-            gl.shadowMap.type = THREE.PCFSoftShadowMap;
+            if (!isLowEnd) { gl.shadowMap.enabled = true; gl.shadowMap.type = THREE.PCFSoftShadowMap; }
           }}
         >
           <SceneInner onInteract={handleInteract} />

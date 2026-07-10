@@ -1,7 +1,7 @@
 'use client';
 
 import React, { Suspense, useRef, useState, useEffect, Component } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 
@@ -79,19 +79,23 @@ export default function ModelDisplay({ file, color, position, scale = 0.1, onInt
   const groupRef = useRef<THREE.Group>(null);
   const rotRef = useRef(THREE.MathUtils.degToRad(Math.random() * 360));
   const [hovered, setHovered] = useState(false);
-  const speedRef = useRef(THREE.MathUtils.degToRad(6 + Math.random() * 4));
+  const speedRef = useRef(THREE.MathUtils.degToRad(4 + Math.random() * 3));
   const stoppedRef = useRef(false);
-
-  const skipFrame = useRef(0);
+  const skipRef = useRef(0);
 
   useFrame(() => {
-    if (!groupRef.current) return;
-    skipFrame.current = (skipFrame.current + 1) % 3;
-    if (skipFrame.current !== 0) return;
+    const g = groupRef.current;
+    if (!g) return;
 
     const dist = playerPos.distanceTo(new THREE.Vector3(position[0], 0, position[2]));
-    const shouldStop = dist < 2.5;
 
+    if (dist > 16) { g.visible = false; return; }
+    g.visible = true;
+
+    skipRef.current = (skipRef.current + 1) % 5;
+    if (skipRef.current !== 0) return;
+
+    const shouldStop = dist < 2.5;
     if (shouldStop && !stoppedRef.current) {
       stoppedRef.current = true;
     } else if (!shouldStop && stoppedRef.current) {
@@ -102,11 +106,9 @@ export default function ModelDisplay({ file, color, position, scale = 0.1, onInt
       rotRef.current += speedRef.current;
     }
 
-    groupRef.current.rotation.y = rotRef.current;
-    groupRef.current.position.y = 0.2 + Math.sin(Date.now() * 0.001 + position[0]) * 0.03;
+    g.rotation.y = rotRef.current;
+    g.position.y = 0.2 + Math.sin(Date.now() * 0.001 + position[0]) * 0.025;
   });
-
-  const glowColor = new THREE.Color(color);
 
   return (
     <group ref={groupRef} position={[position[0], position[1], position[2]]}>
@@ -114,7 +116,6 @@ export default function ModelDisplay({ file, color, position, scale = 0.1, onInt
       <group position={[0, 0.25, 0]}>
         <SafeGlb file={file} color={color} scale={scale} hovered={hovered} />
       </group>
-      <InfoHolo text={''} sub={''} color={color} />
       <mesh
         position={[0, 0.35, 0]}
         onPointerEnter={() => setHovered(true)}
@@ -133,39 +134,13 @@ function Pedestal({ color, hovered }: { color: string; hovered: boolean }) {
   return (
     <group>
       <mesh position={[0, 0.05, 0]}>
-        <cylinderGeometry args={[0.5, 0.6, 0.12, 24]} />
-        <meshPhysicalMaterial color="#1a1a3e" roughness={0.3} metalness={0.4} emissive={color} emissiveIntensity={glow} />
+        <cylinderGeometry args={[0.5, 0.6, 0.12, 16]} />
+        <meshStandardMaterial color="#1a1a3e" roughness={0.5} emissive={color} emissiveIntensity={glow} />
       </mesh>
       <mesh position={[0, 0.14, 0]}>
-        <cylinderGeometry args={[0.55, 0.5, 0.02, 24]} />
-        <meshPhysicalMaterial color={color} roughness={0.3} emissive={color} emissiveIntensity={hovered ? 0.4 : 0.1} />
+        <cylinderGeometry args={[0.55, 0.5, 0.02, 16]} />
+        <meshStandardMaterial color={color} roughness={0.5} emissive={color} emissiveIntensity={hovered ? 0.4 : 0.1} />
       </mesh>
-    </group>
-  );
-}
-
-function InfoHolo({ text, sub, color }: { text: string; sub: string; color: string }) {
-  if (!text) return null;
-  return (
-    <group position={[0, 0.9, 0]}>
-      <sprite scale={[2.5, 0.12, 1]} position={[0, 0.04, 0]}>
-        <spriteMaterial map={(() => {
-          const c = document.createElement('canvas'); c.width = 512; c.height = 28;
-          const ctx = c.getContext('2d')!;
-          ctx.fillStyle = color; ctx.font = 'bold 14px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-          ctx.fillText(text, 256, 14);
-          return new THREE.CanvasTexture(c);
-        })()} transparent opacity={0.95} depthTest={false} />
-      </sprite>
-      <sprite scale={[2.8, 0.08, 1]} position={[0, -0.04, 0]}>
-        <spriteMaterial map={(() => {
-          const c = document.createElement('canvas'); c.width = 512; c.height = 22;
-          const ctx = c.getContext('2d')!;
-          ctx.fillStyle = '#8899bb'; ctx.font = '10px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-          ctx.fillText(sub, 256, 11);
-          return new THREE.CanvasTexture(c);
-        })()} transparent opacity={0.8} depthTest={false} />
-      </sprite>
     </group>
   );
 }
