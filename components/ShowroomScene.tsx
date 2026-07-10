@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { Suspense, useRef, useState, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, Text } from '@react-three/drei';
 import * as THREE from 'three';
@@ -20,15 +20,22 @@ const ITEMS = [
   { id: 'kit', file: '/models/computer_components.glb', name: 'PC Components Kit', desc: 'Bộ linh kiện máy tính đầy đủ', color: '#06b6d4', pos: [0, 0, 8] },
 ];
 
-function Glb({ file, color, scale = 1 }: { file: string; color: string; scale?: number }) {
-  let scene: THREE.Group | null = null;
-  try { scene = useGLTF(file).scene; } catch {}
+function GlbInner({ file, color, scale }: { file: string; color: string; scale: number }) {
+  const { scene } = useGLTF(file);
   const [ok, setOk] = useState(false);
   useEffect(() => {
-    if (scene) { scene.traverse(c => { if (c instanceof THREE.Mesh) { c.castShadow = false; c.receiveShadow = false; } }); setOk(true); }
+    scene.traverse(c => { if (c instanceof THREE.Mesh) { c.castShadow = false; c.receiveShadow = false; } }); setOk(true);
   }, [scene]);
-  if (scene && ok) return <primitive object={scene} scale={scale} />;
-  return <mesh><boxGeometry args={[0.3, 0.3, 0.3]} /><meshStandardMaterial color={color} /></mesh>;
+  if (!ok) return null;
+  return <primitive object={scene} scale={scale} />;
+}
+
+function Glb(props: { file: string; color: string; scale?: number }) {
+  return (
+    <Suspense fallback={<mesh><boxGeometry args={[0.3, 0.3, 0.3]} /><meshStandardMaterial color={props.color} /></mesh>}>
+      <GlbInner {...props} scale={props.scale ?? 1} />
+    </Suspense>
+  );
 }
 
 function InfoHolo({ text, sub, color }: { text: string; sub: string; color: string }) {
@@ -259,3 +266,5 @@ export default function ShowroomScene() {
     </div>
   );
 }
+
+ITEMS.forEach(item => useGLTF.preload(item.file));
