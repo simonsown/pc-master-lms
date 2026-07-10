@@ -50,8 +50,9 @@ export default function UnifiedTracker({ onReady }: { onReady?: () => void }) {
 
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            width: { ideal: 320 }, height: { ideal: 240 },
-            facingMode: 'user', frameRate: { ideal: 20 },
+            width: { ideal: isLowEnd ? 160 : 320 },
+            height: { ideal: isLowEnd ? 120 : 240 },
+            facingMode: 'user', frameRate: { ideal: isLowEnd ? 15 : 20 },
           },
         });
         if (cancelled) { stream.getTracks().forEach(t => t.stop()); return; }
@@ -66,6 +67,7 @@ export default function UnifiedTracker({ onReady }: { onReady?: () => void }) {
 
         let smoothPitch = 0, smoothYaw = 0;
         let skip = 0;
+        const skipEvery = isLowEnd ? 3 : 2;
 
         const loop = async () => {
           if (!mountedRef.current || !faceLandmarker || !handLandmarker || !video || video.readyState < 2) {
@@ -73,7 +75,7 @@ export default function UnifiedTracker({ onReady }: { onReady?: () => void }) {
             return;
           }
           skip++;
-          if (skip % 2 !== 0) { animRef.current = requestAnimationFrame(loop); return; }
+          if (skip % skipEvery !== 0) { animRef.current = requestAnimationFrame(loop); return; }
 
           try {
             const [faceResult, handResult] = await Promise.all([
@@ -87,8 +89,8 @@ export default function UnifiedTracker({ onReady }: { onReady?: () => void }) {
               if (nose && leftEye && rightEye) {
                 const rawYaw = (nose.x - 0.5) * 2;
                 const rawPitch = (nose.y - 0.5) * 2;
-                smoothPitch += 0.6 * (Math.max(-0.6, Math.min(0.6, rawPitch)) - smoothPitch);
-                smoothYaw += 0.6 * (Math.max(-0.8, Math.min(0.8, rawYaw)) - smoothYaw);
+                smoothPitch += 0.5 * (Math.max(-0.6, Math.min(0.6, rawPitch)) - smoothPitch);
+                smoothYaw += 0.5 * (Math.max(-0.8, Math.min(0.8, rawYaw)) - smoothYaw);
                 headTrackingRef.pitch = smoothPitch;
                 headTrackingRef.yaw = smoothYaw;
                 setCameraCoords({ pitch: smoothPitch, yaw: smoothYaw, roll: 0 });
@@ -111,11 +113,11 @@ export default function UnifiedTracker({ onReady }: { onReady?: () => void }) {
               handDataRef.pinch = false;
               handDataRef.landmarks = null;
             }
-          } catch { /* detection error */ }
+          } catch { }
           animRef.current = requestAnimationFrame(loop);
         };
         loop();
-      } catch { /* init error */ }
+      } catch { }
     };
     init();
     return () => {
