@@ -21,14 +21,13 @@ const ITEMS = [
 ];
 
 function Glb({ file, color, scale = 1 }: { file: string; color: string; scale?: number }) {
-  try {
-    const { scene } = useGLTF(file);
-    if (scene) {
-      const [ok, setOk] = useState(false);
-      useEffect(() => { scene.traverse(c => { if (c instanceof THREE.Mesh) { c.castShadow = false; c.receiveShadow = false; } }); setOk(true); }, [scene]);
-      if (ok) return <primitive object={scene} scale={scale} />;
-    }
-  } catch {}
+  let scene: THREE.Group | null = null;
+  try { scene = useGLTF(file).scene; } catch {}
+  const [ok, setOk] = useState(false);
+  useEffect(() => {
+    if (scene) { scene.traverse(c => { if (c instanceof THREE.Mesh) { c.castShadow = false; c.receiveShadow = false; } }); setOk(true); }
+  }, [scene]);
+  if (scene && ok) return <primitive object={scene} scale={scale} />;
   return <mesh><boxGeometry args={[0.3, 0.3, 0.3]} /><meshStandardMaterial color={color} /></mesh>;
 }
 
@@ -163,7 +162,7 @@ function Hall() {
           <mesh position={[0, 0, -10 + i]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[20, 0.01]} /><meshBasicMaterial color="#b0bcc8" transparent opacity={0.15} /></mesh>
         </React.Fragment>
       ))}
-      <mesh position={[0,  +[...Array(6)].map((_, i) => i * 2 + 2), -12]}><boxGeometry args={[16, 0.15, 0.3]} /><meshPhysicalMaterial color="#8899aa" /></mesh>
+      <mesh position={[0, 5, -12]}><boxGeometry args={[16, 0.15, 0.3]} /><meshPhysicalMaterial color="#8899aa" /></mesh>
       <mesh position={[0, 3, -11.85]}><planeGeometry args={[14, 3]} /><meshPhysicalMaterial color="#f0f4ff" roughness={0.05} emissive="#c8d8ff" emissiveIntensity={0.2} /></mesh>
       {ITEMS.map((item) => (
         <ClickableItem key={item.id} item={item} onGrab={setGrabbed} onRelease={() => setGrabbed(null)} grabbed={grabbed === item.id} />
