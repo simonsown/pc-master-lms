@@ -15,5 +15,10 @@
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
       ]
     }
-  ]
+  ],
+  "build": {
+    "env": {
+      "VERCEL_SUPPORT_LARGE_FUNCTIONS": "1"
+    }
+  }
 }
