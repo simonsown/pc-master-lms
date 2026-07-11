@@ -12,6 +12,7 @@ import { saveLessonProgress } from '@/lib/lesson-actions'
 import { getKeyQuestions } from '@/data/key-questions'
 import { QUIZ_BANK } from '@/data/quiz-bank'
 import PdfViewer from '@/components/PdfViewer'
+import { getYouTubeEmbed, getYouTubeId } from '@/utils/youtube'
 
 const EXTRA_VIDEOS: Record<string, { title: string; id: string }[]> = {
   'cpu': [
@@ -96,14 +97,6 @@ export default function LessonViewer({
     router.refresh()
   }, [lesson.id, router])
 
-  const getYouTubeEmbed = (url: string) => {
-    if (!url) return ''
-    const id = url.match(
-      /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/
-    )?.[1]
-    return id ? `https://www.youtube-nocookie.com/embed/${id}` : ''
-  }
-
   const getDriveEmbed = (url: string) => {
     if (!url) return ''
     const id = url.match(/\/d\/(.+?)\/(?:view|preview)/)?.[1] || url.match(/id=(.+?)(&|$)/)?.[1]
@@ -185,10 +178,10 @@ export default function LessonViewer({
               </div>
 
               <div className="px-6 pb-6">
-                {s.type === 'video' && getYouTubeEmbed(s.content) && (
+                {s.type === 'video' && getYouTubeEmbed(s.content, true) && (
                   <div className="aspect-video rounded-xl overflow-hidden" style={{ background: '#000' }}>
                     <iframe
-                      src={getYouTubeEmbed(s.content)}
+                      src={getYouTubeEmbed(s.content, true)}
                       className="w-full h-full"
                       allowFullScreen
                       loading="lazy"
@@ -201,7 +194,7 @@ export default function LessonViewer({
                   <div className="prose max-w-none text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                     {parseRichContent(s.content).map((part, i) => {
                       if (part.type === 'video') {
-                        const embedUrl = getYouTubeEmbed(part.url!)
+                        const embedUrl = getYouTubeEmbed(part.url!, true)
                         return embedUrl ? (
                           <div key={i} className="aspect-video rounded-xl overflow-hidden my-4" style={{ background: '#000' }}>
                             <iframe src={embedUrl} className="w-full h-full" allowFullScreen title="Video" loading="lazy" />

@@ -13,6 +13,7 @@ import { BadgesPanel } from './LessonInteractive';
 import NotificationBar from './NotificationBar';
 import LessonComments from './LessonComments';
 import { useRealtime } from '@/lib/realtime-provider';
+import { getYouTubeEmbed } from '@/utils/youtube';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -34,11 +35,6 @@ function SimpleMarkdown({ text }) {
     return <div dangerouslySetInnerHTML={{ __html: html }} style={{ color: '#475569', lineHeight: 1.8 }} />;
 }
 
-const getYouTubeEmbed = (url) => {
-    if (!url) return '';
-    const id = url.match(/(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/)?.[1];
-    return id ? `https://www.youtube.com/embed/${id}` : '';
-};
 const getDriveEmbed = (url) => {
     if (!url) return '';
     const id = url.match(/\/d\/(.+?)\/(?:view|preview)/)?.[1];

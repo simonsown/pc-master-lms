@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Loader2, ChevronRight, BookOpen, FileText, Video, Image as ImageIcon, Link2, Code, Eye, Plus, Trash2, GripVertical, Upload, FileSearch } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { getYouTubeThumbnail, isValidYouTubeUrl } from '@/utils/youtube'
 
 type SectionInput = {
   id: string
@@ -88,11 +89,6 @@ export default function CreateLessonPage() {
 
     setLoading(false)
     router.push(`/teacher/lessons/${lesson.id}?created=true`)
-  }
-
-  const getYouTubeThumbnail = (url: string) => {
-    const id = url.match(/(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/)?.[1]
-    return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null
   }
 
   return (

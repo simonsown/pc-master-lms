@@ -7,6 +7,7 @@ import Navbar from '@/components/Navbar'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
+import { getYouTubeEmbed } from '@/utils/youtube'
 
 export default function LessonDetailPage() {
   const { courseId, lessonId } = useParams()
@@ -82,7 +83,7 @@ export default function LessonDetailPage() {
           <div className="aspect-video bg-black w-full relative group overflow-hidden">
             {lesson.content_type === 'video' ? (
               <iframe 
-                src={lesson.content_url?.includes('youtube.com') ? lesson.content_url.replace('watch?v=', 'embed/') : lesson.content_url} 
+                src={getYouTubeEmbed(lesson.content_url) || lesson.content_url} 
                 className="w-full h-full border-none"
                 allowFullScreen
                 title={lesson.title}

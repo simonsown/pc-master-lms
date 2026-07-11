@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
+import { getYouTubeEmbed } from '@/utils/youtube';
 import PdfViewer from '@/components/PdfViewer';
 
 export default function StudentLessonPage({ params }) {
@@ -33,12 +34,6 @@ export default function StudentLessonPage({ params }) {
         };
         fetchLesson();
     }, [lessonId]);
-
-    const getYouTubeEmbed = (url) => {
-        if (!url) return '';
-        const id = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)?.[1];
-        return id ? `https://www.youtube.com/embed/${id}` : '';
-    };
 
     const getDriveEmbed = (url) => {
         if (!url) return '';

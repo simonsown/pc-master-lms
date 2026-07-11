@@ -2,9 +2,10 @@
 
 import React, { useEffect, useState, use, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Save, Trash2, Video, FileText, Image as ImageIcon, FileSearch, Code, Loader2, ArrowLeft, GripVertical, Eye, EyeOff, Upload, PlusCircle, CheckCircle, AlertCircle } from 'lucide-react';
+import { Save, Trash2, Video, FileText, Image as ImageIcon, FileSearch, Code, Loader2, ArrowLeft, GripVertical, Eye, EyeOff, Upload, PlusCircle, CheckCircle, AlertCircle, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { BackButton } from '@/components/ui/BackButton';
+import { getYouTubeEmbed, isValidYouTubeUrl, getYouTubeThumbnail } from '@/utils/youtube';
 
 function SimpleMarkdown({ text }) {
     const html = (text || '')
@@ -149,12 +150,6 @@ export default function LessonEditorPage({ params }) {
         const filtered = sections.filter(s => s.id !== id);
         setSections(filtered);
         setActiveSection(filtered[0] || null);
-    };
-
-    const getYouTubeEmbed = (url) => {
-        if (!url) return '';
-        const id = url.match(/(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/)?.[1];
-        return id ? `https://www.youtube.com/embed/${id}` : '';
     };
 
     const getDriveEmbed = (url) => {
@@ -408,9 +403,21 @@ export default function LessonEditorPage({ params }) {
                                 {activeSection.type === 'video' && <>
                                     <div>
                                         <label style={{ display: 'block', color: 'var(--text-muted)', fontSize: '12px', fontWeight: 700, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Link YouTube</label>
-                                        <input placeholder="https://www.youtube.com/watch?v=..." value={activeSection.content} onChange={(e) => updateSectionLocal({ ...activeSection, content: e.target.value })} style={inputStyle} />
+                                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                            <input placeholder="https://www.youtube.com/watch?v=..." value={activeSection.content} onChange={(e) => updateSectionLocal({ ...activeSection, content: e.target.value })} style={{ ...inputStyle, flex: 1 }} />
+                                            {activeSection.content && (
+                                                isValidYouTubeUrl(activeSection.content)
+                                                    ? <CheckCircle size={20} color="#00d4aa" />
+                                                    : <AlertCircle size={20} color="#ef4444" />
+                                            )}
+                                        </div>
+                                        {activeSection.content && !isValidYouTubeUrl(activeSection.content) && (
+                                            <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '4px' }}>
+                                                Link YouTube không hợp lệ. Hỗ trợ: youtube.com/watch?v=..., youtu.be/..., youtube.com/shorts/..., youtube.com/live/...
+                                            </p>
+                                        )}
                                     </div>
-                                    {getYouTubeEmbed(activeSection.content) && (
+                                    {isValidYouTubeUrl(activeSection.content) && (
                                         <div style={{ width: '100%', aspectRatio: '16/9', background: '#000', borderRadius: '16px', overflow: 'hidden' }}>
                                             <iframe src={getYouTubeEmbed(activeSection.content)} style={{ width: '100%', height: '100%', border: 'none' }} allowFullScreen />
                                         </div>
