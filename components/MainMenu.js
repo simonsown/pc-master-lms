@@ -118,7 +118,7 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
                         <h1 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.03em' }}>
-                            PC Master Builder
+                            PC Master Builder for Education
                         </h1>
                         <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '2px 0 0' }}>
                             Mô phỏng lắp ráp PC 2D tích hợp AI
