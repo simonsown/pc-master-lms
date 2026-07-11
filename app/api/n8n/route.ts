@@ -12,6 +12,7 @@ export async function GET() {
     { path: '/api/n8n/webhook/xp', method: 'POST', description: 'Award XP to users' },
     { path: '/api/n8n/webhook/notification', method: 'POST', description: 'Create bulk notifications' },
     { path: '/api/n8n/webhook/lesson-content', method: 'POST', description: 'Generate lesson content with AI' },
+    { path: '/api/n8n/webhook/career-suggest', method: 'POST', description: 'Career build AI suggestions via n8n' },
     { path: '/api/n8n/triggers/lesson-complete', method: 'POST', description: 'Trigger on lesson completion' },
     { path: '/api/n8n/triggers/quiz-submit', method: 'POST', description: 'Trigger on quiz submission' },
   ]

@@ -24,6 +24,7 @@ interface BuildItem {
 interface BuildResult {
   career: string; explanation: string; build: BuildItem[]; totalPrice: number; tips: string;
   isMac?: boolean; model?: string; macBuild?: { model?: string; build: BuildItem[]; totalPrice: number; tips: string; explanation: string };
+  n8nEnriched?: boolean; n8nTips?: string;
 }
 
 const TYPE_COLORS: Record<string, string> = {
@@ -259,18 +260,28 @@ export default function CareerBuildPage() {
         {/* Result */}
         {result && animPhase > 0 && (
           <div ref={resultRef}>
-            {/* Career title */}
+            {/* Career title + n8n badge */}
             <div style={{
               textAlign: 'center', marginBottom: '20px',
               animation: 'fadeSlideUp 0.5s ease-out',
             }}>
               <div style={{
-                display: 'inline-block', padding: '8px 24px', borderRadius: '30px',
+                display: 'inline-flex', alignItems: 'center', gap: '10px',
+                padding: '8px 24px', borderRadius: '30px',
                 background: 'linear-gradient(135deg, rgba(0,212,170,0.15), rgba(0,163,255,0.15))',
                 border: '1px solid rgba(0,212,170,0.3)',
                 fontSize: '20px', fontWeight: 800, color: '#fff',
               }}>
                 {result.career}
+                {result.n8nEnriched && (
+                  <span style={{
+                    fontSize: '10px', fontWeight: 700, padding: '2px 8px',
+                    borderRadius: '10px', background: 'linear-gradient(135deg, #00d4aa, #6366f1)',
+                    color: '#fff', letterSpacing: '0.5px',
+                  }}>
+                    n8n
+                  </span>
+                )}
               </div>
             </div>
 
@@ -362,12 +373,24 @@ export default function CareerBuildPage() {
                       </div>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
-                    {item.price > 0 && (
-                      <div style={{ fontSize: '15px', fontWeight: 800, color: replaced ? 'var(--brand-primary)' : 'var(--text-primary)' }}>
-                        {replaced ? `${formatPrice(replaced.price)}` : formatPrice(item.price)}
-                      </div>
-                    )}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      {item.price > 0 && (
+                        <div style={{ fontSize: '15px', fontWeight: 800, color: replaced ? 'var(--brand-primary)' : 'var(--text-primary)' }}>
+                          {replaced ? `${formatPrice(replaced.price)}` : formatPrice(item.price)}
+                        </div>
+                      )}
+                      {(item as any).shop && result.n8nEnriched && (
+                        <a href={(item as any).link || '#'} target="_blank" rel="noopener noreferrer"
+                          style={{
+                            fontSize: '9px', fontWeight: 600, padding: '1px 6px', borderRadius: '4px',
+                            background: 'rgba(0,212,170,0.1)', color: '#00d4aa',
+                            textDecoration: 'none', whiteSpace: 'nowrap',
+                          }}>
+                          {(item as any).shop}
+                        </a>
+                      )}
+                    </div>
                     <button onClick={() => substitutePart(item)}
                       style={{
                         padding: '5px 10px', borderRadius: '6px', border: '1px solid rgba(0,212,170,0.3)',
@@ -410,6 +433,15 @@ export default function CareerBuildPage() {
                     fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.6',
                   }}>
                     <strong style={{ color: '#facc15' }}>Mẹo:</strong> {activeTips}
+                  </div>
+                )}
+                {result.n8nTips && (
+                  <div style={{
+                    padding: '10px 14px', borderRadius: '10px', marginBottom: '16px',
+                    background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)',
+                    fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.6',
+                  }}>
+                    <strong style={{ color: '#818cf8' }}>n8n:</strong> {result.n8nTips}
                   </div>
                 )}
 

@@ -349,13 +349,19 @@ export async function POST(request: NextRequest) {
       ...item, image: getComponentImage(item.type),
     }));
 
-    const response: any = { ...result, build: enrich(result.build) };
+    let response: any = { ...result, build: enrich(result.build) };
 
     if (macResult) {
       response.macBuild = macResult.isMac ? {
         ...macResult,
         build: enrich(macResult.build || []),
       } : null;
+    }
+
+    // Try n8n enrichment — if unavailable, response stays unchanged
+    const enriched = await enrichWithN8n(response, careerName, customCondition)
+    if (enriched.n8nEnriched) {
+      response = enriched
     }
 
     return NextResponse.json(response);
@@ -416,4 +422,50 @@ function getComponentImage(type: string): string {
     Mainboard: '/images/mainboard_front.png',
   };
   return map[type] || '/images/mainboard_front.png';
+}
+
+async function enrichWithN8n(result: any, careerName: string, condition?: string): Promise<any> {
+  const n8nBase = process.env.N8N_WEBHOOK_BASE || ''
+  const secret = process.env.N8N_WEBHOOK_SECRET || ''
+  if (!n8nBase || !secret) return { ...result, n8nEnriched: false }
+
+  try {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 5000)
+
+    const res = await fetch(`${n8nBase}/webhook/career-suggest`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${secret}`,
+      },
+      body: JSON.stringify({ career: careerName, customCondition: condition }),
+      signal: controller.signal,
+    })
+    clearTimeout(timeout)
+
+    if (!res.ok) return { ...result, n8nEnriched: false }
+
+    const n8nData = await res.json()
+    if (n8nData.error) return { ...result, n8nEnriched: false }
+
+    const enrichedBuild = result.build.map((item: any) => {
+      const n8nItem = (n8nData.build || []).find((n: any) => n.type === item.type)
+      return {
+        ...item,
+        link: n8nItem?.link || getGearVnLink(item),
+        shop: n8nItem?.shop || 'gearvn',
+        n8nPrice: n8nItem?.price || null,
+      }
+    })
+
+    return {
+      ...result,
+      build: enrichedBuild,
+      n8nEnriched: true,
+      n8nTips: n8nData.tips || null,
+    }
+  } catch {
+    return { ...result, n8nEnriched: false }
+  }
 }

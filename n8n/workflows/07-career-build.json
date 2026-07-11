@@ -1,0 +1,177 @@
+{
+  "name": "07 - Career Build AI Suggestion",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/n8n/webhook/career-suggest",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook: Career Build Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "n8n-career-suggest"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.N8N_WEBHOOK_BASE }}/webhook/career-suggest",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer {{ $env.N8N_WEBHOOK_SECRET }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "jsonBody": "={\n  \"career\": \"{{ $json.body.career }}\",\n  \"customDream\": \"{{ $json.body.customDream }}\",\n  \"customCondition\": \"{{ $json.body.customCondition }}\"\n}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "call-career-api",
+      "name": "Call Career Suggest API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ 'https://gearvn.com/search?q=' + encodeURIComponent($json.career) }}",
+        "options": {}
+      },
+      "id": "fetch-shop-prices",
+      "name": "Fetch GearVN Prices",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [650, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.career }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "check-result",
+      "name": "Check Result",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 400]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "career_builds",
+        "dataToSend": "defineBelow",
+        "fieldsToSend": {
+          "values": [
+            { "fieldName": "career", "fieldValue": "={{ $json.career }}" },
+            { "fieldName": "total_price", "fieldValue": "={{ $json.totalPrice }}" },
+            { "fieldName": "explanation", "fieldValue": "={{ $json.explanation }}" },
+            { "fieldName": "tips", "fieldValue": "={{ $json.tips }}" },
+            { "fieldName": "build_items", "fieldValue": "={{ $json.build }}" },
+            { "fieldName": "created_at", "fieldValue": "={{ new Date().toISOString() }}" }
+          ]
+        },
+        "supabaseUrl": "={{ $env.SUPABASE_URL }}",
+        "supabaseServiceKey": "={{ $env.SUPABASE_SERVICE_KEY }}"
+      },
+      "id": "save-to-supabase",
+      "name": "Save to Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [850, 400]
+    },
+    {
+      "parameters": {
+        "operation": "respondToWebhook",
+        "responseCode": 200,
+        "respondMode": "lastNode",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    }
+  ],
+  "connections": {
+    "Webhook: Career Build Request": {
+      "main": [
+        [
+          {
+            "node": "Call Career Suggest API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Career Suggest API": {
+      "main": [
+        [
+          {
+            "node": "Check Result",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch GearVN Prices",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Result": {
+      "main": [
+        [
+          {
+            "node": "Save to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Save to Supabase": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch GearVN Prices": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "tags": [],
+  "active": false,
+  "settings": {},
+  "staticData": null
+}
