@@ -18,19 +18,6 @@ const SKILLS = [
     prerequisites: [],
   },
   {
-    id: 'diagnosis',
-    title: 'Diagnosis Mode',
-    titleVn: 'Chẩn đoán lỗi',
-    desc: 'Phát hiện và sửa lỗi phần cứng máy tính',
-    descEn: 'Detect and fix hardware issues',
-    icon: '\uD83D\uDD0D',
-    route: '/builder/diagnosis',
-    category: 'troubleshooting',
-    color: '#3742FA',
-    xp: 200,
-    prerequisites: ['scenarios'],
-  },
-  {
     id: 'os-install',
     title: 'OS Installation',
     titleVn: 'Cài đặt HĐH',
@@ -41,7 +28,7 @@ const SKILLS = [
     category: 'software',
     color: '#00CEC9',
     xp: 120,
-    prerequisites: ['diagnosis'],
+    prerequisites: ['scenarios'],
   },
   {
     id: 'thermal',
@@ -74,7 +61,7 @@ const SKILLS = [
 const CATEGORIES = [
   { id: 'planning', label: 'Lập kế hoạch', labelEn: 'Planning', color: '#22c55e' },
   { id: 'assembly', label: 'Lắp ráp', labelEn: 'Assembly', color: '#FFD700' },
-  { id: 'troubleshooting', label: 'Chẩn đoán', labelEn: 'Troubleshooting', color: '#3742FA' },
+
   { id: 'software', label: 'Phần mềm', labelEn: 'Software', color: '#00CEC9' },
   { id: 'optimization', label: 'Tối ưu', labelEn: 'Optimization', color: '#FF6348' },
   { id: 'compatibility', label: 'Tương thích', labelEn: 'Compatibility', color: '#A29BFE' },

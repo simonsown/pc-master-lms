@@ -3,29 +3,49 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Phone, Mail, MapPin, ExternalLink, ShieldCheck, Heart, Loader2, Sparkles, BookOpen, Award, Users, Target, Quote, ChevronDown, Cpu } from 'lucide-react';
+import { ArrowLeft, Phone, Mail, MapPin, ExternalLink, ShieldCheck, Heart, Loader2, Sparkles, BookOpen, Award, Users, Target, Quote, ChevronDown, ChevronUp, Cpu, Minimize2, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 function CollapsibleGroup({ title, children, defaultOpen = false }) {
     const [open, setOpen] = useState(defaultOpen);
     return (
-        <div style={{ marginBottom: '8px' }}>
+        <div style={{ marginBottom: '8px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
             <button onClick={() => setOpen(!open)} style={{
                 display: 'flex', alignItems: 'center', gap: '8px', width: '100%',
-                padding: '10px 16px', borderRadius: '10px',
-                background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)',
+                padding: '10px 16px',
+                background: 'rgba(255,255,255,0.02)',
                 color: 'rgba(255,255,255,0.6)', cursor: 'pointer',
                 fontSize: '12px', fontWeight: 700, letterSpacing: '0.5px',
                 fontFamily: 'inherit', textTransform: 'uppercase',
-            }}>
+                border: 'none', transition: 'background 0.15s',
+            }}
+                onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
+            >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                </div>
                 <span style={{ flex: 1, textAlign: 'left' }}>{title}</span>
-                <ChevronDown size={14} style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+                <div style={{ display: 'flex', gap: '6px' }} onClick={e => e.stopPropagation()}>
+                    <span onClick={() => setOpen(false)} title="Thu nhỏ"
+                        style={{ padding: '2px 6px', borderRadius: '4px', fontSize: '11px', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}
+                        onMouseOver={e => e.currentTarget.style.color = 'rgba(255,255,255,0.8)'}
+                        onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+                    >
+                        <Minimize2 size={12} />
+                    </span>
+                </div>
             </button>
-            {open && (
+            <div style={{
+                maxHeight: open ? '500px' : '0px',
+                opacity: open ? 1 : 0,
+                overflow: 'hidden',
+                transition: 'max-height 0.35s ease, opacity 0.25s ease',
+            }}>
                 <div style={{ padding: '16px 16px 8px' }}>
                     {children}
                 </div>
-            )}
+            </div>
         </div>
     );
 }
@@ -460,21 +480,32 @@ export default function AboutPage() {
             <footer style={{ padding: '60px 24px 60px', background: '#050507', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                 <div style={{ maxWidth: '900px', margin: '0 auto' }}>
                     <CollapsibleGroup title="Tác giả & Giáo viên hướng dẫn" defaultOpen={false}>
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', flexWrap: 'wrap' }}>
-                            <div style={{ textAlign: 'center', minWidth: '160px' }}>
-                                <p style={{ fontSize: '13px', fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>Nguyễn Phúc Khánh Sơn</p>
-                                <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', margin: 0 }}>Developer & Designer</p>
-                            </div>
-                            <div style={{ width: '1px', background: 'rgba(255,255,255,0.08)', alignSelf: 'stretch' }} />
-                            <div style={{ textAlign: 'center', minWidth: '160px' }}>
-                                <p style={{ fontSize: '13px', fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>Trần Minh Phụng</p>
-                                <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', margin: 0 }}>GV hướng dẫn</p>
-                            </div>
-                            <div style={{ width: '1px', background: 'rgba(255,255,255,0.08)', alignSelf: 'stretch' }} />
-                            <div style={{ textAlign: 'center', minWidth: '160px' }}>
-                                <p style={{ fontSize: '13px', fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>Đoàn Thụy Kim Phượng</p>
-                                <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', margin: 0 }}>GV phụ trách</p>
-                            </div>
+                        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                            {[
+                                { name: 'Nguyễn Phúc Khánh Sơn', role: 'Developer & Designer' },
+                                { name: 'Trần Minh Phụng', role: 'GV hướng dẫn' },
+                                { name: 'Đoàn Thụy Kim Phượng', role: 'GV phụ trách' },
+                            ].map((p, i) => (
+                                <div key={i} style={{
+                                    display: 'flex', alignItems: 'center', gap: '10px',
+                                    padding: '8px 16px', borderRadius: '8px',
+                                    background: 'rgba(255,255,255,0.03)',
+                                    border: '1px solid rgba(255,255,255,0.06)',
+                                }}>
+                                    <div style={{
+                                        width: '32px', height: '32px', borderRadius: '50%',
+                                        background: 'linear-gradient(135deg, #6366f1, #00d4aa)',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        color: '#fff', fontSize: '13px', fontWeight: 700, flexShrink: 0,
+                                    }}>
+                                        {p.name.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <p style={{ fontSize: '13px', fontWeight: 700, color: '#fff', margin: 0, whiteSpace: 'nowrap' }}>{p.name}</p>
+                                        <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: 0, whiteSpace: 'nowrap' }}>{p.role}</p>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </CollapsibleGroup>
                     <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>

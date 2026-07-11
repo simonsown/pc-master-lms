@@ -175,15 +175,13 @@ export async function GET(req: NextRequest) {
 
   const pq = supabase.from('products').select('*', { count: 'exact', head: true })
   const sq = supabase.from('saved_builds').select('*', { count: 'exact', head: true })
-  const dq = supabase.from('diagnosis_scenarios').select('*', { count: 'exact', head: true })
   const tq = supabase.from('thermal_profiles').select('*', { count: 'exact', head: true })
 
-  const [products, savedBuilds, diagnosis, thermal] = await Promise.all([pq, sq, dq, tq])
+  const [products, savedBuilds, thermal] = await Promise.all([pq, sq, tq])
 
   return NextResponse.json({
     products: { exists: !products.error, count: products.count || 0 },
     savedBuilds: { exists: !savedBuilds.error, count: savedBuilds.count || 0 },
-    diagnosis: { exists: !diagnosis.error, count: diagnosis.count || 0 },
     thermal: { exists: !thermal.error, count: thermal.count || 0 },
     pgConnection: 'Needs database password (not service_role_key)',
     note: 'Run SQL manually in Supabase Dashboard SQL Editor, or provide a Supabase PAT for auto-migration',
