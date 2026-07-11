@@ -316,7 +316,7 @@ async function callGroq(careerName: string, customCondition?: string): Promise<a
 
 export async function POST(request: NextRequest) {
   try {
-    const { career, customDream, customCondition, preferMac } = await request.json();
+    const { career, customDream, customCondition, preferMac, n8n_demo } = await request.json();
     let careerName = career || customDream;
     if (!careerName) return NextResponse.json({ error: 'Vui lòng nhập ước mơ nghề nghiệp' }, { status: 400 });
 
@@ -359,7 +359,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Try n8n enrichment — if unavailable, response stays unchanged
-    const enriched = await enrichWithN8n(response, careerName, customCondition)
+    const enriched = await enrichWithN8n(response, careerName, customCondition, n8n_demo === true || n8n_demo === '1')
     if (enriched.n8nEnriched) {
       response = enriched
     }
@@ -424,9 +424,26 @@ function getComponentImage(type: string): string {
   return map[type] || '/images/mainboard_front.png';
 }
 
-async function enrichWithN8n(result: any, careerName: string, condition?: string): Promise<any> {
+async function enrichWithN8n(result: any, careerName: string, condition?: string, demoMode?: boolean): Promise<any> {
   const n8nBase = process.env.N8N_WEBHOOK_BASE || ''
   const secret = process.env.N8N_WEBHOOK_SECRET || ''
+
+  // Demo mode: fake enriched data để demo cho BGK, không cần n8n thật
+  if (demoMode) {
+    const demoBuild = result.build.map((item: any) => ({
+      ...item,
+      link: getGearVnLink(item),
+      shop: 'gearvn',
+      n8nPrice: item.price ? Math.round(item.price * (0.95 + Math.random() * 0.1)) : null,
+    }))
+    return {
+      ...result,
+      build: demoBuild,
+      n8nEnriched: true,
+      n8nTips: `Giá cập nhật từ GearVN — các linh kiện đang có sẵn hàng. Liên kết mua hàng được đồng bộ qua n8n automation.`,
+    }
+  }
+
   if (!n8nBase || !secret) return { ...result, n8nEnriched: false }
 
   try {

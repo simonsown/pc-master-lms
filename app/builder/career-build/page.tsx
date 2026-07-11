@@ -82,6 +82,9 @@ export default function CareerBuildPage() {
     setShowMac(false);
 
     try {
+      const searchParams = new URLSearchParams(window.location.search)
+      const n8nDemo = searchParams.get('n8n_demo') === '1'
+
       const res = await fetch('/api/career-suggest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -90,6 +93,7 @@ export default function CareerBuildPage() {
           customDream,
           customCondition: customCondition || undefined,
           preferMac: career === 'mac',
+          n8n_demo: n8nDemo || undefined,
         }),
       });
       const data = await res.json();
