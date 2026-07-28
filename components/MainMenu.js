@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Cpu, ShoppingCart, Users, ArrowRight, Info, LogIn, LogOut, User, Award, Swords, Star, Trophy, GraduationCap, Zap, ShieldCheck, Bot, Wrench, Monitor, AlertTriangle, Box, Bell } from 'lucide-react';
+import { BookOpen, Cpu, ShoppingCart, Users, ArrowRight, Info, LogIn, LogOut, User, Award, Swords, Star, Trophy, GraduationCap, Zap, ShieldCheck, Bot, Wrench, Monitor, AlertTriangle, Box, Bell, BookMarked } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -271,26 +271,53 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                 </div>
             </motion.div>
 
-            {/* PRO LEARNING SYSTEM + KHOÁ HỌC */}
+            {/* HỌC TẬP & BÀI GIẢNG — mở trong builder */}
             <motion.div {...fadeUp(0.2)} style={{ marginBottom: '24px' }}>
                 <div style={{
-                    fontSize: '11px', fontWeight: 700, color: 'var(--accent-amber)',
+                    fontSize: '11px', fontWeight: 700, color: 'var(--brand-primary)',
                     textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '12px',
                     display: 'flex', alignItems: 'center', gap: '6px'
                 }}>
-                    <Zap size={13} /> Pro Learning System
+                    <BookMarked size={13} /> Học tập & Bài giảng
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: '10px' }}>
+                <motion.button
+                    onClick={() => onStart('learning_hub')}
+                    whileHover={{ y: -2, boxShadow: '0 4px 16px rgba(0,212,170,0.15)' }}
+                    style={{
+                        display: 'flex', alignItems: 'center', gap: '16px',
+                        padding: '18px 20px', borderRadius: '12px', width: '100%',
+                        border: '1px solid rgba(0,212,170,0.25)',
+                        background: 'linear-gradient(135deg, rgba(0,212,170,0.06) 0%, rgba(99,102,241,0.06) 100%)',
+                        cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
+                        transition: 'border-color 0.2s, box-shadow 0.2s',
+                        marginBottom: '10px',
+                    }}
+                    onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--brand-primary)'; }}
+                    onMouseOut={e => { e.currentTarget.style.borderColor = 'rgba(0,212,170,0.25)'; }}
+                >
+                    <div style={{
+                        display: 'flex', gap: '8px', fontSize: '22px', flexShrink: 0
+                    }}>📚🎬📑</div>
+                    <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>
+                            Khóa học · Video 3D · Slide bài học
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                            Miễn phí: 3 bài đầu · 2 video · 1 slide — Nâng cấp từ 55.000đ/tháng
+                        </div>
+                    </div>
+                    <ArrowRight size={16} style={{ color: 'var(--brand-primary)', flexShrink: 0 }} />
+                </motion.button>
+
+                {/* Other Pro tools */}
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: '10px' }}>
                     {[
-                        { id: '/courses', title: 'Khóa Học', desc: 'Giáo trình kỹ thuật phần cứng PC', Icon: BookOpen, color: '#f59e0b' },
-                        { id: '/video-courses', title: 'Video Bài Giảng', desc: '19 Video 3D Animation linh kiện PC', Icon: Zap, color: '#00d4aa' },
-                        { id: '/builder/slides', title: 'Slide Bài Học 3D', desc: 'Slide tổng quan phần cứng & IC3 Spark', Icon: GraduationCap, color: '#6366f1' },
                         { id: '/builder/os-install', title: 'Cài Windows 11', desc: 'Mô phỏng cài đặt OS thực tế', Icon: Monitor, color: '#3b82f6' },
-                        { id: '/builder/showroom', title: 'PC Builder 3D VR', desc: 'Khám phá linh kiện 3D với Hand & Face Tracking', Icon: Cpu, color: '#10b981' },
-                        { id: '/builder/common-mistakes', title: 'Lỗi Thường Gặp', desc: '8 lỗi build PC phổ biến kèm video', Icon: AlertTriangle, color: '#ef4444' },
-                        { id: '/builder/mac-check', title: 'Gợi Ý Máy Tính', desc: 'Tìm PC phù hợp với nhu cầu & ngân sách', Icon: Monitor, color: '#8b5cf6' },
-                        { id: '/builder/career-build', title: 'Ước Mơ & PC', desc: 'Build PC theo nghề nghiệp tương lai', Icon: Star, color: '#facc15' },
-                        { id: '/builder/3d-components', title: 'Kho Linh Kiện 3D', desc: 'Xem linh kiện dưới góc nhìn 3 chiều', Icon: Box, color: '#a855f7' },
+                        { id: '/builder/showroom', title: 'PC Builder 3D VR', desc: 'Hand & Face Tracking 3D', Icon: Cpu, color: '#10b981' },
+                        { id: '/builder/common-mistakes', title: 'Lỗi Thường Gặp', desc: '8 lỗi build PC phổ biến', Icon: AlertTriangle, color: '#ef4444' },
+                        { id: '/builder/mac-check', title: 'Gợi Ý Máy Tính', desc: 'Tìm PC theo nhu cầu & ngân sách', Icon: Monitor, color: '#8b5cf6' },
+                        { id: '/builder/career-build', title: 'Ước Mơ & PC', desc: 'Build PC theo nghề nghiệp', Icon: Star, color: '#facc15' },
+                        { id: '/builder/3d-components', title: 'Kho Linh Kiện 3D', desc: 'Xem linh kiện 3 chiều', Icon: Box, color: '#a855f7' },
                     ].map((mode) => (
                         <motion.a
                             key={mode.id}

@@ -23,6 +23,7 @@ import LoadingScreen from '../../components/LoadingScreen';
 import ExamsList from '../../components/ExamsList';
 import LoginModal from '../../components/auth/LoginModal';
 import StudentDashboardContent from '../../components/StudentDashboardContent';
+import LearningHub from '../../components/LearningHub';
 import { GURU_MESSAGES } from '../../utils/i18nData';
 import { useGuru } from '@/lib/guru-state';
 import { withTracking } from '@/lib/tracking';
@@ -304,6 +305,7 @@ function Home(props) {
         case 'multiplayer': return lang === 'en' ? '2-Player Versus' : '2 Người Chơi';
         case 'exams': return lang === 'en' ? 'Exams' : 'Kỳ Thi';
 
+        case 'learning_hub': return lang === 'en' ? 'Learning Hub' : 'Học Tập & Bài Giảng';
         case 'components': return lang === 'en' ? 'Component Library' : 'Tủ Linh Kiện';
         default: return 'PC Master Builder';
     }
@@ -381,8 +383,8 @@ function Home(props) {
             <div style={{
                 display: 'flex', flexDirection: 'column', width: '100%',
                 height: 'calc(100vh - 60px)',
-                padding: ['course','market'].includes(appMode) ? '0' : '24px',
-                overflow: 'hidden'
+                padding: ['course','market','learning_hub'].includes(appMode) ? '0 16px 24px' : '24px',
+                overflow: 'auto'
             }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                   <button
@@ -409,8 +411,8 @@ function Home(props) {
                 </div>
 
                 {/* Main View Port */}
-                <div style={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, alignItems: 'center', justifyContent: ['course','market'].includes(appMode) ? 'flex-start' : 'center', overflow: 'auto' }}>
-                    <div style={{ width: '100%', maxWidth: ['course','market'].includes(appMode) ? '100%' : '1400px', position: 'relative', height: ['course','market'].includes(appMode) ? '100%' : 'auto', padding: ['course','market'].includes(appMode) ? '0' : '0' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, alignItems: 'center', justifyContent: ['course','market','learning_hub'].includes(appMode) ? 'flex-start' : 'center', overflow: 'auto' }}>
+                    <div style={{ width: '100%', maxWidth: ['course','market','learning_hub'].includes(appMode) ? '100%' : '1400px', position: 'relative', height: ['course','market'].includes(appMode) ? '100%' : 'auto', padding: ['course','market','learning_hub'].includes(appMode) ? '0' : '0' }}>
                         {appMode === 'assembly' ? (
                             <div style={{ display: 'flex', gap: '16px', width: '100%', height: '100%' }}>
                                 <PartPickerSidebar
@@ -610,6 +612,8 @@ function Home(props) {
                                     </div>
                                 </div>
                             </div>
+                        ) : appMode === 'learning_hub' ? (
+                            <LearningHub lang={lang} onBack={() => setAppMode('menu')} />
                         ) : appMode === 'exams' ? (
                             <ExamsList lang={lang} onBack={() => setAppMode('menu')} />
                         ) : appMode === 'components' ? (

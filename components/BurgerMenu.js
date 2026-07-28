@@ -158,23 +158,14 @@ const BurgerMenu = ({
                             {lang === 'en' ? 'Explore' : 'Khám phá'}
                         </div>
                         
-                        <Link
-                            href="/courses"
-                            style={{ ...navItemStyle('courses', false), textDecoration: 'none' }}
-                            onMouseEnter={() => setHoveredBtn('courses')} onMouseLeave={() => setHoveredBtn(null)}
+                        <button
+                            onMouseEnter={() => setHoveredBtn('learning_hub')} onMouseLeave={() => setHoveredBtn(null)}
+                            onClick={() => { setAppMode('learning_hub'); setIsMobileOpen(false); }}
+                            style={navItemStyle('learning_hub', appMode === 'learning_hub')}
                         >
-                            <BookOpen style={iconStyle('courses', false)} />
-                            {lang === 'en' ? 'Hardware Course' : 'Giáo Trình Khóa Học'}
-                        </Link>
-
-                        <Link
-                            href="/video-courses"
-                            style={{ ...navItemStyle('video_courses', false), textDecoration: 'none' }}
-                            onMouseEnter={() => setHoveredBtn('video_courses')} onMouseLeave={() => setHoveredBtn(null)}
-                        >
-                            <Sparkles style={iconStyle('video_courses', false)} />
-                            {lang === 'en' ? 'Video Library' : 'Video Bài Giảng'}
-                        </Link>
+                            <BookMarked style={iconStyle('learning_hub', appMode === 'learning_hub')} />
+                            {lang === 'en' ? 'Learning & Lectures' : 'Học Tập & Bài Giảng'}
+                        </button>
                         
                         <button
                             onMouseEnter={() => setHoveredBtn('learning')} onMouseLeave={() => setHoveredBtn(null)}
