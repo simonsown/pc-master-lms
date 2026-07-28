@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRealtime } from '@/lib/realtime-provider'
 import { createBrowserClient } from '@supabase/ssr'
-import { Zap, ChevronRight, Clock, Award, Flame, CheckCircle, Trophy, Star, ChevronDown, ChevronUp } from 'lucide-react'
+import { Zap, ChevronRight, Clock, Award, Flame, Trophy, ChevronDown, ChevronUp } from 'lucide-react'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,23 +16,21 @@ const STATUS_ICONS: Record<string, string> = {
   exam_completed: '📝',
   quiz_completed: '🧠',
   builder_session: '🛠️',
-  quest_completed: '📋',
   daily_reward: '🎁',
 }
 
 export default function LevelPage() {
   const { state, refetch } = useRealtime()
-  const [activeTab, setActiveTab] = useState<'level' | 'quests' | 'titles' | 'history'>('level')
+  const [activeTab, setActiveTab] = useState<'level' | 'titles' | 'history'>('level')
   const [expandedLevel, setExpandedLevel] = useState<number | null>(null)
 
   const {
     level, levelTitle, levelIcon, levelColor, levelProgress, xp, xpToNext, xpInLevel,
-    streak, studyMinutes, levelDefs, quests, titles, xpHistory, allQuests,
+    streak, studyMinutes, levelDefs, titles, xpHistory,
   } = state
 
   const tabItems = [
     { key: 'level' as const, label: 'Cấp Độ', icon: <Zap size={16} /> },
-    { key: 'quests' as const, label: 'Nhiệm Vụ', icon: <CheckCircle size={16} /> },
     { key: 'titles' as const, label: 'Danh Hiệu', icon: <Award size={16} /> },
     { key: 'history' as const, label: 'Lịch Sử XP', icon: <Clock size={16} /> },
   ]
@@ -218,97 +216,6 @@ export default function LevelPage() {
             </motion.div>
           )}
 
-          {activeTab === 'quests' && (
-            <motion.div key="quests" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-              <div className="lms-card" style={{ padding: '24px' }}>
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>Nhiệm Vụ Hằng Ngày</h2>
-                    <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Hoàn thành nhiệm vụ để nhận XP và danh hiệu</p>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
-                    <Flame size={16} style={{ color: '#f59e0b' }} />
-                    <span className="font-bold" style={{ color: 'var(--text-primary)' }}>{streak}</span> ngày liên tiếp
-                  </div>
-                </div>
-
-                {allQuests.length === 0 ? (
-                  <div className="text-center py-12">
-                    <CheckCircle size={40} className="mx-auto mb-3" style={{ color: 'var(--text-muted)', opacity: 0.3 }} />
-                    <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Chưa có nhiệm vụ nào. Quay lại sau!</p>
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {allQuests.map((quest) => {
-                      const userQuest = quests.find(q => q.quest_id === quest.id)
-                      const completed = userQuest?.is_completed || false
-                      const progress = userQuest?.progress || 0
-                      return (
-                        <div
-                          key={quest.id}
-                          className="flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all"
-                          style={{
-                            background: completed ? 'rgba(8,158,96,0.08)' : 'var(--bg-elevated)',
-                            border: `1px solid ${completed ? 'rgba(8,158,96,0.2)' : 'var(--border-default)'}`,
-                            opacity: completed ? 0.7 : 1,
-                          }}
-                        >
-                          <div className="flex items-center justify-center w-10 h-10 rounded-lg text-lg" style={{
-                            background: completed ? 'rgba(8,158,96,0.15)' : 'var(--bg-base)',
-                          }}>
-                            {completed ? '✅' : (quest.icon || '📋')}
-                          </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div className="text-sm font-bold" style={{ color: completed ? 'var(--brand-primary)' : 'var(--text-primary)' }}>
-                              {quest.title}
-                              {completed && <span className="ml-2 text-xs">✓ Hoàn thành</span>}
-                            </div>
-                            <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{quest.description}</div>
-                            <div className="flex items-center gap-2 mt-1.5">
-                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{
-                                background: quest.difficulty === 'hard' ? 'rgba(239,68,68,0.15)' : quest.difficulty === 'medium' ? 'rgba(245,158,11,0.15)' : 'rgba(8,158,96,0.15)',
-                                color: quest.difficulty === 'hard' ? '#EF4444' : quest.difficulty === 'medium' ? '#F59E0B' : '#10B981',
-                              }}>
-                                {quest.difficulty === 'hard' ? 'Khó' : quest.difficulty === 'medium' ? 'TB' : 'Dễ'}
-                              </span>
-                              <span className="text-[10px] font-bold" style={{ color: 'var(--brand-primary)' }}>+{quest.xp_reward} XP</span>
-                            </div>
-                          </div>
-                          <div className="text-right flex-shrink-0">
-                            {!completed && quest.requirement_value > 0 && (
-                              <div className="text-xs font-bold" style={{ color: 'var(--text-muted)' }}>
-                                {progress} / {quest.requirement_value}
-                              </div>
-                            )}
-                            <Star size={16} style={{ color: completed ? 'var(--brand-primary)' : 'var(--text-muted)', opacity: completed ? 1 : 0.3 }} />
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
-
-              {/* Completed Quests */}
-              {quests.filter(q => q.is_completed).length > 0 && (
-                <div className="lms-card mt-4" style={{ padding: '24px' }}>
-                  <h3 className="text-sm font-bold mb-3" style={{ color: 'var(--text-muted)' }}>
-                    Nhiệm Vụ Đã Hoàn Thành ({quests.filter(q => q.is_completed).length})
-                  </h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    {quests.filter(q => q.is_completed).slice(0, 5).map(uq => (
-                      <div key={uq.id} className="flex items-center gap-3 px-3 py-2 rounded-lg" style={{ background: 'var(--bg-elevated)' }}>
-                        <span>✅</span>
-                        <span className="text-sm flex-1" style={{ color: 'var(--text-muted)' }}>{uq.daily_quests?.title || 'Nhiệm vụ'}</span>
-                        <span className="text-xs" style={{ color: 'var(--brand-primary)' }}>+{uq.xp_earned || uq.daily_quests?.xp_reward || 0} XP</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </motion.div>
-          )}
-
           {activeTab === 'titles' && (
             <motion.div key="titles" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
               <div className="lms-card" style={{ padding: '24px' }}>
@@ -324,7 +231,7 @@ export default function LevelPage() {
                     { id: 'speed_demon', title: 'Tốc Độ', desc: 'Hoàn thành quiz trong 2 phút', icon: '⚡', xp: 120 },
                     { id: 'scholar', title: 'Học Giả', desc: 'Hoàn thành 10 bài học', icon: '📚', xp: 200 },
                     { id: 'collector', title: 'Nhà Sưu Tập', desc: 'Đạt 5000 XP', icon: '💎', xp: 300 },
-                    { id: 'quest_master', title: 'Vua Nhiệm Vụ', desc: 'Hoàn thành 50 nhiệm vụ ngày', icon: '📋', xp: 250 },
+
                   ].map(t => {
                     const earned = titles.some(ut => ut.title_id === t.id)
                     return (

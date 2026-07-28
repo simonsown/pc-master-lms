@@ -1,0 +1,38 @@
+[
+  {
+    "type": "warning",
+    "message": "An unrecognised element was ignored: v:path"
+  },
+  {
+    "type": "warning",
+    "message": "An unrecognised element was ignored: v:stroke"
+  },
+  {
+    "type": "warning",
+    "message": "An unrecognised element was ignored: v:fill"
+  },
+  {
+    "type": "warning",
+    "message": "An unrecognised element was ignored: v:line"
+  },
+  {
+    "type": "warning",
+    "message": "Unrecognised paragraph style: 'Body Text' (Style ID: BodyText)"
+  },
+  {
+    "type": "warning",
+    "message": "Unrecognised paragraph style: 'Heading 8' (Style ID: Heading8)"
+  },
+  {
+    "type": "warning",
+    "message": "Unrecognised paragraph style: 'List Paragraph' (Style ID: ListParagraph)"
+  },
+  {
+    "type": "warning",
+    "message": "Unrecognised paragraph style: 'Table Paragraph' (Style ID: TableParagraph)"
+  },
+  {
+    "type": "warning",
+    "message": "Unrecognised paragraph style: 'Heading 7' (Style ID: Heading7)"
+  }
+]

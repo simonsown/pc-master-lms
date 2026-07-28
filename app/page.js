@@ -57,7 +57,9 @@ export default function LandingPage() {
             <Link href="/builder" style={{ color: 'var(--text-muted)', textDecoration: 'none', padding: '8px 16px', borderRadius: '8px', transition: 'all 0.2s' }}>
               Thực hành
             </Link>
-
+            <Link href="/learning" style={{ color: 'var(--text-muted)', textDecoration: 'none', padding: '8px 16px', borderRadius: '8px', transition: 'all 0.2s' }}>
+              Học tập
+            </Link>
           </div>
         </div>
 
@@ -108,6 +110,7 @@ export default function LandingPage() {
       }}>
         <Link href="/about" style={{ padding: '12px 16px', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '15px', fontWeight: 500 }} onClick={() => setMobileMenu(false)}>Về chúng tôi</Link>
         <Link href="/builder" style={{ padding: '12px 16px', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '15px', fontWeight: 500 }} onClick={() => setMobileMenu(false)}>Thực hành</Link>
+        <Link href="/learning" style={{ padding: '12px 16px', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '15px', fontWeight: 500 }} onClick={() => setMobileMenu(false)}>Học tập</Link>
       </div>
 
       {/* HERO */}
@@ -168,7 +171,7 @@ export default function LandingPage() {
         <div className="landing-stats-grid" style={{ maxWidth: '1000px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '24px' }}>
           {[
             { num: '50+', label: 'Linh kiện chi tiết', color: 'var(--brand-primary)' },
-            { num: '10+', label: 'Nhiệm vụ thử thách', color: 'var(--brand-primary)' },
+            { num: '7', label: 'Giai đoạn học tập', color: 'var(--brand-primary)' },
             { num: '100%', label: 'Nền tảng Web-based', color: 'var(--accent-blue)' },
             { num: '99%', label: 'Độ chính xác kỹ thuật', color: 'var(--accent-amber)' },
           ].map((s, i) => (
@@ -377,6 +380,7 @@ export default function LandingPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <Link href="/builder" style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Thực hành</Link>
                 <Link href="/about" style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Về chúng tôi</Link>
+                <Link href="/learning" style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Học tập</Link>
               </div>
             </div>
             <div>

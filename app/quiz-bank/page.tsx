@@ -73,23 +73,9 @@ export default function QuizBankPage() {
   const [xpEarned, setXpEarned] = useState(0)
 
   useEffect(() => {
-    checkDailyUnlock()
+    setUnlockedCount(QUIZ_BANK.length)
     loadCompletedQuizzes()
   }, [])
-
-  function checkDailyUnlock() {
-    const stored = localStorage.getItem(UNLOCK_KEY)
-    const today = new Date().toISOString().slice(0, 10)
-    if (stored !== today) {
-      localStorage.setItem(UNLOCK_KEY, today)
-      const baseUnlocked = 2
-      const extra = Math.floor(QUIZ_BANK.length / 2)
-      setUnlockedCount(Math.min(baseUnlocked + extra, QUIZ_BANK.length))
-    } else {
-      const saved = localStorage.getItem('quiz_bank_unlocked_count')
-      setUnlockedCount(saved ? parseInt(saved) : 2)
-    }
-  }
 
   async function loadCompletedQuizzes() {
     try {
@@ -174,7 +160,7 @@ export default function QuizBankPage() {
           </div>
 
           <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: '0 auto 12px', maxWidth: '500px' }}>
-            Mỗi ngày mở khóa {DAILY_UNLOCK} chủ đề · {QUIZ_BANK.length} chủ đề · 10 câu hỏi/chủ đề
+            {QUIZ_BANK.length} chủ đề · 10 câu hỏi/chủ đề · Tất cả đã mở khóa
           </p>
 
           {/* Stats badges */}

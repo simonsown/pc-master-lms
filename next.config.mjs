@@ -20,7 +20,7 @@ const nextConfig = {
       {
         source: '/(.*)',
         headers: [
-          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
@@ -32,9 +32,9 @@ const nextConfig = {
               "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.jsdelivr.net https://accounts.google.com https://static.sketchfab.com blob:",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com https://*.sketchfab.com",
-              "img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in https://*.googleusercontent.com https://img.youtube.com https://*.sketchfab.com https://static.sketchfab.com",
+              "img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in https://*.googleusercontent.com https://img.youtube.com https://*.ytimg.com https://*.sketchfab.com https://static.sketchfab.com",
               "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://accounts.google.com https://storage.googleapis.com https://cdn.jsdelivr.net https://static.sketchfab.com https://*.sketchfab.com blob:",
-              "frame-src 'self' https://accounts.google.com https://www.youtube.com https://sketchfab.com",
+              "frame-src 'self' https://accounts.google.com https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com https://drive.google.com https://docs.google.com https://*.google.com https://sketchfab.com https://*.canva.com https://*.genial.ly",
               "worker-src 'self' blob: https://cdn.jsdelivr.net https://static.sketchfab.com",
               "media-src 'self' blob: mediastream: https://*.sketchfab.com",
             ].join('; '),

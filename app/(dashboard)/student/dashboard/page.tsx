@@ -118,7 +118,8 @@ export default async function StudentDashboardPage() {
     supabase
       .from('lessons')
       .select('id', { count: 'exact', head: true })
-      .eq('is_published', true),
+      .eq('is_published', true)
+      .is('course_id', null),
   ])
 
   if (progressRes.error || quizRes.error || lessonsCountRes.error) {

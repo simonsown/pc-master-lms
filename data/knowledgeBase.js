@@ -65,5 +65,35 @@ export const KNOWLEDGE_BASE = [
     Độ phân giải: Full HD (1080p), 2K (1440p), 4K (2160p).
     Tần số quét (Refresh Rate): Tính bằng Hz (60Hz, 144Hz, 240Hz). Càng cao thì hình ảnh chuyển động càng mượt.
     Tấm nền (Panel Type): IPS (màu đẹp, góc nhìn rộng), VA (độ tương phản cao), TN (tốc độ phản hồi nhanh nhưng màu sắc kém hơn).`
+  },
+  {
+    topic: "SLIDE_CHAPTER1_HARDWARE",
+    content: `Giáo trình Chương 1 - Giới thiệu về Phần cứng máy tính PC:
+    1. Quan hệ Hardware & Software: Hardware là các thiết bị vật lý hữu hình, không tự chạy được nếu thiếu Software và Driver.
+    2. 4 Chức năng cơ bản: Nhập (Input), Xử lý (Processing / CPU), Lưu trữ (Storage / RAM/HDD/SSD), Xuất (Output).
+    3. Phương thức giao tiếp: Ngắt (IRQ), DMA (Direct Memory Access), Driver điều khiển và Nguồn điện PSU.
+    4. Bo mạch hệ thống (Systemboard / Mainboard): Chứa CPU Socket, Chipset (Northbridge/Southbridge), RAM slots (SIMM, DIMM, RIMM), BIOS ROM, CMOS setup chip & pin CMOS, Jumper & DIP switches.
+    5. Bộ nhớ chính vs Phụ: RAM là bộ nhớ chính tạm thời (tự xóa khi tắt máy), HDD/SSD là bộ nhớ phụ cố định.
+    6. Hệ thống Bus & Khe cắm mở rộng: Data Bus truyền dữ liệu, System Clock đồng bộ xung nhịp. Khe cắm PCI, AGP, ISA dùng cắm các Card rời (Sound card, Video card, NIC, Modem).`
+  },
+  {
+    topic: "IC3_SPARK_HARDWARE",
+    content: `Kiến thức chuẩn quốc tế IC3 Spark GS5 - IT Digital Literacy:
+    1. Phân loại máy tính: Máy chủ (Servers: Tower, Rack, Blade), Máy tính bàn (Desktop PC / Mac OS X), Máy tính xách tay (Laptop/Notebook), Chromebooks (Chrome OS & Đám mây), Máy tính bảng (Tablets), Điện thoại thông minh (Smartphones).
+    2. Quy trình hoạt động RAM: Ổ đĩa cứng HDD/SSD ➔ Nạp ứng dụng vào RAM ➔ CPU xử lý ➔ Xuất màn hình.
+    3. Lưu trữ Cục bộ vs Đám mây: Cục bộ (HDD, SSD, USB, Thẻ SD) vs Đám mây (Google Drive, OneDrive, iCloud, Dropbox, NAS).
+    4. Chỉ số kỹ thuật: Dung lượng lưu trữ (Bytes, GB, TB), Tần số xung nhịp CPU (GHz), Tần số quét màn hình (Hz / FPS), Băng thông truyền dữ liệu (Bandwidth).`
+  },
+  {
+    topic: "FPT_POLYTECHNIC_HISTORY",
+    content: `Giáo trình Tổng quan Phần cứng FPT Polytechnic:
+    1. Các thế hệ máy tính:
+       - Thế hệ 0 (1642-1940): Máy tính cơ học Pascaline của Blaise Pascal.
+       - Thế hệ I (1940-1956): Đèn chân không (Máy ENIAC 1943, máy IAS dựa trên kiến trúc Von Neumann).
+       - Thế hệ II (1956-1963): Transistor bóng bán dẫn (Bell Labs 1947 bởi Bardeen, Brattain, Shockley).
+       - Thế hệ III (1964-1971): Mạch tích hợp IC (Integrated Circuit - IBM System/360, IBM 5100).
+       - Thế hệ IV (1971-nay): Mạch tích hợp mật độ siêu cao VLSI (IBM PC 5150 năm 1981 với Intel 8088 & MS-DOS).
+    2. Xu hướng tương lai: Tiến trình sản xuất vi chip nhỏ (22nm, 14nm, 10nm, 7nm), CPU đa nhân (Multi-core), Máy tính lượng tử (Quantum Computing).
+    3. Hệ thống Bus chuẩn Von Neumann: Control Bus (lệnh), Address Bus (địa chỉ ô nhớ), Data Bus (dữ liệu).`
   }
 ];

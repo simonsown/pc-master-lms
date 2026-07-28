@@ -1,122 +1,119 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Loader2 } from 'lucide-react'
+import React, { useState } from 'react'
+import { ExternalLink, FileText, Download, Loader2 } from 'lucide-react'
 
 export default function PdfViewer({ url, title }: { url: string; title?: string }) {
-  const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [scale, setScale] = useState(1)
+  const [hasError, setHasError] = useState(false)
 
   if (!url) return null
 
   const isGoogleDrive = url.includes('drive.google.com')
-  const isPdf = url.toLowerCase().endsWith('.pdf')
+  const driveId = url.match(/\/d\/(.+?)\/(?:view|preview|\/|$)/)?.[1] || url.match(/id=(.+?)(&|$)/)?.[1]
 
   let embedUrl = url
-  if (isGoogleDrive) {
-    const id = url.match(/\/d\/(.+?)\/(?:view|preview)/)?.[1] || url.match(/id=(.+?)(&|$)/)?.[1]
-    if (id) {
-      embedUrl = `https://docs.google.com/gview?url=https://drive.google.com/uc?export=download&id=${id}&embedded=true`
-    }
+  if (isGoogleDrive && driveId) {
+    embedUrl = `https://drive.google.com/file/d/${driveId}/preview`
+  } else if (!isGoogleDrive && (url.endsWith('.pdf') || url.includes('.pdf?'))) {
+    embedUrl = `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`
   }
 
-  if (isGoogleDrive || !isPdf) {
-    return (
-      <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-subtle)' }}>
-        <iframe
-          src={embedUrl}
-          style={{ width: '100%', height: '80vh', border: 'none' }}
-          title={title || 'PDF Viewer'}
-          loading="lazy"
-          allowFullScreen
-        />
-      </div>
-    )
-  }
+  const directDownloadUrl = isGoogleDrive && driveId
+    ? `https://drive.google.com/uc?export=download&id=${driveId}`
+    : url
 
   return (
-    <div className="pdf-viewer" style={{
+    <div style={{
       borderRadius: '12px', overflow: 'hidden',
-      border: '1px solid var(--border-subtle)',
-      background: 'var(--bg-elevated)'
+      border: '1px solid var(--border-subtle, #e5e7eb)',
+      background: 'var(--bg-elevated, #ffffff)',
+      boxShadow: '0 4px 16px rgba(0,0,0,0.06)'
     }}>
+      {/* Top Header Toolbar */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '8px 16px', background: 'var(--bg-surface)',
-        borderBottom: '1px solid var(--border-subtle)'
+        padding: '10px 16px', background: 'var(--bg-surface, #f9fafb)',
+        borderBottom: '1px solid var(--border-subtle, #e5e7eb)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={page <= 1}
-            style={{
-              padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--border-default)',
-              background: 'var(--bg-elevated)', cursor: page <= 1 ? 'not-allowed' : 'pointer',
-              color: page <= 1 ? 'var(--text-muted)' : 'var(--text-primary)', opacity: page <= 1 ? 0.4 : 1
-            }}
-          >
-            <ChevronLeft size={16} />
-          </button>
-          <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
-            Trang {page} / {totalPages || '--'}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 600, color: 'var(--text-primary, #111827)' }}>
+          <FileText size={16} color="var(--brand-primary, #4f46e5)" />
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '300px' }}>
+            {title || 'Tài liệu PDF'}
           </span>
-          <button
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-            disabled={page >= totalPages}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <a
+            href={directDownloadUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
-              padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--border-default)',
-              background: 'var(--bg-elevated)', cursor: page >= totalPages ? 'not-allowed' : 'pointer',
-              color: page >= totalPages ? 'var(--text-muted)' : 'var(--text-primary)', opacity: page >= totalPages ? 0.4 : 1
+              display: 'flex', alignItems: 'center', gap: '5px',
+              padding: '5px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 600,
+              background: 'var(--bg-elevated, #fff)', border: '1px solid var(--border-default, #d1d5db)',
+              color: 'var(--text-primary, #374151)', textDecoration: 'none'
             }}
           >
-            <ChevronRight size={16} />
-          </button>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button
-            onClick={() => setScale(s => Math.max(0.5, s - 0.25))}
-            style={{ padding: '6px 8px', borderRadius: '6px', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--text-muted)' }}
+            <Download size={13} /> Tải PDF
+          </a>
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'flex', alignItems: 'center', gap: '5px',
+              padding: '5px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 600,
+              background: 'var(--brand-primary, #4f46e5)', color: '#ffffff', textDecoration: 'none'
+            }}
           >
-            <ZoomOut size={16} />
-          </button>
-          <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>{Math.round(scale * 100)}%</span>
-          <button
-            onClick={() => setScale(s => Math.min(2, s + 0.25))}
-            style={{ padding: '6px 8px', borderRadius: '6px', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--text-muted)' }}
-          >
-            <ZoomIn size={16} />
-          </button>
+            <ExternalLink size={13} /> Mở tab mới
+          </a>
         </div>
       </div>
-      <div style={{
-        position: 'relative', width: '100%', minHeight: '300px',
-        display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
-        padding: '16px', overflow: 'auto',
-        background: 'var(--bg-base)'
-      }}>
-        {loading && (
+
+      {/* Frame container */}
+      <div style={{ position: 'relative', width: '100%', height: '540px', background: '#f3f4f6' }}>
+        {loading && !hasError && (
           <div style={{
-            position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-            color: 'var(--text-muted)'
+            position: 'absolute', inset: 0,
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            gap: '8px', color: '#6b7280', background: '#f9fafb', zIndex: 1
           }}>
-            <Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} />
-            <span style={{ fontSize: '12px' }}>Đang tải PDF...</span>
+            <Loader2 size={28} style={{ animation: 'spin 1s linear infinite' }} />
+            <span style={{ fontSize: '13px', fontWeight: 500 }}>Đang tải tài liệu PDF...</span>
           </div>
         )}
-        <iframe
-          src={`${embedUrl}#page=${page}`}
-          style={{
-            width: '100%', maxWidth: '800px', height: '70vh', border: 'none',
-            borderRadius: '8px', opacity: loading ? 0 : 1,
-            transition: 'opacity 0.3s'
-          }}
-          onLoad={() => setLoading(false)}
-          title={title || 'PDF'}
-          loading="lazy"
-        />
+
+        {hasError ? (
+          <div style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            height: '100%', gap: '12px', padding: '24px', textAlign: 'center', color: '#374151'
+          }}>
+            <FileText size={40} color="#6b7280" />
+            <div style={{ fontSize: '14px', fontWeight: 600 }}>Không thể xem trực tiếp file PDF này</div>
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                padding: '8px 16px', borderRadius: '8px', background: '#4f46e5', color: '#fff',
+                fontSize: '13px', fontWeight: 600, textDecoration: 'none'
+              }}
+            >
+              Mở liên kết trực tiếp
+            </a>
+          </div>
+        ) : (
+          <iframe
+            src={embedUrl}
+            style={{ width: '100%', height: '100%', border: 'none' }}
+            onLoad={() => setLoading(false)}
+            onError={() => { setLoading(false); setHasError(true); }}
+            title={title || 'PDF Viewer'}
+            allow="autoplay"
+            allowFullScreen
+          />
+        )}
       </div>
       <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
     </div>

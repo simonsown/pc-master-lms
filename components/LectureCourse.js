@@ -525,7 +525,7 @@ export default function LectureCourse({ lang, onBack }) {
             if (user) setUserId(user.id);
 
             const { data: allLessons } = await supabase
-                .from('lessons').select('*').eq('is_published', true)
+                .from('lessons').select('*').eq('is_published', true).is('course_id', null)
                 .order('created_at', { ascending: false });
 
             const all = allLessons || [];

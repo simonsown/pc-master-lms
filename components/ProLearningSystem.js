@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import PCourseViewer from './PCourseViewer';
 
 const SKILLS = [
   {
@@ -164,7 +165,7 @@ export default function ProLearningSystem() {
   const [lang, setLang] = useState('vn');
   const [progress, setProgress] = useState({});
   const [selected, setSelected] = useState(null);
-  const [tab, setTab] = useState('dashboard');
+  const [tab, setTab] = useState('course');
   const [earnedXp, setEarnedXp] = useState(0);
 
   useEffect(() => {
@@ -276,7 +277,7 @@ export default function ProLearningSystem() {
             display: 'flex', background: 'rgba(255,255,255,0.04)', borderRadius: 8,
             border: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden',
           }}>
-            {['dashboard', 'skills'].map(tabId => (
+            {['course', 'dashboard', 'skills'].map(tabId => (
               <button key={tabId} onClick={() => { setTab(tabId); setSelected(null); }}
                 style={{
                   padding: '6px 16px', fontSize: 12, fontWeight: 600, cursor: 'pointer',
@@ -284,7 +285,7 @@ export default function ProLearningSystem() {
                   border: 'none', color: tab === tabId ? '#00d4aa' : 'var(--text-muted, #5a5d72)',
                   fontFamily: 'inherit', transition: 'all 0.2s',
                 }}>
-                {tabId === 'dashboard' ? t('Tổng quan', 'Dashboard') : t('Kỹ năng', 'Skills')}
+                {tabId === 'course' ? t('Khóa học', 'Course') : tabId === 'dashboard' ? t('Tổng quan', 'Dashboard') : t('Kỹ năng', 'Skills')}
               </button>
             ))}
           </div>
@@ -435,6 +436,12 @@ export default function ProLearningSystem() {
                 onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
               >{t('Đặt lại tiến độ', 'Reset Progress')}</button>
             </div>
+          </div>
+        )}
+
+        {tab === 'course' && (
+          <div style={{ animation: 'fadeIn 0.3s' }}>
+            <PCourseViewer lang={lang} />
           </div>
         )}
 

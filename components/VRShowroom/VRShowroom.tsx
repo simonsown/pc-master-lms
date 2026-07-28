@@ -117,15 +117,17 @@ function SceneInner({ onInteract }: { onInteract: (id: string) => void }) {
   );
 }
 
-export default function VRShowroom() {
+export default function VRShowroom({ onFocus, focusId }: { onFocus?: (id: string | null) => void; focusId?: string | null }) {
   const [camOn, setCamOn] = useState(false);
   const [debugOn, setDebugOn] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const camKey = useRef(0);
 
   const handleInteract = useCallback((id: string) => {
-    setSelectedId(prev => prev === id ? null : id);
-  }, []);
+    const next = selectedId === id ? null : id;
+    setSelectedId(next);
+    if (onFocus) onFocus(next);
+  }, [selectedId, onFocus]);
 
   return (
     <MainErrorBoundary>
@@ -141,14 +143,14 @@ export default function VRShowroom() {
         >
           <SceneInner onInteract={handleInteract} />
         </Canvas>
-        <InfoPanel itemId={selectedId} onClose={() => setSelectedId(null)} />
+        {!focusId && <InfoPanel itemId={selectedId} onClose={() => setSelectedId(null)} />}
         <UI
           camEnabled={camOn}
           handEnabled={false}
           debugMode={debugOn}
           onToggleCam={() => { setCamOn(v => !v); camKey.current++; }}
           onToggleHand={() => {}}
-          onReset={() => { setSelectedId(null); camKey.current++; setCamOn(false); }}
+          onReset={() => { setSelectedId(null); camKey.current++; setCamOn(false); if (onFocus) onFocus(null); }}
           onCenter={() => {
             const canvas = document.querySelector('canvas');
             if (canvas) canvas.dispatchEvent(new MouseEvent('click', { bubbles: true }));

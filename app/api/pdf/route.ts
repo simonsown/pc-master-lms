@@ -2,26 +2,34 @@ import { NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
 
-const ALLOWED = ['sach-tin10.pdf', 'sach-tin11.pdf']
-
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const file = searchParams.get('file')
 
-  if (!file || !ALLOWED.includes(file)) {
-    return new NextResponse('File not found', { status: 404 })
+  if (!file) {
+    return new NextResponse('File parameter is required', { status: 400 })
   }
 
-  const filePath = path.join(process.cwd(), 'public', file)
+  // Prevent path traversal
+  const safeFilename = path.basename(file)
+  
+  // Search in public/slides first, then public/
+  let filePath = path.join(process.cwd(), 'public', 'slides', safeFilename)
   if (!fs.existsSync(filePath)) {
-    return new NextResponse('File not found', { status: 404 })
+    filePath = path.join(process.cwd(), 'public', safeFilename)
+  }
+
+  if (!fs.existsSync(filePath)) {
+    return new NextResponse(`File not found: ${safeFilename}`, { status: 404 })
   }
 
   const buffer = fs.readFileSync(filePath)
   return new NextResponse(buffer, {
     headers: {
       'Content-Type': 'application/pdf',
-      'Content-Disposition': 'inline; filename="' + file + '"',
+      'Content-Disposition': `inline; filename="${safeFilename}"`,
+      'Access-Control-Allow-Origin': '*',
+      'Cache-Control': 'public, max-age=31536000, immutable',
     },
   })
 }

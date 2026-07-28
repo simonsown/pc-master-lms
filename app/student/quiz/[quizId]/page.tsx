@@ -364,7 +364,7 @@ export default function QuizTakingPage({ params }: { params: Promise<{ quizId: s
               {filteredGlossary.map(([term, def]) => (
                 <div key={term} className="p-4 rounded-2xl border" style={{ borderColor: 'var(--border-default)' }}>
                   <span className="text-sm font-bold uppercase tracking-wider" style={{ color: 'var(--brand-primary)' }}>{term}</span>
-                  <p className="text-sm mt-1 leading-relaxed" style={{ color: 'var(--text-muted)' }}>{def}</p>
+                  <p className="text-sm mt-1 leading-relaxed" style={{ color: 'var(--text-muted)' }}>{typeof def === 'string' ? def : def.definition}</p>
                 </div>
               ))}
             </div>

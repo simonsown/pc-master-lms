@@ -158,15 +158,23 @@ const BurgerMenu = ({
                             {lang === 'en' ? 'Explore' : 'Khám phá'}
                         </div>
                         
-                        <button
-                            onMouseEnter={() => setHoveredBtn('course')} onMouseLeave={() => setHoveredBtn(null)}
-                            onClick={() => setAppMode('course')}
-                            style={navItemStyle('course', appMode === 'course')}
+                        <Link
+                            href="/courses"
+                            style={{ ...navItemStyle('courses', false), textDecoration: 'none' }}
+                            onMouseEnter={() => setHoveredBtn('courses')} onMouseLeave={() => setHoveredBtn(null)}
                         >
-                            <BookOpen style={iconStyle('course', appMode === 'course')} />
-                            {lang === 'en' ? 'Lecture Course' : 'Bài Giảng'}
-                        </button>
-                        
+                            <BookOpen style={iconStyle('courses', false)} />
+                            {lang === 'en' ? 'Hardware Course' : 'Giáo Trình Khóa Học'}
+                        </Link>
+
+                        <Link
+                            href="/video-courses"
+                            style={{ ...navItemStyle('video_courses', false), textDecoration: 'none' }}
+                            onMouseEnter={() => setHoveredBtn('video_courses')} onMouseLeave={() => setHoveredBtn(null)}
+                        >
+                            <Sparkles style={iconStyle('video_courses', false)} />
+                            {lang === 'en' ? 'Video Library' : 'Video Bài Giảng'}
+                        </Link>
                         
                         <button
                             onMouseEnter={() => setHoveredBtn('learning')} onMouseLeave={() => setHoveredBtn(null)}
@@ -223,16 +231,7 @@ const BurgerMenu = ({
                             <BookMarked style={iconStyle('quiz_bank', false)} />
                             {lang === 'en' ? 'Question Bank' : 'Ngân Hàng Đề Thi'}
                         </Link>
-                        
-                        <Link 
-                            href="/exams" 
-                            style={{ ...navItemStyle('exams', false), textDecoration: 'none' }}
-                            onMouseEnter={() => setHoveredBtn('exams')} 
-                            onMouseLeave={() => setHoveredBtn(null)}
-                        >
-                            <FileText style={iconStyle('exams', false)} />
-                            {lang === 'en' ? 'Exams' : 'Kỳ Thi'}
-                        </Link>
+
                         
                         <Link 
                             href="/quiz" 
@@ -470,43 +469,59 @@ const BurgerMenu = ({
 
             {/* Credits Modal (same mostly, updated colors) */}
             {showCredits && (
-                <div style={{
+                <div 
+                  onClick={(e) => { if (e.target === e.currentTarget) setShowCredits(false) }}
+                  style={{
                     position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-                    background: 'rgba(12, 15, 20, 0.85)', backdropFilter: 'blur(8px)',
-                    zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '2rem'
+                    background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(12px)',
+                    zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '1rem'
                 }}>
                     <div style={{
-                        background: 'var(--bg-surface)', border: '1px solid var(--border-strong)', borderRadius: '12px',
-                        padding: '24px', maxWidth: '500px', width: '100%', color: 'var(--text-primary)',
-                        position: 'relative'
+                        background: 'linear-gradient(145deg, #0f1729 0%, #1a2a4a 50%, #0d1f3c 100%)',
+                        border: '1px solid rgba(0,212,170,0.2)', borderRadius: '20px',
+                        padding: '24px 28px', maxWidth: '480px', width: '100%', color: '#fff',
+                        position: 'relative', maxHeight: '85vh', overflowY: 'auto',
+                        boxShadow: '0 0 60px rgba(0,212,170,0.1), 0 20px 60px rgba(0,0,0,0.5)'
                     }}>
                         <button
                             onClick={() => setShowCredits(false)}
-                            style={{ position: 'absolute', top: '16px', right: '16px', background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
-                        ><X size={20} /></button>
+                            style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', cursor: 'pointer', padding: '6px 12px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600 }}
+                        ><X size={16} /> {lang === 'en' ? 'Close' : 'Đóng (Tắt)'}</button>
 
-                        <h2 style={{ marginTop: 0, fontSize: '24px', textAlign: 'center', marginBottom: '24px', fontWeight: 700 }}>
-                            {lang === 'en' ? 'CREDITS' : 'TÁC GIẢ'}
-                        </h2>
+                        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                            <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'linear-gradient(135deg, #00d4aa, #00f3ff)', margin: '0 auto 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>🏆</div>
+                            <h2 style={{ margin: '0 0 4px', fontSize: '18px', fontWeight: 800 }}>
+                                {lang === 'en' ? 'CREDITS & REPORT' : 'TÁC GIẢ & BÁO CÁO'}
+                            </h2>
+                            <p style={{ margin: 0, fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>PC Master Builder - v1.0.0</p>
+                        </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', fontSize: '14px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
-                            <p style={{ margin: 0 }}><strong>{lang === 'en' ? 'Project:' : 'Dự Án:'}</strong> PC Master Builder</p>
-                            <p style={{ margin: 0 }}><strong>{lang === 'en' ? 'Developer:' : 'Developer:'}</strong> Nguyễn Phúc Khánh Sơn</p>
-                            <p style={{ margin: 0 }}><strong>{lang === 'en' ? 'Members:' : 'Thành viên:'}</strong></p>
-                            <ul style={{ margin: 0, paddingLeft: '24px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                <li>Đặng Quốc An</li>
-                                <li>Nguyễn Phạm Gia Khiêm</li>
-                                <li>Ngô Minh Khang</li>
-                            </ul>
-                            <p style={{ margin: 0 }}><strong>{lang === 'en' ? 'Advisor:' : 'Giáo viên HD:'}</strong> Trần Minh Phụng</p>
-                            <p style={{ margin: 0 }}><strong>{lang === 'en' ? 'Co-Advisor:' : 'GVHD:'}</strong> Đoàn Thụy Kim Phượng</p>
-                            <div style={{ height: '1px', background: 'var(--border-subtle)', margin: '8px 0' }}></div>
-                            <p style={{ margin: 0, fontStyle: 'italic', textAlign: 'center', fontSize: '13px' }}>
-                                {lang === 'en'
-                                    ? "Thank you for using PC Master Builder! We hope this app makes PC building fun and interactive."
-                                    : "Cảm ơn bạn đã trải nghiệm PC Master Builder! Hy vọng dự án này giúp việc lắp ráp máy tính trở nên thú vị."
-                                }
-                            </p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px' }}>
+                            <div style={{ padding: '10px 14px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                                <p style={{ margin: '0 0 4px', fontSize: '11px', fontWeight: 700, color: '#00d4aa' }}>THÔNG TIN DỰ ÁN</p>
+                                <p style={{ margin: '2px 0' }}><strong>{lang === 'en' ? 'Project:' : 'Dự Án:'}</strong> PC Master Builder</p>
+                                <p style={{ margin: '2px 0' }}><strong>{lang === 'en' ? 'Developer:' : 'Developer:'}</strong> Nguyễn Phúc Khánh Sơn</p>
+                            </div>
+                            <div style={{ padding: '10px 14px', borderRadius: '12px', background: 'rgba(0,212,170,0.04)', border: '1px solid rgba(0,212,170,0.1)' }}>
+                                <p style={{ margin: '0 0 4px', fontSize: '11px', fontWeight: 700, color: '#00d4aa' }}>GIÁO VIÊN HƯỚNG DẪN</p>
+                                <p style={{ margin: '2px 0' }}>👩‍🏫 Trần Minh Phụng (GVHD Chính)</p>
+                                <p style={{ margin: '2px 0' }}>👩‍🏫 Đoàn Thụy Kim Phượng (GVHD)</p>
+                            </div>
+                            <div style={{ padding: '10px 14px', borderRadius: '12px', background: 'rgba(99,102,241,0.04)', border: '1px solid rgba(99,102,241,0.1)' }}>
+                                <p style={{ margin: '0 0 4px', fontSize: '11px', fontWeight: 700, color: '#818cf8' }}>THÀNH VIÊN</p>
+                                <p style={{ margin: '2px 0' }}>👨‍💻 Đặng Quốc An • Nguyễn Phạm Gia Khiêm • Ngô Minh Khang</p>
+                            </div>
+                            <button
+                                onClick={() => setShowCredits(false)}
+                                style={{
+                                    marginTop: '8px', width: '100%', padding: '10px', borderRadius: '10px',
+                                    background: 'linear-gradient(135deg, #00d4aa, #00aaff)',
+                                    border: 'none', color: '#000', fontWeight: 800, fontSize: '13px',
+                                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
+                                }}
+                            >
+                                <X size={16} /> {lang === 'en' ? 'Close Window' : 'Tắt / Đóng Cửa Sổ'}
+                            </button>
                         </div>
                     </div>
                 </div>

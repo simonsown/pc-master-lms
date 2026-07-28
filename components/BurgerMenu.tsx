@@ -113,11 +113,11 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ lang, toggleLang, onStartQuiz, 
             </div>
             {[
               { id: 'course', icon: BookOpen, label: lang === 'en' ? 'Lecture Course' : 'Bài Giảng', onClick: () => setAppMode('course') },
-
+              { id: 'video-courses', icon: Sparkles, label: lang === 'en' ? '3D Video Library' : 'Video Bài Giảng', href: '/video-courses' },
+              { id: 'slides', icon: FileText, label: lang === 'en' ? 'Interactive Slides' : 'Slide Bài Học 3D', href: '/builder/slides' },
               { id: 'history', icon: History, label: lang === 'en' ? 'Learning History' : 'Lịch Sử Học Tập', href: '/student/history' },
               { id: 'learning', icon: Cpu, label: lang === 'en' ? 'Practice Mode' : 'Luyện Tập', onClick: () => setAppMode('learning') },
               { id: 'market', icon: ShoppingCart, label: lang === 'en' ? 'Marketplace' : 'Chợ Máy Tính', onClick: () => setAppMode('market') },
-              { id: 'exams', icon: Award, label: lang === 'en' ? 'Exams' : 'Kỳ Thi', onClick: () => setAppMode('exams') },
               { id: 'multiplayer', icon: Users, label: lang === 'en' ? '2-Player Versus' : '2 Người Chơi', onClick: () => setAppMode('multiplayer') },
             ].map(item => {
               const active = item.onClick ? appMode === item.id : false;
@@ -131,8 +131,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ lang, toggleLang, onStartQuiz, 
               return item.href ? <Link key={item.id} href={item.href} style={{ textDecoration: 'none' }}>{content}</Link> : content;
             })}
 
-            {/* Quest Widget */}
-            <QuestWidgetSection lang={lang} />
+
           </div>
 
           <div style={{ padding: '8px 16px 4px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
@@ -253,153 +252,131 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ lang, toggleLang, onStartQuiz, 
       </div>
 
       {showCredits && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(12px)', zIndex: 9999,
+        <div 
+          onClick={(e) => { if (e.target === e.currentTarget) setShowCredits(false) }}
+          style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+          background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(12px)', zIndex: 9999,
           display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '1rem',
           animation: 'creditsFadeIn 0.3s ease' }}>
           <div style={{
             background: 'linear-gradient(145deg, #0f1729 0%, #1a2a4a 50%, #0d1f3c 100%)',
-            borderRadius: '24px', padding: '36px', maxWidth: '520px', width: '100%',
+            borderRadius: '20px', padding: '24px 28px', maxWidth: '500px', width: '100%',
+            maxHeight: '85vh', overflowY: 'auto',
             color: '#fff', position: 'relative',
-            border: '1px solid rgba(0,212,170,0.15)',
-            boxShadow: '0 0 60px rgba(0,212,170,0.08), 0 20px 60px rgba(0,0,0,0.4)',
-            overflow: 'hidden',
+            border: '1px solid rgba(0,212,170,0.2)',
+            boxShadow: '0 0 60px rgba(0,212,170,0.1), 0 20px 60px rgba(0,0,0,0.5)',
           }}>
             <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '180px', height: '180px',
               borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,212,170,0.06) 0%, transparent 70%)',
               pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', bottom: '-40px', left: '-40px', width: '140px', height: '140px',
-              borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,243,255,0.04) 0%, transparent 70%)',
-              pointerEvents: 'none' }} />
 
             <button onClick={() => setShowCredits(false)}
-              style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)', cursor: 'pointer',
-                width: '32px', height: '32px', borderRadius: '10px', display: 'flex', alignItems: 'center',
-                justifyContent: 'center', transition: 'all 0.2s', zIndex: 1 }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff' }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.5)' }}>
-              <X size={16} />
+              style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.2)', color: '#fff', cursor: 'pointer',
+                padding: '6px 12px', borderRadius: '8px', display: 'flex', alignItems: 'center',
+                gap: '6px', fontSize: '12px', fontWeight: 600, transition: 'all 0.2s', zIndex: 10 }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#fff' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff' }}>
+              <X size={16} /> {lang === 'en' ? 'Close' : 'Đóng (Tắt)'}
             </button>
 
-            <div style={{ textAlign: 'center', marginBottom: '28px', position: 'relative', zIndex: 1 }}>
-              <div style={{ width: '56px', height: '56px', borderRadius: '16px',
+            <div style={{ textAlign: 'center', marginBottom: '20px', position: 'relative', zIndex: 1 }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '14px',
                 background: 'linear-gradient(135deg, #00d4aa, #00f3ff)',
-                margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '24px', boxShadow: '0 0 30px rgba(0,212,170,0.2)' }}>
+                margin: '0 auto 10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '20px', boxShadow: '0 0 24px rgba(0,212,170,0.25)' }}>
                 🏆
               </div>
-              <h2 style={{ margin: '0 0 4px', fontSize: '20px', fontWeight: 800, letterSpacing: '0.5px' }}>
-                {lang === 'en' ? 'CREDITS' : 'TÁC GIẢ & BÁO CÁO'}
+              <h2 style={{ margin: '0 0 4px', fontSize: '18px', fontWeight: 800, letterSpacing: '0.5px' }}>
+                {lang === 'en' ? 'CREDITS & REPORT' : 'TÁC GIẢ & BÁO CÁO'}
               </h2>
-              <div style={{ width: '40px', height: '2px', background: 'linear-gradient(90deg, #00d4aa, #00f3ff)', margin: '8px auto', borderRadius: '2px' }} />
-              <p style={{ margin: 0, fontSize: '11px', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.5px' }}>
+              <div style={{ width: '36px', height: '2px', background: 'linear-gradient(90deg, #00d4aa, #00f3ff)', margin: '6px auto', borderRadius: '2px' }} />
+              <p style={{ margin: 0, fontSize: '11px', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.5px' }}>
                 PC Master Builder - v1.0.0
               </p>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', position: 'relative', zIndex: 1 }}>
-              <div style={{ padding: '12px 16px', borderRadius: '14px',
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', position: 'relative', zIndex: 1 }}>
+              <div style={{ padding: '10px 14px', borderRadius: '12px',
                 background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px',
-                  color: 'var(--brand-primary)', marginBottom: '8px' }}>
+                <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.2px',
+                  color: 'var(--brand-primary)', marginBottom: '6px' }}>
                   {lang === 'en' ? 'Project Info' : 'Thông tin dự án'}
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '12px' }}>
                   {[
                     { icon: '📦', label: lang === 'en' ? 'Project' : 'Dự Án', value: 'PC Master Builder' },
                     { icon: '👨‍💻', label: lang === 'en' ? 'Developer' : 'Developer', value: 'Nguyễn Phúc Khánh Sơn' },
                     { icon: '🛠️', label: lang === 'en' ? 'Version' : 'Phiên bản', value: 'V1.0.0' },
                   ].map((item, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '14px' }}>{item.icon}</span>
-                      <span style={{ color: 'rgba(255,255,255,0.4)', minWidth: '80px', fontSize: '11px' }}>{item.label}</span>
+                      <span style={{ fontSize: '13px' }}>{item.icon}</span>
+                      <span style={{ color: 'rgba(255,255,255,0.4)', minWidth: '75px', fontSize: '11px' }}>{item.label}</span>
                       <span style={{ color: '#fff', fontWeight: 600, fontSize: '12px' }}>{item.value}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div style={{ padding: '12px 16px', borderRadius: '14px',
+              <div style={{ padding: '10px 14px', borderRadius: '12px',
                 background: 'rgba(0,212,170,0.04)', border: '1px solid rgba(0,212,170,0.1)' }}>
-                <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px',
-                  color: '#00d4aa', marginBottom: '8px' }}>
+                <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.2px',
+                  color: '#00d4aa', marginBottom: '6px' }}>
                   {lang === 'en' ? 'Supervisors' : 'Giáo viên hướng dẫn'}
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   {[
                     { name: 'Trần Minh Phụng', role: lang === 'en' ? 'Lead Supervisor' : 'GVHD Chính', color: '#00d4aa' },
                     { name: 'Đoàn Thụy Kim Phượng', role: lang === 'en' ? 'Co-Supervisor' : 'GVHD', color: '#00f3ff' },
                   ].map((gv, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '6px 10px',
-                      borderRadius: '10px', background: 'rgba(255,255,255,0.03)' }}>
-                      <div style={{ width: '32px', height: '32px', borderRadius: '10px',
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 8px',
+                      borderRadius: '8px', background: 'rgba(255,255,255,0.03)' }}>
+                      <div style={{ width: '26px', height: '26px', borderRadius: '8px',
                         background: `linear-gradient(135deg, ${gv.color}22, ${gv.color}11)`,
                         border: `1px solid ${gv.color}33`,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0 }}>
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', flexShrink: 0 }}>
                         👩‍🏫
                       </div>
                       <div>
-                        <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{gv.name}</div>
-                        <div style={{ fontSize: '10px', color: gv.color, fontWeight: 600, letterSpacing: '0.5px' }}>{gv.role}</div>
+                        <div style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>{gv.name}</div>
+                        <div style={{ fontSize: '9px', color: gv.color, fontWeight: 600 }}>{gv.role}</div>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div style={{ padding: '12px 16px', borderRadius: '14px',
+              <div style={{ padding: '10px 14px', borderRadius: '12px',
                 background: 'rgba(99,102,241,0.04)', border: '1px solid rgba(99,102,241,0.1)' }}>
-                <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px',
-                  color: '#818cf8', marginBottom: '8px' }}>
+                <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.2px',
+                  color: '#818cf8', marginBottom: '6px' }}>
                   {lang === 'en' ? 'Team Members' : 'Thành viên'}
                 </div>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                   {[
                     { name: 'Đặng Quốc An', role: 'Frontend', color: '#818cf8' },
                     { name: 'Nguyễn Phạm Gia Khiêm', role: 'Backend', color: '#f59e0b' },
                     { name: 'Ngô Minh Khang', role: 'UI/UX', color: '#10b981' },
                   ].map((m, i) => (
-                    <div key={i} style={{ flex: '1 1 auto', minWidth: '120px', padding: '8px 12px', borderRadius: '10px',
+                    <div key={i} style={{ flex: '1 1 auto', minWidth: '100px', padding: '6px 8px', borderRadius: '8px',
                       background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)',
                       textAlign: 'center' }}>
-                      <div style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>{m.name}</div>
-                      <div style={{ fontSize: '9px', color: m.color, fontWeight: 600, letterSpacing: '0.5px' }}>{m.role}</div>
+                      <div style={{ fontSize: '11px', fontWeight: 700, color: '#fff' }}>{m.name}</div>
+                      <div style={{ fontSize: '9px', color: m.color, fontWeight: 600 }}>{m.role}</div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div style={{ padding: '12px 16px', borderRadius: '14px',
-                background: 'rgba(16,185,129,0.04)', border: '1px solid rgba(16,185,129,0.1)' }}>
-                <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px',
-                  color: '#10b981', marginBottom: '8px' }}>
-                  {lang === 'en' ? 'Features' : 'Tính năng'}
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', fontSize: '11px' }}>
-                  {[
-                    '🎮 Lắp ráp PC 2D', '🤖 AI Hướng dẫn', '📚 Bài giảng', '🖥️ Mô phỏng Windows',
-                    '✋ Theo dõi tay', '🏪 Chợ linh kiện', '👥 2 Người chơi', '📝 Kỳ thi & Quiz',
-                    '🏆 Hệ thống XP', '📊 Bảng xếp hạng', '📜 Chứng chỉ', '💬 Diễn đàn',
-                    '📱 Responsive', '🌐 Đa ngôn ngữ',
-                  ].map((feat, i) => (
-                    <div key={i} style={{ padding: '4px 6px', borderRadius: '6px',
-                      background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span style={{ fontSize: '10px', lineHeight: '1' }}>{feat}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div style={{ padding: '12px 16px', borderRadius: '14px',
+              <div style={{ padding: '10px 14px', borderRadius: '12px',
                 background: 'rgba(245,158,11,0.04)', border: '1px solid rgba(245,158,11,0.1)' }}>
-                <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px',
-                  color: '#f59e0b', marginBottom: '8px' }}>
+                <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.2px',
+                  color: '#f59e0b', marginBottom: '6px' }}>
                   Tech Stack
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                  {['Next.js 16', 'React 19', 'TypeScript', 'Supabase', 'Three.js', 'Framer Motion', 'Tailwind CSS', 'MediaPipe', 'Zustand', 'Recharts', 'Lucide'].map((tech, i) => (
-                    <span key={i} style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '9px', fontWeight: 600,
+                  {['Next.js 16', 'React 19', 'TypeScript', 'Supabase', 'Three.js', 'Framer Motion', 'Tailwind CSS', 'MediaPipe', 'Zustand', 'Lucide'].map((tech, i) => (
+                    <span key={i} style={{ padding: '2px 6px', borderRadius: '4px', fontSize: '9px', fontWeight: 600,
                       background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
                       color: 'rgba(255,255,255,0.6)' }}>
                       {tech}
@@ -409,14 +386,29 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ lang, toggleLang, onStartQuiz, 
               </div>
             </div>
 
-            <div style={{ marginTop: '20px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-              <div style={{ padding: '12px', borderRadius: '12px',
-                background: 'linear-gradient(135deg, rgba(0,212,170,0.06), rgba(0,243,255,0.06))',
-                border: '1px solid rgba(0,212,170,0.12)' }}>
-                <p style={{ margin: '0 0 4px', fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>
+            <div style={{ marginTop: '16px', textAlign: 'center', position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <button
+                onClick={() => setShowCredits(false)}
+                style={{
+                  width: '100%', padding: '10px', borderRadius: '10px',
+                  background: 'linear-gradient(135deg, #00d4aa, #00aaff)',
+                  border: 'none', color: '#000', fontWeight: 800, fontSize: '13px',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                  boxShadow: '0 4px 15px rgba(0,212,170,0.3)', transition: 'all 0.2s'
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)' }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)' }}
+              >
+                <X size={16} /> {lang === 'en' ? 'Close Window' : 'Tắt / Đóng Cửa Sổ'}
+              </button>
+
+              <div style={{ padding: '8px', borderRadius: '8px',
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.05)' }}>
+                <p style={{ margin: '0 0 2px', fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>
                   © {new Date().getFullYear()} - THPT Nguyễn Công Trứ
                 </p>
-                <p style={{ margin: 0, fontSize: '10px', color: 'rgba(255,255,255,0.25)', fontStyle: 'italic' }}>
+                <p style={{ margin: 0, fontSize: '9px', color: 'rgba(255,255,255,0.25)', fontStyle: 'italic' }}>
                   {lang === 'en' ? '"Dare to Think, Dare to Do"' : '"Dám nghĩ, Dám làm"'}
                 </p>
               </div>
@@ -428,62 +420,5 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ lang, toggleLang, onStartQuiz, 
     </>
   );
 };
-
-function QuestWidgetSection({ lang }: { lang: 'en' | 'vn' }) {
-  const { state: realtimeState } = useRealtime()
-  const quests = realtimeState.allQuests.slice(0, 3)
-  const userQuests = realtimeState.quests
-
-  return (
-    <div style={{ padding: '4px 16px 8px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', marginTop: '4px' }}>
-        <Trophy size={12} style={{ color: '#f59e0b' }} />
-        <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)' }}>
-          {lang === 'en' ? 'Daily Quests' : 'Nhiệm Vụ Hôm Nay'}
-        </span>
-        <div style={{ marginLeft: 'auto', fontSize: '9px', color: 'var(--brand-primary)', fontWeight: 600 }}>
-          Lv.{realtimeState.level}
-        </div>
-      </div>
-      {quests.map((quest, i) => {
-        const userQuest = userQuests.find(q => q.quest_id === quest.id)
-        const isCompleted = userQuest?.is_completed
-        const progress = userQuest?.progress || 0
-        return (
-          <div key={quest.id} style={{
-            display: 'flex', alignItems: 'center', gap: '8px',
-            padding: '6px 8px', borderRadius: '8px',
-            background: isCompleted ? 'rgba(16,185,129,0.08)' : 'rgba(255,255,255,0.03)',
-            marginBottom: '4px', opacity: isCompleted ? 0.6 : 1
-          }}>
-            <span style={{ fontSize: '14px' }}>{quest.icon || '📌'}</span>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: '11px', fontWeight: 600, color: isCompleted ? '#10b981' : 'rgba(255,255,255,0.8)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {quest.title}
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ fontSize: '9px', color: 'var(--brand-primary)', fontWeight: 600 }}>+{quest.xp_reward}XP</span>
-                {!isCompleted && quest.requirement_value > 0 && (
-                  <div style={{ flex: 1, height: '2px', borderRadius: '99px', background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', borderRadius: '99px', background: 'var(--brand-primary)', width: `${Math.min(100, (progress / quest.requirement_value) * 100)}%` }} />
-                  </div>
-                )}
-                {isCompleted && <CheckCircle2 size={10} style={{ color: '#10b981' }} />}
-              </div>
-            </div>
-          </div>
-        )
-      })}
-      <Link href="/student/dashboard" style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
-        padding: '6px', borderRadius: '6px', fontSize: '9px', fontWeight: 600,
-        color: 'var(--brand-primary)', textDecoration: 'none', marginTop: '4px',
-        background: 'rgba(8,158,96,0.08)'
-      }}>
-        <Zap size={10} /> {lang === 'en' ? 'View All Tasks' : 'Xem tất cả'} →
-      </Link>
-    </div>
-  )
-}
 
 export default BurgerMenu;

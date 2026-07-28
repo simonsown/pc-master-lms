@@ -1,0 +1,1175 @@
+﻿export interface CourseSection {
+  id: string;
+  title: string;
+  content: string;
+  imagePrompt?: string;
+  quiz?: {
+    question: string;
+    options: string[];
+    correctIndex: number;
+    explanation: string;
+  }[];
+}
+
+export interface CoursePart {
+  id: string;
+  titleVn: string;
+  titleEn: string;
+  pages: string;
+  sections: CourseSection[];
+}
+
+export interface CourseStage {
+  id: string;
+  stageNumber: number;
+  icon: string;
+  color: string;
+  titleVn: string;
+  titleEn: string;
+  pages: string;
+  parts: CoursePart[];
+}
+
+export const PC_HARDWARE_COURSE: CourseStage[] = [
+  {
+    id: 'stage-1',
+    stageNumber: 1,
+    icon: '🖥️',
+    color: '#6366f1',
+    titleVn: 'Tổng quan về máy vi tính',
+    titleEn: 'Overview of Personal Computers',
+    pages: '1–20',
+    parts: [
+      {
+        id: 'stage-1-part-1',
+        titleVn: 'Lịch sử máy tính cá nhân',
+        titleEn: 'History of Personal Computers',
+        pages: '1–8',
+        sections: [
+          {
+            id: 'stage-1-part-1-section-1',
+            title: 'Những chiếc máy tính đầu tiên',
+            content: 'Máy tính cá nhân (PC) đã trải qua một hành trình phát triển đầy thú vị kéo dài hơn 50 năm. Câu chuyện bắt đầu từ những năm 1970, khi công nghệ vi xử lý ra đời và mở ra kỷ nguyên máy tính dành cho cá nhân. Trước thời kỳ này, máy tính là những cỗ máy khổng lồ chiếm cả căn phòng, chỉ dành cho quân đội, trường đại học và các tập đoàn lớn. Chúng đắt đỏ và phức tạp đến mức không ai có thể tưởng tượng được một ngày nào đó mỗi gia đình sẽ có một chiếc máy tính trên bàn làm việc.\n\nNăm 1975, chiếc máy tính Altair 8800 ra đời và được coi là chiếc PC đầu tiên trên thế giới. Altair 8800 sử dụng bộ vi xử lý Intel 8080, có tốc độ 2MHz và chỉ có 256 byte RAM. Điều đặc biệt là nó không có bàn phím hay màn hình – người dùng phải bật/tắt các công tắc trên mặt trước để nhập dữ liệu và đọc kết quả qua các đèn LED nhấp nháy. Dù vậy, Altair 8800 đã tạo ra một cơn sốt trong cộng đồng kỹ thuật và truyền cảm hứng cho nhiều người trẻ, trong đó có Bill Gates và Paul Allen – những người sau này sáng lập Microsoft.\n\nNăm 1977 đánh dấu bước ngoặt lớn với sự ra đời của Apple II do Steve Jobs và Steve Wozniak sáng chế. Apple II là chiếc máy tính đầu tiên có vỏ nhựa đẹp mắt, bàn phím tích hợp, màn hình màu và ổ đĩa mềm. Nó được thiết kế dành cho người dùng phổ thông chứ không chỉ cho các kỹ sư. Apple II đặc biệt thành công trong lĩnh vực giáo dục – hầu hết các trường học ở Mỹ đều trang bị máy Apple II để dạy tin học. Đây chính là chiếc máy tính đã đưa công nghệ thông tin đến gần hơn với công chúng.',
+            imagePrompt: 'Máy tính Apple II năm 1977 với vỏ nhựa, bàn phím và màn hình màu',
+            quiz: [
+              {
+                question: 'Chiếc máy tính cá nhân đầu tiên trên thế giới là gì?',
+                options: ['Altair 8800', 'Apple II', 'IBM PC', 'ENIAC'],
+                correctIndex: 0,
+                explanation: 'Altair 8800 ra mắt năm 1975 được coi là chiếc máy tính cá nhân đầu tiên, mở đầu cho kỷ nguyên PC.'
+              },
+              {
+                question: 'Bộ vi xử lý nào được sử dụng trong Altair 8800?',
+                options: ['Intel 8080', 'Intel 4004', 'Intel 8086', 'Motorola 6800'],
+                correctIndex: 0,
+                explanation: 'Altair 8800 dùng chip Intel 8080, một trong những vi xử lý đầu tiên có hiệu năng đủ mạnh cho máy tính cá nhân.'
+              }
+            ]
+          },
+          {
+            id: 'stage-1-part-1-section-2',
+            title: 'Kỷ nguyên IBM PC và sự lên ngôi của Windows',
+            content: 'Năm 1981, IBM – gã khổng lồ trong ngành máy tính lớn – quyết định tham gia thị trường PC đang phát triển nhanh chóng. IBM PC ra mắt với bộ vi xử lý Intel 8088 chạy ở tốc độ 4.77MHz, 16KB RAM và ổ đĩa mềm 5.25 inch. Điều làm nên sự khác biệt lớn nhất của IBM PC là kiến trúc mở: IBM công bố đầy đủ thông số kỹ thuật, cho phép các nhà sản xuất khác tạo ra máy tính tương thích (gọi là IBM-compatible). Quyết định này đã tạo ra cả một hệ sinh thái PC mà chúng ta sử dụng ngày nay. Hệ điều hành cho IBM PC là MS-DOS (Microsoft Disk Operating System) do Microsoft cung cấp, đánh dấu sự khởi đầu của đế chế phần mềm này.\n\nNăm 1985, Microsoft cho ra mắt Windows 1.0 – giao diện đồ họa đầu tiên chạy trên nền MS-DOS. Tuy nhiên, phiên bản Windows thực sự làm nên cuộc cách mạng là Windows 95 ra mắt năm 1995. Windows 95 mang đến giao diện hoàn toàn mới với nút Start, thanh Taskbar và các biểu tượng trên Desktop – những khái niệm quen thuộc với chúng ta ngày nay. Windows 95 cũng hỗ trợ Plug and Play (cắm là chạy), giúp việc cài đặt thiết bị ngoại vi trở nên dễ dàng hơn bao giờ hết. Đây là hệ điều hành đã đưa PC đến với hàng triệu gia đình trên khắp thế giới.\n\nSự cạnh tranh giữa IBM PC và Apple Macintosh đã thúc đẩy sự phát triển không ngừng của công nghệ máy tính. Trong khi IBM PC dùng hệ điều hành Windows và chip Intel, Apple Macintosh dùng hệ điều hành riêng với giao diện đồ họa cách mạng. Cuộc đua này đã mang lại cho người dùng những sản phẩm ngày càng tốt hơn, rẻ hơn và dễ sử dụng hơn. Ngày nay, PC đã trở thành công cụ không thể thiếu trong học tập, làm việc và giải trí – từ chiếc máy tính bảng trong túi đến siêu máy tính phòng thí nghiệm.',
+            imagePrompt: 'IBM PC 5150 năm 1981 với màn hình CRT và ổ đĩa mềm',
+            quiz: [
+              {
+                question: 'IBM PC ra mắt vào năm nào?',
+                options: ['1975', '1977', '1981', '1985'],
+                correctIndex: 2,
+                explanation: 'IBM PC chính thức ra mắt năm 1981, tạo nên cuộc cách mạng với kiến trúc mở cho phép sản xuất máy tương thích.'
+              },
+              {
+                question: 'Hệ điều hành nào đi kèm với IBM PC đầu tiên?',
+                options: ['MS-DOS', 'Windows 1.0', 'CP/M', 'UNIX'],
+                correctIndex: 0,
+                explanation: 'IBM PC sử dụng MS-DOS do Microsoft cung cấp, đặt nền móng cho sự phát triển của Microsoft sau này.'
+              },
+              {
+                question: 'Tính năng nổi bật nào của Windows 95 đã thay đổi cách người dùng tương tác với PC?',
+                options: ['Nút Start và thanh Taskbar', 'Màn hình xanh', 'Ổ cứng ảo', 'Chế độ ngủ đông'],
+                correctIndex: 0,
+                explanation: 'Windows 95 giới thiệu nút Start và thanh Taskbar, tạo nên cuộc cách mạng về giao diện người dùng đồ họa.'
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'stage-1-part-2',
+        titleVn: 'Khái niệm kỹ thuật số cơ bản',
+        titleEn: 'Basic Digital Concepts',
+        pages: '9–14',
+        sections: [
+          {
+            id: 'stage-1-part-2-section-1',
+            title: 'Tín hiệu số và tín hiệu tương tự',
+            content: 'Trong thế giới công nghệ, chúng ta có hai loại tín hiệu cơ bản: tín hiệu tương tự (analog) và tín hiệu số (digital). Tín hiệu tương tự là tín hiệu liên tục, có thể nhận mọi giá trị trong một khoảng nhất định. Hãy tưởng tượng một chiếc đồng hồ kim – kim giây di chuyển liên tục, mượt mà qua từng vạch. Đó là một ví dụ về tín hiệu tương tự. Âm thanh tự nhiên, nhiệt độ, ánh sáng đều là các tín hiệu tương tự. Trong kỹ thuật, tín hiệu tương tự được biểu diễn dưới dạng sóng hình sin liên tục.\n\nNgược lại, tín hiệu số là tín hiệu rời rạc, chỉ có hai trạng thái: 0 và 1 (tắt và mở). Hãy tưởng tượng một chiếc đồng hồ điện tử hiển thị số – nó chỉ hiện các con số rõ ràng, không có trạng thái ở giữa. Máy tính làm việc hoàn toàn với tín hiệu số. Mỗi dữ liệu trong máy tính – từ văn bản, hình ảnh, âm thanh đến video – đều được chuyển đổi thành các dãy bit 0 và 1. Ưu điểm lớn nhất của tín hiệu số là khả năng chống nhiễu tốt và dễ dàng xử lý, lưu trữ, sao chép mà không bị suy giảm chất lượng.\n\nQuá trình chuyển đổi từ tín hiệu tương tự sang tín hiệu số gọi là số hóa (digitization). Ví dụ, khi bạn nói vào microphone của máy tính, âm thanh analog từ giọng nói được chuyển đổi thành tín hiệu số qua chip ADC (Analog-to-Digital Converter). Máy tính xử lý tín hiệu số này và có thể lưu lại dưới dạng file nhạc. Khi bạn nghe lại, chip DAC (Digital-to-Analog Converter) sẽ chuyển ngược lại thành tín hiệu analog để loa phát ra âm thanh. Quá trình chuyển đổi này diễn ra hàng triệu lần mỗi giây trong các thiết bị điện tử quanh ta.',
+            imagePrompt: 'Sơ đồ so sánh tín hiệu tương tự (sóng liên tục) và tín hiệu số (0 và 1)',
+            quiz: [
+              {
+                question: 'Tín hiệu số khác tín hiệu tương tự ở điểm nào?',
+                options: ['Chỉ có hai trạng thái 0 và 1', 'Liên tục và mượt mà', 'Có thể nhận mọi giá trị', 'Không thể lưu trữ'],
+                correctIndex: 0,
+                explanation: 'Tín hiệu số chỉ có hai trạng thái rời rạc là 0 và 1, trong khi tín hiệu tương tự có thể nhận mọi giá trị liên tục.'
+              },
+              {
+                question: 'Thiết bị nào chuyển tín hiệu tương tự thành tín hiệu số?',
+                options: ['ADC (Analog-to-Digital Converter)', 'DAC (Digital-to-Analog Converter)', 'CPU', 'RAM'],
+                correctIndex: 0,
+                explanation: 'ADC chuyển tín hiệu tương tự liên tục thành tín hiệu số rời rạc để máy tính xử lý được.'
+              }
+            ]
+          },
+          {
+            id: 'stage-1-part-2-section-2',
+            title: 'Hệ thống số trong máy tính',
+            content: 'Máy tính sử dụng hệ nhị phân (binary) – hệ đếm chỉ gồm hai chữ số 0 và 1 – để biểu diễn mọi thông tin. Mỗi chữ số nhị phân được gọi là một bit (binary digit). Nhưng tại sao máy tính lại dùng hệ nhị phân? Câu trả lời nằm ở bản chất vật lý: các linh kiện điện tử trong máy tính (như transistor) chỉ có hai trạng thái hoạt động – đóng (0) hoặc mở (1). Việc thiết kế mạch điện với hai trạng thái đơn giản hơn nhiều so với mười trạng thái như hệ thập phân mà con người quen dùng.\n\nTám bit tạo thành một byte, và byte là đơn vị cơ bản để đo dung lượng thông tin. Một byte có thể biểu diễn 256 giá trị khác nhau (từ 0 đến 255), đủ để mã hóa một ký tự chữ cái. Các bội số của byte bao gồm Kilobyte (KB = 1024 byte), Megabyte (MB = 1024 KB), Gigabyte (GB = 1024 MB) và Terabyte (TB = 1024 GB). Ngoài hệ nhị phân, còn có hệ thập lục phân (hexadecimal) gồm 16 chữ số (0-9 và A-F) thường được dùng trong lập trình và kỹ thuật để biểu diễn địa chỉ bộ nhớ và màu sắc một cách ngắn gọn.\n\nĐể chuyển đổi giữa các hệ thống số, chúng ta có các quy tắc đơn giản. Ví dụ, số thập phân 13 trong hệ nhị phân là 1101 (1×8 + 1×4 + 0×2 + 1×1 = 13). Trong hệ thập lục phân, số 13 được viết là D. Máy tính thực hiện hàng tỷ phép tính chuyển đổi giữa các hệ số mỗi giây một cách tự động, giúp chúng ta không cần quan tâm đến điều này khi sử dụng. Hiểu được các hệ thống số giúp kỹ thuật viên dễ dàng đọc mã lỗi, cấu hình địa chỉ mạng và làm việc với bộ nhớ trong quá trình sửa chữa PC.',
+            imagePrompt: 'Bảng chuyển đổi giữa hệ nhị phân, thập phân và thập lục phân',
+            quiz: [
+              {
+                question: '1 byte bằng bao nhiêu bit?',
+                options: ['8 bit', '4 bit', '16 bit', '32 bit'],
+                correctIndex: 0,
+                explanation: '1 byte = 8 bit, là đơn vị cơ bản để biểu diễn dữ liệu trong máy tính.'
+              },
+              {
+                question: 'Số thập phân 13 trong hệ nhị phân là gì?',
+                options: ['1101', '1011', '1110', '1001'],
+                correctIndex: 0,
+                explanation: '13 = 8+4+1 = 1x8 + 1x4 + 0x2 + 1x1 = 1101 (nhị phân).'
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'stage-1-part-3',
+        titleVn: 'Các thành phần cơ bản của máy tính',
+        titleEn: 'Basic Computer Components',
+        pages: '15–20',
+        sections: [
+          {
+            id: 'stage-1-part-3-section-1',
+            title: 'CPU và RAM – Bộ não và bộ nhớ tạm thời',
+            content: 'CPU (Central Processing Unit) hay bộ vi xử lý được ví như bộ não của máy tính. Nó thực hiện tất cả các phép tính và điều khiển mọi hoạt động của hệ thống. CPU nằm trên mainboard, được che chắn bởi một tản nhiệt và quạt làm mát. Các hãng sản xuất CPU nổi tiếng nhất hiện nay là Intel (với dòng Core i3/i5/i7/i9) và AMD (với dòng Ryzen 3/5/7/9). Tốc độ của CPU được đo bằng GHz (gigahertz) – con số này cho biết CPU có thể thực hiện bao nhiêu tỷ chu kỳ lệnh mỗi giây.\n\nRAM (Random Access Memory) là bộ nhớ truy cập ngẫu nhiên, đóng vai trò như bàn làm việc của máy tính. Khi bạn mở một chương trình, dữ liệu từ ổ cứng sẽ được nạp lên RAM để CPU có thể truy cập nhanh chóng. RAM là bộ nhớ khả biến (volatile) – nghĩa là khi tắt máy, toàn bộ dữ liệu trong RAM sẽ bị mất. Dung lượng RAM ảnh hưởng trực tiếp đến khả năng đa nhiệm: RAM càng lớn, bạn càng có thể mở nhiều chương trình cùng lúc mà máy không bị chậm. Các loại RAM phổ biến hiện nay là DDR4 và DDR5.\n\nCả CPU và RAM đều có ảnh hưởng quyết định đến hiệu năng của máy tính. Một CPU mạnh với RAM lớn sẽ cho trải nghiệm mượt mà khi chơi game, chỉnh sửa video hay chạy các phần mềm nặng. Tuy nhiên, giữa CPU và RAM cần có sự cân bằng – nếu CPU quá mạnh mà RAM quá ít, máy sẽ bị nghẽn cổ chai (bottleneck) do RAM không đủ nhanh để đáp ứng CPU. Ngược lại, RAM nhiều nhưng CPU yếu cũng không tận dụng được hết tiềm năng.',
+            imagePrompt: 'Sơ đồ CPU Intel và thanh RAM DDR5 gắn trên mainboard',
+            quiz: [
+              {
+                question: 'Đơn vị đo tốc độ xử lý của CPU là gì?',
+                options: ['GHz (Gigahertz)', 'GB (Gigabyte)', 'Mbps (Megabit trên giây)', 'RPM (Vòng trên phút)'],
+                correctIndex: 0,
+                explanation: 'Tốc độ CPU được đo bằng GHz, cho biết số tỷ chu kỳ lệnh mà CPU xử lý mỗi giây.'
+              },
+              {
+                question: 'Tại sao dữ liệu trong RAM bị mất khi tắt máy tính?',
+                options: ['RAM là bộ nhớ khả biến (volatile)', 'RAM bị hỏng khi tắt máy', 'RAM tự xóa để tiết kiệm điện', 'Hệ điều hành xóa RAM khi tắt'],
+                correctIndex: 0,
+                explanation: 'RAM là bộ nhớ khả biến, cần nguồn điện để duy trì dữ liệu. Khi tắt máy, dữ liệu trong RAM sẽ mất hoàn toàn.'
+              }
+            ]
+          },
+          {
+            id: 'stage-1-part-3-section-2',
+            title: 'Ổ cứng và thiết bị lưu trữ ngoài',
+            content: 'Bộ nhớ ngoài là nơi lưu trữ dữ liệu lâu dài, không bị mất khi tắt máy. Khác với RAM, bộ nhớ ngoài là bộ nhớ bất biến (non-volatile). Hai loại ổ cứng phổ biến nhất hiện nay là HDD (Hard Disk Drive) và SSD (Solid State Drive). HDD là ổ cứng cơ học, sử dụng đĩa từ quay và đầu đọc để ghi/đọc dữ liệu. HDD có dung lượng lớn với giá thành rẻ, phù hợp để lưu trữ dữ liệu số lượng lớn như phim ảnh, nhạc và tài liệu. Tuy nhiên, HDD có tốc độ chậm hơn và dễ hỏng hóc hơn do có bộ phận cơ khí chuyển động.\n\nSSD là ổ cứng thể rắn, sử dụng chip nhớ Flash để lưu trữ dữ liệu. SSD không có bộ phận chuyển động, do đó nhanh hơn gấp 5-10 lần so với HDD, hoạt động êm ái và bền hơn. SSD NVMe (Non-Volatile Memory Express) là chuẩn nhanh nhất hiện nay, kết nối trực tiếp qua khe M.2 trên mainboard với tốc độ đọc có thể lên đến 7000 MB/s. Nhờ SSD, máy tính khởi động chỉ trong vài giây và các chương trình mở gần như tức thì. Giải pháp tối ưu cho PC hiện nay là dùng SSD để cài hệ điều hành và các chương trình thường dùng, kết hợp với HDD để lưu trữ dữ liệu lớn.\n\nNgoài ổ cứng gắn trong, còn có nhiều thiết bị lưu trữ ngoài khác. USB flash drive (thường gọi là USB) là thiết bị nhỏ gọn dùng chip nhớ Flash, kết nối qua cổng USB. Ổ cứng di động (external HDD/SSD) cho phép mang theo dữ liệu dễ dàng. Thẻ nhớ SD thường dùng trong máy ảnh và điện thoại. CD/DVD là ổ đĩa quang dùng tia laser để đọc đĩa, tuy hiện nay ít phổ biến hơn do sự lên ngôi của USB và SSD. Mỗi loại thiết bị lưu trữ đều có ưu nhược điểm riêng và phù hợp với các mục đích sử dụng khác nhau.',
+            imagePrompt: 'So sánh cấu tạo bên trong ổ HDD (cơ học) và ổ SSD (chip nhớ)',
+            quiz: [
+              {
+                question: 'Loại ổ cứng nào có tốc độ đọc/ghi nhanh nhất hiện nay?',
+                options: ['SSD NVMe', 'HDD 7200RPM', 'SSD SATA', 'HDD 5400RPM'],
+                correctIndex: 0,
+                explanation: 'SSD NVMe kết nối qua khe M.2 với giao thức NVMe có tốc độ nhanh nhất, lên đến 7000 MB/s.'
+              },
+              {
+                question: 'Tại sao SSD được coi là bền hơn HDD?',
+                options: ['Không có bộ phận cơ khí chuyển động', 'Dung lượng lớn hơn', 'Giá thành rẻ hơn', 'Tiêu thụ nhiều điện hơn'],
+                correctIndex: 0,
+                explanation: 'SSD không có đĩa quay và đầu đọc cơ học, nên chịu va đập tốt hơn và ít hỏng hóc hơn HDD.'
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'stage-2',
+    stageNumber: 2,
+    icon: '🔲',
+    color: '#f59e0b',
+    titleVn: 'Case & Bộ nguồn',
+    titleEn: 'Case & Power Supply',
+    pages: '21–45',
+    parts: [
+      {
+        id: 'stage-2-part-1',
+        titleVn: 'Case máy tính',
+        titleEn: 'Computer Case',
+        pages: '21–28',
+        sections: [
+          {
+            id: 'stage-2-part-1-section-1',
+            title: 'Cấu tạo và phân loại Case',
+            content: 'Case máy tính (còn gọi là vỏ máy, thùng máy) là khung bảo vệ bên ngoài chứa đựng tất cả các linh kiện bên trong. Case không chỉ có nhiệm vụ bảo vệ linh kiện khỏi bụi bẩn, va đập mà còn đóng vai trò quan trọng trong việc tản nhiệt và tạo luồng gió làm mát cho toàn bộ hệ thống. Một chiếc case tốt phải đảm bảo không gian đủ rộng cho linh kiện, có các vị trí lắp quạt hợp lý và thiết kế thông thoáng để không khí lưu thông dễ dàng.\n\nCase được phân loại theo kích thước và form factor tương thích với mainboard. Các loại phổ biến nhất gồm Full Tower (lớn nhất, hỗ trợ mainboard E-ATX và XL-ATX), Mid Tower (phổ biến nhất, hỗ trợ ATX, M-ATX và ITX), Mini Tower (nhỏ gọn, hỗ trợ M-ATX và ITX) và Small Form Factor (SFF) – siêu nhỏ gọn chỉ dành cho ITX. Việc chọn kích thước case phụ thuộc vào nhu cầu sử dụng: nếu bạn muốn lắp nhiều ổ cứng, tản nhiệt nước cỡ lớn và card đồ họa dài thì cần case Full hoặc Mid Tower.\n\nChất liệu làm case cũng rất đa dạng. Thép SECC (thép cán nguội) là vật liệu phổ biến nhất, vừa chắc chắn vừa có giá thành hợp lý. Nhôm cao cấp hơn, nhẹ hơn và tản nhiệt tốt hơn nhưng đắt tiền. Kính cường lực (tempered glass) thường được dùng làm mặt bên để khoe linh kiện bên trong, đặc biệt là với dân chơi PC yêu thích đèn LED RGB. Nhựa ABS được dùng cho các chi tiết trang trí và mặt trước. Một case tốt cần có các tấm lọc bụi (dust filter) ở vị trí hút gió để ngăn bụi xâm nhập, giúp linh kiện luôn sạch sẽ và hoạt động ổn định.',
+            imagePrompt: 'Case máy tính Mid Tower với mặt kính cường lực và đèn LED RGB',
+            quiz: [
+              {
+                question: 'Loại case nào phổ biến nhất cho PC desktop hiện nay?',
+                options: ['Mid Tower', 'Full Tower', 'Mini Tower', 'Small Form Factor'],
+                correctIndex: 0,
+                explanation: 'Mid Tower là loại case phổ biến nhất vì kích thước vừa phải, hỗ trợ mainboard ATX và đa số linh kiện.'
+              },
+              {
+                question: 'Chất liệu nào thường được dùng cho mặt bên case để khoe linh kiện bên trong?',
+                options: ['Kính cường lực (Tempered Glass)', 'Thép SECC', 'Nhôm', 'Nhựa ABS'],
+                correctIndex: 0,
+                explanation: 'Kính cường lực trong suốt giúp người dùng ngắm nhìn linh kiện bên trong, thường kết hợp với đèn LED RGB.'
+              }
+            ]
+          },
+          {
+            id: 'stage-2-part-1-section-2',
+            title: 'Tiêu chí lựa chọn Case',
+            content: 'Khi chọn mua case máy tính, có nhiều yếu tố cần cân nhắc để đảm bảo tương thích và hiệu quả làm mát tối ưu. Yếu tố đầu tiên là kích thước và khả năng tương thích: case phải đủ rộng để chứa mainboard, card đồ họa (GPU), tản nhiệt CPU và bộ nguồn. Bạn cần kiểm tra chiều dài tối đa của GPU mà case hỗ trợ, chiều cao tối đa của tản nhiệt CPU, và kích thước bộ nguồn tương thích. Ví dụ, một card đồ họa RTX 4090 có thể dài tới 350mm, đòi hỏi case phải có khoảng trống đủ lớn.\n\nKhả năng làm mát là yếu tố sống còn đối với hiệu năng hệ thống. Một case tốt cần có luồng khí (airflow) được tối ưu: mặt trước thoáng để hút gió vào, mặt sau và trên để thải gió ra. Số lượng và vị trí lắp quạt rất quan trọng – lý tưởng là có ít nhất 3 quạt (2 hút trước, 1 thải sau). Nếu bạn dùng tản nhiệt nước AIO, case cần có vị trí lắp radiator ở mặt trên hoặc mặt trước với kích thước phù hợp (240mm, 360mm, v.v.). Case có thiết kế mesh (lưới) ở mặt trước cho luồng khí tốt nhất.\n\nCuối cùng là các tiện ích đi kèm và thẩm mỹ. Cổng USB 3.0/3.1 ở mặt trước, giắc âm thanh HD Audio, nút Reset và đèn LED báo hiệu là những tiện ích cần có. Khả năng quản lý dây (cable management) với các lỗ luồn dây và khoảng trống sau khay mainboard giúp dây cáp gọn gàng, tăng luồng khí và dễ vệ sinh. Đèn LED RGB có thể tùy chỉnh màu sắc là điểm cộng cho những ai yêu thích thẩm mỹ. Giá case dao động từ vài trăm nghìn cho đến vài triệu đồng, tùy vào thương hiệu (Corsair, NZXT, Cooler Master, Phanteks, v.v.) và chất lượng hoàn thiện.',
+            imagePrompt: 'Case máy tính với mặt trước dạng lưới (mesh) và quạt RGB',
+            quiz: [
+              {
+                question: 'Yếu tố nào quan trọng nhất khi chọn case để đảm bảo tản nhiệt tốt?',
+                options: ['Luồng khí (Airflow) tốt', 'Màu sắc đẹp', 'Nhiều đèn LED', 'Kích thước nhỏ gọn'],
+                correctIndex: 0,
+                explanation: 'Airflow tốt giúp không khí nóng được đẩy ra ngoài và không khí mát được hút vào, giữ linh kiện luôn mát.'
+              },
+              {
+                question: 'Khi lắp tản nhiệt nước AIO 360mm, bạn cần kiểm tra thông số gì trên case?',
+                options: ['Vị trí lắp radiator 360mm', 'Chiều dài GPU', 'Số khe ổ cứng', 'Trọng lượng case'],
+                correctIndex: 0,
+                explanation: 'Cần kiểm tra case có hỗ trợ radiator 360mm ở mặt trên hoặc mặt trước không.'
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'stage-2-part-2',
+        titleVn: 'Bộ nguồn ATX',
+        titleEn: 'ATX Power Supply',
+        pages: '29–38',
+        sections: [
+          {
+            id: 'stage-2-part-2-section-1',
+            title: 'Nguyên lý hoạt động của bộ nguồn',
+            content: 'Bộ nguồn (PSU – Power Supply Unit) là thiết bị chuyển đổi dòng điện xoay chiều (AC) từ ổ cắm điện gia đình (220V ở Việt Nam) thành dòng điện một chiều (DC) với các mức điện áp khác nhau để cấp cho các linh kiện trong máy tính. PSU được coi là trái tim của hệ thống – nếu nguồn yếu hay kém chất lượng, toàn bộ hệ thống sẽ hoạt động không ổn định và có nguy cơ hỏng hóc cao. Một bộ nguồn ATX tiêu chuẩn cung cấp các mức điện áp: +3.3V (cho chipset và RAM), +5V (cho ổ cứng và USB), +12V (cho CPU và GPU – quan trọng nhất), -12V và +5VSB (standby).\n\nSơ đồ khối của bộ nguồn gồm nhiều tầng xử lý. Đầu tiên là bộ lọc nhiễu EMI (Electromagnetic Interference) giúp loại bỏ nhiễu điện từ từ lưới điện. Tiếp theo là bộ chỉnh lưu (rectifier) chuyển AC thành DC, sau đó là bộ biến đổi DC-DC (PFC – Power Factor Correction) để tăng hiệu suất. Tầng biến áp xung (switching transformer) đóng vai trò chính trong việc hạ áp và cách ly điện. Cuối cùng, bộ lọc đầu ra (output filter) làm phẳng điện áp DC trước khi cấp cho linh kiện. Mạch điều khiển PWM (Pulse Width Modulation) liên tục điều chỉnh để giữ điện áp ổn định.\n\nChứng nhận 80 PLUS là tiêu chuẩn đánh giá hiệu suất của bộ nguồn. Nguồn đạt chuẩn 80 PLUS có hiệu suất tối thiểu 80% ở các mức tải 20%, 50% và 100%. Các cấp độ từ thấp đến cao gồm: White, Bronze, Silver, Gold, Platinum và Titanium. Nguồn 80 PLUS Gold (hiệu suất ~87-90%) là lựa chọn phổ biến cho PC tầm trung và cao cấp. Nguồn hiệu suất cao không chỉ tiết kiệm điện mà còn tỏa ít nhiệt hơn, giúp quạt chạy êm hơn và tăng tuổi thọ linh kiện.',
+            imagePrompt: 'Sơ đồ khối bên trong bộ nguồn ATX với các tầng xử lý',
+            quiz: [
+              {
+                question: 'Bộ nguồn PSU có chức năng chính là gì?',
+                options: ['Chuyển AC thành DC', 'Tăng điện áp lên 220V', 'Lưu trữ điện năng', 'Điều khiển tốc độ quạt'],
+                correctIndex: 0,
+                explanation: 'PSU chuyển đổi dòng điện xoay chiều (AC) thành dòng điện một chiều (DC) với các mức điện áp phù hợp cho linh kiện.'
+              },
+              {
+                question: 'Mức điện áp nào quan trọng nhất trong bộ nguồn ATX?',
+                options: ['+12V', '+3.3V', '+5V', '-12V'],
+                correctIndex: 0,
+                explanation: 'Điện áp +12V cung cấp nguồn chính cho CPU và GPU – hai linh kiện tiêu thụ nhiều điện nhất.'
+              },
+              {
+                question: 'Chứng nhận 80 PLUS Gold có hiệu suất tối thiểu ở mức tải 50% là bao nhiêu?',
+                options: ['87%', '80%', '90%', '92%'],
+                correctIndex: 0,
+                explanation: '80 PLUS Gold yêu cầu hiệu suất tối thiểu 87% ở mức tải 50%, 90% ở mức tải 100%.'
+              }
+            ]
+          },
+          {
+            id: 'stage-2-part-2-section-2',
+            title: 'Các loại đầu nối và lựa chọn nguồn',
+            content: 'Bộ nguồn ATX có nhiều loại đầu nối khác nhau để cấp điện cho từng linh kiện. Đầu nối chính là 24-pin ATX (trước đây là 20-pin) cắm vào mainboard để cấp nguồn tổng thể. Đầu nối EPS 8-pin (4+4) cấp nguồn riêng cho CPU, thường có 1 hoặc 2 đầu trên mainboard cao cấp. Đầu nối PCIe 8-pin (6+2) dành cho card đồ họa, có thể có nhiều đầu trên nguồn công suất lớn. Đầu nối SATA 15-pin cấp nguồn cho ổ cứng SATA, còn đầu nối Molex 4-pin (cũ hơn) dùng cho quạt và thiết bị cũ.\n\nPSU được chia làm 3 loại dựa trên khả năng tháo rời dây cáp. Non-modular là loại dây liền, không tháo được – giá rẻ nhưng khó quản lý dây thừa. Semi-modular có dây chính (24-pin, EPS) cố định, còn các dây khác có thể tháo rời. Full-modular cho phép tháo toàn bộ dây, giúp case gọn gàng nhất và dễ dàng thay dây tùy chỉnh (custom cable). Full-modular là lựa chọn ưu tiên cho PC cao cấp và dân modding.\n\nKhi chọn mua nguồn, công suất (wattage) là yếu tố then chốt. Bạn cần tính tổng công suất tiêu thụ của tất cả linh kiện, đặc biệt là CPU và GPU, sau đó cộng thêm 20-30% dư địa. Ví dụ, một PC gaming với CPU 150W và GPU 250W cần nguồn tối thiểu 550-650W. Nên chọn nguồn dư công suất một chút để PSU hoạt động ở mức tải tối ưu (40-60%) và có khả năng nâng cấp sau này. Thương hiệu uy tín gồm Corsair, Seasonic, EVGA, Cooler Master, và các dòng như Corsair RM/RMx/Shift, Seasonic Focus/GX, EVGA SuperNOVA đều rất đáng tin cậy.',
+            imagePrompt: 'Các loại đầu nối dây cáp của bộ nguồn ATX',
+            quiz: [
+              {
+                question: 'Đầu nối nào trên PSU dùng để cấp nguồn cho card đồ họa?',
+                options: ['PCIe 8-pin (6+2)', 'EPS 8-pin (4+4)', '24-pin ATX', 'SATA 15-pin'],
+                correctIndex: 0,
+                explanation: 'Đầu nối PCIe 8-pin (6+2) được thiết kế riêng để cấp nguồn cho card đồ họa rời.'
+              },
+              {
+                question: 'Loại PSU nào cho phép tháo rời toàn bộ dây cáp?',
+                options: ['Full-modular', 'Semi-modular', 'Non-modular', 'All-modular'],
+                correctIndex: 0,
+                explanation: 'PSU full-modular cho phép tháo rời tất cả dây cáp, giúp quản lý dây gọn gàng và dễ dàng thay dây tùy chỉnh.'
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'stage-2-part-3',
+        titleVn: 'Kiểm tra và sửa chữa bộ nguồn',
+        titleEn: 'Power Supply Testing & Repair',
+        pages: '39–45',
+        sections: [
+          {
+            id: 'stage-2-part-3-section-1',
+            title: 'Các lỗi thường gặp ở bộ nguồn',
+            content: 'Bộ nguồn là một trong những linh kiện dễ hỏng nhất trong máy tính và có thể gây ra nhiều triệu chứng khó chịu. Một trong những dấu hiệu phổ biến nhất là máy tính không khởi động được – khi nhấn nút Power, không có bất kỳ phản hồi nào, đèn quạt không quay. Nguyên nhân có thể do nguồn bị chết hoàn toàn, cầu chì bên trong bị đứt, hoặc mạch bảo vệ kích hoạt. Một triệu chứng khác là máy khởi động được nhưng tự tắt ngang hoặc reset liên tục – điều này thường do nguồn yếu, không đủ công suất đáp ứng khi linh kiện hoạt động ở tải cao.\n\nNguồn yếu hoặc hoạt động không ổn định còn gây ra lỗi màn hình xanh (BSOD), treo máy ngẫu nhiên, ổ cứng không được nhận diện, hoặc card đồ họa bị giật/lag khi chơi game. Một dấu hiệu điển hình khác là quạt nguồn kêu to, kêu lạch cạch hoặc không quay. Quạt nguồn bị kẹt do bụi bẩn hoặc mỡ bôi trơn khô sẽ làm nhiệt độ bên trong nguồn tăng cao, dẫn đến hỏng hóc. Mùi khét từ nguồn là dấu hiệu nguy hiểm nhất – có thể do tụ điện bị nổ, cuộn dây bị cháy hoặc các linh kiện bán dẫn bị đánh thủng.\n\nViệc kiểm tra nguồn cần được thực hiện cẩn thận vì liên quan đến điện áp cao và nguy hiểm. Cách đơn giản nhất là dùng đồng hồ vạn năng (multimeter) để đo điện áp đầu ra của các chân trên đầu nối 24-pin. Cắm que đo đen vào chân mass (dây đen) và que đo đỏ vào các chân điện áp: +12V (dây vàng), +5V (dây đỏ), +3.3V (dây cam). Nếu các giá trị đo được lệch quá 5% so với tiêu chuẩn, nguồn có vấn đề. Một cách khác là dùng thiết bị chuyên dụng PSU tester để kiểm tra nhanh toàn bộ các đầu ra. Quan trọng nhất: luôn đảm bảo an toàn, ngắt điện trước khi kiểm tra và không tự ý mở nguồn nếu không có chuyên môn.',
+            imagePrompt: 'Kỹ thuật viên đang đo điện áp bộ nguồn bằng đồng hồ vạn năng',
+            quiz: [
+              {
+                question: 'Dấu hiệu nào cho thấy bộ nguồn có vấn đề nghiêm trọng?',
+                options: ['Mùi khét từ nguồn', 'Quạt nguồn quay êm', 'Đèn nguồn sáng', 'Máy khởi động bình thường'],
+                correctIndex: 0,
+                explanation: 'Mùi khét từ nguồn cho thấy các linh kiện bên trong đã bị cháy hỏng, cần thay nguồn ngay lập tức.'
+              },
+              {
+                question: 'Dụng cụ nào dùng để đo điện áp đầu ra của bộ nguồn?',
+                options: ['Đồng hồ vạn năng (Multimeter)', 'Nhiệt kế điện tử', 'Máy hiện sóng', 'Ampe kìm'],
+                correctIndex: 0,
+                explanation: 'Đồng hồ vạn năng có thể đo điện áp DC ở các đầu ra của PSU để kiểm tra hoạt động.'
+              }
+            ]
+          },
+          {
+            id: 'stage-2-part-3-section-2',
+            title: 'Quy trình thay thế và khắc phục sự cố nguồn',
+            content: 'Khi xác định bộ nguồn bị lỗi, việc thay thế là giải pháp an toàn nhất. Không nên cố sửa chữa nguồn nếu bạn không có kiến thức chuyên sâu về điện tử, vì bên trong nguồn có các tụ điện cao áp có thể gây điện giật nguy hiểm ngay cả khi đã rút điện. Quy trình thay nguồn bắt đầu bằng việc tắt máy, rút dây nguồn và đợi khoảng 5-10 phút cho các tụ xả hết điện. Sau đó, tháo các dây cáp kết nối từ PSU cũ đến các linh kiện, ghi nhớ vị trí từng đầu nối để lắp lại dễ dàng.\n\nKhi lắp nguồn mới, hãy chú ý đặt nguồn đúng chiều (quạt của nguồn hướng xuống dưới nếu case có lỗ thoát khí ở đáy, hoặc hướng lên trên nếu nguồn đặt ở trên cùng). Kết nối lần lượt: 24-pin ATX vào mainboard, EPS 8-pin vào CPU, PCIe vào card đồ họa và SATA vào ổ cứng. Sử dụng dây buộc (cable tie) để cố định dây gọn gàng, tránh dây chạm vào quạt hoặc cản trở luồng khí. Sau khi lắp xong, kiểm tra lại tất cả các đầu nối đã chắc chắn trước khi cấp điện và khởi động.\n\nMột số mẹo khắc phục sự cố nhanh: nếu máy không khởi động, hãy kiểm tra công tắc nguồn ở mặt sau PSU đã bật chưa (I là bật, O là tắt). Thử dùng bộ nguồn khác (nếu có) để xác định chính xác nguyên nhân. Kiểm tra cáp nguồn 24-pin đã cắm chặt vào mainboard chưa – đây là lỗi rất thường gặp ở người mới lắp ráp. Đối với nguồn có quạt không quay: một số nguồn hiện đại có chế độ fanless (quạt chỉ quay khi tải nặng), nếu máy hoạt động bình thường thì không cần lo lắng. Nếu nghi ngờ nguồn yếu, có thể dùng trang web tính công suất PSU (PSU calculator) để kiểm tra lại nhu cầu thực tế.',
+            imagePrompt: 'Quy trình thay thế bộ nguồn ATX trong case máy tính',
+            quiz: [
+              {
+                question: 'Tại sao không nên tự sửa bộ nguồn nếu không có chuyên môn?',
+                options: ['Bên trong có tụ điện cao áp nguy hiểm', 'Nguồn rất rẻ nên mua mới tốt hơn', 'Không có dụng cụ sửa', 'Nguồn không thể sửa được'],
+                correctIndex: 0,
+                explanation: 'Các tụ điện trong nguồn có thể tích điện áp cao và gây điện giật nguy hiểm ngay cả khi đã rút dây nguồn.'
+              },
+              {
+                question: 'Khi lắp nguồn mới, đầu nối nào cần cắm vào mainboard trước tiên?',
+                options: ['24-pin ATX', 'EPS 8-pin', 'PCIe 8-pin', 'SATA 15-pin'],
+                correctIndex: 0,
+                explanation: 'Đầu nối 24-pin ATX cấp nguồn chính cho mainboard và là kết nối quan trọng nhất.'
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'stage-3',
+    stageNumber: 3,
+    icon: '🔌',
+    color: '#10b981',
+    titleVn: 'Mainboard',
+    titleEn: 'Motherboard',
+    pages: '46–120',
+    parts: [
+      {
+        id: 'stage-3-part-1',
+        titleVn: 'Cấu tạo và chức năng của Mainboard',
+        titleEn: 'Motherboard Structure & Functions',
+        pages: '46–65',
+        sections: [
+          {
+            id: 'stage-3-part-1-section-1',
+            title: 'Chipset cầu bắc và cầu nam',
+            content: 'Chipset là tập hợp các vi mạch điều khiển luồng dữ liệu giữa CPU, RAM, card đồ họa và các thiết bị ngoại vi. Trong các mainboard đời cũ (trước khoảng 2010), chipset được chia làm hai phần riêng biệt: cầu bắc (Northbridge) và cầu nam (Southbridge). Cầu bắc chịu trách nhiệm kết nối CPU với RAM và card đồ họa qua các bus tốc độ cao như FSB (Front Side Bus) và AGP/PCIe. Vì xử lý các luồng dữ liệu quan trọng nhất, cầu bắc thường nằm gần CPU hơn và có tản nhiệt riêng.\n\nCầu nam (Southbridge) đảm nhận các kết nối chậm hơn như ổ cứng SATA, cổng USB, âm thanh, mạng LAN, PCI slot và các thiết bị I/O khác. Cầu nam kết nối với cầu bắc qua bus nội bộ (DMI – Direct Media Interface hoặc bus tương tự). Sự phân chia này giúp giảm tải cho CPU và tối ưu luồng dữ liệu. Tuy nhiên, từ thời Intel Nehalem (2008) và AMD K8, bộ điều khiển bộ nhớ (memory controller) đã được tích hợp vào CPU, khiến vai trò của cầu bắc giảm dần.\n\nNgày nay, trên các mainboard hiện đại, chipset chỉ còn một chip duy nhất (gọi là Platform Controller Hub – PCH trên Intel, hoặc Fusion Controller Hub – FCH trên AMD) tích hợp cả chức năng cầu bắc và cầu nam. Chipset này kết nối trực tiếp với CPU qua bus DMI (Intel) hoặc PCIe (AMD). Các chipset phổ biến hiện nay gồm: Intel Z790, B760, H610 cho thế hệ 12-14; AMD X670E, B650, A620 cho nền tảng AM5. Chipset cao cấp hơn cung cấp nhiều làn PCIe, cổng USB, SATA và hỗ trợ ép xung.',
+            imagePrompt: 'Sơ đồ kiến trúc chipset cầu bắc (Northbridge) và cầu nam (Southbridge)',
+            quiz: [
+              {
+                question: 'Chipset cầu bắc (Northbridge) chịu trách nhiệm kết nối những gì?',
+                options: ['CPU với RAM và card đồ họa', 'CPU với ổ cứng', 'RAM với USB', 'Card đồ họa với ổ cứng'],
+                correctIndex: 0,
+                explanation: 'Cầu bắc xử lý các kết nối tốc độ cao giữa CPU, RAM và card đồ họa – những thành phần quan trọng nhất.'
+              },
+              {
+                question: 'Tại sao chipset hiện đại chỉ còn một chip duy nhất thay vì hai?',
+                options: ['Bộ điều khiển bộ nhớ đã được tích hợp vào CPU', 'Công nghệ chưa đủ phát triển', 'Để giảm kích thước mainboard', 'Do yêu cầu của Microsoft'],
+                correctIndex: 0,
+                explanation: 'Từ khi bộ điều khiển bộ nhớ được tích hợp vào CPU, vai trò cầu bắc giảm, cho phép hợp nhất thành một chipset duy nhất.'
+              }
+            ]
+          },
+          {
+            id: 'stage-3-part-1-section-2',
+            title: 'BIOS, CMOS và IC SIO',
+            content: 'BIOS (Basic Input/Output System) là một chương trình firmware được lưu trên chip ROM (Read-Only Memory) gắn trên mainboard. Khi bạn nhấn nút khởi động, BIOS là chương trình đầu tiên chạy, thực hiện quá trình POST (Power-On Self Test) để kiểm tra các linh kiện cơ bản như CPU, RAM, card đồ họa. Nếu phát hiện lỗi, BIOS sẽ phát ra mã beep hoặc hiển thị thông báo lỗi. Sau đó, BIOS sẽ tìm kiếm bootloader trên ổ cứng hoặc thiết bị khởi động để nạp hệ điều hành.\n\nCMOS (Complementary Metal-Oxide-Semiconductor) là một vi mạch nhỏ trên mainboard lưu trữ các cài đặt BIOS như thứ tự khởi động, cấu hình RAM, xung nhịp CPU và thời gian hệ thống. CMOS được nuôi bởi pin CR2032 (pin đồng xu) để duy trì dữ liệu ngay cả khi tắt máy và rút dây nguồn. Nếu pin CMOS yếu hoặc hết, máy tính sẽ mất cài đặt BIOS mỗi khi tắt, thời gian hệ thống bị sai, và thỉnh thoảng máy báo lỗi "CMOS Checksum Error". Thay pin CMOS là thao tác đơn giản nhưng rất hay gặp trong bảo trì PC.\n\nIC SIO (Super I/O) là một chip chuyên dụng trên mainboard quản lý các cổng I/O truyền thống như cổng COM (serial), cổng LPT (parallel), PS/2 cho bàn phím và chuột, và quạt điều khiển. Dù các cổng này ít được dùng trên PC hiện đại (thay thế bởi USB), chip SIO vẫn quan trọng trong việc giám sát hệ thống – nó theo dõi nhiệt độ, tốc độ quạt và điện áp thông qua các cảm biến (sensors). Dữ liệu này được gửi đến BIOS và các phần mềm như HWMonitor để hiển thị cho người dùng. IC SIO thường được sản xuất bởi Nuvoton, ITE hoặc Fintek.',
+            imagePrompt: 'Vị trí chip BIOS, pin CMOS CR2032 và chip SIO trên mainboard',
+            quiz: [
+              {
+                question: 'Chức năng chính của BIOS khi khởi động máy tính là gì?',
+                options: ['Kiểm tra phần cứng (POST) và nạp hệ điều hành', 'Quản lý cổng USB', 'Điều khiển tốc độ quạt', 'Nén dữ liệu ổ cứng'],
+                correctIndex: 0,
+                explanation: 'BIOS thực hiện POST để kiểm tra phần cứng, sau đó tìm bootloader trên thiết bị khởi động để nạp hệ điều hành.'
+              },
+              {
+                question: 'Dấu hiệu nào cho thấy pin CMOS trên mainboard sắp hết?',
+                options: ['Mất cài đặt BIOS và sai thời gian khi tắt máy', 'Máy bị treo thường xuyên', 'Ổ cứng không hoạt động', 'Card đồ họa không lên hình'],
+                correctIndex: 0,
+                explanation: 'Khi pin CMOS hết, mainboard không thể lưu cài đặt BIOS, dẫn đến mất cấu hình và thời gian hệ thống bị sai mỗi lần khởi động.'
+              }
+            ]
+          },
+          {
+            id: 'stage-3-part-1-section-3',
+            title: 'Các thành phần khác trên Mainboard',
+            content: 'Ngoài chipset, BIOS và SIO, mainboard còn có nhiều thành phần quan trọng khác. VRM (Voltage Regulator Module) là hệ thống mạch điện chuyển đổi và ổn định điện áp từ nguồn xuống mức phù hợp cho CPU. VRM gồm các pha (phase) – mỗi pha có cuộn cảm (choke), tụ điện (capacitor) và MOSFET. Số pha VRM càng nhiều, dòng điện cấp cho CPU càng ổn định, đặc biệt quan trọng khi ép xung. Mainboard cao cấp có 12-20 pha VRM trong khi mainboard phổ thông chỉ có 4-8 pha.\n\nTụ điện (capacitor) trên mainboard có vai trò lọc nhiễu và ổn định điện áp. Có hai loại chính: tụ hóa nhôm (electrolytic) giá rẻ nhưng kém bền, và tụ rắn (solid-cap) cao cấp hơn với tuổi thọ cao gấp 5-10 lần. Trên mainboard hiện đại, hầu hết tụ điện đều là loại rắn. Các cuộn cảm (choke) hoạt động cùng với tụ điện để làm phẳng dòng điện. Các mainboard cao cấp thường dùng cuộn cảm mạ vàng hoặc có vỏ bọc để tản nhiệt tốt hơn.\n\nĐồng hồ thạch anh (Crystal Oscillator) tạo ra xung nhịp chuẩn cho toàn bộ hệ thống. Chip âm thanh (Audio Codec) như Realtek ALC1220 xử lý âm thanh. Chip mạng LAN (Ethernet Controller) như Intel I225-V hoặc Realtek 2.5G cung cấp kết nối mạng. Các jumper và công tắc DIP cho phép cấu hình cứng một số chức năng. Đèn debug LED hiển thị mã lỗi dưới dạng số hoặc chữ giúp kỹ thuật viên chẩn đoán nhanh sự cố phần cứng.',
+            imagePrompt: 'Sơ đồ các thành phần chính trên mainboard hiện đại',
+            quiz: [
+              {
+                question: 'VRM trên mainboard có chức năng gì?',
+                options: ['Ổn định điện áp cấp cho CPU', 'Điều khiển tốc độ quạt', 'Kết nối Internet', 'Xử lý âm thanh'],
+                correctIndex: 0,
+                explanation: 'VRM (Voltage Regulator Module) chuyển đổi và ổn định điện áp từ nguồn xuống mức phù hợp cho CPU hoạt động.'
+              },
+              {
+                question: 'Loại tụ điện nào tốt hơn và bền hơn trên mainboard?',
+                options: ['Tụ rắn (Solid-cap)', 'Tụ hóa nhôm', 'Tụ tantali', 'Tụ mica'],
+                correctIndex: 0,
+                explanation: 'Tụ rắn (solid-cap) có tuổi thọ cao gấp 5-10 lần tụ hóa nhôm, thường dùng trên mainboard chất lượng cao.'
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'stage-3-part-2',
+        titleVn: 'Các thế hệ Mainboard',
+        titleEn: 'Motherboard Generations',
+        pages: '66–90',
+        sections: [
+          {
+            id: 'stage-3-part-2-section-1',
+            title: 'Mainboard thời Pentium 2, 3 và 4',
+            content: 'Cuối thập niên 1990 và đầu 2000 là thời kỳ hoàng kim của sự phát triển mainboard với các chuẩn mới liên tục ra đời. Mainboard thời Pentium II (1997) sử dụng khe cắm Slot 1 thay vì socket – CPU được gắn trên một card mô-đun riêng (SEC cartridge). Chipset phổ biến thời này là Intel 440BX, nổi tiếng với độ ổn định và hiệu năng cao. RAM chủ yếu là SDRAM PC66/PC100, bus FSB chạy ở 66-100MHz. AGP 2x (Accelerated Graphics Port) bắt đầu thay thế PCI cho card đồ họa.\n\nPentium III (1999) chuyển về socket 370 với CPU FC-PGA, nhưng vẫn dùng chipset 440BX hoặc i815. Bus FSB tăng lên 133MHz. RAM SDRAM PC133 là chuẩn chính, và AGP 4x ra đời. Pentium 4 (2000-2006) đánh dấu bước ngoặt lớn với kiến trúc NetBurst, socket 423 rồi 478. Chipset i845, i865 và i875 mang đến hỗ trợ RAM RDRAM, SDRAM và DDR đầu tiên. AGP 8x và SATA ra đời. Mainboard thời Pentium 4 có nhiều vấn đề về nhiệt độ vì CPU NetBurst tỏa nhiệt rất lớn, đòi hỏi tản nhiệt cồng kềnh.\n\nCác hãng sản xuất mainboard nổi tiếng giai đoạn này gồm ASUS, Gigabyte, MSI, Abit, và DFI. Mỗi hãng có những công nghệ riêng như ASUS có AI Overclocking, Gigabyte có DualBIOS để dự phòng hỏng BIOS, Abit nổi tiếng với khả năng ép xung. Thời kỳ này cũng chứng kiến sự phát triển của các chuẩn kết nối như USB 1.1/2.0, FireWire (IEEE 1394), và âm thanh AC97. Việc nâng cấp mainboard thường xuyên do socket thay đổi liên tục là một đặc điểm khó chịu của thời đại này.',
+            imagePrompt: 'Mainboard Pentium 4 với socket 478, khe AGP và RAM DDR',
+            quiz: [
+              {
+                question: 'Pentium II sử dụng khe cắm CPU dạng nào?',
+                options: ['Slot 1', 'Socket 370', 'Socket 478', 'LGA 775'],
+                correctIndex: 0,
+                explanation: 'Pentium II dùng slot 1 – CPU được gắn trên một card mô-đun (SEC cartridge) cắm vào khe, khác với socket thông thường.'
+              },
+              {
+                question: 'Công nghệ DualBIOS của hãng nào giúp dự phòng khi hỏng BIOS?',
+                options: ['Gigabyte', 'ASUS', 'MSI', 'Abit'],
+                correctIndex: 0,
+                explanation: 'Gigabyte nổi tiếng với DualBIOS – mainboard có 2 chip BIOS, chip dự phòng tự động khôi phục khi chip chính bị lỗi.'
+              }
+            ]
+          },
+          {
+            id: 'stage-3-part-2-section-2',
+            title: 'Từ Core 2 Duo đến thế hệ Core i',
+            content: 'Năm 2006, Intel giới thiệu kiến trúc Core với dòng Core 2 Duo, đánh dấu bước ngoặt lớn. Socket LGA 775 (Socket T) ra đời và tồn tại lâu nhất trong lịch sử Intel. Chipset dòng 3, 4, 5 series (P35, X38, P45, X58) mang đến hỗ trợ DDR2, DDR3 và PCI Express 2.0. Đây là thời kỳ hoàng kim của ép xung với các mainboard P35 và P45 cho phép tăng FSB từ 333 lên 500MHz+. Core 2 Quad ra đời với 4 nhân, mở đầu kỷ nguyên đa nhân trên desktop.\n\nNăm 2008, Intel ra mắt kiến trúc Nehalem với dòng Core i7 đầu tiên, socket LGA 1366 (dòng 9xx) và chipset X58. Đây là cuộc cách mạng: bộ điều khiển bộ nhớ tích hợp trong CPU, bus QPI (Quick Path Interconnect) thay thế FSB, và hỗ trợ RAM DDR3 triple-channel. Năm 2009, Core i5/i7 dòng 8xx ra mắt trên socket LGA 1156 với chipset P55/H55/H57, tích hợp card đồ họa trong CPU (Clarkdale). Năm 2011 là cột mốc quan trọng với socket LGA 1155 (Sandy Bridge) và chipset 6 series (P67, H67, Z68).\n\nKiến trúc Sandy Bridge (2011) và Ivy Bridge (2012) dùng socket LGA 1155 với chipset 7 series (Z77, H77, B75). Haswell (2013) và Broadwell (2014) dùng LGA 1150 với chipset 8/9 series (Z87, Z97, H97). Skylake (2015) chuyển sang LGA 1151 với chipset 100 series (Z170, H170, B150). Mỗi thế hệ đều mang đến những cải tiến về hiệu năng, tiết kiệm điện và hỗ trợ chuẩn mới như USB 3.0, SATA 6Gb/s, PCIe 3.0, M.2 NVMe và DDR4.',
+            imagePrompt: 'Mainboard LGA 1155 với chipset Z77 thời Sandy Bridge',
+            quiz: [
+              {
+                question: 'Socket LGA 775 gắn liền với dòng CPU nào của Intel?',
+                options: ['Core 2 Duo / Core 2 Quad', 'Pentium 4', 'Core i7', 'Pentium III'],
+                correctIndex: 0,
+                explanation: 'LGA 775 là socket của dòng Core 2 Duo và Core 2 Quad (2006-2009), một trong những socket tồn tại lâu nhất của Intel.'
+              },
+              {
+                question: 'Điểm cách mạng nào của kiến trúc Nehalem (Core i7 thế hệ 1)?',
+                options: ['Bộ điều khiển bộ nhớ tích hợp trong CPU', 'Hỗ trợ USB 3.0', 'Tích hợp WiFi', 'Hỗ trợ DDR5'],
+                correctIndex: 0,
+                explanation: 'Nehalem là kiến trúc đầu tiên tích hợp bộ điều khiển bộ nhớ vào CPU, loại bỏ FSB và dùng bus QPI tốc độ cao.'
+              }
+            ]
+          },
+          {
+            id: 'stage-3-part-2-section-3',
+            title: 'Mainboard đời mới và AMD',
+            content: 'Từ năm 2016, Intel phát triển LGA 1151 v2 (300 series) cho Coffee Lake (thế hệ 8-9), sau đó là LGA 1200 (400/500 series) cho Comet Lake và Rocket Lake (thế hệ 10-11). Năm 2021, Intel ra mắt LGA 1700 (600/700 series) cho Alder Lake, Raptor Lake và dòng 14 (thế hệ 12-14) với kiến trúc hybrid (P-core + E-core), hỗ trợ DDR5 và PCIe 5.0. Chipset Z790 cao cấp nhất cho phép ép xung CPU và RAM, nhiều làn PCIe 5.0 và cổng USB 3.2 Gen 2x2 20Gbps.\n\nVề phía AMD, socket AM3+ (2011) dùng cho CPU FX Bulldozer/Piledriver với chipset 900 series. Năm 2017 là bước ngoặt với AMD Ryzen trên socket AM4. Chipset dòng 300 (B350, X370), 400 (B450, X470) và 500 (B550, X570) dùng cho Ryzen 1000 đến 5000 series. AM4 tồn tại suốt 5 thế hệ CPU – điều hiếm thấy. Năm 2022, AMD ra mắt AM5 (LGA 1718) cho Ryzen 7000 series với chipset X670E, B650E, B650 và A620. AM5 hỗ trợ DDR5, PCIe 5.0 và tối đa 24 làn PCIe 5.0 từ CPU.\n\nAMD luôn có lợi thế về tương thích ngược – B450 lên được Ryzen 5000, A520 và B550 đều hỗ trợ nhiều thế hệ. Intel thường thay socket sau 2-3 thế hệ. Nhìn chung, mainboard hiện đại tích hợp nhiều công nghệ: âm thanh cao cấp (Realtek ALC4080), mạng 2.5G/10G LAN, WiFi 6E/7, Bluetooth 5.3, USB-C với Thunderbolt 4, đèn LED RGB có thể tùy chỉnh, BIOS Flashback, và tản nhiệt VRM mạnh mẽ. Việc chọn mainboard cần dựa trên nhu cầu, ngân sách và khả năng nâng cấp trong tương lai.',
+            imagePrompt: 'Mainboard AMD AM5 X670E và Intel LGA 1700 Z790',
+            quiz: [
+              {
+                question: 'Socket AM5 của AMD hỗ trợ loại RAM nào?',
+                options: ['DDR5', 'DDR4', 'DDR3', 'Cả DDR4 và DDR5'],
+                correctIndex: 0,
+                explanation: 'AM5 chỉ hỗ trợ DDR5, không tương thích ngược với DDR4 như AM4.'
+              },
+              {
+                question: 'Ai là người có lợi thế về tương thích socket lâu dài hơn giữa Intel và AMD?',
+                options: ['AMD (AM4 dùng 5 thế hệ CPU)', 'Intel (thay socket mỗi 2 năm)', 'Cả hai như nhau', 'Không hãng nào'],
+                correctIndex: 0,
+                explanation: 'AM4 của AMD đã hỗ trợ 5 thế hệ CPU Ryzen (1000-5000 series), trong khi Intel thay socket sau 2-3 thế hệ.'
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'stage-3-part-3',
+        titleVn: 'Khe cắm và Bus mở rộng',
+        titleEn: 'Slots & Expansion Buses',
+        pages: '91–120',
+        sections: [
+          {
+            id: 'stage-3-part-3-section-1',
+            title: 'CPU Socket và RAM Slot',
+            content: 'CPU socket là khe cắm kết nối CPU với mainboard, đóng vai trò then chốt trong khả năng tương thích. Có hai loại socket chính: LGA (Land Grid Array) và PGA (Pin Grid Array). LGA có các chân nằm trên socket (mainboard), CPU có các tiếp điểm phẳng. Đây là chuẩn của Intel từ LGA 775 đến LGA 1700. PGA có chân nằm trên CPU, cắm vào lỗ trên socket – đây là chuẩn của AMD từ AM2 đến AM4. Từ AM5, AMD chuyển sang LGA. Khi lắp CPU, cần căn chỉnh tam giác vàng hoặc mũi tên trên CPU với dấu tương ứng trên socket, nhẹ nhàng đặt CPU xuống mà không dùng lực.\n\nRAM slot (khe DIMM – Dual Inline Memory Module) là nơi gắn thanh RAM. Các khe thường được đánh số A1, A2, B1, B2. Để kích hoạt Dual Channel (kênh đôi), bạn cần gắn RAM theo cặp: A2+B2 thường được ưu tiên (cùng màu trên mainboard). Dual Channel tăng gấp đôi băng thông bộ nhớ, cải thiện đáng kể hiệu năng. Các thế hệ RAM khác nhau có số chân và vị trí khuyết khác nhau để chống cắm nhầm: DDR3 có 240 chân, DDR4 có 288 chân, DDR5 cũng 288 chân nhưng vị trí khuyết khác.\n\nTốc độ RAM được đo bằng MHz hoặc MT/s, với DDR5 hiện đạt 4800-8400 MT/s. Mainboard giới hạn tốc độ RAM tối đa tùy chipset và BIOS. XMP (Intel Extreme Memory Profile) và EXPO (AMD Extended Profiles for Overclocking) là các profile ép xung RAM tự động, cho phép chạy RAM ở tốc độ cao hơn mặc định. Để chọn RAM phù hợp, cần xem mainboard hỗ trợ DDR mấy, tốc độ tối đa và dung lượng tối đa. Nhiều mainboard ATX có 4 khe, hỗ trợ tối đa 128-256GB RAM.',
+            imagePrompt: 'Sơ đồ socket LGA 1700 và khe RAM DDR5 trên mainboard',
+            quiz: [
+              {
+                question: 'Dual Channel RAM mang lại lợi ích gì?',
+                options: ['Tăng gấp đôi băng thông bộ nhớ', 'Tăng gấp đôi dung lượng RAM', 'Giảm một nửa độ trễ', 'Tiết kiệm điện'],
+                correctIndex: 0,
+                explanation: 'Dual Channel cho phép CPU truy cập hai thanh RAM cùng lúc, tăng gấp đôi băng thông so với Single Channel.'
+              },
+              {
+                question: 'XMP và EXPO là công nghệ gì?',
+                options: ['Ép xung RAM tự động', 'Tăng tốc CPU', 'Tản nhiệt RAM', 'Tiết kiệm pin'],
+                correctIndex: 0,
+                explanation: 'XMP (Intel) và EXPO (AMD) là các profile ép xung RAM tự động giúp chạy RAM ở tốc độ cao hơn chuẩn.'
+              }
+            ]
+          },
+          {
+            id: 'stage-3-part-3-section-2',
+            title: 'Khe PCI, AGP và PCI Express',
+            content: 'Trước khi PCI Express ra đời, khe PCI (Peripheral Component Interconnect) là chuẩn kết nối mở rộng phổ biến nhất. PCI 2.0 ra mắt năm 1993 với băng thông 133 MB/s ở 33MHz, dùng cho card mạng, card âm thanh, modem và các thiết bị khác. Tuy nhiên, với sự phát triển của card đồ họa 3D, PCI nhanh chóng bão hòa băng thông, dẫn đến nhu cầu về chuẩn kết nối đồ họa chuyên dụng.\n\nNăm 1997, AGP (Accelerated Graphics Port) ra đời, là khe cắm chuyên dụng cho card đồ họa. AGP có băng thông cao hơn nhiều so với PCI: AGP 1x (266 MB/s), 2x (533 MB/s), 4x (1.07 GB/s) và 8x (2.14 GB/s). AGP tồn tại đến giữa thập niên 2000 và bị thay thế hoàn toàn bởi PCI Express, vốn linh hoạt và có băng thông cao hơn nhiều.\n\nPCI Express (PCIe) ra mắt năm 2004 và là chuẩn kết nối mở rộng thống nhất hiện nay. PCIe sử dụng kiến trúc serial point-to-point với các làn (lane) dữ liệu độc lập. Mỗi làn PCIe 1.0 có băng thông 250 MB/s mỗi chiều. Các thế hệ PCIe: 1.0 (2.5 GT/s), 2.0 (5 GT/s), 3.0 (8 GT/s), 4.0 (16 GT/s), 5.0 (32 GT/s). PCIe 5.0 x16 đạt băng thông ~63 GB/s, gấp 32 lần AGP 8x. Tính năng quan trọng: PCIe tương thích ngược, PCIe 4.0 chạy được card PCIe 3.0 nhưng ở tốc độ thấp hơn.',
+            imagePrompt: 'So sánh khe cắm PCI, AGP và PCI Express trên mainboard',
+            quiz: [
+              {
+                question: 'PCI Express khác AGP ở điểm cơ bản nào?',
+                options: ['PCIe là chuẩn nối tiếp (serial) point-to-point', 'AGP nhanh hơn PCIe', 'PCIe chỉ dùng cho card đồ họa', 'AGP là chuẩn mới hơn'],
+                correctIndex: 0,
+                explanation: 'PCIe sử dụng kiến trúc nối tiếp với các làn dữ liệu độc lập, trong khi AGP là chuẩn song song (parallel).'
+              },
+              {
+                question: 'Mỗi làn PCIe 5.0 có tốc độ bao nhiêu?',
+                options: ['32 GT/s', '16 GT/s', '8 GT/s', '2.5 GT/s'],
+                correctIndex: 0,
+                explanation: 'PCIe 5.0 có tốc độ 32 GT/s (gigatransfers per second) mỗi làn, gấp đôi PCIe 4.0 và gấp 12 lần PCIe 1.0.'
+              }
+            ]
+          },
+          {
+            id: 'stage-3-part-3-section-3',
+            title: 'Các chuẩn kết nối khác: SATA, USB, M.2',
+            content: 'SATA (Serial ATA) là chuẩn kết nối ổ cứng và ổ quang, thay thế PATA (IDE) từ năm 2003. SATA I (1.5 Gb/s), II (3 Gb/s) và III (6 Gb/s). SATA III vẫn là chuẩn chính hiện nay, tốc độ thực tế ~550-600 MB/s. Cáp SATA data mỏng, dễ quản lý hơn cáp IDE dẹt. Mỗi cổng SATA kết nối một thiết bị. Mainboard thường có 4-8 cổng SATA. SATA cũng hỗ trợ hot-swap (cắm nóng) và NCQ (Native Command Queuing).\n\nUSB (Universal Serial Bus) là chuẩn kết nối vạn năng cho thiết bị ngoại vi. USB 1.1 (12 Mbps), USB 2.0 (480 Mbps), USB 3.0/3.1 Gen 1 (5 Gbps), USB 3.1 Gen 2 (10 Gbps), USB 3.2 Gen 2x2 (20 Gbps) và USB4 (40 Gbps). Cổng USB 3.0 thường có màu xanh dương. USB Type-C là đầu nối đối xứng, có thể cắm theo cả hai chiều, hỗ trợ Power Delivery đến 240W và DisplayPort Alt Mode.\n\nM.2 là chuẩn kết nối hiện đại cho SSD và card WiFi, thay thế mSATA. Khe M.2 hỗ trợ cả SATA và NVMe qua PCIe. SSD M.2 NVMe có tốc độ gấp 5-10 lần SSD SATA. Các kích thước M.2 phổ biến: 2230, 2242, 2260, 2280. M.2 2280 (22x80mm) phổ biến nhất. M.2 NVMe trên PCIe 4.0 có tốc độ đọc tuần tự lên đến 7450 MB/s, trong khi PCIe 5.0 có thể đạt 12000+ MB/s. Khi lắp M.2, cần vặn ốc cố định và gắn tản nhiệt nếu SSD tỏa nhiệt cao.',
+            imagePrompt: 'Sơ đồ cổng SATA, USB và khe M.2 trên mainboard',
+            quiz: [
+              {
+                question: 'Tốc độ tối đa của chuẩn SATA III là bao nhiêu?',
+                options: ['6 Gb/s (~550 MB/s thực tế)', '3 Gb/s', '1.5 Gb/s', '12 Gb/s'],
+                correctIndex: 0,
+                explanation: 'SATA III có băng thông 6 Gb/s, với tốc độ thực tế khoảng 550-600 MB/s.'
+              },
+              {
+                question: 'Kích thước M.2 phổ biến nhất trên thị trường hiện nay là gì?',
+                options: ['2280 (dài 80mm)', '2230 (dài 30mm)', '2242 (dài 42mm)', '2260 (dài 60mm)'],
+                correctIndex: 0,
+                explanation: 'M.2 2280 (22mm rộng, 80mm dài) là kích thước phổ biến nhất cho SSD NVMe trên desktop và laptop.'
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'stage-4',
+    stageNumber: 4,
+    icon: '💾',
+    color: '#8b5cf6',
+    titleVn: 'Bộ nhớ & Thiết bị lưu trữ',
+    titleEn: 'Memory & Storage Devices',
+    pages: '121–160',
+    parts: [
+      {
+        id: 'stage-4-part-1',
+        titleVn: 'RAM - Bộ nhớ trong',
+        titleEn: 'RAM - Internal Memory',
+        pages: '121–135',
+        sections: [
+          {
+            id: 'stage-4-part-1-section-1',
+            title: 'Lịch sử và các thế hệ RAM',
+            content: 'RAM (Random Access Memory) đã trải qua một quá trình phát triển dài từ những năm 1990. Thế hệ đầu tiên là SDRAM (Synchronous Dynamic RAM) ra mắt năm 1993, đồng bộ với bus hệ thống. SDRAM có tốc độ 66-133MHz (PC66, PC100, PC133), dung lượng tối đa 512MB mỗi thanh. SDRAM dùng 168 chân và điện áp 3.3V. Đây là RAM chính trong thời Pentium III và Pentium 4 đầu. SDRAM đã thay thế hoàn toàn EDO RAM và FPM RAM trước đó.\n\nDDR (Double Data Rate) SDRAM ra mắt năm 2000, mang đến cuộc cách mạng: truyền dữ liệu cả hai cạnh xung nhịp (tăng gấp đôi băng thông so với SDRAM). DDR1 có 184 chân, điện áp 2.5V, tốc độ 200-400MHz (PC1600 đến PC3200). DDR2 (2003) có 240 chân, điện áp 1.8V, tốc độ 400-1066MHz. DDR3 (2007) vẫn 240 chân nhưng điện áp chỉ 1.5V (1.35V cho DDR3L), tốc độ 1066-2133MHz. DDR3 phổ biến suốt thời Core i thế hệ 1-4. DDR4 (2014) có 288 chân, điện áp 1.2V, tốc độ 2133-5333MHz và dung lượng tối đa 512GB mỗi thanh.\n\nDDR5 là thế hệ mới nhất, ra mắt năm 2021 cùng Intel Alder Lake và AMD Ryzen 7000. DDR5 có 288 chân (khác vị trí khuyết so với DDR4), điện áp 1.1V, tốc độ 4800-8400 MT/s. DDR5 tích hợp bộ điều chỉnh điện áp (PMIC) và ECC on-die ngay trên thanh RAM. Dung lượng tối đa lên đến 512GB mỗi thanh (dùng chip 16Gb). DDR5 cải thiện băng thông gấp đôi DDR4, nhưng độ trễ CAS (CL) cao hơn. Trong tương lai, DDR5 sẽ tiếp tục phát triển với tốc độ lên đến 10000+ MT/s. Mỗi thế hệ RAM mới đều tăng hiệu năng, giảm điện áp và tăng dung lượng.',
+            imagePrompt: 'So sánh các thế hệ RAM SDRAM, DDR, DDR2, DDR3, DDR4 và DDR5',
+            quiz: [
+              {
+                question: 'DDR SDRAM khác SDRAM thường ở điểm nào?',
+                options: ['Truyền dữ liệu cả hai cạnh xung nhịp', 'Điện áp cao hơn', 'Dung lượng nhỏ hơn', 'Chậm hơn SDRAM'],
+                correctIndex: 0,
+                explanation: 'DDR (Double Data Rate) truyền dữ liệu cả khi xung lên và xung xuống, gấp đôi băng thông so với SDRAM cùng xung nhịp.'
+              },
+              {
+                question: 'DDR4 có bao nhiêu chân và điện áp hoạt động là bao nhiêu?',
+                options: ['288 chân, 1.2V', '240 chân, 1.5V', '184 chân, 2.5V', '288 chân, 1.1V'],
+                correctIndex: 0,
+                explanation: 'DDR4 có 288 chân và hoạt động ở điện áp 1.2V, thấp hơn DDR3 (1.5V) giúp tiết kiệm điện.'
+              }
+            ]
+          },
+          {
+            id: 'stage-4-part-1-section-2',
+            title: 'Thông số kỹ thuật của RAM',
+            content: 'Để hiểu và chọn RAM phù hợp, cần nắm các thông số kỹ thuật quan trọng. Dung lượng (capacity) là thông số đầu tiên, đo bằng GB. PC văn phòng cần tối thiểu 8GB, gaming cần 16-32GB, dựng phim/AI cần 32-128GB. Hệ điều hành và ứng dụng càng ngày càng ngốn nhiều RAM – Windows 11 idle đã dùng 3-4GB. Chrome với nhiều tab có thể dùng 6-8GB. Do đó, 16GB là điểm khởi đầu tốt cho đa số người dùng, và 32GB cho gaming/đồ họa.\n\nTốc độ (speed) đo bằng MHz hoặc MT/s. DDR4 phổ biến ở 3200-3600MT/s, DDR5 ở 4800-6000MT/s. Tốc độ cao hơn cải thiện hiệu năng trong các tác vụ nhạy băng thông như render video, giải nén file, chơi game ở độ phân giải cao. Tuy nhiên, lợi ích tốc độ thường không tuyến tính – chênh lệch giữa 4800 và 5600 MT/s có thể chỉ 3-5% trong game. Cân bằng giữa tốc độ, độ trễ và giá cả là quan trọng.\n\nCAS Latency (CL) là độ trễ giữa lệnh yêu cầu dữ liệu và thời điểm dữ liệu sẵn sàng. CL thấp hơn = nhanh hơn. Ví dụ, DDR4 3200 CL16 có độ trễ 10ns, trong khi DDR5 6000 CL36 có độ trễ 12ns. Thông số đầy đủ của RAM gồm CL-tRCD-tRP-tRAS (ví dụ 16-18-18-38). Timing thấp hơn luôn tốt hơn. XMP (Intel) và EXPO (AMD) giúp tự động cài đặt các timing tối ưu. Ngoài ra còn có rank (single/dual rank) ảnh hưởng đến hiệu năng, và điện áp (voltage) từ 1.1V (DDR5) đến 1.5V (DDR3).',
+            imagePrompt: 'Bảng thông số kỹ thuật của RAM DDR4 và DDR5',
+            quiz: [
+              {
+                question: 'Dung lượng RAM tối thiểu cho một PC gaming hiện nay là bao nhiêu?',
+                options: ['16GB', '8GB', '4GB', '32GB'],
+                correctIndex: 0,
+                explanation: '16GB RAM là tiêu chuẩn tối thiểu cho gaming hiện đại, 32GB nếu có nhu cầu đa nhiệm nặng.'
+              },
+              {
+                question: 'CAS Latency (CL) thấp hơn có ý nghĩa gì?',
+                options: ['Độ trễ thấp hơn, truy cập nhanh hơn', 'Dung lượng lớn hơn', 'Tốc độ cao hơn', 'Tiết kiệm điện hơn'],
+                correctIndex: 0,
+                explanation: 'CL thấp hơn đồng nghĩa thời gian đáp ứng giữa lệnh và dữ liệu ngắn hơn, cải thiện hiệu năng.'
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'stage-4-part-2',
+        titleVn: 'Ổ cứng và thiết bị lưu trữ',
+        titleEn: 'Hard Drives & Storage Devices',
+        pages: '136–160',
+        sections: [
+          {
+            id: 'stage-4-part-2-section-1',
+            title: 'Cấu tạo và nguyên lý hoạt động của HDD',
+            content: 'HDD (Hard Disk Drive) là ổ cứng cơ học đã tồn tại hơn 60 năm. Bên trong HDD gồm các đĩa từ (platter) làm bằng nhôm hoặc thủy tinh phủ lớp từ tính, quay với tốc độ 5400-15000 vòng/phút (RPM). Đầu đọc/ghi (read/write head) di chuyển trên bề mặt đĩa để đọc ghi dữ liệu, hovering chỉ cách bề mặt vài nanomet – mỏng hơn sợi tóc người cả nghìn lần. Motor quay đĩa (spindle motor) và motor di chuyển đầu đọc (actuator – voice coil motor) được điều khiển chính xác bởi bo mạch điều khiển.\n\nNguyên lý ghi dữ liệu: đầu đọc sử dụng dòng điện để tạo từ trường, làm thay đổi hướng từ tính của các hạt từ trên bề mặt đĩa. Mỗi hạt từ tương ứng với bit 0 hoặc 1. Khi đọc, đầu đọc cảm nhận từ trường của các hạt khi đĩa quay. Dữ liệu được tổ chức thành các track (rãnh), sector (cung) và cylinder (trụ). Track là vòng tròn đồng tâm, sector là phần của track (thường 512 byte hoặc 4KB), cylinder là tập track cùng bán kính trên nhiều đĩa.\n\nCác thông số quan trọng của HDD gồm: dung lượng (500GB-22TB), tốc độ quay (5400-7200-10000-15000 RPM), bộ nhớ đệm (cache 64-512MB), tốc độ đọc/ghi tuần tự (~100-250 MB/s với 7200RPM), tốc độ truy cập ngẫu nhiên (seek time ~8-15ms), và độ ồn. HDD 5400RPM tiết kiệm điện và ồn thấp, phù hợp lưu trữ dữ liệu; 7200RPM nhanh hơn cho game và ứng dụng. HDD 2.5 inch (laptop) thường 5400RPM, 3.5 inch (desktop) thường 7200RPM.',
+            imagePrompt: 'Cấu tạo bên trong ổ cứng HDD với đĩa từ, đầu đọc và motor',
+            quiz: [
+              {
+                question: 'Bộ phận nào trong HDD thực hiện việc đọc và ghi dữ liệu?',
+                options: ['Đầu đọc/ghi (Read/Write head)', 'Đĩa từ (Platter)', 'Motor quay (Spindle)', 'Bo mạch điều khiển'],
+                correctIndex: 0,
+                explanation: 'Đầu đọc/ghi (actuator arm với head) di chuyển trên bề mặt đĩa để đọc và ghi dữ liệu bằng từ trường.'
+              },
+              {
+                question: 'Tốc độ quay phổ biến của HDD desktop là bao nhiêu RPM?',
+                options: ['7200 RPM', '5400 RPM', '10000 RPM', '15000 RPM'],
+                correctIndex: 0,
+                explanation: 'HDD desktop 3.5 inch phổ biến chạy ở tốc độ 7200 RPM, cân bằng giữa hiệu năng và độ ồn.'
+              }
+            ]
+          },
+          {
+            id: 'stage-4-part-2-section-2',
+            title: 'SSD – Ổ cứng thể rắn thế hệ mới',
+            content: 'SSD (Solid State Drive) là công nghệ lưu trữ sử dụng chip nhớ Flash NAND, không có bộ phận cơ học. SSD bắt đầu phổ biến từ khoảng 2010 và nhanh chóng thay thế HDD làm ổ chính cho hệ điều hành. Cấu tạo của SSD gồm: chip điều khiển (controller) – bộ não xử lý đọc ghi và quản lý bộ nhớ, chip nhớ NAND Flash – nơi lưu trữ dữ liệu, DRAM cache – bộ nhớ đệm tạm thời (trên SSD cao cấp), và tụ điện – dự phòng dữ liệu khi mất điện đột ngột.\n\nCác loại NAND Flash: SLC (1 bit/cell) – nhanh nhất, bền nhất, đắt nhất; MLC (2 bit/cell); TLC (3 bit/cell) – phổ biến hiện nay; QLC (4 bit/cell) – dung lượng lớn, rẻ nhất nhưng chậm và kém bền. Công nghệ 3D NAND xếp các cell theo chiều dọc (64-228 lớp), tăng dung lượng mà không giảm kích thước chip. Giao thức kết nối: SATA (3 Gb/s), NVMe (Non-Volatile Memory Express) qua PCIe – nhanh hơn nhiều. SSD NVMe PCIe 4.0 đọc 7000 MB/s, PCIe 5.0 đọc 12000+ MB/s.\n\nChỉ số TBW (Terabytes Written) đo tuổi thọ SSD – tổng lượng dữ liệu có thể ghi. SSD 1TB TLC thường có TBW 600-1200 – đủ dùng 5-10 năm cho người dùng phổ thông. DRAM cache giúp SSD nhanh hơn, DRAM-less (dùng HMB – Host Memory Buffer) rẻ hơn nhưng chậm hơn khi tải nặng. Các thương hiệu SSD uy tín: Samsung (990 Pro, 870 Evo), WD (SN850X, SN570), Crucial (T500, P3 Plus), SK Hynix (Platinum P41), Kingston (KC3000, NV2).',
+            imagePrompt: 'Cấu tạo bên trong ổ SSD với chip NAND, controller và DRAM cache',
+            quiz: [
+              {
+                question: 'Chỉ số TBW trên SSD cho biết điều gì?',
+                options: ['Tổng lượng dữ liệu có thể ghi trong suốt vòng đời', 'Tốc độ đọc tối đa', 'Dung lượng tối đa của SSD', 'Nhiệt độ hoạt động'],
+                correctIndex: 0,
+                explanation: 'TBW (Terabytes Written) là tổng lượng dữ liệu (tính bằng TB) có thể ghi vào SSD trước khi nó hết tuổi thọ.'
+              },
+              {
+                question: 'Giao thức nào cung cấp tốc độ nhanh nhất cho SSD hiện nay?',
+                options: ['NVMe qua PCIe', 'SATA III', 'mSATA', 'PATA'],
+                correctIndex: 0,
+                explanation: 'NVMe (Non-Volatile Memory Express) qua PCIe cho tốc độ gấp 5-10 lần SATA, lên đến 12000+ MB/s với PCIe 5.0.'
+              }
+            ]
+          },
+          {
+            id: 'stage-4-part-2-section-3',
+            title: 'CD-ROM, FDD, USB và thiết bị lưu trữ khác',
+            content: 'Trước khi USB và SSD phổ biến, các thiết bị lưu trữ quang và từ tính là phương tiện chính. Ổ đĩa mềm (FDD – Floppy Disk Drive) dùng đĩa mềm 3.5 inch dung lượng 1.44MB. Đĩa mềm gồm đĩa từ mềm trong vỏ nhựa, cần ổ đọc chuyên dụng. FDD phổ biến từ 1980 đến đầu 2000, sau đó bị thay thế bởi CD-ROM và USB. Ngày nay FDD đã hoàn toàn lỗi thời, nhưng trong lịch sử nó là phương tiện phân phối phần mềm chính.\n\nỔ đĩa quang CD-ROM (Compact Disc Read-Only Memory) ra mắt năm 1985, dùng tia laser đọc dữ liệu từ đĩa nhựa đường kính 12cm. CD dung lượng 700MB. DVD (Digital Versatile Disc) ra mắt 1995, dung lượng 4.7GB (single layer) hoặc 8.5GB (dual layer). Blu-ray ra mắt 2006, dung lượng 25GB (single) hoặc 50GB (dual). Tốc độ ổ quang: 1x = 150 KB/s (CD), 1x = 1.385 MB/s (DVD), 1x = 4.5 MB/s (BD). Ngày nay ổ quang ít dùng, nhưng vẫn còn trong PC văn phòng.\n\nUSB flash drive là thiết bị lưu trữ Flash nhỏ gọn, kết nối qua cổng USB. Phát minh năm 1999 bởi IBM và Trek Technology. Dung lượng USB từ 2GB đến 2TB. Tốc độ USB 3.0 đạt 5 Gbps, USB 3.1/3.2 lên 20 Gbps. USB-C ngày càng phổ biến với khả năng đảo chiều và tốc độ cao. USB flash dùng để cài Windows, lưu trữ dữ liệu di động, khôi phục hệ thống. Định dạng file hệ thống phổ biến: FAT32 (tối đa 4GB/file), exFAT (không giới hạn), NTFS.',
+            imagePrompt: 'Ổ đĩa mềm, ổ CD-ROM, USB flash drive và ổ đĩa Blu-ray',
+            quiz: [
+              {
+                question: 'Dung lượng tối đa của đĩa CD-ROM tiêu chuẩn là bao nhiêu?',
+                options: ['700 MB', '4.7 GB', '1.44 MB', '25 GB'],
+                correctIndex: 0,
+                explanation: 'Đĩa CD-ROM tiêu chuẩn có đường kính 12cm và dung lượng tối đa 700 MB dữ liệu.'
+              },
+              {
+                question: 'USB flash drive ra đời vào năm nào?',
+                options: ['1999', '1995', '2005', '1990'],
+                correctIndex: 0,
+                explanation: 'USB flash ra đời năm 1999, nhanh chóng thay thế đĩa mềm và CD-ROM nhờ kích thước nhỏ và dung lượng lớn.'
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'stage-5',
+    stageNumber: 5,
+    icon: '🖱️',
+    color: '#ec4899',
+    titleVn: 'Thiết bị ngoại vi & Card mở rộng',
+    titleEn: 'Peripherals & Expansion Cards',
+    pages: '161–200',
+    parts: [
+      {
+        id: 'stage-5-part-1',
+        titleVn: 'Thiết bị nhập và xuất',
+        titleEn: 'Input & Output Devices',
+        pages: '161–175',
+        sections: [
+          {
+            id: 'stage-5-part-1-section-1',
+            title: 'Bàn phím và chuột',
+            content: 'Bàn phím và chuột là hai thiết bị nhập liệu cơ bản nhất của máy tính. Bàn phím có lịch sử phát triển từ máy đánh chữ, với bố trí phím QWERTY (ra đời 1868) vẫn được dùng đến nay. Có hai loại bàn phím chính: bàn phím màng (membrane) và bàn phím cơ (mechanical). Bàn phím màng dùng lớp cao su dẫn điện, giá rẻ, nhẹ và êm. Bàn phím cơ dùng switch riêng cho từng phím, cảm giác gõ tốt hơn, độ bền cao hơn (50-100 triệu cú nhấn so với 5-10 triệu của màng).\n\nCác loại switch cơ phổ biến: Cherry MX (Đức) – Blue (clicky), Brown (tactile), Red (linear), Speed/Silver (linear, hành trình ngắn). Các hãng khác có Gateron, Kailh, Outemu. Bàn phím cơ được dân chơi game và lập trình viên yêu thích. Bàn phím còn có đèn nền LED/RGB, keycap tùy chỉnh, macro và layout khác nhau (full-size, TKL, 60%). Kết nối: USB, không dây 2.4GHz, Bluetooth.\n\nChuột máy tính phát triển từ chuột bi (ball mouse, 1972) đến chuột quang (optical, 1999) và chuột laser. Chuột quang dùng LED để theo dõi bề mặt, chuột laser chính xác hơn. Thông số quan trọng: DPI (dots per inch) – độ nhạy; polling rate – tần số báo cáo (125-1000Hz); IPS (inches per second) – tốc độ tối đa. Chuột gaming thường có: cảm biến PixArt, switch Omron (50-80 triệu click), RGB, dây paracord nhẹ hoặc không dây. Các thương hiệu: Logitech (G Pro, G502), Razer (Viper, DeathAdder), SteelSeries (Rival).',
+            imagePrompt: 'Bàn phím cơ Cherry MX và chuột gaming Logitech G Pro',
+            quiz: [
+              {
+                question: 'Loại bàn phím nào có cảm giác gõ tốt và độ bền cao nhất?',
+                options: ['Bàn phím cơ (Mechanical)', 'Bàn phím màng (Membrane)', 'Bàn phím ảo', 'Bàn phím cảm ứng'],
+                correctIndex: 0,
+                explanation: 'Bàn phím cơ dùng switch riêng cho từng phím, cho cảm giác gõ tốt và độ bền lên đến 100 triệu cú nhấn.'
+              },
+              {
+                question: 'DPI của chuột máy tính là chỉ số đo gì?',
+                options: ['Độ nhạy của chuột', 'Tốc độ click', 'Trọng lượng chuột', 'Kích thước chuột'],
+                correctIndex: 0,
+                explanation: 'DPI (Dots Per Inch) đo độ nhạy – DPI càng cao, con trỏ di chuyển càng xa khi chuột di chuyển một khoảng nhất định.'
+              }
+            ]
+          },
+          {
+            id: 'stage-5-part-1-section-2',
+            title: 'Công nghệ màn hình CRT và LCD',
+            content: 'Màn hình máy tính là thiết bị xuất chính. CRT (Cathode Ray Tube) là công nghệ dùng ống phóng tia âm cực, phổ biến từ 1960 đến 2005. Màn hình CRT dùng súng điện tử bắn tia electron vào lớp phosphor phát sáng. CRT có màu sắc tuyệt vời, góc nhìn rộng, độ trễ cực thấp, nhưng to, nặng, tiêu thụ nhiều điện. Màn hình CRT có tỉ lệ 4:3, độ phân giải tối đa 2048x1536.\n\nLCD (Liquid Crystal Display) phổ biến cho PC từ 2003. LCD dùng tinh thể lỏng xoay chiều phân cực ánh sáng từ đèn nền (LED). LCD mỏng, nhẹ, tiết kiệm điện. Các loại tấm nền LCD: TN (Twisted Nematic) – giá rẻ, phản hồi nhanh, góc nhìn hẹp; IPS (In-Plane Switching) – góc nhìn rộng 178°, màu sắc chính xác; VA (Vertical Alignment) – tương phản cao, màu đen sâu.\n\nCông nghệ mới: OLED – mỗi pixel tự phát sáng, màu đen tuyệt đối; Mini-LED – đèn nền LED mini; QLED – chấm lượng tử. Tần số quét: 60Hz (văn phòng), 120-144Hz (gaming), 240-360Hz (eSports). Độ phân giải: Full HD (1920x1080), QHD (2560x1440), 4K (3840x2160). Cổng kết nối: HDMI, DisplayPort, USB-C.',
+            imagePrompt: 'So sánh màn hình CRT cổ điển và màn hình LCD hiện đại',
+            quiz: [
+              {
+                question: 'Tấm nền LCD nào có góc nhìn rộng nhất và màu sắc chính xác nhất?',
+                options: ['IPS (In-Plane Switching)', 'TN (Twisted Nematic)', 'VA (Vertical Alignment)', 'OLED'],
+                correctIndex: 0,
+                explanation: 'IPS có góc nhìn lên đến 178° cả chiều ngang lẫn dọc, cho màu sắc chính xác và nhất quán ở mọi góc nhìn.'
+              },
+              {
+                question: 'Tần số quét 144Hz trên màn hình mang lại lợi ích gì?',
+                options: ['Chuyển động mượt mà hơn khi chơi game', 'Độ phân giải cao hơn', 'Màu sắc đẹp hơn', 'Tiết kiệm điện hơn'],
+                correctIndex: 0,
+                explanation: 'Tần số quét cao (144Hz) hiển thị 144 khung hình mỗi giây, cho chuyển động mượt mà hơn đáng kể so với 60Hz.'
+              }
+            ]
+          },
+          {
+            id: 'stage-5-part-1-section-3',
+            title: 'Các thiết bị nhập/xuất khác',
+            content: 'Máy in (printer) là thiết bị xuất dữ liệu ra giấy. Có máy in laser (dùng bột mực, nhanh, sắc nét) và máy in phun (inkjet, tốt cho ảnh màu). Máy in đa năng (all-in-one) tích hợp scan, photocopy, fax. Chuẩn kết nối: USB, WiFi, Ethernet. Chỉ số quan trọng: độ phân giải (DPI), tốc độ (ppm).\n\nMáy scan số hóa tài liệu thành file kỹ thuật số. Độ phân giải scan 600-1200 DPI đủ văn bản, 2400-4800 DPI cho ảnh. Loa và tai nghe là thiết bị xuất âm thanh. Tai nghe có micro (headset) phổ biến cho gaming và hội họp. Thông số: dải tần (20Hz-20kHz), trở kháng (32-300 ohm), độ nhạy (dB). Microphone có loại động (dynamic) và tụ (condenser).\n\nWebcam cho họp online và livestream, độ phân giải 720p/1080p/4K, 30-60fps. Các thương hiệu: Logitech (C920, Brio), Razer (Kiyo), Elgato (Facecam). Card reader cho thẻ SD/microSD. Hub USB chia cổng. Docking station cho laptop. UPS (Uninterruptible Power Supply) – bộ lưu điện dự phòng khi mất điện, bảo vệ dữ liệu và phần cứng.',
+            imagePrompt: 'Thiết bị ngoại vi: máy in, máy scan, webcam, loa và tai nghe',
+            quiz: [
+              {
+                question: 'Máy in laser phù hợp nhất cho mục đích nào?',
+                options: ['In văn bản số lượng lớn, sắc nét', 'In ảnh màu chất lượng cao', 'In trên giấy ảnh', 'In nhãn dán'],
+                correctIndex: 0,
+                explanation: 'Máy in laser dùng bột mực, in nhanh và sắc nét, chi phí mỗi trang thấp, phù hợp in văn bản số lượng lớn.'
+              },
+              {
+                question: 'UPS (Uninterruptible Power Supply) có chức năng gì?',
+                options: ['Cấp điện dự phòng cho PC khi mất điện', 'Tăng tốc độ mạng', 'Lọc virus cho máy tính', 'Cải thiện chất lượng âm thanh'],
+                correctIndex: 0,
+                explanation: 'UPS cung cấp pin dự phòng cho PC khi mất điện, giúp bạn lưu công việc và tắt máy an toàn.'
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'stage-5-part-2',
+        titleVn: 'Card mở rộng',
+        titleEn: 'Expansion Cards',
+        pages: '176–200',
+        sections: [
+          {
+            id: 'stage-5-part-2-section-1',
+            title: 'Card đồ họa (VGA Card)',
+            content: 'Card đồ họa (GPU – Graphics Processing Unit) là một trong những linh kiện quan trọng nhất cho game, đồ họa và tính toán song song. GPU thực hiện hàng tỷ phép tính mỗi giây để render hình ảnh 2D và 3D. Có hai loại GPU: tích hợp (iGPU) nằm trong CPU (Intel UHD, AMD Radeon Graphics) dùng cho văn phòng; và rời (dGPU) là card riêng với VRAM, tản nhiệt và nguồn riêng.\n\nCấu tạo card đồ họa gồm: chip GPU, VRAM (bộ nhớ đồ họa), PCB, VRM, tản nhiệt (heatsink + quạt) và các đầu ra hình ảnh (HDMI, DisplayPort, DVI). Thông số quan trọng: số nhân CUDA (NVIDIA) / Stream Processor (AMD), xung nhịp, dung lượng VRAM (4-24GB), băng thông (GDDR6, GDDR6X), TDP. NVIDIA có dòng RTX (4060-4090), AMD có dòng RX (7600-7900 XTX), Intel có Arc (A750, A770).\n\nCông nghệ: Ray Tracing – mô phỏng ánh sáng vật lý; DLSS (NVIDIA) / FSR (AMD) / XeSS (Intel) – upscaling AI tăng FPS; Reflex (NVIDIA) / Anti-Lag (AMD) – giảm độ trễ. Kết nối nguồn: PCIe 8-pin (150W), 12VHPWR (600W cho RTX 40 series). Chiều dài card: 200-350mm. Khi mua GPU cần xem xét độ phân giải chơi game (1080p, 1440p, 4K), FPS mong muốn, ngân sách và PSU tương thích.',
+            imagePrompt: 'Card đồ họa NVIDIA RTX 4090 với tản nhiệt 3 quạt và đèn RGB',
+            quiz: [
+              {
+                question: 'VRAM trên card đồ họa có chức năng gì?',
+                options: ['Lưu trữ dữ liệu đồ họa tạm thời', 'Tăng tốc CPU', 'Xử lý âm thanh', 'Lưu trữ hệ điều hành'],
+                correctIndex: 0,
+                explanation: 'VRAM (Video RAM) là bộ nhớ riêng của GPU, lưu trữ texture, frame buffer và dữ liệu đồ họa để GPU truy cập nhanh.'
+              },
+              {
+                question: 'Công nghệ DLSS của NVIDIA giúp cải thiện điều gì?',
+                options: ['Tăng FPS bằng AI upscaling', 'Tăng dung lượng VRAM', 'Giảm nhiệt độ GPU', 'Cải thiện âm thanh'],
+                correctIndex: 0,
+                explanation: 'DLSS (Deep Learning Super Sampling) dùng AI để upscale hình ảnh từ độ phân giải thấp lên cao, tăng FPS đáng kể.'
+              }
+            ]
+          },
+          {
+            id: 'stage-5-part-2-section-2',
+            title: 'Card âm thanh (Sound Card)',
+            content: 'Card âm thanh xử lý tín hiệu âm thanh cho máy tính. Hầu hết mainboard có âm thanh onboard với chip Realtek, đủ tốt cho nhu cầu cơ bản. Card âm thanh rời cần cho nhạc sĩ, producer, game thủ competitive và audiophile. Card rời có SNR cao hơn (>120dB), THD thấp hơn và nhiều tính năng chuyên nghiệp.\n\nCấu tạo gồm: chip DAC (Digital-to-Analog Converter), chip ADC (Analog-to-Digital Converter), bộ khuếch đại (amp), và các cổng kết nối (3.5mm, optical S/PDIF, RCA, MIDI). Card gaming: Sound Blaster X4/AE-7 có âm thanh vòm 7.1, SBX Pro Studio, Scout Mode. Card cho nhạc sĩ: Focusrite Scarlett, Universal Audio Apollo, RME Babyface.\n\nThông số: SNR (dB), THD+N (%), dải tần (20Hz-20kHz), trở kháng đầu ra, số kênh (2.0, 5.1, 7.1). USB DAC/AMP (FiiO K5 Pro, Schiit Magni/Modi) là giải pháp gọn nhẹ. Card âm thanh PCIe gắn trong, external sound card qua USB, âm thanh HDMI/DisplayPort từ GPU. Card rời ít phổ biến hơn trước do âm thanh onboard đã cải thiện nhiều.',
+            imagePrompt: 'Card âm thanh Sound Blaster và USB DAC/AMP FiiO',
+            quiz: [
+              {
+                question: 'Chỉ số SNR (Signal-to-Noise Ratio) trên card âm thanh cho biết điều gì?',
+                options: ['Độ sạch của tín hiệu âm thanh', 'Công suất đầu ra', 'Số kênh âm thanh', 'Kích thước card'],
+                correctIndex: 0,
+                explanation: 'SNR đo tỉ lệ tín hiệu trên nhiễu – càng cao (trên 110dB) càng ít tạp âm nền, âm thanh càng trong trẻo.'
+              },
+              {
+                question: 'Đối tượng nào cần card âm thanh rời nhất?',
+                options: ['Nhạc sĩ, producer và audiophile', 'Người dùng văn phòng', 'Game thủ casual', 'Người xem phim'],
+                correctIndex: 0,
+                explanation: 'Nhạc sĩ và producer cần card âm thanh rời/audio interface để thu âm chất lượng cao và giám sát latency thấp.'
+              }
+            ]
+          },
+          {
+            id: 'stage-5-part-2-section-3',
+            title: 'Card mạng (Network Interface Card)',
+            content: 'Card mạng (NIC – Network Interface Card) kết nối máy tính vào mạng LAN và Internet. Hầu hết mainboard có LAN onboard (Realtek, Intel) với tốc độ 1 GbE hoặc 2.5 GbE. Card mạng rời cần khi: mainboard không đủ cổng, cần tốc độ cao (10 GbE), cần nhiều cổng (multi-port), hoặc nâng cấp WiFi. Card mạng có dạng PCIe x1 hoặc USB.\n\nCard Ethernet: 10/100/1000 Mbps (Gigabit), 2.5 GbE, 5 GbE, 10 GbE. Chip phổ biến: Intel I225-V, I226-V (2.5G), Realtek RTL8125 (2.5G), Aquantia AQC113 (10G). Tính năng: RSS, VLAN tagging, Jumbo Frame, PXE Boot, WoL. Trong game 1Gbps đủ, NAS và server cần 2.5-10Gbps.\n\nCard WiFi: WiFi 5 (802.11ac, 867 Mbps), WiFi 6 (802.11ax, 1.2-2.4 Gbps), WiFi 6E (thêm 6GHz), WiFi 7 (802.11be, đến 46 Gbps). Card WiFi dạng M.2 Key E hoặc PCIe x1 với antenna rời. Chip: Intel AX210/AX211 (WiFi 6E), Qualcomm QCNCM865. Bluetooth tích hợp cùng chip WiFi. Antenna ngoài cải thiện tín hiệu. Chọn card WiFi cần xem tương thích router và driver hỗ trợ.',
+            imagePrompt: 'Card mạng 10GbE PCIe và card WiFi 6E với antenna rời',
+            quiz: [
+              {
+                question: 'Tốc độ phổ biến nhất của card mạng Ethernet trên mainboard hiện nay là bao nhiêu?',
+                options: ['1 GbE (Gigabit Ethernet)', '100 Mbps', '10 GbE', '2.5 GbE'],
+                correctIndex: 0,
+                explanation: '1 Gigabit Ethernet (1000 Mbps) vẫn là chuẩn phổ biến nhất trên mainboard, đủ cho đa số nhu cầu Internet.'
+              },
+              {
+                question: 'Chuẩn WiFi nào hỗ trợ băng tần 6GHz?',
+                options: ['WiFi 6E', 'WiFi 6', 'WiFi 5', 'WiFi 4'],
+                correctIndex: 0,
+                explanation: 'WiFi 6E là phiên bản mở rộng của WiFi 6, thêm băng tần 6GHz với ít nhiễu và tốc độ cao hơn.'
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'stage-6',
+    stageNumber: 6,
+    icon: '🪟',
+    color: '#3b82f6',
+    titleVn: 'Phần mềm & Vai trò trong hệ thống',
+    titleEn: 'Software & System Roles',
+    pages: '201–230',
+    parts: [
+      {
+        id: 'stage-6-part-1',
+        titleVn: 'Khái niệm phần mềm máy tính',
+        titleEn: 'Software Concepts',
+        pages: '201–210',
+        sections: [
+          {
+            id: 'stage-6-part-1-section-1',
+            title: 'Ngôn ngữ lập trình và chương trình máy tính',
+            content: 'Phần mềm là tập hợp các câu lệnh và dữ liệu điều khiển máy tính thực hiện các tác vụ cụ thể. Phần mềm được chia làm hai loại chính: phần mềm hệ thống (system software) bao gồm hệ điều hành, driver, tiện ích; và phần mềm ứng dụng (application software) như Word, Excel, Photoshop, game. Phần mềm được viết bằng ngôn ngữ lập trình – các ngôn ngữ hình thức cho phép con người giao tiếp với máy tính.\n\nNgôn ngữ lập trình chia làm nhiều cấp. Ngôn ngữ máy (machine language) là mã nhị phân 0 và 1 mà CPU hiểu trực tiếp, rất khó cho con người. Hợp ngữ (assembly) dùng ký hiệu gợi nhớ thay mã nhị phân, dễ hơn một chút. Ngôn ngữ bậc cao (high-level language) gần với ngôn ngữ tự nhiên: C/C++, Java, Python, JavaScript, C#. Chương trình viết bằng ngôn ngữ bậc cao cần được biên dịch (compile) hoặc thông dịch (interpret) sang ngôn ngữ máy.\n\nQuy trình tạo phần mềm gồm: phân tích yêu cầu, thiết kế kiến trúc, viết mã nguồn (coding), biên dịch (compile), kiểm thử (testing), triển khai (deployment) và bảo trì (maintenance). Mỗi ngôn ngữ phù hợp với lĩnh vực khác nhau: C++ cho game và hệ thống, Python cho AI và data science, JavaScript cho web, Java cho ứng dụng doanh nghiệp. Lập trình viên cần hiểu cả phần cứng lẫn phần mềm để tối ưu hiệu năng.',
+            imagePrompt: 'Sơ đồ các cấp ngôn ngữ lập trình từ máy đến bậc cao',
+            quiz: [
+              {
+                question: 'Phần mềm được chia làm hai loại chính nào?',
+                options: ['Phần mềm hệ thống và phần mềm ứng dụng', 'Phần mềm trả phí và miễn phí', 'Phần mềm cũ và mới', 'Phần mềm desktop và mobile'],
+                correctIndex: 0,
+                explanation: 'Phần mềm hệ thống quản lý phần cứng (hệ điều hành, driver), phần mềm ứng dụng phục vụ nhu cầu người dùng (Word, game).'
+              },
+              {
+                question: 'Ngôn ngữ lập trình nào được CPU hiểu trực tiếp?',
+                options: ['Ngôn ngữ máy (mã nhị phân)', 'Python', 'Java', 'C++'],
+                correctIndex: 0,
+                explanation: 'CPU chỉ hiểu trực tiếp ngôn ngữ máy (mã nhị phân 0 và 1), các ngôn ngữ khác cần biên dịch hoặc thông dịch.'
+              }
+            ]
+          },
+          {
+            id: 'stage-6-part-1-section-2',
+            title: 'Hệ điều hành – Nền tảng của mọi phần mềm',
+            content: 'Hệ điều hành (Operating System – OS) là phần mềm quan trọng nhất, quản lý tài nguyên phần cứng và cung cấp giao diện cho người dùng và ứng dụng. Hệ điều hành đảm nhiệm: quản lý tiến trình (process), quản lý bộ nhớ (memory), quản lý file, quản lý thiết bị I/O, bảo mật và cung cấp giao diện người dùng (GUI hoặc CLI).\n\nCác hệ điều hành phổ biến: Microsoft Windows (Windows 10/11) – phổ biến nhất cho PC desktop và laptop, giao diện thân thiện, hỗ trợ game và phần mềm văn phòng tốt nhất. macOS – của Apple, chạy trên Mac, giao diện đẹp, tối ưu cho đồ họa và lập trình. Linux – mã nguồn mở, nhiều bản phân phối (Ubuntu, Fedora, Arch), phổ biến cho server, lập trình viên và nhúng. ChromeOS – của Google, dành cho Chromebook, nhẹ nhàng, tập trung vào web.\n\nKiến trúc hệ điều hành gồm: nhân (kernel) – lõi tương tác trực tiếp với phần cứng; shell – giao diện người dùng; file system – tổ chức dữ liệu (NTFS trên Windows, APFS trên macOS, ext4 trên Linux). Hệ điều hành quản lý đa nhiệm (multitasking), đa người dùng (multi-user), và cung cấp API cho ứng dụng. Khi máy tính khởi động, bootloader nạp kernel vào RAM và khởi chạy các dịch vụ hệ thống.',
+            imagePrompt: 'So sánh giao diện hệ điều hành Windows 11, macOS và Linux',
+            quiz: [
+              {
+                question: 'Thành phần lõi của hệ điều hành tương tác trực tiếp với phần cứng là gì?',
+                options: ['Kernel (nhân)', 'Shell (giao diện)', 'File system', 'Bootloader'],
+                correctIndex: 0,
+                explanation: 'Kernel là lõi của hệ điều hành, quản lý trực tiếp CPU, RAM, thiết bị I/O và cung cấp dịch vụ cho các tiến trình.'
+              },
+              {
+                question: 'Hệ điều hành nào phổ biến nhất cho PC desktop và gaming?',
+                options: ['Microsoft Windows', 'macOS', 'Linux', 'ChromeOS'],
+                correctIndex: 0,
+                explanation: 'Windows chiếm ~75% thị phần desktop, hỗ trợ nhiều game và phần mềm nhất, là lựa chọn số một cho PC gaming.'
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'stage-6-part-2',
+        titleVn: 'Chương trình ứng dụng',
+        titleEn: 'Application Software',
+        pages: '211–220',
+        sections: [
+          {
+            id: 'stage-6-part-2-section-1',
+            title: 'Ứng dụng văn phòng và đồ họa',
+            content: 'Phần mềm ứng dụng là các chương trình giúp người dùng thực hiện công việc cụ thể. Microsoft Office là bộ ứng dụng văn phòng phổ biến nhất gồm: Word (soạn thảo văn bản), Excel (bảng tính), PowerPoint (trình chiếu), Outlook (email), Access (cơ sở dữ liệu). Word hỗ trợ định dạng văn bản phong phú, trộn thư, mục lục tự động. Excel có hàng trăm hàm tính toán, biểu đồ, PivotTable, và lập trình VBA. PowerPoint cung cấp hiệu ứng, animation và template chuyên nghiệp.\n\nAdobe Photoshop là phần mềm chỉnh sửa ảnh chuyên nghiệp số một thế giới. Photoshop hỗ trợ layer, mask, filter, brush, pen tool, và hàng ngàn tính năng khác. Dùng cho: thiết kế đồ họa, chỉnh sửa ảnh, digital painting, UI/UX design. Các phần mềm đồ họa khác: Adobe Illustrator (vector), Adobe Premiere Pro (dựng phim), Adobe After Effects (VFX), CorelDRAW, GIMP (miễn phí), Canva (thiết kế online).\n\nNgoài ra còn có: trình duyệt web (Chrome, Edge, Firefox, Safari), trình phát media (VLC, MPC-HC), phần mềm chat (Zalo, Messenger, Discord), phần mềm họp online (Zoom, Google Meet, Microsoft Teams), phần mềm nén file (WinRAR, 7-Zip). Mỗi ứng dụng có yêu cầu cấu hình khác nhau: Photoshop cần RAM 8-16GB và GPU đồ họa, Premiere cần SSD nhanh và CPU đa nhân. Việc hiểu yêu cầu này giúp chọn cấu hình PC phù hợp.',
+            imagePrompt: 'Giao diện Microsoft Office và Adobe Photoshop',
+            quiz: [
+              {
+                question: 'Phần mềm nào là tiêu chuẩn cho chỉnh sửa ảnh chuyên nghiệp?',
+                options: ['Adobe Photoshop', 'Microsoft Word', 'VLC Media Player', 'WinRAR'],
+                correctIndex: 0,
+                explanation: 'Adobe Photoshop là phần mềm chỉnh sửa ảnh chuyên nghiệp hàng đầu với hàng ngàn tính năng cho thiết kế và xử lý ảnh.'
+              },
+              {
+                question: 'Ứng dụng Microsoft Excel thuộc loại phần mềm gì?',
+                options: ['Bảng tính (Spreadsheet)', 'Soạn thảo văn bản', 'Trình chiếu', 'Cơ sở dữ liệu'],
+                correctIndex: 0,
+                explanation: 'Excel là phần mềm bảng tính với hàng trăm hàm, biểu đồ và phân tích dữ liệu, thuộc bộ Microsoft Office.'
+              }
+            ]
+          },
+          {
+            id: 'stage-6-part-2-section-2',
+            title: 'Trình biên dịch và công cụ phát triển',
+            content: 'Trình biên dịch (compiler) và trình thông dịch (interpreter) là công cụ chuyển đổi mã nguồn thành chương trình thực thi. Compiler dịch toàn bộ mã nguồn sang mã máy một lần (C, C++, Rust). Interpreter dịch và thực thi từng dòng lệnh (Python, JavaScript, PHP). Một số ngôn ngữ dùng kết hợp: Java biên dịch thành bytecode rồi JVM thông dịch, C# biên dịch thành IL rồi CLR thực thi.\n\nIDE (Integrated Development Environment) là môi trường phát triển tích hợp, gồm: editor (soạn thảo mã), compiler/interpreter, debugger (gỡ lỗi), và các công cụ hỗ trợ. IDE phổ biến: Visual Studio (C++, C#), Visual Studio Code (đa ngôn ngữ), IntelliJ IDEA (Java), PyCharm (Python), Eclipse, Xcode (macOS/iOS). VS Code là editor nhẹ nhưng mạnh mẽ với hàng ngàn extension, được lập trình viên yêu thích nhất hiện nay.\n\nCông cụ quản lý phiên bản (version control): Git là tiêu chuẩn toàn cầu, giúp quản lý lịch sử code và làm việc nhóm. GitHub, GitLab, Bitbucket là nền tảng lưu trữ Git online. Công cụ CI/CD (Continuous Integration/Continuous Deployment): Jenkins, GitHub Actions, GitLab CI tự động build và deploy. Trình gỡ lỗi (debugger) cho phép chạy từng bước, xem biến, phân tích stack trace để tìm lỗi. Tất cả những công cụ này tạo thành hệ sinh thái phát triển phần mềm chuyên nghiệp.',
+            imagePrompt: 'Giao diện Visual Studio Code và terminal với Git',
+            quiz: [
+              {
+                question: 'Sự khác nhau giữa compiler và interpreter là gì?',
+                options: ['Compiler dịch cả file cùng lúc, interpreter dịch từng dòng', 'Compiler chậm hơn interpreter', 'Compiler chỉ dùng cho Python', 'Interpreter tạo file .exe'],
+                correctIndex: 0,
+                explanation: 'Compiler dịch toàn bộ mã nguồn sang mã máy một lần, interpreter thực thi từng dòng lệnh mà không cần biên dịch trước.'
+              },
+              {
+                question: 'Git là công cụ gì trong phát triển phần mềm?',
+                options: ['Quản lý phiên bản mã nguồn', 'Trình biên dịch', 'IDE', 'Cơ sở dữ liệu'],
+                correctIndex: 0,
+                explanation: 'Git là hệ thống quản lý phiên bản phân tán, theo dõi thay đổi mã nguồn và hỗ trợ làm việc nhóm.'
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'stage-6-part-3',
+        titleVn: 'Virus và bảo mật máy tính',
+        titleEn: 'Computer Viruses & Security',
+        pages: '221–230',
+        sections: [
+          {
+            id: 'stage-6-part-3-section-1',
+            title: 'Virus máy tính và phần mềm độc hại',
+            content: 'Virus máy tính là chương trình độc hại (malware) tự nhân bản và lây lan từ máy này sang máy khác, gây hại cho hệ thống. Virus có thể xóa file, mã hóa dữ liệu, đánh cắp thông tin, biến máy tính thành botnet, hoặc cài đặt phần mềm quảng cáo. Virus lây qua: email đính kèm, USB nhiễm bệnh, tải file từ web độc hại, lỗ hổng bảo mật phần mềm.\n\nCác loại malware phổ biến: Worm – tự lây lan qua mạng mà không cần file chủ; Trojan – ngụy trang thành phần mềm hợp pháp; Ransomware – mã hóa dữ liệu, đòi tiền chuộc; Spyware – theo dõi hoạt động người dùng, đánh cắp thông tin; Adware – hiển thị quảng cáo không mong muốn; Rootkit – ẩn sâu trong hệ thống, khó phát hiện; Keylogger – ghi lại các phím gõ để lấy mật khẩu.\n\nDấu hiệu nhiễm virus: máy chạy chậm bất thường, xuất hiện file lạ, chương trình tự mở, trình duyệt bị chuyển hướng, mất file, tốn nhiều tài nguyên CPU/RAM, Windows bị vô hiệu hóa Task Manager. Cách phòng tránh: không mở email/tệp đính kèm từ nguồn không tin cậy, không tải phần mềm lậu, cập nhật Windows và phần mềm thường xuyên, dùng phần mềm diệt virus, sao lưu dữ liệu định kỳ.',
+            imagePrompt: 'Sơ đồ các loại phần mềm độc hại và cách lây lan',
+            quiz: [
+              {
+                question: 'Loại mã độc nào mã hóa dữ liệu và đòi tiền chuộc?',
+                options: ['Ransomware', 'Trojan', 'Worm', 'Spyware'],
+                correctIndex: 0,
+                explanation: 'Ransomware mã hóa file của nạn nhân và yêu cầu trả tiền chuộc (thường bằng Bitcoin) để giải mã.'
+              },
+              {
+                question: 'Cách tốt nhất để phòng tránh virus máy tính là gì?',
+                options: ['Không mở file lạ, cập nhật phần mềm, dùng antivirus', 'Tắt Windows Update', 'Cài nhiều antivirus cùng lúc', 'Không dùng Internet'],
+                correctIndex: 0,
+                explanation: 'Kết hợp cảnh giác với file lạ, cập nhật bảo mật định kỳ và phần mềm diệt virus là cách phòng tránh hiệu quả nhất.'
+              }
+            ]
+          },
+          {
+            id: 'stage-6-part-3-section-2',
+            title: 'An ninh mạng và bảo vệ dữ liệu',
+            content: 'An ninh mạng (cybersecurity) là lĩnh vực bảo vệ hệ thống máy tính, mạng và dữ liệu khỏi tấn công. Ba nguyên tắc cốt lõi của bảo mật thông tin là CIA: Confidentiality (tính bảo mật) – chỉ người có thẩm quyền mới truy cập được; Integrity (tính toàn vẹn) – dữ liệu không bị thay đổi trái phép; Availability (tính sẵn sàng) – dữ liệu luôn có khi cần.\n\nCác biện pháp bảo vệ cơ bản: tường lửa (firewall) chặn truy cập trái phép; phần mềm diệt virus (antivirus) như Windows Defender, Kaspersky, Bitdefender; mã hóa dữ liệu (BitLocker, VeraCrypt); VPN mã hóa kết nối Internet; xác thực đa yếu tố (2FA/MFA); quản lý mật khẩu với password manager (LastPass, 1Password). Bản vá bảo mật (security patch) từ Windows Update và nhà sản xuất vá lỗ hổng.\n\nCác cuộc tấn công phổ biến: Phishing – lừa đảo qua email/tin nhắn giả mạo; DDoS – tấn công từ chối dịch vụ; Man-in-the-Middle – nghe lén kết nối mạng; SQL Injection – tấn công vào cơ sở dữ liệu qua web. Sao lưu dữ liệu (backup) định kỳ – quy tắc 3-2-1: 3 bản sao, 2 phương tiện khác nhau, 1 bản sao lưu ngoại tuyến. Windows có File History, macOS có Time Machine. Sao lưu đám mây: Google Drive, OneDrive, Dropbox, Backblaze.',
+            imagePrompt: 'Sơ đồ an ninh mạng: tường lửa, mã hóa và xác thực đa yếu tố',
+            quiz: [
+              {
+                question: 'Ba nguyên tắc cốt lõi của bảo mật thông tin là gì?',
+                options: ['CIA: Bảo mật - Toàn vẹn - Sẵn sàng', 'ABC: Truy cập - Sao lưu - Mã hóa', 'XYZ: Chống virus - Tường lửa - VPN', 'MNP: Mật khẩu - Mạng - Phần mềm'],
+                correctIndex: 0,
+                explanation: 'CIA triad gồm Confidentiality (bảo mật), Integrity (toàn vẹn), Availability (sẵn sàng) – nền tảng của an ninh thông tin.'
+              },
+              {
+                question: 'Quy tắc sao lưu 3-2-1 là gì?',
+                options: ['3 bản sao, 2 phương tiện, 1 bản sao ngoại tuyến', '3 ổ cứng, 2 USB, 1 đám mây', '3 lần/tuần, 2 tháng, 1 năm', '3 file, 2 folder, 1 ổ đĩa'],
+                correctIndex: 0,
+                explanation: '3-2-1: giữ 3 bản sao dữ liệu, trên 2 loại phương tiện khác nhau, với 1 bản sao lưu ngoại tuyến (offline).'
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'stage-7',
+    stageNumber: 7,
+    icon: '🛠️',
+    color: '#f97316',
+    titleVn: 'Bảo trì & Sửa chữa',
+    titleEn: 'Maintenance & Repair',
+    pages: '231–hết',
+    parts: [
+      {
+        id: 'stage-7-part-1',
+        titleVn: 'Các bệnh thường gặp ở PC',
+        titleEn: 'Common PC Problems',
+        pages: '231–250',
+        sections: [
+          {
+            id: 'stage-7-part-1-section-1',
+            title: 'Lỗi nguồn và mainboard',
+            content: 'Lỗi nguồn và mainboard là những sự cố phổ biến và thường nghiêm trọng nhất trong PC. Lỗi nguồn: máy không lên nguồn (không quạt, không đèn), máy tự reset/tắt ngang khi chơi game, quạt nguồn kêu to hoặc không quay, mùi khét từ nguồn. Nguyên nhân: tụ nguồn chập/cháy, MOSFET hỏng, cầu chì đứt, quạt kẹt do bụi. Cách kiểm tra: dùng đồng hồ đo điện áp đầu ra, hoặc thay nguồn khác để test.\n\nLỗi mainboard: máy không POST (không lên hình, quạt quay nhưng không boot), beep code báo lỗi (dài liên tục là lỗi RAM, ngắn 1-2 tiếng là lỗi VGA), không nhận RAM/GPU, USB không hoạt động, không vào BIOS. Nguyên nhân: tụ mainboard phù/chảy, chipset quá nhiệt, chân socket CPU cong/gãy, hỏng IC SIO, hỏng BIOS (corrupted), hỏng VRM. Cách khắc phục: reset CMOS (tháo pin, chờ 5 phút), kiểm tra tụ phồng, cập nhật BIOS, thay linh kiện nếu cần.\n\nMẹo chẩn đoán nhanh: dùng debug LED trên mainboard (nếu có) đọc mã lỗi. Các mã thường gặp: 00/FF – CPU chưa hoạt động, d4/d5 – lỗi RAM, b2 – lỗi VGA. Nếu không có debug LED, dùng beep speaker gắn vào chân speaker trên mainboard. Các mainboard đời mới có đèn LED báo lỗi ở từng khu vực: CPU (đỏ), DRAM (vàng), VGA (trắng), BOOT (xanh lá). Đèn nào sáng là lỗi ở khu vực đó.',
+            imagePrompt: 'Đèn debug LED trên mainboard báo lỗi phần cứng',
+            quiz: [
+              {
+                question: 'Tiếng beep dài liên tục từ mainboard báo hiệu lỗi gì?',
+                options: ['Lỗi RAM', 'Lỗi CPU', 'Lỗi VGA', 'Lỗi nguồn'],
+                correctIndex: 0,
+                explanation: 'Beep dài liên tục theo chuẩn AMI/Phoenix BIOS báo lỗi RAM không được phát hiện hoặc lỗi module nhớ.'
+              },
+              {
+                question: 'Khi máy không POST, việc đầu tiên nên làm là gì?',
+                options: ['Reset CMOS (tháo pin và chờ)', 'Thay ngay mainboard mới', 'Mua CPU mới', 'Cài lại Windows'],
+                correctIndex: 0,
+                explanation: 'Reset CMOS bằng cách tháo pin hoặc jump clear CMOS giúp khôi phục cài đặt BIOS mặc định, thường giải quyết lỗi không POST.'
+              }
+            ]
+          },
+          {
+            id: 'stage-7-part-1-section-2',
+            title: 'Lỗi RAM, CPU và ổ cứng',
+            content: 'Lỗi RAM thường gây ra: máy không boot (beep dài liên tục), màn hình xanh (BSOD) với mã lỗi MEMORY_MANAGEMENT, chương trình treo ngẫu nhiên, Windows báo lỗi "memory could not be written/read". Nguyên nhân: RAM lỏng, chân RAM bẩn, không tương thích (tốc độ/timing), lỗi xung đột XMP, RAM hỏng (bad sector). Cách kiểm tra: vệ sinh chân RAM bằng cục tẩy, thử gắn từng thanh, dùng MemTest86 (chạy từ USB) để kiểm tra toàn diện. Chạy MemTest86 qua 1-2 pass (mất vài giờ) để phát hiện lỗi chính xác.\n\nLỗi CPU hiếm gặp hơn nhưng nghiêm trọng: máy không POST (quạt quay nhưng không hình, debug LED báo CPU đỏ), nhiệt độ CPU quá cao (trên 100°C) dẫn đến throttling hoặc shutdown, PC treo khi tải nặng, lỗi tính toán (dẫn đến BSOD hoặc kết quả sai). Nguyên nhân: quạt tản nhiệt không gắn chặt, keo tản nhiệt khô, ép xung quá mức, điện áp Vcore không ổn định, chân CPU bị cong. Cách xử lý: kiểm tra tản nhiệt và bôi lại keo, vào BIOS reset CPU settings, kiểm tra điện áp nguồn cấp cho CPU (cáp EPS 4+4 pin).\n\nLỗi ổ cứng: máy chậm, khởi động lâu, file bị lỗi hoặc không mở được, ổ cứng kêu lạch cạch (click of death – HDD sắp hỏng), Windows báo "disk boot failure" hoặc "bootmgr is missing". Nguyên nhân: bad sector trên HDD, NAND cell chết trên SSD, lỗi firmware, cáp SATA lỏng/hỏng, TBW đã hết (SSD). Cách kiểm tra: dùng CrystalDiskInfo xem S.M.A.R.T status, dùng CHKDSK sửa lỗi file system. Nếu S.M.A.R.T báo "Caution" hoặc "Bad", cần backup dữ liệu ngay và thay ổ mới.',
+            imagePrompt: 'Kiểm tra RAM bằng MemTest86 và ổ cứng bằng CrystalDiskInfo',
+            quiz: [
+              {
+                question: 'Phần mềm nào chuyên dùng để kiểm tra lỗi RAM?',
+                options: ['MemTest86', 'CrystalDiskInfo', 'CHKDSK', 'HWMonitor'],
+                correctIndex: 0,
+                explanation: 'MemTest86 chạy từ USB, kiểm tra toàn bộ RAM qua nhiều mẫu test, phát hiện lỗi bad sector và lỗi timing.'
+              },
+              {
+                question: 'Tiếng kêu lạch cạch từ ổ cứng là dấu hiệu gì?',
+                options: ['HDD sắp hỏng đầu đọc (click of death)', 'Ổ cứng hoạt động bình thường', 'Ổ cứng thiếu điện', 'Lỗi cáp SATA'],
+                correctIndex: 0,
+                explanation: 'Click of death là tiếng đầu đọc HDD không tìm được track, báo hiệu sắp hỏng – cần backup dữ liệu ngay lập tức.'
+              }
+            ]
+          },
+          {
+            id: 'stage-7-part-1-section-3',
+            title: 'Lỗi nhiệt độ, quạt và tản nhiệt',
+            content: 'Nhiệt độ quá cao là kẻ thù số một của linh kiện điện tử. CPU hoạt động an toàn ở 40-80°C (idle ~30-45°C, load ~60-80°C), GPU tương tự. Nếu nhiệt độ vượt 90-100°C, CPU sẽ throttling (giảm xung để hạ nhiệt) hoặc shutdown. Nguyên nhân: tản nhiệt không gắn chặt, keo tản nhiệt khô/cũ (nên thay mỗi 1-2 năm), quạt ngừng quay (bụi bẩn, hỏng motor), luồng khí case kém (ít quạt, bụi bám lưới lọc). Cách kiểm tra: dùng HWMonitor, CPU-Z, GPU-Z, MSI Afterburner theo dõi nhiệt độ.\n\nVệ sinh PC định kỳ rất quan trọng: dùng bình xịt khí (compressed air) để thổi bụi khỏi tản nhiệt, quạt, khe PCI, nguồn. Không dùng máy hút bụi (tĩnh điện gây hỏng linh kiện). Vệ sinh 3-6 tháng một lần tùy môi trường. Thay keo tản nhiệt CPU/GPU mỗi 1-2 năm: lau sạch keo cũ bằng cồn isopropyl 90%+, bôi keo mới lượng bằng hạt gạo, gắn lại tản nhiệt. Đối với laptop, cần vệ sinh thường xuyên hơn do khe tản nhiệt nhỏ dễ bị bụi bít.\n\nCác giải pháp cải thiện nhiệt: thêm quạt case (ưu tiên hút trước, thải sau), chuyển sang tản nhiệt nước AIO hoặc custom loop, dùng case mesh (lưới) thoáng khí, quản lý dây gọn gàng, dùng thermal paste chất lượng cao (Noctua NT-H2, Arctic MX-6, Thermal Grizzly Kryonaut). Ép xung cần tản nhiệt mạnh hơn. Nhiệt độ RAM và VRM cũng cần theo dõi, đặc biệt khi ép xung. Cài đặt fan curve trong BIOS hoặc phần mềm (FanControl, SpeedFan) để quạt tự động tăng tốc theo nhiệt độ.',
+            imagePrompt: 'Vệ sinh PC bằng bình xịt khí và thay keo tản nhiệt CPU',
+            quiz: [
+              {
+                question: 'Nhiệt độ CPU an toàn khi chơi game là bao nhiêu?',
+                options: ['60-80°C', '90-100°C', '40-50°C', 'Trên 100°C'],
+                correctIndex: 0,
+                explanation: 'CPU hoạt động an toàn ở 60-80°C khi chơi game, trên 90°C là mức nguy hiểm có thể gây throttling hoặc shutdown.'
+              },
+              {
+                question: 'Bao lâu nên thay keo tản nhiệt cho CPU?',
+                options: ['Mỗi 1-2 năm', 'Mỗi tháng', 'Mỗi 5 năm', 'Không bao giờ cần thay'],
+                correctIndex: 0,
+                explanation: 'Keo tản nhiệt khô dần theo thời gian, nên thay mỗi 1-2 năm hoặc khi tháo tản nhiệt để đảm bảo dẫn nhiệt tốt nhất.'
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'stage-7-part-2',
+        titleVn: 'Quy trình kiểm tra và chẩn đoán',
+        titleEn: 'Testing & Diagnostic Procedures',
+        pages: '251–270',
+        sections: [
+          {
+            id: 'stage-7-part-2-section-1',
+            title: 'Quy trình thay thế linh kiện',
+            content: 'Thay thế linh kiện là kỹ năng cơ bản của kỹ thuật viên PC. Quy trình chung: tắt máy, rút dây nguồn (và rút pin laptop nếu có), đeo dây chống tĩnh điện (ESD wrist strap), thao tác trên bề mặt không tĩnh điện. Chuẩn bị dụng cụ: tua vít từ tính (Phillips #1 và #2), nhíp, dây buộc, cồn isopropyl, keo tản nhiệt. Luôn thao tác nhẹ nhàng, không dùng lực quá mạnh.\n\nThay mainboard: tháo GPU, RAM, ổ cứng, quạt, các cáp kết nối. Tháo ốc giữ mainboard (thường 6-9 ốc). Nhấc mainboard lên nhẹ nhàng, tránh chạm vào chân CPU socket. Lắp mainboard mới: gắn CPU (căn chỉnh tam giác vàng), gắn RAM (khe ưu tiên A2+B2), gắn SSD M.2, bôi keo tản nhiệt, gắn tản nhiệt CPU, cho mainboard vào case, siết ốc đều tay, kết nối cáp 24-pin ATX, EPS 8-pin, cáp front panel (Power SW, Reset SW, HDD LED, Power LED).\n\nThay CPU: mở khóa socket, nhấc CPU cũ ra (cầm cạnh, không chạm chân/lug), đặt CPU mới (đúng chiều), đóng khóa. Thay RAM: mở clip hai đầu khe, ấn thanh RAM xuống cho đến khi clip tự kêu "tách". Thay GPU: tháo ốc giữ GPU, nhấn clip giữ khe PCIe, rút card ra; lắp ngược lại. Thay PSU: tháo tất cả dây cáp, tháo ốc giữ nguồn, rút nguồn ra; lắp ngược lại. Sau khi thay, cắm nguồn, bật máy và kiểm tra POST. Nếu không POST, kiểm tra lại tất cả kết nối, đặc biệt là 24-pin và EPS.',
+            imagePrompt: 'Quy trình thay thế mainboard từng bước',
+            quiz: [
+              {
+                question: 'Dụng cụ chống tĩnh điện nào cần dùng khi thay linh kiện?',
+                options: ['Dây đeo tay ESD (chống tĩnh điện)', 'Găng tay cao su', 'Kìm cách điện', 'Tua vít nhựa'],
+                correctIndex: 0,
+                explanation: 'Dây đeo tay ESD xả tĩnh điện từ cơ thể xuống đất, bảo vệ linh kiện nhạy cảm khỏi phóng tĩnh điện gây hỏng.'
+              },
+              {
+                question: 'Khe RAM nào nên gắn ưu tiên để kích hoạt Dual Channel?',
+                options: ['A2 và B2 (cùng màu)', 'A1 và A2', 'B1 và B2', 'A1 và B1'],
+                correctIndex: 0,
+                explanation: 'Hầu hết mainboard khuyên gắn RAM ở khe A2 và B2 trước (slot 2 và 4) để kích hoạt Dual Channel và ổn định nhất.'
+              }
+            ]
+          },
+          {
+            id: 'stage-7-part-2-section-2',
+            title: 'Chẩn đoán lỗi bằng phần mềm và thiết bị',
+            content: 'Chẩn đoán lỗi hệ thống đòi hỏi kết hợp phần mềm và thiết bị chuyên dụng. Phần mềm chẩn đoán: HWMonitor – theo dõi nhiệt độ, điện áp, tốc độ quạt; CrystalDiskInfo – kiểm tra sức khỏe ổ cứng S.M.A.R.T; CPU-Z / GPU-Z – thông tin chi tiết CPU/GPU; MemTest86 – test RAM; OCCT – stress test CPU, GPU, PSU; 3DMark / FurMark – test GPU; Cinebench – benchmark CPU; HWiNFO64 – thông tin toàn diện. Chạy stress test giúp phát hiện lỗi không ổn định (khi hệ thống nóng lên, lỗi mới xuất hiện).\n\nThiết bị chẩn đoán: PSU tester – kiểm tra nhanh các mức điện áp nguồn; POST card (debug card) – cắm vào khe PCI hoặc LPC, hiển thị mã lỗi POST dạng số hex; đồng hồ vạn năng (multimeter) – đo điện áp, thông mạch, kiểm tra tụ; máy hiện sóng (oscilloscope) – phân tích tín hiệu xung; nhiệt kế hồng ngoại (infrared thermometer) – đo nhiệt độ bề mặt linh kiện. Kỹ thuật viên cần biết đọc sơ đồ mạch và datasheet IC để sửa chữa cấp board.\n\nQuy trình chẩn đoán có hệ thống: 1) Hỏi triệu chứng (khi nào lỗi xuất hiện, làm gì thì lỗi). 2) Kiểm tra trực quan (tụ phồng, cháy nổ, chân cắm lỏng). 3) Đo điện áp nguồn (24-pin, EPS, PCIe). 4) Reset CMOS. 5) Boot tối thiểu (minimum boot: CPU + 1 RAM + mainboard, không ổ cứng, không GPU). 6) Thay linh kiện nghi ngờ. 7) Chạy phần mềm chẩn đoán. 8) Ghi log và so sánh với thông số chuẩn. Phương pháp "thay thế để loại trừ" (swap and test) là hiệu quả nhất khi có linh kiện thay thế.',
+            imagePrompt: 'Kỹ thuật viên dùng POST card và phần mềm HWMonitor chẩn đoán PC',
+            quiz: [
+              {
+                question: 'Phần mềm nào stress test CPU và GPU để phát hiện lỗi không ổn định?',
+                options: ['OCCT', 'CPU-Z', 'CrystalDiskInfo', 'HWMonitor'],
+                correctIndex: 0,
+                explanation: 'OCCT (OverClock Checking Tool) stress test CPU, GPU, PSU với tải cao, phát hiện lỗi không ổn định do nhiệt hoặc nguồn.'
+              },
+              {
+                question: 'Boot tối thiểu (minimum boot) gồm những linh kiện nào?',
+                options: ['CPU + 1 RAM + Mainboard', 'CPU + GPU + RAM', 'Mainboard + GPU + Ổ cứng', 'CPU + RAM + Ổ cứng'],
+                correctIndex: 0,
+                explanation: 'Minimum boot chỉ gồm CPU, 1 thanh RAM và mainboard – đủ để kiểm tra xem hệ thống có POST được không, loại trừ lỗi từ các thành phần khác.'
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'stage-7-part-3',
+        titleVn: 'Kỹ thuật nâng cao',
+        titleEn: 'Advanced Techniques',
+        pages: '271–hết',
+        sections: [
+          {
+            id: 'stage-7-part-3-section-1',
+            title: 'Ép xung CPU (Overclocking)',
+            content: 'Ép xung (overclocking) là tăng xung nhịp hoạt động của CPU/GPU/RAM vượt thông số mặc định để đạt hiệu năng cao hơn. Ép xung CPU đòi hỏi: CPU có nhân mở khóa (K-series Intel, Ryzen không X), mainboard chipset hỗ trợ ép xung (Z-series Intel, B/X-series AMD), tản nhiệt mạnh hơn (AIO 240mm+ hoặc tower kép) và nguồn đủ công suất. Các thông số ép xung CPU gồm: multiplier (hệ số nhân, ví dụ 40x = 4.0GHz), Vcore (điện áp lõi, thường 1.2-1.4V), LLC (Load Line Calibration – bù điện áp khi tải), BCLK (base clock, 100MHz chuẩn).\n\nPhương pháp ép xung CPU: vào BIOS, tăng multiplier từ từ (bước 1x = 100MHz), test ổn định với Cinebench hoặc OCCT, theo dõi nhiệt độ (không quá 90°C). Nếu crash, tăng Vcore một chút (bước 0.01-0.025V). Giới hạn an toàn Vcore: ~1.35V cho Intel 12-14th, ~1.3V cho AMD Ryzen 7000. EPU (Intel) / Precision Boost Overdrive – PBO (AMD) là ép xung tự động. Undervolting (giảm điện áp) ngược lại: giữ xung chuẩn và giảm Vcore để giảm nhiệt (thường -0.05 đến -0.1V).\n\nÉp xung RAM: vào BIOS kích hoạt XMP (Intel) hoặc EXPO (AMD) để chạy RAM ở tốc độ nhà sản xuất. Nâng cao: tăng tần số, giảm timing (CL, tRCD, tRP, tRAS), tăng điện áp DRAM (1.35-1.5V cho DDR4, 1.25-1.45V cho DDR5). Test RAM với MemTest86 hoặc TestMem5. Lợi ích ép xung: tăng FPS trong game (5-15%), tăng tốc render, giải nén. Rủi ro: nhiệt độ cao, giảm tuổi thọ linh kiện, mất bảo hành, crash hệ thống (gây mất dữ liệu). Ép xung không còn "ngốn điện" như xưa – CPU hiện đại tự động boost xung khi đủ tản nhiệt.',
+            imagePrompt: 'Giao diện BIOS ép xung CPU với các thông số multiplier và Vcore',
+            quiz: [
+              {
+                question: 'CPU Intel dòng nào cho phép ép xung?',
+                options: ['Dòng K (nhân mở khóa)', 'Dòng Non-K', 'Dòng F', 'Dòng T'],
+                correctIndex: 0,
+                explanation: 'Intel Core dòng K (như i7-14700K) có hệ số nhân mở khóa, cho phép ép xung trên mainboard chipset Z-series.'
+              },
+              {
+                question: 'Undervolting CPU mang lại lợi ích gì?',
+                options: ['Giảm nhiệt độ mà vẫn giữ hiệu năng', 'Tăng xung nhịp cao hơn', 'Vô hiệu hóa CPU core', 'Tự động ép xung'],
+                correctIndex: 0,
+                explanation: 'Undervolting giảm điện áp CPU trong khi giữ nguyên xung nhịp, giúp giảm nhiệt độ và tiết kiệm điện mà không mất hiệu năng.'
+              }
+            ]
+          },
+          {
+            id: 'stage-7-part-3-section-2',
+            title: 'Card test mainboard và kỹ thuật nâng cao',
+            content: 'Card test mainboard (POST card / debug card) là công cụ không thể thiếu cho kỹ thuật viên sửa chữa chuyên nghiệp. Card này cắm vào khe PCIe, PCI hoặc LPC bus, hiển thị mã POST dạng 2 chữ số hex (00, FF, d4, b2...). Mỗi mã tương ứng với bước kiểm tra phần cứng trong quá trình POST. Sách tra mã POST (theo hãng BIOS: AMI, Phoenix, Award) giúp xác định chính xác lỗi. Card test có đèn LED báo hiệu các mức điện áp (+3.3V, +5V, +12V) và tín hiệu clock, reset.\n\nSửa mainboard cấp board (board-level repair) là kỹ thuật cao cấp: thay IC BIOS (nạp lại firmware bằng CH341A programmer), thay tụ điện cháy/phồng, thay MOSFET VRM, thay IC SIO/codec âm thanh. Cần máy hàn khí nóng (hot air rework station), mỏ hàn nhiệt độ điều chỉnh, kính hiển vi, máy hàn sóng (cho BGA). Hàn BGA (Ball Grid Array) – chipset và GPU – là kỹ thuật khó nhất, cần máy rework BGA chuyên dụng và khuôn stencil.\n\nCác dụng cụ khác: máy đo dòng rò (DC power supply) để test mainboard ngoài case; máy soi nhiệt (thermal camera) tìm linh kiện nóng bất thường; máy hiện sóng (oscilloscope) đo tín hiệu xung clock, dữ liệu bus; thiết bị nạp BIOS (Programmer) cho IC SPI Flash; bo mạch test CPU/RAM. Kỹ thuật viên cần hiểu sơ đồ nguyên lý (schematic diagram) và boardview (bản đồ linh kiện) để định vị và đo kiểm. Ngành sửa chữa PC đòi hỏi kiến thức điện tử, khả năng đọc sơ đồ và kiên nhẫn. Đây là lĩnh vực thú vị cho những ai đam mê phần cứng.',
+            imagePrompt: 'Card test mainboard PCI và dụng cụ hàn BGA chuyên nghiệp',
+            quiz: [
+              {
+                question: 'Card test mainboard (POST card) hiển thị thông tin gì?',
+                options: ['Mã lỗi POST dạng số hex giúp chẩn đoán', 'Tốc độ CPU hiện tại', 'Nhiệt độ mainboard', 'Dung lượng RAM'],
+                correctIndex: 0,
+                explanation: 'POST card hiển thị mã hex tương ứng từng bước kiểm tra phần cứng, giúp xác định chính xác linh kiện lỗi.'
+              },
+              {
+                question: 'Kỹ thuật sửa mainboard cấp board bao gồm những thao tác nào?',
+                options: ['Thay IC BIOS, tụ, MOSFET, hàn BGA', 'Thay toàn bộ mainboard', 'Cài lại Windows', 'Vệ sinh case'],
+                correctIndex: 0,
+                explanation: 'Board-level repair gồm thay IC BIOS (nạp firmware), tụ cháy, MOSFET VRM, và hàn BGA cho chipset/GPU bằng máy hàn khí nóng.'
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+];

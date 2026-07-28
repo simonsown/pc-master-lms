@@ -206,65 +206,17 @@ export default function StudentDashboard() {
           <motion.div {...fadeUp(0.3)} className="lms-card" style={{ padding: isMobile ? '16px' : '24px', borderRadius: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 style={{ fontSize: '15px', fontWeight: 700, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Trophy size={16} style={{ color: '#f59e0b' }} /> Nhiệm vụ hôm nay
+                <BookOpen size={16} style={{ color: 'var(--brand-primary)' }} /> Bài học gần đây
               </h3>
-              <Link href="/student/dashboard" style={{ fontSize: '11px', color: 'var(--brand-primary)', fontWeight: 600, textDecoration: 'none' }}>
-                Xem tất cả →
-              </Link>
             </div>
-            {realtimeState.allQuests.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {realtimeState.allQuests.slice(0, 4).map((quest, i) => {
-                  const userQuest = realtimeState.quests.find(q => q.quest_id === quest.id)
-                  const isCompleted = userQuest?.is_completed
-                  const progress = userQuest?.progress || 0
-                  return (
-                    <motion.div key={quest.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
-                      style={{ padding: '12px', borderRadius: '10px', background: isCompleted ? 'rgba(16,185,129,0.06)' : 'var(--bg-surface)', border: `1px solid ${isCompleted ? 'rgba(16,185,129,0.2)' : 'var(--border-subtle)'}`, opacity: isCompleted ? 0.7 : 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{ fontSize: '20px' }}>{quest.icon || '📌'}</span>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            {quest.title}
-                            {isCompleted && <CheckCircle2 size={12} style={{ color: '#10b981' }} />}
-                          </div>
-                          <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>+{quest.xp_reward} XP</div>
-                          {!isCompleted && quest.requirement_value > 0 && (
-                            <div style={{ height: '3px', borderRadius: '99px', background: 'rgba(255,255,255,0.06)', marginTop: '6px', overflow: 'hidden' }}>
-                              <div style={{ height: '100%', borderRadius: '99px', background: 'var(--brand-primary)', width: `${Math.min(100, (progress / quest.requirement_value) * 100)}%`, transition: 'width 0.3s' }} />
-                            </div>
-                          )}
-                        </div>
-                        <div style={{ fontSize: '10px', fontWeight: 700, color: isCompleted ? '#10b981' : 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                          {isCompleted ? 'Hoan thanh' : `+${quest.xp_reward}XP`}
-                        </div>
-                      </div>
-                    </motion.div>
-                  )
-                })}
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {[
-                  { id: 'fb-1', title: 'Hoàn thành 1 bài học', xp_reward: 50, icon: '📚' },
-                  { id: 'fb-2', title: 'Lắp ráp PC', xp_reward: 30, icon: '🔧' },
-                  { id: 'fb-3', title: 'Làm quiz', xp_reward: 20, icon: '🧠' },
-                  { id: 'fb-4', title: 'Đạt streak 3 ngày', xp_reward: 100, icon: '🔥' },
-                  { id: 'fb-5', title: 'Tham gia thảo luận', xp_reward: 15, icon: '💬' },
-                ].map((q, i) => (
-                  <motion.div key={q.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
-                    style={{ padding: '12px', borderRadius: '10px', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ fontSize: '20px' }}>{q.icon}</span>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>{q.title}</div>
-                      </div>
-                      <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>+{q.xp_reward}XP</div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            )}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{ padding: '20px', borderRadius: '12px', background: 'var(--bg-surface)', border: '1px solid var(--border-default)', textAlign: 'center' }}>
+              <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0 }}>
+                Truy cập <Link href="/pro" style={{ color: 'var(--brand-primary)', fontWeight: 700, textDecoration: 'none' }}>Khóa học</Link> để bắt đầu học về kỹ thuật phần cứng PC
+              </p>
+            </motion.div>
           </motion.div>
         </aside>
       </div>

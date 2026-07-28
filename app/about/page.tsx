@@ -60,12 +60,7 @@ export default function AboutPage() {
             if (data && data.length > 0) {
                 setTeam(data);
             } else {
-                setTeam([
-                    { id: '1', full_name: 'Nguyễn Phúc Khánh Sơn', image_url: '/son.png', role: 'Developer' },
-                    { id: '2', full_name: 'Đặng Quốc An', image_url: '/team-an-khang.png', role: 'Thành viên' },
-                    { id: '3', full_name: 'Nguyễn Phạm Gia Khiêm', image_url: '/team-hiem.png', role: 'Thành viên' },
-                    { id: '4', full_name: 'Ngô Minh Khang', image_url: '/team-an-khang.png', role: 'Thành viên' },
-                ]);
+                setTeam([]);
             }
             setLoading(false);
         }
@@ -366,8 +361,7 @@ export default function AboutPage() {
                             <div style={{ textAlign: 'center' }}><Loader2 className="animate-spin" size={40} color="var(--brand-primary)" /></div>
                         ) : (
                             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '60px' }}>
-                                {team.map((member, idx) => {
-                                    const isKhangOrAn = member.full_name === 'Đặng Quốc An' || member.full_name === 'Ngô Minh Khang';
+                                {team.length > 0 ? team.map((member, idx) => {
                                     const borderGradients = [
                                         'linear-gradient(135deg, #00d4aa, #00f3ff)',
                                         'linear-gradient(135deg, #ffb900, #ff8b00)',
@@ -406,7 +400,50 @@ export default function AboutPage() {
                                             <div style={{ width: '40px', height: '3px', background: borderGradients[idx % borderGradients.length], margin: '8px auto', borderRadius: '2px' }} />
                                         </div>
                                     );
-                                })}
+                                }) : (
+                                    <div style={{ textAlign: 'center' }}>
+                                        <motion.div
+                                            animate={{ 
+                                                scale: [1, 1.02, 1],
+                                                rotate: [0, 2, 0, -2, 0],
+                                            }}
+                                            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                                            style={{
+                                                width: '280px', height: '280px', margin: '0 auto 28px',
+                                                borderRadius: '50%', overflow: 'hidden',
+                                                border: '3px solid var(--brand-primary)',
+                                                boxShadow: '0 0 60px rgba(0,212,170,0.3)',
+                                                position: 'relative',
+                                            }}
+                                        >
+                                            <motion.div
+                                                animate={{ rotate: 360 }}
+                                                transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
+                                                style={{
+                                                    position: 'absolute', inset: -3,
+                                                    borderRadius: '50%',
+                                                    background: 'conic-gradient(from 0deg, transparent, var(--brand-primary), transparent, var(--brand-primary), transparent)',
+                                                    zIndex: 0,
+                                                }}
+                                            />
+                                            <img 
+                                                src="/logo-team.png" 
+                                                alt="PC Master Builder Team"
+                                                style={{ 
+                                                    width: '100%', height: '100%', objectFit: 'cover', 
+                                                    display: 'block', position: 'relative', zIndex: 1,
+                                                    borderRadius: '50%',
+                                                }}
+                                            />
+                                        </motion.div>
+                                        <h3 style={{ fontSize: '24px', fontWeight: 800, color: '#fff', marginBottom: '8px' }}>
+                                            PC Master Builder Team
+                                        </h3>
+                                        <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)' }}>
+                                            Đội ngũ phát triển với khát vọng đổi mới giáo dục
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </section>
@@ -464,11 +501,17 @@ export default function AboutPage() {
                         </div>
 
                         <div style={{ height: '450px', borderRadius: '32px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', position: 'relative' }}>
-                            <iframe 
-                                src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d979.2117895773255!2d106.668737!3d10.823294!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x317528e57849e531%3A0xc3b320d72c0d3b3c!2zVHLGsOG7nW5nIFRIUFQgTmd1eeG7hW4gQ8O0bmcgVHLhu6k!5e0!3m2!1svi!2s!4v1719200000000!5m2!1svi!2s"
-                                width="100%" height="100%" style={{ border: 0, borderRadius: '32px' }} 
-                                allowFullScreen={true} loading="lazy" referrerPolicy="no-referrer-when-downgrade"
-                            ></iframe>
+                            <motion.div
+                                animate={{ scale: [1, 1.03, 1] }}
+                                transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+                                style={{ width: '100%', height: '100%' }}
+                            >
+                                <img 
+                                    src="/school-image.jpg" 
+                                    alt="Trường THPT Nguyễn Công Trứ"
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: '32px' }}
+                                />
+                            </motion.div>
                             <div style={{ position: 'absolute', top: '12px', left: '12px', padding: '6px 14px', borderRadius: '8px', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', fontSize: '12px', fontWeight: 600, color: '#fff', zIndex: 10, pointerEvents: 'none' }}>
                                 🏫 THPT Nguyễn Công Trứ
                             </div>

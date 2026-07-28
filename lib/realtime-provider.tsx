@@ -11,30 +11,6 @@ interface LevelDef {
   description: string;
 }
 
-interface Quest {
-  id: string;
-  title: string;
-  description: string;
-  xp_reward: number;
-  type: string;
-  difficulty: string;
-  icon: string;
-  requirement_type: string;
-  requirement_value: number;
-  is_active: boolean;
-  expires_at: string;
-}
-
-interface UserQuest {
-  id: string;
-  quest_id: string;
-  is_completed: boolean;
-  completed_at: string;
-  xp_earned: number;
-  progress: number;
-  daily_quests: Quest;
-}
-
 interface Title {
   id: string;
   title_id: string;
@@ -73,10 +49,8 @@ interface RealtimeState {
     xpToNext: number;
     xpInLevel: number;
     levelDefs: LevelDef[];
-    quests: UserQuest[];
     titles: Title[];
     xpHistory: XpTransaction[];
-    allQuests: Quest[];
 }
 
 interface RealtimeContextType {
@@ -107,15 +81,6 @@ const defaultLevelDefs: LevelDef[] = [
   { level: 20, title: 'Bất Tử', xp_required: 65000, color_hex: '#ffd700', icon: '🏆', description: 'Bất tử trong lịch sử' },
 ];
 
-const FALLBACK_QUESTS: Quest[] = [
-  { id: 'fallback-lesson', title: 'Hoàn thành 1 bài học', description: 'Hoàn thành một bài học bất kỳ', xp_reward: 50, type: 'daily', difficulty: 'easy', icon: '📚', requirement_type: 'lessons', requirement_value: 1, is_active: true, expires_at: '' },
-  { id: 'fallback-pc', title: 'Lắp ráp PC', description: 'Lắp ráp một cấu hình PC trong builder', xp_reward: 30, type: 'daily', difficulty: 'easy', icon: '🔧', requirement_type: 'builds', requirement_value: 1, is_active: true, expires_at: '' },
-  { id: 'fallback-quiz', title: 'Làm quiz', description: 'Hoàn thành một bài quiz', xp_reward: 20, type: 'daily', difficulty: 'easy', icon: '🧠', requirement_type: 'quizzes', requirement_value: 1, is_active: true, expires_at: '' },
-  { id: 'fallback-exam', title: 'Vượt qua kỳ thi', description: 'Vượt qua một kỳ thi bất kỳ', xp_reward: 80, type: 'daily', difficulty: 'medium', icon: '📝', requirement_type: 'exams', requirement_value: 1, is_active: true, expires_at: '' },
-  { id: 'fallback-streak', title: 'Đạt streak 3 ngày', description: 'Duy trì streak học tập 3 ngày liên tiếp', xp_reward: 100, type: 'daily', difficulty: 'medium', icon: '🔥', requirement_type: 'streak', requirement_value: 3, is_active: true, expires_at: '' },
-  { id: 'fallback-discussion', title: 'Tham gia thảo luận', description: 'Tham gia thảo luận trong lớp học', xp_reward: 15, type: 'daily', difficulty: 'easy', icon: '💬', requirement_type: 'discussions', requirement_value: 1, is_active: true, expires_at: '' },
-];
-
 function calcLevel(xp: number, levelDefs: LevelDef[]) {
   let lvl = levelDefs[0];
   for (const d of levelDefs) {
@@ -133,7 +98,7 @@ const RealtimeContext = createContext<RealtimeContextType>({
       completedLessons: new Set(), xp: 0, streak: 0, studyMinutes: 0, weeklyActivity: [],
       averageScore: null, completedLessonCount: 0, totalQuizAttempts: 0,
       level: 1, levelTitle: 'Tân Thủ', levelIcon: '🌱', levelColor: '#94a3b8', levelProgress: 0, xpToNext: 100, xpInLevel: 0,
-      levelDefs: defaultLevelDefs, quests: [], titles: [], xpHistory: [], allQuests: [],
+      levelDefs: defaultLevelDefs, titles: [], xpHistory: [],
     },
     refetch: async () => {},
 });
@@ -160,10 +125,8 @@ export function RealtimeProvider({ children, userId }: { children: React.ReactNo
         xpToNext: 100,
         xpInLevel: 0,
         levelDefs: defaultLevelDefs,
-        quests: [],
         titles: [],
         xpHistory: [],
-        allQuests: [],
     });
 
     const supabaseRef = useRef<any>(null);
@@ -212,92 +175,6 @@ export function RealtimeProvider({ children, userId }: { children: React.ReactNo
         }
     }, [])
 
-    const autoCompleteQuests = useCallback(async (supabase: any, userId: string, currentQuests: UserQuest[], allQuestsDefs: Quest[], currentXp: number, currentLevel: number) => {
-        try {
-            const { data: lessonProgress } = await supabase.from('lesson_progress').select('lesson_id, status').eq('student_id', userId)
-            const completedLessonCount = (lessonProgress || []).filter((p: any) => p.status === 'completed').length
-
-            const { data: quizAttempts } = await supabase.from('quiz_attempts').select('id').eq('student_id', userId)
-            const quizCount = (quizAttempts || []).length
-
-            let buildCount = 0
-            try { const { data: builderSessions } = await supabase.from('builder_sessions').select('id').eq('user_id', userId); buildCount = (builderSessions || []).length } catch (e) {}
-
-            let discussionCount = 0
-            try { const { data: discussions } = await supabase.from('discussions').select('id').eq('user_id', userId); discussionCount = (discussions || []).length } catch (e) {}
-
-            let passedExamCount = 0
-            try { const { data: examAttempts } = await supabase.from('exam_attempts').select('id, status').eq('user_id', userId); passedExamCount = (examAttempts || []).filter((e: any) => e.status === 'passed').length } catch (e) {}
-
-            const { data: stats } = await supabase.from('learning_stats').select('current_streak').eq('user_id', userId).single()
-            const currentStreak = stats?.current_streak || 0
-
-            let newXp = currentXp
-            let leveledUp = false
-
-            for (const questDef of allQuestsDefs) {
-                const existingQuest = currentQuests.find((q: UserQuest) => q.quest_id === questDef.id)
-                if (existingQuest?.is_completed) continue
-
-                let requirementMet = false
-                switch (questDef.requirement_type) {
-                    case 'lessons': requirementMet = completedLessonCount >= questDef.requirement_value; break
-                    case 'quizzes': requirementMet = quizCount >= questDef.requirement_value; break
-                    case 'builds': requirementMet = buildCount >= questDef.requirement_value; break
-                    case 'streak': requirementMet = currentStreak >= questDef.requirement_value; break
-                    case 'discussions': requirementMet = discussionCount >= questDef.requirement_value; break
-                    case 'exams': requirementMet = passedExamCount >= questDef.requirement_value; break
-                    default: requirementMet = false
-                }
-
-                if (requirementMet) {
-                    if (existingQuest) {
-                        await supabase.from('user_quests').update({ is_completed: true, completed_at: new Date().toISOString(), xp_earned: questDef.xp_reward }).eq('id', existingQuest.id)
-                    } else {
-                        await supabase.from('user_quests').insert({ user_id: userId, quest_id: questDef.id, is_completed: true, completed_at: new Date().toISOString(), xp_earned: questDef.xp_reward })
-                    }
-                    newXp += questDef.xp_reward
-                    await supabase.from('xp_transactions').insert({ user_id: userId, amount: questDef.xp_reward, reason: `Hoàn thành nhiệm vụ: ${questDef.title}`, reference_type: 'quest', reference_id: questDef.id })
-                } else if (existingQuest) {
-                    const progress = calculateQuestProgress(questDef, completedLessonCount, quizCount, buildCount, discussionCount, currentStreak, passedExamCount)
-                    if (progress !== existingQuest.progress) {
-                        await supabase.from('user_quests').update({ progress }).eq('id', existingQuest.id)
-                    }
-                }
-            }
-
-            if (newXp > currentXp) {
-                const { data: profile } = await supabase.from('profiles').select('xp, level').eq('id', userId).single()
-                const totalXp = (profile?.xp || 0) + (newXp - currentXp)
-                const { data: levelDefs } = await supabase.from('level_definitions').select('level').lte('xp_required', totalXp).order('xp_required', { ascending: false }).limit(1)
-                const newLevel = (levelDefs?.[0] as any)?.level || 1
-                await supabase.from('profiles').update({ xp: totalXp, level: newLevel, updated_at: new Date().toISOString() }).eq('id', userId)
-                await supabase.from('leaderboard_cache').upsert({ user_id: userId, total_xp: totalXp, level: newLevel, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
-                await supabase.from('learning_stats').update({ total_xp: totalXp, updated_at: new Date().toISOString() }).eq('user_id', userId)
-                if (newLevel > currentLevel) {
-                    leveledUp = true
-                }
-            }
-
-            return { xp: newXp, leveledUp }
-        } catch (e) {
-            console.error('Auto-complete quests error:', e)
-            return null
-        }
-    }, [])
-
-    function calculateQuestProgress(quest: Quest, completedLessons: number, quizzes: number, builds: number, discussions: number, streak: number, exams?: number) {
-        switch (quest.requirement_type) {
-            case 'lessons': return Math.min(completedLessons, quest.requirement_value)
-            case 'quizzes': return Math.min(quizzes, quest.requirement_value)
-            case 'builds': return Math.min(builds, quest.requirement_value)
-            case 'discussions': return Math.min(discussions, quest.requirement_value)
-            case 'streak': return Math.min(streak, quest.requirement_value)
-            case 'exams': return Math.min(exams || 0, quest.requirement_value)
-            default: return 0
-        }
-    }
-
     const fetchData = useCallback(async () => {
         if (!userId || !supabaseRef.current) return;
         const supabase = supabaseRef.current;
@@ -306,14 +183,12 @@ export function RealtimeProvider({ children, userId }: { children: React.ReactNo
         await trackDailyLogin(supabase, userId);
 
         const [
-          progress, statsRes, profile, levelDefs, userQuests, activeQuests, titles, xpHistory,
+          progress, statsRes, profile, levelDefs, titles, xpHistory,
         ] = await Promise.all([
             supabase.from('lesson_progress').select('lesson_id').eq('student_id', userId),
             supabase.from('learning_stats').select('*').eq('user_id', userId).single(),
             supabase.from('profiles').select('xp, level').eq('id', userId).single(),
             supabase.from('level_definitions').select('*').order('level', { ascending: true }),
-            supabase.from('user_quests').select('*, daily_quests(*)').eq('user_id', userId).order('created_at', { ascending: false }).limit(10),
-            supabase.from('daily_quests').select('*').eq('is_active', true).order('xp_reward', { ascending: false }),
             supabase.from('user_titles').select('*, player_titles(*)').eq('user_id', userId),
             supabase.from('xp_transactions').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20),
         ]);
@@ -321,21 +196,6 @@ export function RealtimeProvider({ children, userId }: { children: React.ReactNo
         let xp = profile?.data?.xp || statsRes?.data?.total_xp || 0;
         const defs = (levelDefs.data as LevelDef[]) || defaultLevelDefs;
         const levelInfo = calcLevel(xp, defs);
-        const currentQuests = (userQuests.data || []) as UserQuest[];
-        const allQuestsDefs = (() => {
-            const fetched = (activeQuests.data || []) as Quest[];
-            return fetched.length >= 5 ? fetched : [...fetched, ...FALLBACK_QUESTS].slice(0, 5);
-        })();
-
-        // Auto-complete quests if requirements are met
-        try {
-            const result = await autoCompleteQuests(supabase, userId, currentQuests, allQuestsDefs, xp, levelInfo.level)
-            if (result && result.xp > xp) {
-                xp = result.xp
-            }
-        } catch (e) {
-            console.error('Auto-complete error:', e)
-        }
 
         // Fetch quiz attempts for average score
         let avgScore: number | null = null
@@ -366,8 +226,6 @@ export function RealtimeProvider({ children, userId }: { children: React.ReactNo
             totalQuizAttempts,
             ...finalLevelInfo,
             levelDefs: defs,
-            quests: currentQuests,
-            allQuests: allQuestsDefs,
             titles: (titles.data || []) as Title[],
             xpHistory: (xpHistory.data || []) as XpTransaction[],
         }));
@@ -398,11 +256,6 @@ export function RealtimeProvider({ children, userId }: { children: React.ReactNo
             .on(
                 'postgres_changes',
                 { event: 'INSERT', schema: 'public', table: 'xp_transactions', filter: `user_id=eq.${userId}` },
-                () => fetchData()
-            )
-            .on(
-                'postgres_changes',
-                { event: '*', schema: 'public', table: 'user_quests', filter: `user_id=eq.${userId}` },
                 () => fetchData()
             )
             .on(

@@ -4,11 +4,168 @@ import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getProfile } from '@/lib/auth-actions'
 import { createBrowserClient } from '@supabase/ssr'
-import { BookOpen, Clock, Trophy, Award, Camera, Settings, Activity, FileText, ChevronRight, Edit3, ShieldCheck, User, Loader, CheckCircle } from 'lucide-react'
+import { BookOpen, Clock, Trophy, Award, Camera, Settings, Activity, FileText, ChevronRight, Edit3, ShieldCheck, User, Loader, CheckCircle, ExternalLink, Search, RotateCcw, History } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import { toast } from 'react-hot-toast'
 import { updateProfile } from '@/app/actions/profile'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
+
+function ExamsTabContent({ userId, supabase: sb }) {
+  const [exams, setExams] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchExams() {
+      try {
+        const { data } = await sb
+          .from('assignments')
+          .select('*')
+          .eq('is_published', true)
+          .order('created_at', { ascending: false });
+        setExams(data || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchExams();
+  }, []);
+
+  if (loading) {
+    return <div style={{ textAlign: 'center', padding: 40 }}><Loader className="animate-spin" size={24} color="var(--brand-primary)" /></div>;
+  }
+
+  if (exams.length === 0) {
+    return (
+      <div style={{ textAlign: 'center', padding: '60px 24px', color: 'var(--text-muted)' }}>
+        <FileText size={48} style={{ margin: '0 auto 16px', opacity: 0.3 }} />
+        <p>Chưa có bài thi nào.</p>
+        <Link href="/builder" style={{ display: 'inline-block', marginTop: 16, padding: '10px 24px', background: 'var(--brand-primary)', color: '#000', borderRadius: 10, fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
+          Vào Trung tâm Khảo thí
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <motion.div key="exams" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+        <h3 style={{ fontSize: 18, fontWeight: 700 }}>Kỳ thi & Bài kiểm tra</h3>
+        <Link href="/my-exams" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: 'var(--accent-blue)', textDecoration: 'none' }}>
+          <ExternalLink size={14} /> Xem phân tích
+        </Link>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {exams.map(exam => (
+          <Link key={exam.id} href={`/exam/${exam.id}`} style={{ textDecoration: 'none' }}>
+            <motion.div whileHover={{ y: -2 }} style={{
+              display: 'flex', alignItems: 'center', gap: 14, padding: '16px 20px',
+              borderRadius: 12, background: 'var(--bg-base)', border: '1px solid var(--border-default)',
+              cursor: 'pointer', transition: 'all 0.2s',
+            }}>
+              <div style={{
+                width: 44, height: 44, borderRadius: 10,
+                background: 'color-mix(in srgb, var(--accent-blue) 10%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--accent-blue) 20%, transparent)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}>
+                <FileText size={20} color="var(--accent-blue)" />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>
+                  {exam.title}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', gap: 8 }}>
+                  <span>{new Date(exam.created_at).toLocaleDateString('vi-VN')}</span>
+                  <span>·</span>
+                  <span>{exam.questions_count || 0} câu hỏi</span>
+                </div>
+              </div>
+              <ChevronRight size={18} color="var(--text-muted)" />
+            </motion.div>
+          </Link>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+function ActivityTabContent({ userId, supabase: sb }) {
+  const [activities, setActivities] = useState([
+    { time: 'Hôm nay, 14:30', title: 'Hoàn thành bài học: Cấu trúc cơ bản của Mainboard', desc: 'Đạt 100% điểm thực hành Lab 2D.', color: 'var(--brand-primary)' },
+    { time: 'Hôm qua, 09:15', title: 'Mở khóa huy hiệu: Thợ máy tập sự', desc: '', color: 'var(--accent-amber)' },
+    { time: '3 ngày trước', title: 'Gia nhập lớp học: 10A1 - Tin học cơ bản', desc: '', color: 'var(--bg-elevated)' },
+  ]);
+  const [history, setHistory] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('pc_activity_history');
+    if (stored) {
+      try {
+        setHistory(JSON.parse(stored));
+      } catch {}
+    }
+  }, []);
+
+  const allItems = showHistory
+    ? history.map(h => ({ time: h.time, title: h.action, desc: h.detail || '', color: 'var(--brand-primary)' }))
+    : activities;
+
+  return (
+    <motion.div key="activity" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+        <h3 style={{ fontSize: 18, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <History size={18} color="var(--brand-primary)" /> {showHistory ? 'Lịch sử hoạt động' : 'Hoạt động gần đây'}
+        </h3>
+        <button onClick={() => setShowHistory(!showHistory)} style={{
+          display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600,
+          color: 'var(--accent-blue)', background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+        }}>
+          <RotateCcw size={14} /> {showHistory ? 'Hoạt động gần đây' : 'Lịch sử hoạt động'}
+        </button>
+      </div>
+
+      {allItems.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '40px 24px', color: 'var(--text-muted)' }}>
+          <Activity size={48} style={{ margin: '0 auto 16px', opacity: 0.3 }} />
+          <p>Chưa có hoạt động nào.</p>
+        </div>
+      ) : (
+        <div style={{ position: 'relative', borderLeft: '1px solid var(--border-default)', marginLeft: 16, display: 'flex', flexDirection: 'column', gap: 24, paddingBottom: 16 }}>
+          {allItems.map((item, i) => (
+            <div key={i} style={{ position: 'relative', paddingLeft: 32 }}>
+              <div style={{
+                position: 'absolute', width: 14, height: 14, borderRadius: '50%',
+                background: item.color, left: '-7.5px', top: 4,
+                border: '3px solid var(--bg-surface)',
+                boxShadow: item.color === 'var(--brand-primary)' ? '0 0 10px color-mix(in srgb, var(--brand-primary) 50%, transparent)' : 'none',
+              }} />
+              <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>{item.time}</div>
+              <div style={{ background: 'var(--bg-base)', padding: '14px 16px', borderRadius: 12, border: '1px solid var(--border-default)' }}>
+                <p style={{ fontWeight: 500, margin: 0, color: 'var(--text-primary)' }}>{item.title}</p>
+                {item.desc && <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4, margin: 0 }}>{item.desc}</p>}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!showHistory && history.length > 0 && (
+        <button onClick={() => setShowHistory(true)} style={{
+          marginTop: 16, display: 'flex', alignItems: 'center', gap: 4,
+          fontSize: 14, fontWeight: 500, color: 'var(--accent-blue)',
+          background: 'transparent', border: 'none', cursor: 'pointer', paddingLeft: 16, fontFamily: 'inherit',
+        }}>
+          Xem toàn bộ lịch sử ({history.length}) <ChevronRight size={16} />
+        </button>
+      )}
+    </motion.div>
+  );
+}
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null)
@@ -370,78 +527,11 @@ export default function ProfilePage() {
             
             <AnimatePresence mode="wait">
               {activeTab === 'activity' && (
-                <motion.div key="activity" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-                  <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '24px' }}>Hoạt động gần đây</h3>
-                  
-                  <div style={{ position: 'relative', borderLeft: '1px solid var(--border-default)', marginLeft: '16px', display: 'flex', flexDirection: 'column', gap: '32px', paddingBottom: '16px' }}>
-                    <div style={{ position: 'relative', paddingLeft: '32px' }}>
-                      <div style={{ position: 'absolute', width: '16px', height: '16px', background: 'var(--brand-primary)', borderRadius: '50%', left: '-8.5px', top: '4px', border: '4px solid var(--bg-surface)', boxShadow: '0 0 10px color-mix(in srgb, var(--brand-primary) 50%, transparent)' }} />
-                      <div style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '4px' }}>Hôm nay, 14:30</div>
-                      <div style={{ background: 'var(--bg-base)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-default)' }}>
-                        <p style={{ fontWeight: 500 }}>Hoàn thành bài học: <span style={{ color: 'var(--text-primary)' }}>Cấu trúc cơ bản của Mainboard</span></p>
-                        <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginTop: '4px' }}>Đạt 100% điểm thực hành Lab 2D.</p>
-                      </div>
-                    </div>
-
-                    <div style={{ position: 'relative', paddingLeft: '32px' }}>
-                      <div style={{ position: 'absolute', width: '16px', height: '16px', background: 'var(--accent-amber)', borderRadius: '50%', left: '-8.5px', top: '4px', border: '4px solid var(--bg-surface)' }} />
-                      <div style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '4px' }}>Hôm qua, 09:15</div>
-                      <div style={{ background: 'var(--bg-base)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-default)' }}>
-                        <p style={{ fontWeight: 500 }}>Mở khóa huy hiệu: <span style={{ color: 'var(--accent-amber)', fontWeight: 700 }}>Thợ máy tập sự</span></p>
-                      </div>
-                    </div>
-
-                    <div style={{ position: 'relative', paddingLeft: '32px' }}>
-                      <div style={{ position: 'absolute', width: '16px', height: '16px', background: 'var(--bg-elevated)', borderRadius: '50%', left: '-8.5px', top: '4px', border: '4px solid var(--bg-surface)' }} />
-                      <div style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '4px' }}>3 ngày trước</div>
-                      <div style={{ background: 'var(--bg-base)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-default)' }}>
-                        <p style={{ fontWeight: 500, color: 'var(--text-secondary)' }}>Gia nhập lớp học: <span style={{ color: 'var(--text-primary)' }}>10A1 - Tin học cơ bản</span></p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <button style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '14px', fontWeight: 500, color: 'var(--accent-blue)', background: 'transparent', border: 'none', cursor: 'pointer', paddingLeft: '16px' }}>
-                    Xem toàn bộ lịch sử <ChevronRight size={16} />
-                  </button>
-                </motion.div>
+                <ActivityTabContent userId={profile.id} supabase={supabase} />
               )}
 
               {activeTab === 'exams' && (
-                <motion.div key="exams" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-                    <h3 style={{ fontSize: '18px', fontWeight: 700 }}>Lịch sử bài thi</h3>
-                  </div>
-                  
-                  <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
-                      <thead>
-                        <tr style={{ borderBottom: '1px solid var(--border-default)', fontSize: '14px', color: 'var(--text-muted)' }}>
-                          <th style={{ padding: '12px 16px', fontWeight: 500 }}>Tên bài thi</th>
-                          <th style={{ padding: '12px 16px', fontWeight: 500 }}>Ngày thi</th>
-                          <th style={{ padding: '12px 16px', fontWeight: 500 }}>Điểm số</th>
-                          <th style={{ padding: '12px 16px', fontWeight: 500 }}>Xếp loại</th>
-                          <th style={{ padding: '12px 16px', fontWeight: 500 }}></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr style={{ borderBottom: '1px solid var(--border-default)' }}>
-                          <td style={{ padding: '16px', fontWeight: 500 }}>Kiểm tra 15p: Linh kiện CPU</td>
-                          <td style={{ padding: '16px', color: 'var(--text-muted)', fontSize: '14px' }}>10/05/2026</td>
-                          <td style={{ padding: '16px', fontWeight: 700, color: 'var(--brand-primary)' }}>9.5</td>
-                          <td style={{ padding: '16px' }}><span style={{ padding: '4px 8px', background: 'color-mix(in srgb, var(--success) 10%, transparent)', color: 'var(--success)', borderRadius: '4px', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase' }}>Giỏi</span></td>
-                          <td style={{ padding: '16px', textAlign: 'right' }}><button style={{ fontSize: '14px', fontWeight: 500, color: 'var(--accent-blue)', background: 'transparent', border: 'none', cursor: 'pointer' }}>Xem chi tiết</button></td>
-                        </tr>
-                        <tr style={{ borderBottom: '1px solid var(--border-default)' }}>
-                          <td style={{ padding: '16px', fontWeight: 500 }}>Thực hành lắp ráp PC Gaming</td>
-                          <td style={{ padding: '16px', color: 'var(--text-muted)', fontSize: '14px' }}>05/05/2026</td>
-                          <td style={{ padding: '16px', fontWeight: 700, color: 'var(--accent-amber)' }}>8.0</td>
-                          <td style={{ padding: '16px' }}><span style={{ padding: '4px 8px', background: 'color-mix(in srgb, var(--accent-blue) 10%, transparent)', color: 'var(--accent-blue)', borderRadius: '4px', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase' }}>Khá</span></td>
-                          <td style={{ padding: '16px', textAlign: 'right' }}><button style={{ fontSize: '14px', fontWeight: 500, color: 'var(--accent-blue)', background: 'transparent', border: 'none', cursor: 'pointer' }}>Xem chi tiết</button></td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </motion.div>
+                <ExamsTabContent userId={profile.id} supabase={supabase} />
               )}
 
               {activeTab === 'badges' && (

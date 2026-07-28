@@ -2,7 +2,7 @@
 
 import React, { Suspense, useRef, useState, useEffect, Component } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useGLTF, Text } from '@react-three/drei';
+import { useGLTF, Text, OrbitControls, useProgress, Environment, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { headTrackingRef } from './head-tracker-shared';
 import { handDataRef } from './hand-shared';
@@ -20,10 +20,212 @@ const ITEMS = [
   { id: 'kit', file: '/models/computer_components.glb', name: 'PC Components Kit', desc: 'Bộ linh kiện máy tính đầy đủ', color: '#06b6d4', pos: [0, 0, 8] },
 ];
 
+// Preload GLB models for instant rendering
+if (typeof window !== 'undefined') {
+  ITEMS.forEach(i => {
+    try { useGLTF.preload(i.file); } catch (e) {}
+  });
+}
+
+/* ── Loading Overlay ── */
+function LoadingOverlay() {
+  const { progress, active } = useProgress();
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    if (!active && progress >= 100) {
+      const t = setTimeout(() => setVisible(false), 400);
+      return () => clearTimeout(t);
+    }
+  }, [active, progress]);
+
+  if (!visible) return null;
+  const pct = Math.round(progress);
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 9998, display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      background: 'linear-gradient(135deg, #0f172a, #1e1b4b)',
+      transition: 'opacity 0.4s ease', opacity: visible ? 1 : 0,
+    }}>
+      <div style={{ marginBottom: 28, textAlign: 'center' }}>
+        <div style={{ fontSize: 44, marginBottom: 12 }}>🖥️</div>
+        <div style={{ fontSize: 24, fontWeight: 800, color: '#fff' }}>Showroom 3D Linh Kiện</div>
+        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>Đang tải mô hình 3D...</div>
+      </div>
+
+      <div style={{ width: 280, marginBottom: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 6 }}>
+          <span>Tiến độ tải</span>
+          <span style={{ color: '#818cf8', fontWeight: 700 }}>{pct}%</span>
+        </div>
+        <div style={{ height: 6, background: 'rgba(255,255,255,0.1)', borderRadius: 99, overflow: 'hidden' }}>
+          <div style={{
+            width: `${pct}%`, height: '100%',
+            background: 'linear-gradient(90deg, #4f46e5, #818cf8)',
+            borderRadius: 99, transition: 'width 0.2s ease',
+          }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Fullscreen 3D Component Viewer Modal ── */
+function FullscreenViewer({ item, onClose, onPrev, onNext, hasPrev, hasNext }: {
+  item: typeof ITEMS[0]; onClose: () => void; onPrev: () => void; onNext: () => void; hasPrev: boolean; hasNext: boolean;
+}) {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'ArrowLeft' && hasPrev) onPrev();
+      if (e.key === 'ArrowRight' && hasNext) onNext();
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onClose, onPrev, onNext, hasPrev, hasNext]);
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 9997, background: '#090d16',
+      display: 'flex', flexDirection: 'column',
+      animation: 'fadeInUp 0.2s cubic-bezier(.4,0,.2,1)',
+    }}>
+      <style>{`@keyframes fadeInUp{from{opacity:0;transform:scale(0.98)}to{opacity:1;transform:scale(1)}}`}</style>
+
+      {/* Top Navigation Bar */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '20px 28px', background: 'linear-gradient(to bottom, rgba(9,13,22,0.95), transparent)',
+        pointerEvents: 'none'
+      }}>
+        <div style={{ pointerEvents: 'auto' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: item.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 2 }}>
+            CHI TIẾT LINH KIỆN 3D
+          </div>
+          <div style={{ fontSize: 22, fontWeight: 800, color: '#ffffff' }}>{item.name}</div>
+          <div style={{ fontSize: 13, color: '#94a3b8', marginTop: 2 }}>{item.desc}</div>
+        </div>
+
+        <button
+          onClick={onClose}
+          style={{
+            pointerEvents: 'auto',
+            width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.1)',
+            border: '1px solid rgba(255,255,255,0.2)', color: '#ffffff', fontSize: 20,
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.25)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Interactive 3D Canvas */}
+      <div style={{ flex: 1, width: '100%', height: '100%' }}>
+        <Canvas
+          camera={{ position: [0, 0.4, 2.2], fov: 45 }}
+          gl={{ antialias: true, powerPreference: 'high-performance' }}
+        >
+          <ambientLight intensity={0.9} />
+          <directionalLight position={[5, 10, 5]} intensity={1.6} />
+          <directionalLight position={[-5, 5, -5]} intensity={0.8} color="#818cf8" />
+          <pointLight position={[0, 2, 0]} intensity={0.8} color={item.color} />
+          <Suspense fallback={null}>
+            <GlbViewer file={item.file} />
+            <Environment preset="city" />
+          </Suspense>
+          <OrbitControls
+            enableZoom={true} enablePan={true} autoRotate autoRotateSpeed={1.2}
+            minDistance={0.4} maxDistance={5} target={[0, 0, 0]}
+          />
+        </Canvas>
+      </div>
+
+      {/* Bottom Controls */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 10,
+        padding: '24px', background: 'linear-gradient(to top, rgba(9,13,22,0.95), transparent)',
+        display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 16
+      }}>
+        <button
+          onClick={onPrev} disabled={!hasPrev}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8, padding: '10px 20px', borderRadius: 10,
+            background: hasPrev ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.04)',
+            border: `1px solid ${hasPrev ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.08)'}`,
+            color: hasPrev ? '#ffffff' : 'rgba(255,255,255,0.3)', cursor: hasPrev ? 'pointer' : 'not-allowed',
+            fontSize: 13, fontWeight: 600, transition: 'all 0.15s',
+          }}
+        >
+          ← Linh kiện trước
+        </button>
+
+        <div style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.06)', borderRadius: 8, fontSize: 12, color: '#94a3b8', border: '1px solid rgba(255,255,255,0.1)' }}>
+          🖱️ Kéo chuột để xoay · Cuộn chuột để Phóng to/Thu nhỏ · ESC để Đóng
+        </div>
+
+        <button
+          onClick={onNext} disabled={!hasNext}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8, padding: '10px 20px', borderRadius: 10,
+            background: hasNext ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.04)',
+            border: `1px solid ${hasNext ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.08)'}`,
+            color: hasNext ? '#ffffff' : 'rgba(255,255,255,0.3)', cursor: hasNext ? 'pointer' : 'not-allowed',
+            fontSize: 13, fontWeight: 600, transition: 'all 0.15s',
+          }}
+        >
+          Linh kiện tiếp →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function GlbViewer({ file }: { file: string }) {
+  const { scene } = useGLTF(file);
+  const ref = useRef<THREE.Group>(null);
+
+  useEffect(() => {
+    if (!scene) return;
+    const box = new THREE.Box3().setFromObject(scene);
+    const size = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    if (maxDim > 0 && ref.current) {
+      const scale = 1.3 / maxDim;
+      ref.current.scale.setScalar(scale);
+      const center = box.getCenter(new THREE.Vector3());
+      ref.current.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
+    }
+  }, [scene]);
+
+  return <primitive ref={ref} object={scene} />;
+}
+
+/* ── Scene Components ── */
 class ModelBoundary extends Component<{ children: React.ReactNode; fallback: React.ReactNode }> {
   state = { ok: true };
   static getDerivedStateFromError() { return { ok: false }; }
   render() { return this.state.ok ? this.props.children : this.props.fallback; }
+}
+
+class SceneErrorBoundary extends Component<{ children: React.ReactNode }> {
+  state = { ok: true };
+  static getDerivedStateFromError() { return { ok: false }; }
+  render() { return this.state.ok ? this.props.children : <FallbackScene />; }
+}
+
+function FallbackScene() {
+  return (
+    <mesh position={[0, 1, 0]}>
+      <boxGeometry args={[0.5, 0.5, 0.5]} />
+      <meshStandardMaterial color="#44aaff" />
+    </mesh>
+  );
 }
 
 function FallbackBox({ color }: { color: string }) {
@@ -35,14 +237,8 @@ function FallbackBox({ color }: { color: string }) {
   );
 }
 
-function GlbInner({ file, color, scale }: { file: string; color: string; scale: number }) {
+function GlbInner({ file, scale }: { file: string; scale: number }) {
   const { scene } = useGLTF(file);
-  const [ok, setOk] = useState(false);
-  useEffect(() => {
-    scene.traverse(c => { if (c instanceof THREE.Mesh) { c.castShadow = false; c.receiveShadow = false; c.material.transparent = false; } });
-    setOk(true);
-  }, [scene]);
-  if (!ok) return null;
   return <primitive object={scene} scale={scale} />;
 }
 
@@ -50,34 +246,9 @@ function SafeGlb({ file, color, scale = 1 }: { file: string; color: string; scal
   return (
     <ModelBoundary fallback={<FallbackBox color={color} />}>
       <Suspense fallback={<FallbackBox color={color} />}>
-        <GlbInner file={file} color={color} scale={scale} />
+        <GlbInner file={file} scale={scale} />
       </Suspense>
     </ModelBoundary>
-  );
-}
-
-function InfoHolo({ text, sub, color }: { text: string; sub: string; color: string }) {
-  return (
-    <group position={[0, 0.9, 0]}>
-      <sprite scale={[2.5, 0.12, 1]} position={[0, 0.04, 0]}>
-        <spriteMaterial map={(() => {
-          const c = document.createElement('canvas'); c.width = 512; c.height = 28;
-          const ctx = c.getContext('2d')!;
-          ctx.fillStyle = color; ctx.font = 'bold 14px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-          ctx.fillText(text, 256, 14);
-          return new THREE.CanvasTexture(c);
-        })()} transparent opacity={0.95} depthTest={false} />
-      </sprite>
-      <sprite scale={[2.8, 0.08, 1]} position={[0, -0.04, 0]}>
-        <spriteMaterial map={(() => {
-          const c = document.createElement('canvas'); c.width = 512; c.height = 22;
-          const ctx = c.getContext('2d')!;
-          ctx.fillStyle = '#8899bb'; ctx.font = '10px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-          ctx.fillText(sub, 256, 11);
-          return new THREE.CanvasTexture(c);
-        })()} transparent opacity={0.8} depthTest={false} />
-      </sprite>
-    </group>
   );
 }
 
@@ -96,15 +267,28 @@ function Pedestal({ color }: { color: string }) {
   );
 }
 
-function ClickableItem({ item, onGrab, onRelease, grabbed }: {
-  item: typeof ITEMS[0]; onGrab: (id: string) => void; onRelease: () => void; grabbed: boolean;
+function ClickableItem({ item, onFocus }: {
+  item: typeof ITEMS[0]; onFocus: (id: string) => void;
 }) {
   const ref = useRef<THREE.Group>(null);
+  const pointerDownPos = useRef({ x: 0, y: 0 });
 
   useFrame(({ clock }) => {
-    if (!ref.current || grabbed) return;
+    if (!ref.current) return;
     ref.current.position.y = 0.2 + Math.sin(clock.elapsedTime * 0.6 + ITEMS.indexOf(item)) * 0.04;
   });
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    pointerDownPos.current = { x: e.clientX, y: e.clientY };
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    const dx = Math.abs(e.clientX - pointerDownPos.current.x);
+    const dy = Math.abs(e.clientY - pointerDownPos.current.y);
+    if (dx < 6 && dy < 6) {
+      onFocus(item.id);
+    }
+  };
 
   return (
     <group position={[item.pos[0], item.pos[1], item.pos[2]]}>
@@ -112,67 +296,41 @@ function ClickableItem({ item, onGrab, onRelease, grabbed }: {
       <group ref={ref} position={[0, 0.2, 0]}>
         <SafeGlb file={item.file} color={item.color} scale={0.1} />
       </group>
-      <InfoHolo text={item.name} sub={item.desc} color={item.color} />
-      <mesh position={[0, 0.4, 0]}
-        onClick={(e) => { e.stopPropagation(); grabbed ? onRelease() : onGrab(item.id); }}
+
+      {/* 2D HTML Floating Button */}
+      <Html position={[0, 1.1, 0]} center distanceFactor={12}>
+        <div
+          onClick={(e) => { e.stopPropagation(); onFocus(item.id); }}
+          style={{
+            background: 'rgba(15,23,42,0.9)', color: '#ffffff', border: `1.5px solid ${item.color}`,
+            padding: '6px 12px', borderRadius: 20, fontSize: 11, fontWeight: 700,
+            cursor: 'pointer', whiteSpace: 'nowrap', boxShadow: '0 4px 14px rgba(0,0,0,0.3)',
+            display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.15s',
+            backdropFilter: 'blur(6px)',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.08)'; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+        >
+          <span style={{ color: item.color }}>🔍</span> {item.name}
+        </div>
+      </Html>
+
+      {/* Invisible Click Target */}
+      <mesh
+        position={[0, 0.5, 0]}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
         onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
         onPointerOut={() => { document.body.style.cursor = 'default'; }}
       >
-        <boxGeometry args={[0.8, 0.8, 0.8]} />
+        <boxGeometry args={[1.4, 1.4, 1.4]} />
         <meshBasicMaterial transparent opacity={0} />
       </mesh>
     </group>
   );
 }
 
-function HeldComponent({ item }: { item: typeof ITEMS[0] }) {
-  const { camera } = useThree();
-  const ref = useRef<THREE.Group>(null);
-  const rotRef = useRef(0);
-
-  useFrame(() => {
-    if (!ref.current) return;
-    const fwd = new THREE.Vector3(0, 0, -1.5).applyQuaternion(camera.quaternion);
-    ref.current.position.copy(camera.position.clone().add(fwd));
-    ref.current.quaternion.copy(camera.quaternion);
-
-    const h = handDataRef;
-    if (h.active && h.landmarks && h.landmarks.length >= 21) {
-      const dx = (h.landmarks[8][0] - 0.5) * 2;
-      rotRef.current += dx * 0.02;
-    } else {
-      rotRef.current += 0.01;
-    }
-    const child = ref.current.children[0];
-    if (child) child.rotation.y = rotRef.current;
-  });
-
-  return (
-    <group ref={ref}>
-      <SafeGlb file={item.file} color={item.color} scale={0.15} />
-    </group>
-  );
-}
-
-class SceneErrorBoundary extends Component<{ children: React.ReactNode }> {
-  state = { ok: true };
-  static getDerivedStateFromError() { return { ok: false }; }
-  render() { return this.state.ok ? this.props.children : <FallbackScene />; }
-}
-
-function FallbackScene() {
-  return (
-    <mesh position={[0, 1, 0]}>
-      <boxGeometry args={[0.5, 0.5, 0.5]} />
-      <meshStandardMaterial color="#44aaff" />
-    </mesh>
-  );
-}
-
-function Hall() {
-  const [grabbed, setGrabbed] = useState<string | null>(null);
-  const item = grabbed ? ITEMS.find(i => i.id === grabbed) : null;
-
+function Hall({ onFocusItem }: { onFocusItem: (id: string) => void }) {
   return (
     <group>
       <color attach="background" args={['#ffffff']} />
@@ -181,30 +339,22 @@ function Hall() {
       <hemisphereLight args={['#ffffff', '#d0d8e8', 0.6]} />
       <directionalLight position={[10, 20, 10]} intensity={1.0} />
       <directionalLight position={[-10, 15, -10]} intensity={0.8} />
-      <directionalLight position={[0, 25, 0]} intensity={0.5} />
-      <pointLight position={[0, 10, 0]} intensity={0.6} distance={35} />
+
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]}>
         <planeGeometry args={[40, 40]} />
         <meshPhysicalMaterial color="#e8ecf0" roughness={0.8} metalness={0} />
       </mesh>
-      <mesh position={[0, 2.5, -12]}>
-        <boxGeometry args={[18, 0.12, 0.3]} />
-        <meshPhysicalMaterial color="#d0d8e0" roughness={0.6} />
-      </mesh>
-      <mesh position={[0, 1.5, -11.85]}>
-        <planeGeometry args={[16, 2.5]} />
-        <meshPhysicalMaterial color="#f0f4ff" roughness={0.05} />
-      </mesh>
+
       <Text position={[0, 3.0, -11.5]} fontSize={0.55} color="#334466" font="monospace" anchorX="center" anchorY="middle">
-        PHÒNG TRƯNG BÀY LINH KIỆN PC
+        PHÒNG TRƯNG BÀY LINH KIỆN PC 3D
       </Text>
       <Text position={[0, 2.55, -11.5]} fontSize={0.22} color="#667799" font="monospace" anchorX="center" anchorY="middle">
-        WASD di chuyển • Click cầm/nhả • Webcam xoay góc nhìn
+        Bấm vào thẻ linh kiện để xoay & xem chi tiết 3D toàn màn hình
       </Text>
+
       {ITEMS.map((item) => (
-        <ClickableItem key={item.id} item={item} onGrab={setGrabbed} onRelease={() => setGrabbed(null)} grabbed={grabbed === item.id} />
+        <ClickableItem key={item.id} item={item} onFocus={onFocusItem} />
       ))}
-      {item && <HeldComponent item={item} />}
     </group>
   );
 }
@@ -258,61 +408,48 @@ function PlayerController() {
   return null;
 }
 
-function HandTracker3D() {
-  const { camera } = useThree();
-  const ref = useRef<THREE.Group>(null);
-
-  useFrame(() => {
-    const h = handDataRef;
-    if (!ref.current) return;
-    if (h.active && h.landmarks && h.landmarks.length >= 21) {
-      const fwd = new THREE.Vector3(0, 0, -0.8).applyQuaternion(camera.quaternion);
-      ref.current.position.copy(camera.position.clone().add(fwd));
-      ref.current.quaternion.copy(camera.quaternion);
-      ref.current.visible = true;
-    } else {
-      ref.current.visible = false;
-    }
-  });
-
-  return <group ref={ref} visible={false} />;
-}
-
-function CameraPreview() {
-  return (
-    <div style={{
-      position: 'fixed', top: 16, right: 16, zIndex: 9999,
-      width: 160, height: 120,
-      borderRadius: 12, overflow: 'hidden',
-      border: '2px solid rgba(0,255,136,0.4)',
-      boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
-      background: '#000',
-    }}>
-      <div style={{
-        position: 'absolute', top: 4, left: 4,
-        background: 'rgba(0,0,0,0.6)', padding: '2px 6px', borderRadius: 4,
-        fontSize: 9, color: '#00ff88', fontFamily: 'monospace', zIndex: 1,
-      }}>
-        CAM • Face + Hand
-      </div>
-    </div>
-  );
-}
-
 export default function ShowroomScene() {
+  const [focusedId, setFocusedId] = useState<string | null>(null);
+  const focusedItem = focusedId ? ITEMS.find(i => i.id === focusedId) : null;
+  const focusedIdx = focusedId ? ITEMS.findIndex(i => i.id === focusedId) : -1;
+
+  const handlePrev = () => {
+    if (focusedIdx > 0) setFocusedId(ITEMS[focusedIdx - 1].id);
+  };
+  const handleNext = () => {
+    if (focusedIdx < ITEMS.length - 1) setFocusedId(ITEMS[focusedIdx + 1].id);
+  };
+
   return (
     <div className="w-full h-screen bg-white relative overflow-hidden">
+      <LoadingOverlay />
       <UnifiedTracker />
-      <CameraPreview />
+
       <SceneErrorBoundary>
-        <Canvas shadows camera={{ position: [0, 1.7, 4], fov: 60, near: 0.1, far: 50 }}
+        <Canvas
+          shadows={false}
+          camera={{ position: [0, 1.7, 4], fov: 60, near: 0.1, far: 50 }}
+          gl={{ antialias: true, powerPreference: 'high-performance' }}
           onCreated={({ gl }) => { gl.setClearColor('#ffffff'); }}
         >
-          <Hall />
+          <Suspense fallback={null}>
+            <Hall onFocusItem={setFocusedId} />
+          </Suspense>
           <PlayerController />
-          <HandTracker3D />
         </Canvas>
       </SceneErrorBoundary>
+
+      {/* Fullscreen 3D Component Viewer */}
+      {focusedItem && (
+        <FullscreenViewer
+          item={focusedItem}
+          onClose={() => setFocusedId(null)}
+          onPrev={handlePrev}
+          onNext={handleNext}
+          hasPrev={focusedIdx > 0}
+          hasNext={focusedIdx < ITEMS.length - 1}
+        />
+      )}
     </div>
   );
 }

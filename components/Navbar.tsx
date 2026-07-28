@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Home, BookOpen, Trophy, FileText, LayoutDashboard, Users, BarChart3, Bell, Menu, X, Settings, LogOut, User as UserIcon, HelpCircle } from 'lucide-react'
+import { Home, BookOpen, Trophy, FileText, LayoutDashboard, Users, BarChart3, Bell, Menu, X, Settings, LogOut, User as UserIcon, HelpCircle, Sparkles } from 'lucide-react'
 import { getProfile, logout } from '@/lib/auth-actions'
 import { NotificationBell } from '@/components/notifications/NotificationBell'
 
@@ -47,12 +47,18 @@ export default function Navbar() {
 
   // Menu items based on role
   const role = userProfile?.role || 'student'
+  const isExamPage = pathname?.startsWith('/exams') || pathname?.startsWith('/exam')
   
   const studentMenu = [
     { name: 'Trang chủ', path: '/student', icon: <Home size={18} /> },
-    { name: 'Bài học', path: '/courses', icon: <BookOpen size={18} /> },
+    { name: 'Học tập & Bài giảng', path: '/learning', icon: <BookOpen size={18} /> },
     { name: 'Kỳ thi', path: '/exams', icon: <FileText size={18} /> },
-    { name: 'Trắc nghiệm', path: '/quiz', icon: <HelpCircle size={18} /> },
+    { name: 'Xếp hạng', path: '/leaderboard', icon: <Trophy size={18} /> },
+  ]
+
+  const examMenu = [
+    { name: 'Trang chủ', path: '/student', icon: <Home size={18} /> },
+    { name: 'Kỳ thi', path: '/exams', icon: <FileText size={18} /> },
     { name: 'Xếp hạng', path: '/leaderboard', icon: <Trophy size={18} /> },
   ]
 
@@ -64,7 +70,7 @@ export default function Navbar() {
     { name: 'Báo cáo', path: '/teacher/reports', icon: <BarChart3 size={18} /> },
   ]
 
-  const activeMenu = role === 'teacher' ? teacherMenu : studentMenu
+  const activeMenu = isExamPage ? examMenu : (role === 'teacher' ? teacherMenu : studentMenu)
 
   const handleLogout = async () => {
     await logout()

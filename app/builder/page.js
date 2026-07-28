@@ -303,7 +303,7 @@ function Home(props) {
         case 'mission_assembly': return lang === 'en' ? `Lab: ${missionData?.missionId}` : `Phòng Lab: ${missionData?.missionId}`;
         case 'multiplayer': return lang === 'en' ? '2-Player Versus' : '2 Người Chơi';
         case 'exams': return lang === 'en' ? 'Exams' : 'Kỳ Thi';
-        case 'challenge': return lang === 'en' ? 'Daily Challenge' : 'Thử Thách';
+
         case 'components': return lang === 'en' ? 'Component Library' : 'Tủ Linh Kiện';
         default: return 'PC Master Builder';
     }
@@ -436,7 +436,7 @@ function Home(props) {
                                     minWidth: 'min(200px, 25vw)', pointerEvents: 'none', zIndex: 10
                                 }}>
                                     <h3 style={{ margin: '0 0 10px 0', fontSize: '13px', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                                        {lang === 'en' ? 'Checklist' : 'Nhiệm vụ'}
+                                        {lang === 'en' ? 'Checklist' : 'Checklist'}
                                     </h3>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px' }}>
                                         {[
@@ -618,31 +618,6 @@ function Home(props) {
                                     {lang === 'en' ? 'Component Library' : 'Tủ Linh Kiện'}
                                 </h2>
                                 <BuilderLab />
-                            </div>
-                        ) : appMode === 'challenge' ? (
-                            <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
-                                <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#1A2F4A', marginBottom: '16px' }}>Nhiệm Vụ Hằng Ngày</h2>
-                                <p style={{ color: '#64748B', fontSize: '14px', marginBottom: '24px' }}>Hoàn thành nhiệm vụ để nhận điểm kinh nghiệm và huy hiệu.</p>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                                    {[
-                                        { title: 'Lắp ráp nhanh', desc: 'Hoàn thành 1 bộ PC trong 5 phút', reward: '100 XP', color: '#D32F2F' },
-                                        { title: 'Tiết kiệm', desc: 'Build dưới 15 triệu với hiệu năng cao', reward: '150 XP', color: '#0097A7' },
-                                        { title: 'Tương thích hoàn hảo', desc: 'Lắp 5 bộ không lỗi tương thích', reward: '75 XP', color: '#F5A623' },
-                                        { title: 'Cấu hình cân bằng', desc: 'CPU + GPU đồng cấp, không nghẽn cổ chai', reward: '200 XP', color: '#1A2F4A' },
-                                    ].map((c, i) => (
-                                        <div key={i} style={{ padding: '20px', borderRadius: '10px', border: '1px solid #E2E8F0', background: '#fff' }}>
-                                            <div style={{ fontSize: '11px', fontWeight: 700, color: c.color, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>{c.title}</div>
-                                            <p style={{ fontSize: '13px', color: '#64748B', marginBottom: '12px', lineHeight: 1.5 }}>{c.desc}</p>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <span style={{ fontSize: '12px', fontWeight: 700, color: c.color }}>+{c.reward}</span>
-                                                <button onClick={() => { setAppMode('learning'); }}
-                                                    style={{ padding: '6px 14px', borderRadius: '6px', border: 'none', background: c.color, color: '#fff', fontWeight: 600, fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
-                                                    Nhận nhiệm vụ
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
                             </div>
                         ) : null}
                     </div>

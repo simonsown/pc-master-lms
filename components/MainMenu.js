@@ -233,7 +233,9 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                 </div>
             </motion.div>
 
-            {/* EXTRA MODES */}
+
+
+            {/* THÊM - KỲ THI */}
             <motion.div {...fadeUp(0.25)} style={{ marginBottom: '24px' }}>
                 <div style={{
                     fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)',
@@ -242,43 +244,34 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                     {lang === 'en' ? 'More' : 'Thêm'}
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: '10px' }}>
-                    {[
-                        { id: 'exams', title: 'Kỳ Thi', desc: 'Kiểm tra kiến thức định kỳ', Icon: ShieldCheck, color: s.teal },
-                        { id: 'challenge', title: 'Nhiệm Vụ', desc: 'Nhiệm vụ hàng ngày', Icon: Swords, color: s.orange },
-                    ].map((mode) => (
-                        <motion.button
-                            key={mode.id}
-                            onClick={() => mode.id === 'practice' ? router.push('/practice') : onStart(mode.id)}
-                            whileHover={{ y: -1 }}
-                            style={{
-                                display: 'flex', alignItems: 'center', gap: '12px',
-                                padding: '12px 16px', borderRadius: '10px',
-                                border: '1px solid var(--border-default)',
-                                background: 'var(--bg-elevated)',
-                                cursor: 'pointer', textAlign: 'left', width: '100%',
-                                fontFamily: 'inherit',
-                                transition: 'border-color 0.2s'
-                            }}
-                            onMouseOver={e => { e.currentTarget.style.borderColor = mode.color; e.currentTarget.style.background = 'var(--bg-hover)'; }}
-                            onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.background = 'var(--bg-elevated)'; }}
-                        >
-                            <div style={{
-                                width: '34px', height: '34px', borderRadius: '8px',
-                                background: `${mode.color}12`, color: mode.color,
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
-                            }}>
-                                <mode.Icon size={16} />
-                            </div>
-                            <div>
-                                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>{mode.title}</div>
-                                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{mode.desc}</div>
-                            </div>
-                        </motion.button>
-                    ))}
+                    <motion.a href="/exams" whileHover={{ y: -1 }}
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: '12px',
+                            padding: '12px 16px', borderRadius: '10px',
+                            border: '1px solid var(--border-default)',
+                            background: 'var(--bg-elevated)',
+                            cursor: 'pointer', textDecoration: 'none',
+                            transition: 'border-color 0.2s'
+                        }}
+                        onMouseOver={e => { e.currentTarget.style.borderColor = s.teal; e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                        onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.background = 'var(--bg-elevated)'; }}
+                    >
+                        <div style={{
+                            width: '34px', height: '34px', borderRadius: '8px',
+                            background: `${s.teal}12`, color: s.teal,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                        }}>
+                            <ShieldCheck size={16} />
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>{lang === 'en' ? 'Exams' : 'Kỳ Thi'}</div>
+                            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{lang === 'en' ? 'Test your knowledge' : 'Kiểm tra kiến thức định kỳ'}</div>
+                        </div>
+                    </motion.a>
                 </div>
             </motion.div>
 
-            {/* PRO LEARNING SYSTEM */}
+            {/* PRO LEARNING SYSTEM + KHOÁ HỌC */}
             <motion.div {...fadeUp(0.2)} style={{ marginBottom: '24px' }}>
                 <div style={{
                     fontSize: '11px', fontWeight: 700, color: 'var(--accent-amber)',
@@ -287,17 +280,17 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                 }}>
                     <Zap size={13} /> Pro Learning System
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: '10px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: '10px' }}>
                     {[
+                        { id: '/courses', title: 'Khóa Học', desc: 'Giáo trình kỹ thuật phần cứng PC', Icon: BookOpen, color: '#f59e0b' },
+                        { id: '/video-courses', title: 'Video Bài Giảng', desc: '19 Video 3D Animation linh kiện PC', Icon: Zap, color: '#00d4aa' },
+                        { id: '/builder/slides', title: 'Slide Bài Học 3D', desc: 'Slide tổng quan phần cứng & IC3 Spark', Icon: GraduationCap, color: '#6366f1' },
                         { id: '/builder/os-install', title: 'Cài Windows 11', desc: 'Mô phỏng cài đặt OS thực tế', Icon: Monitor, color: '#3b82f6' },
-
-
-                        { id: '/builder/showroom', title: 'PC Builder 3D VR', desc: 'Khám phá linh kiện 3D với Hand & Face Tracking', Icon: Cpu, color: '#00d4aa' },
+                        { id: '/builder/showroom', title: 'PC Builder 3D VR', desc: 'Khám phá linh kiện 3D với Hand & Face Tracking', Icon: Cpu, color: '#10b981' },
                         { id: '/builder/common-mistakes', title: 'Lỗi Thường Gặp', desc: '8 lỗi build PC phổ biến kèm video', Icon: AlertTriangle, color: '#ef4444' },
                         { id: '/builder/mac-check', title: 'Gợi Ý Máy Tính', desc: 'Tìm PC phù hợp với nhu cầu & ngân sách', Icon: Monitor, color: '#8b5cf6' },
                         { id: '/builder/career-build', title: 'Ước Mơ & PC', desc: 'Build PC theo nghề nghiệp tương lai', Icon: Star, color: '#facc15' },
                         { id: '/builder/3d-components', title: 'Kho Linh Kiện 3D', desc: 'Xem linh kiện dưới góc nhìn 3 chiều', Icon: Box, color: '#a855f7' },
-
                     ].map((mode) => (
                         <motion.a
                             key={mode.id}
