@@ -562,8 +562,8 @@ function Home(props) {
                                     </div>
                                 </div>
                             </div>
-                        ) : appMode === 'course' ? (
-                            <LectureCourse lang={lang} onBack={() => setAppMode('menu')} />
+                        ) : (appMode === 'course' || appMode === 'learning_hub') ? (
+                            <LearningHub lang={lang} onBack={() => setAppMode('menu')} />
                         ) : appMode === 'learning' ? (
                             <LearningMode
                                 lang={lang}

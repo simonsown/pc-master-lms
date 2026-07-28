@@ -52,7 +52,7 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
     };
 
     const modes = [
-        { id: 'course', title: 'Bài Giảng', desc: 'Lý thuyết phần cứng theo chủ đề', Icon: BookOpen, color: s.red },
+        { id: 'learning_hub', title: 'Bài Giảng & Khóa Học', desc: 'Giáo trình, Video 3D & Slide bài học', Icon: BookOpen, color: s.red },
         { id: 'learning', title: 'Luyện Tập', desc: 'Lắp ráp tự do theo sở thích', Icon: Cpu, color: s.teal },
         { id: 'market', title: 'Chợ Máy Tính', desc: 'Mua linh kiện, tối ưu cấu hình', Icon: ShoppingCart, color: s.orange },
         { id: 'multiplayer', title: '2 Người Chơi', desc: 'Đối kháng — ai lắp nhanh hơn thắng', Icon: Users, color: s.red },
