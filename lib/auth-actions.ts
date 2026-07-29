@@ -121,34 +121,55 @@ export async function register(formData: FormData) {
 
   // 2. Đăng ký tài khoản Auth
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-  const { data, error } = await supabase.auth.signUp({
+
+  // Lần 1: Thử signUp kèm metadata
+  let { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: {
         full_name: fullName,
         role: role,
+        profile_completed: true,
       },
-      // Redirect URL sau khi xác nhận email (nếu bật confirmation)
       emailRedirectTo: `${siteUrl}/auth/callback`,
     }
   })
 
+  // FALLBACK CHỐNG LỖI "Database error saving new user":
+  // Nếu Supabase DB Trigger (on_auth_user_created) bị lỗi khi đọc metadata hoặc RLS,
+  // thử lại với minimal options để tạo auth.users trước, rồi tự upsert profile bằng server action bên dưới.
+  if (error && (
+    error.message.toLowerCase().includes('database error') ||
+    error.message.toLowerCase().includes('saving new user') ||
+    error.message.toLowerCase().includes('unexpected failure')
+  )) {
+    console.warn('signUp with metadata failed due to DB trigger, retrying with minimal options:', error.message)
+    const retryResult = await supabase.auth.signUp({
+      email,
+      password,
+    })
+    data = retryResult.data
+    error = retryResult.error
+  }
+
   if (error) {
     let msg = error.message
+    const lowerMsg = msg.toLowerCase()
     if (
-      msg.toLowerCase().includes('already registered') ||
-      msg.toLowerCase().includes('already exists') ||
-      msg.toLowerCase().includes('user_already_exists')
+      lowerMsg.includes('already registered') ||
+      lowerMsg.includes('already exists') ||
+      lowerMsg.includes('user_already_exists')
     ) {
       msg = 'Email này đã được đăng ký tài khoản. Vui lòng dùng email khác hoặc đăng nhập!'
+    } else if (lowerMsg.includes('database error') || lowerMsg.includes('saving new user')) {
+      msg = 'Lỗi Cơ sở dữ liệu Supabase (Database Trigger). Vui lòng chạy lại file migration SQL hoặc tắt email confirmation!'
     }
     return { error: msg }
   }
 
   // Trường hợp email cần xác nhận → user tồn tại nhưng chưa active
   if (data.user && !data.session) {
-    // Vẫn tạo profile để lưu thông tin, sẽ dùng khi họ xác nhận email
     await supabase.from('profiles').upsert({
       id: data.user.id,
       email: email,
@@ -163,7 +184,16 @@ export async function register(formData: FormData) {
   }
 
   if (data.user) {
-    // Tạo profile - chỉ dùng các column chắc chắn tồn tại
+    // Đánh dấu profile_completed trong auth metadata
+    await supabase.auth.updateUser({
+      data: {
+        full_name: fullName,
+        role: role,
+        profile_completed: true
+      }
+    }).catch(() => {})
+
+    // Tạo profile trong bảng public.profiles
     const profileData: Record<string, unknown> = {
       id: data.user.id,
       email: email,
@@ -171,7 +201,6 @@ export async function register(formData: FormData) {
       role: role,
       updated_at: new Date().toISOString()
     }
-    // Thêm optional fields nếu có giá trị
     if (schoolId) profileData.school_id = schoolId
     if (schoolName) profileData.school_name = schoolName
 
@@ -182,7 +211,6 @@ export async function register(formData: FormData) {
 
     if (upsertError) {
       console.error('Profile Upsert Error during registration:', upsertError)
-      // Thử lại với minimal data nếu có lỗi column không tồn tại
       await supabase.from('profiles').upsert({
         id: data.user.id,
         email: email,
@@ -212,17 +240,8 @@ export async function register(formData: FormData) {
   }
 
   const userRole = role || 'student'
-  if (userRole === 'student') {
-    return { success: true, redirectUrl: '/builder' }
-  } else if (userRole === 'teacher') {
-    return { success: true, redirectUrl: '/teacher' }
-  } else if (userRole === 'parent') {
-    return { success: true, redirectUrl: '/parent' }
-  } else if (userRole === 'admin') {
-    return { success: true, redirectUrl: '/admin' }
-  } else {
-    return { success: true, redirectUrl: `/${userRole}` }
-  }
+  const redirectUrl = userRole === 'student' ? '/builder' : `/${userRole}`
+  return { success: true, redirectUrl }
 }
 
 export async function logout() {
@@ -276,13 +295,14 @@ export async function completeOAuthRegistration(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   
   if (!user) {
-    return { error: 'Không tìm thấy phiên đăng nhập' }
+    return { error: 'Không tìm thấy phiên đăng nhập Google. Vui lòng thử lại!' }
   }
 
-  const role = formData.get('role') as string || 'student'
-  const fullName = formData.get('full_name') as string || user.user_metadata?.full_name || user.email?.split('@')[0] || ''
+  const role = (formData.get('role') as string) || 'student'
+  const fullName = (formData.get('full_name') as string) || user.user_metadata?.full_name || user.email?.split('@')[0] || ''
   const schoolCode = formData.get('school_code') as string
   const schoolName = formData.get('school_name') as string
+  const classCode = formData.get('class_code') as string
   
   let schoolId = null;
   if (schoolCode) {
@@ -290,31 +310,64 @@ export async function completeOAuthRegistration(formData: FormData) {
       .from('schools')
       .select('id')
       .eq('code', schoolCode)
-      .single()
+      .maybeSingle()
       
     if (school) schoolId = school.id;
   }
 
-  // Cập nhật profile cho tài khoản Google đã tạo
-  const { error: profileError } = await supabase.from('profiles').upsert({
+  // 1. Cập nhật profile trong bảng public.profiles
+  const profileData: Record<string, unknown> = {
     id: user.id,
     email: user.email,
     full_name: fullName,
     role: role,
-    school_id: schoolId,
-    school_name: schoolName,
     updated_at: new Date().toISOString()
-  });
+  }
+  if (schoolId) profileData.school_id = schoolId
+  if (schoolName) profileData.school_name = schoolName
+
+  const { error: profileError } = await supabase.from('profiles').upsert(profileData, { onConflict: 'id' });
 
   if (profileError) {
-    return { error: 'Lỗi khi cập nhật hồ sơ: ' + profileError.message }
+    console.error('Profile Upsert Error in completeOAuthRegistration:', profileError)
+    await supabase.from('profiles').upsert({
+      id: user.id,
+      email: user.email,
+      full_name: fullName,
+      role: role,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'id' })
+  }
+
+  // 2. Cập nhật metadata profile_completed: true
+  await supabase.auth.updateUser({
+    data: {
+      full_name: fullName,
+      role: role,
+      profile_completed: true
+    }
+  }).catch(() => {})
+
+  // 3. Liên kết phụ huynh nếu có
+  if (role === 'parent' && classCode) {
+    const { data: student } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('role', 'student')
+      .or(`email.eq.${classCode},id.eq.${classCode}`)
+      .maybeSingle();
+    
+    if (student) {
+      await supabase.from('parent_student_links').insert({
+        parent_id: user.id,
+        student_id: student.id,
+        relationship: 'parent'
+      });
+    }
   }
 
   revalidatePath('/', 'layout')
   
-  if (role === 'student') {
-    redirect('/builder')
-  } else {
-    redirect(`/${role}`)
-  }
+  const redirectUrl = role === 'student' ? '/builder' : `/${role}`
+  return { success: true, redirectUrl }
 }
