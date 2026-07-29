@@ -7,49 +7,8 @@ import { BookOpen, Sparkles, Play, ArrowLeft, CheckCircle2, Lock, ShieldCheck, Z
 import PCourseViewer from '@/components/PCourseViewer';
 import SlideViewer from '@/components/SlideViewer';
 
-// Import video lessons list
-const VIDEO_LESSONS = [
-  {
-    id: 'mb-3d-1',
-    youtubeId: 'XkoM-rkX1uE',
-    title: 'Mô phỏng 3D Cấu tạo & Chức năng Bo Mạch Chủ (Mainboard) - Tập 1',
-    category: 'Bo Mạch Chủ',
-    duration: '14:25',
-    level: 'Cơ bản',
-  },
-  {
-    id: 'mb-3d-2',
-    youtubeId: 'lwaQ8D8hwTY',
-    title: 'Nguyên lý hoạt động Bus & Chipset trên Bo Mạch Chủ PC 3D',
-    category: 'Bo Mạch Chủ',
-    duration: '11:40',
-    level: 'Trung cấp',
-  },
-  {
-    id: 'mb-3d-3',
-    youtubeId: 'TsB2H1QPrCI',
-    title: 'Sơ đồ đường mạch & Mạch điện VRM trên Bo Mạch Chủ Máy Tính',
-    category: 'Bo Mạch Chủ',
-    duration: '09:50',
-    level: 'Nâng cao',
-  },
-  {
-    id: 'cpu-3d-1',
-    youtubeId: '_Pqfjer8-O4',
-    title: 'Mô phỏng 3D Cấu trúc Bên trong Chip CPU Vi Xử Lý',
-    category: 'Vi Xử Lý CPU',
-    duration: '15:10',
-    level: 'Cơ bản',
-  },
-  {
-    id: 'gpu-3d-1',
-    youtubeId: 'h9Z4oGN89MU',
-    title: 'Mô phỏng 3D Cấu tạo Card Đồ Họa rời (VGA / GPU)',
-    category: 'Card Đồ Họa GPU',
-    duration: '13:45',
-    level: 'Cơ bản',
-  },
-];
+// Video bài giảng sẽ được tải từ database (giáo viên đăng tải qua LMS)
+const VIDEO_LESSONS: Array<{ id: string; youtubeId: string; title: string; category: string; duration: string; level: string }> = [];
 
 export default function LearningHubPage() {
   const router = useRouter();
@@ -365,34 +324,34 @@ export default function LearningHubPage() {
               {/* Personal Plan */}
               <div style={{ padding: 24, borderRadius: 16, background: 'rgba(0,212,170,0.06)', border: '2px solid #00d4aa', position: 'relative', transform: 'scale(1.02)' }}>
                 <div style={{ position: 'absolute', top: -12, right: 16, padding: '2px 10px', borderRadius: 99, background: '#00d4aa', color: '#000', fontSize: 10, fontWeight: 800 }}>
-                  KHUYÊN DÙNG
+                  GÓI CÁ NHÂN (B2C)
                 </div>
-                <h4 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 800, color: '#00d4aa' }}>Gói Cá Nhân Pro</h4>
+                <h4 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 800, color: '#00d4aa' }}>Gói Cá Nhân Pro (B2C)</h4>
                 <div style={{ fontSize: 32, fontWeight: 800, color: '#fff', marginBottom: 16 }}>
-                  55.000đ <span style={{ fontSize: 13, fontWeight: 400, color: '#94a3b8' }}>/ tháng</span>
+                  49.000đ <span style={{ fontSize: 13, fontWeight: 400, color: '#94a3b8' }}>/ tháng</span>
                 </div>
                 <ul style={{ paddingLeft: 18, margin: 0, fontSize: 13, color: '#e2e8f0', display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <li><strong>Mở khóa 100%</strong> khóa học 20 chương</li>
-                  <li><strong>Xem full 19 video 3D</strong> animation</li>
-                  <li><strong>Toàn bộ Slide 3D</strong> tương tác</li>
+                  <li><strong>Học full bài học & slide 3D</strong> tương tác</li>
+                  <li><strong>AI Tutor tư vấn</strong> chống chặt chém</li>
                   <li>Lưu tiến trình học cá nhân</li>
                 </ul>
               </div>
 
               {/* Enterprise / School Plan */}
               <div style={{ padding: 24, borderRadius: 16, background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.3)' }}>
-                <h4 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 800, color: '#818cf8' }}>Gói Trường Học & Doanh Nghiệp</h4>
+                <h4 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 800, color: '#818cf8' }}>Gói Trường Học (B2B)</h4>
                 <div style={{ fontSize: 28, fontWeight: 800, color: '#fff', marginBottom: 4 }}>
-                  32.000đ
+                  25.000đ
                 </div>
                 <div style={{ fontSize: 12, color: '#818cf8', fontWeight: 600, marginBottom: 16 }}>
-                  bình quân / học sinh / tháng
+                  bình quân / học sinh / năm
                 </div>
                 <ul style={{ paddingLeft: 18, margin: 0, fontSize: 13, color: '#cbd5e1', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <li>Tài khoản Quản lý cho Giáo viên</li>
+                  <li>Tài khoản Quản lý LMS cho Giáo viên</li>
                   <li>Tất cả quyền lợi Gói Cá Nhân Pro</li>
-                  <li>Xuất báo cáo tiến độ học sinh</li>
-                  <li>Hỗ trợ kỹ thuật 24/7</li>
+                  <li>Tiết kiệm hàng trăm triệu tiền phòng lab thật</li>
+                  <li>Xuất báo cáo tiến độ học sinh & hỗ trợ 24/7</li>
                 </ul>
               </div>
             </div>

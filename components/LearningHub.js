@@ -16,7 +16,8 @@ function isUnlocked() {
 }
 
 const VIDEO_LESSONS = [
-  // 1. Bo Mạch Chủ
+  // Video bài giảng sẽ được giáo viên đăng tải qua hệ thống LMS
+  // (Danh sách trống - chờ nội dung từ giáo viên)
   {
     id: 'mb-3d-1',
     youtubeId: 'XkoM-rkX1uE',
@@ -257,22 +258,22 @@ function PricingModal({ onClose, onUnlock }) {
     {
       id: 'personal',
       icon: '👤',
-      name: 'Cá Nhân',
-      price: '55.000đ',
+      name: 'Cá Nhân (B2C)',
+      price: '49.000đ',
       unit: '/ tháng',
       color: '#00d4aa',
-      highlight: false,
-      features: ['Toàn bộ khóa học (20 chương)', '19 Video bài giảng 3D', 'Tất cả Slide 3D', 'Không giới hạn luyện tập'],
+      highlight: true,
+      features: ['Toàn bộ khóa học (20 chương)', 'Học full bài học & slide 3D tương tác', 'AI Tutor tư vấn chống chặt chém', 'Lưu tiến trình học cá nhân'],
     },
     {
       id: 'school',
       icon: '🏫',
-      name: 'Trường Học / Doanh Nghiệp',
-      price: '32.000đ',
-      unit: '/ học sinh / tháng',
+      name: 'Trường Học (B2B)',
+      price: '25.000đ',
+      unit: '/ học sinh / năm',
       color: '#6366f1',
-      highlight: true,
-      features: ['Tất cả quyền lợi Cá nhân', 'Dashboard quản lý lớp', 'Báo cáo tiến độ học sinh', 'Hỗ trợ ưu tiên 24/7'],
+      highlight: false,
+      features: ['Tất cả quyền lợi Cá nhân Pro', 'LMS Dashboard cho Giáo viên', 'Tiết kiệm hàng trăm triệu tiền lab', 'Báo cáo tiến độ & hỗ trợ 24/7'],
     },
   ];
 

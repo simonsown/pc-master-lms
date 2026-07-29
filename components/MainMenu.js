@@ -303,7 +303,7 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                             Khóa học · Video 3D · Slide bài học
                         </div>
                         <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                            Miễn phí: 3 bài đầu · 2 video · 1 slide — Nâng cấp từ 55.000đ/tháng
+                            Miễn phí: 3 bài đầu · 2 video · 1 slide — Nâng cấp từ 49.000đ/tháng (B2C)
                         </div>
                     </div>
                     <ArrowRight size={16} style={{ color: 'var(--brand-primary)', flexShrink: 0 }} />
