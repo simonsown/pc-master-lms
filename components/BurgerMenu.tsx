@@ -113,8 +113,6 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ lang, toggleLang, onStartQuiz, 
             </div>
             {[
               { id: 'course', icon: BookOpen, label: lang === 'en' ? 'Lecture Course' : 'Bài Giảng', onClick: () => setAppMode('course') },
-              { id: 'video-courses', icon: Sparkles, label: lang === 'en' ? '3D Video Library' : 'Video Bài Giảng', href: '/video-courses' },
-              { id: 'slides', icon: FileText, label: lang === 'en' ? 'Interactive Slides' : 'Slide Bài Học 3D', href: '/builder/slides' },
               { id: 'history', icon: History, label: lang === 'en' ? 'Learning History' : 'Lịch Sử Học Tập', href: '/student/history' },
               { id: 'learning', icon: Cpu, label: lang === 'en' ? 'Practice Mode' : 'Luyện Tập', onClick: () => setAppMode('learning') },
               { id: 'market', icon: ShoppingCart, label: lang === 'en' ? 'Marketplace' : 'Chợ Máy Tính', onClick: () => setAppMode('market') },
