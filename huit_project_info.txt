@@ -1,0 +1,20 @@
+HỒ SƠ DỰ THI HUIT STARTUP 2026
+Dự án: PC MASTER BUILDER
+Lĩnh vực: Giáo dục
+Nhóm: Nguyễn Phúc Khánh Sơn, Đặng Quốc An, Nguyễn Phạm Gia Khiêm, Ngô Minh Khang
+GVHD: Đoàn Thị Kim Phượng
+Tóm tắt dự án
+Hệ thống LMS môn Tin học kết hợp thực hành phần cứng.
+Sản phẩm
+Website: https://pc-master-lms.vercel.app/
+GitHub: https://github.com/simonsown/pc-master-lms
+Tính năng
+LMS, Quiz, Builder 2D, AI chống chặt chém, Career Build, VR.
+Mô hình kinh doanh
+Miễn phí tính năng học tập; Premium 20.000đ cho AI và VR.
+Thử nghiệm
+76 học sinh lớp 10A1 và 10C9.
+Thành tích
+Tin học trẻ lần thứ 35 - Sản phẩm sáng tạo.
+Tính khả thi
+Đã có sản phẩm thật, GitHub public và người dùng thử.

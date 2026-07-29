@@ -112,11 +112,12 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ lang, toggleLang, onStartQuiz, 
               {lang === 'en' ? 'Explore' : 'Khám phá'}
             </div>
             {[
-              { id: 'course', icon: BookOpen, label: lang === 'en' ? 'Lecture Course' : 'Bài Giảng', onClick: () => setAppMode('course') },
+              { id: 'lessons', icon: BookOpen, label: lang === 'en' ? 'Teacher Lessons' : 'Bài Giảng Từ Giáo Viên', href: '/lessons' },
+              { id: 'course', icon: GraduationCap, label: lang === 'en' ? 'Lecture Course' : 'Khóa Học SGK 20 Chương', onClick: () => setAppMode('course') },
               { id: 'history', icon: History, label: lang === 'en' ? 'Learning History' : 'Lịch Sử Học Tập', href: '/student/history' },
-              { id: 'learning', icon: Cpu, label: lang === 'en' ? 'Practice Mode' : 'Luyện Tập', onClick: () => setAppMode('learning') },
-              { id: 'market', icon: ShoppingCart, label: lang === 'en' ? 'Marketplace' : 'Chợ Máy Tính', onClick: () => setAppMode('market') },
-              { id: 'multiplayer', icon: Users, label: lang === 'en' ? '2-Player Versus' : '2 Người Chơi', onClick: () => setAppMode('multiplayer') },
+              { id: 'learning', icon: Cpu, label: lang === 'en' ? 'Practice Mode' : 'Luyện Tập Lắp Ráp', onClick: () => setAppMode('learning') },
+              { id: 'market', icon: ShoppingCart, label: lang === 'en' ? 'Marketplace' : 'Chợ Linh Kiện PC', onClick: () => setAppMode('market') },
+              { id: 'multiplayer', icon: Users, label: lang === 'en' ? '2-Player Versus' : 'Đấu 2 Người Chơi', onClick: () => setAppMode('multiplayer') },
             ].map(item => {
               const active = item.onClick ? appMode === item.id : false;
               const content = (

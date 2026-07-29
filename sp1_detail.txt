@@ -1,0 +1,101 @@
+--------------------
+      ĐĂNG KÝ THÔNG TIN SẢN PHẨM DỰ THI
+      THÔNG TIN TÁC GIẢ (NHÓM TÁC GIẢ)
+PHIẾU ĐĂNG KÝ DỰ THI
+BẢNG D1, D2, D3, E | Đơn vị:
+________________________
+1 | Đăng ký
+Bảng dự thi | Bảng D1 | Bảng D2 | Bảng D3 | Bảng D3 | Bảng E
+1 | Đăng ký
+Bảng dự thi | ☐ | ☐ |  |  | ☐
+2 | Sản phẩm dự thi | Sản phẩm dự thi | Phần mềm | Phần mềm | SP tích hợp phần cứng | SP tích hợp phần cứng
+2 | Sản phẩm dự thi | Sản phẩm dự thi |  |  | ☐ | ☐
+3 | Tên SPST dự thi | Tên SPST dự thi | PC Master Builder – Phần mềm học tập tập thông minh về máy tính | PC Master Builder – Phần mềm học tập tập thông minh về máy tính | PC Master Builder – Phần mềm học tập tập thông minh về máy tính | PC Master Builder – Phần mềm học tập tập thông minh về máy tính
+4 | Ngôn ngữ lập trình hoặc nền tảng | Ngôn ngữ lập trình hoặc nền tảng | Ngôn ngữ: JavaScript (Node.js).
+Framework & Thư viện: Next.js, React, MediaPipe (Computer Vision), Google Generative AI (Gemini), GitHub | Ngôn ngữ: JavaScript (Node.js).
+Framework & Thư viện: Next.js, React, MediaPipe (Computer Vision), Google Generative AI (Gemini), GitHub | Ngôn ngữ: JavaScript (Node.js).
+Framework & Thư viện: Next.js, React, MediaPipe (Computer Vision), Google Generative AI (Gemini), GitHub | Ngôn ngữ: JavaScript (Node.js).
+Framework & Thư viện: Next.js, React, MediaPipe (Computer Vision), Google Generative AI (Gemini), GitHub
+5 | Cấu hình cài đặt | Cấu hình cài đặt | Thiết bị phần cứng sử dụng: 
+Máy tính cá nhân (PC/Laptop).
+Webcam (bắt buộc để sử dụng tính năng theo dõi cử chỉ tay - Hand Tracking).
+Cấu hình cài đặt:
+Ứng dụng chạy trên nền tảng Web, không cần cài đặt phần mềm chuyên dụng. 
+Yêu cầu: Trình duyệt web hiện đại (Google Chrome, Microsoft Edge, Firefox,...) có hỗ trợ truy cập Webcam và kết nối Internet ổn định (để xử lý AI và tải mô hình nhận diện). | Thiết bị phần cứng sử dụng: 
+Máy tính cá nhân (PC/Laptop).
+Webcam (bắt buộc để sử dụng tính năng theo dõi cử chỉ tay - Hand Tracking).
+Cấu hình cài đặt:
+Ứng dụng chạy trên nền tảng Web, không cần cài đặt phần mềm chuyên dụng. 
+Yêu cầu: Trình duyệt web hiện đại (Google Chrome, Microsoft Edge, Firefox,...) có hỗ trợ truy cập Webcam và kết nối Internet ổn định (để xử lý AI và tải mô hình nhận diện). | Thiết bị phần cứng sử dụng: 
+Máy tính cá nhân (PC/Laptop).
+Webcam (bắt buộc để sử dụng tính năng theo dõi cử chỉ tay - Hand Tracking).
+Cấu hình cài đặt:
+Ứng dụng chạy trên nền tảng Web, không cần cài đặt phần mềm chuyên dụng. 
+Yêu cầu: Trình duyệt web hiện đại (Google Chrome, Microsoft Edge, Firefox,...) có hỗ trợ truy cập Webcam và kết nối Internet ổn định (để xử lý AI và tải mô hình nhận diện). | Thiết bị phần cứng sử dụng: 
+Máy tính cá nhân (PC/Laptop).
+Webcam (bắt buộc để sử dụng tính năng theo dõi cử chỉ tay - Hand Tracking).
+Cấu hình cài đặt:
+Ứng dụng chạy trên nền tảng Web, không cần cài đặt phần mềm chuyên dụng. 
+Yêu cầu: Trình duyệt web hiện đại (Google Chrome, Microsoft Edge, Firefox,...) có hỗ trợ truy cập Webcam và kết nối Internet ổn định (để xử lý AI và tải mô hình nhận diện).
+Số lượng thí sinh trong đội thi | Số lượng thí sinh trong đội thi | 1 người ☐    2 người     3 người ☐   4người ☐   5 người ☐
+(Bảng D1, D2, D3 tối đa 02 thành viên) | 1 người ☐    2 người     3 người ☐   4người ☐   5 người ☐
+(Bảng D1, D2, D3 tối đa 02 thành viên) | 1 người ☐    2 người     3 người ☐   4người ☐   5 người ☐
+(Bảng D1, D2, D3 tối đa 02 thành viên)
+Thí sinh thứ nhất (đội trưởng) | Thí sinh thứ nhất (đội trưởng) | Thí sinh thứ nhất (đội trưởng) | Thí sinh thứ nhất (đội trưởng) | Thí sinh thứ nhất (đội trưởng)
+Họ và tên: | Họ và tên: | Dương Vũ Minh Đức | Dương Vũ Minh Đức | Dương Vũ Minh Đức
+Ngày/tháng/năm sinh: | Ngày/tháng/năm sinh: | 01/01/2009 | 01/01/2009 | 01/01/2009
+Lớp, trường: | Lớp, trường: | 11D11,Trường Trung học phổ Thông Nguyễn Công Trứ | 11D11,Trường Trung học phổ Thông Nguyễn Công Trứ | 11D11,Trường Trung học phổ Thông Nguyễn Công Trứ
+Xã, phường, đặc khu: | Xã, phường, đặc khu: | Phường Thông Tây Hội | Phường Thông Tây Hội | Phường Thông Tây Hội
+Điện thoại: | Điện thoại: | 0389591109 | 0389591109 | 0389591109
+Email: | Email: | ducduongvuminh@gmail.com | ducduongvuminh@gmail.com | ducduongvuminh@gmail.com
+Size áo: | Size áo: | XS ☐  S☐  M ☐   L   XL ☐  2XL ☐  3L ☐  4L ☐  5L ☐ | XS ☐  S☐  M ☐   L   XL ☐  2XL ☐  3L ☐  4L ☐  5L ☐ | XS ☐  S☐  M ☐   L   XL ☐  2XL ☐  3L ☐  4L ☐  5L ☐
+Thí sinh thứ hai | Thí sinh thứ hai | Thí sinh thứ hai | Thí sinh thứ hai | Thí sinh thứ hai
+Họ và tên: | Họ và tên: | Nguyễn Phúc Khánh Sơn | Nguyễn Phúc Khánh Sơn | Nguyễn Phúc Khánh Sơn
+Ngày/tháng/năm sinh: | Ngày/tháng/năm sinh: | 13/04/2009 | 13/04/2009 | 13/04/2009
+Lớp, trường: | Lớp, trường: | 10C9,Trường Trung học phổ Thông Nguyễn Công Trứ | 10C9,Trường Trung học phổ Thông Nguyễn Công Trứ | 10C9,Trường Trung học phổ Thông Nguyễn Công Trứ
+Xã, phường, đặc khu: | Xã, phường, đặc khu: | Phường Thông Tây Hội | Phường Thông Tây Hội | Phường Thông Tây Hội
+Điện thoại: | Điện thoại: | 0967695719 | 0967695719 | 0967695719
+Email: | Email: | Phuckhanhsonnguyen@gmail.com | Phuckhanhsonnguyen@gmail.com | Phuckhanhsonnguyen@gmail.com
+Size áo: | Size áo: | XS ☐  S☐  M ☐   L ☐ XL   2XL ☐  3L ☐  4L ☐  5L ☐ | XS ☐  S☐  M ☐   L ☐ XL   2XL ☐  3L ☐  4L ☐  5L ☐ | XS ☐  S☐  M ☐   L ☐ XL   2XL ☐  3L ☐  4L ☐  5L ☐
+Thí sinh thứ ba (chỉ áp dụng cho bảng E) | Thí sinh thứ ba (chỉ áp dụng cho bảng E) | Thí sinh thứ ba (chỉ áp dụng cho bảng E) | Thí sinh thứ ba (chỉ áp dụng cho bảng E) | Thí sinh thứ ba (chỉ áp dụng cho bảng E)
+Họ và tên: | Họ và tên: |  |  | 
+Ngày/tháng/năm sinh: | Ngày/tháng/năm sinh: |  |  | 
+Lớp, trường: | Lớp, trường: |  |  | 
+Xã, phường, đặc khu: | Xã, phường, đặc khu: |  |  | 
+Điện thoại: | Điện thoại: |  |  | 
+Email: | Email: |  |  | 
+Size áo: | Size áo: | XS ☐  S☐  M ☐   L ☐ XL ☐  2XL ☐  3L ☐  4L ☐  5L ☐ | XS ☐  S☐  M ☐   L ☐ XL ☐  2XL ☐  3L ☐  4L ☐  5L ☐ | XS ☐  S☐  M ☐   L ☐ XL ☐  2XL ☐  3L ☐  4L ☐  5L ☐
+Thí sinh thứ tư (chỉ áp dụng cho bảng E) | Thí sinh thứ tư (chỉ áp dụng cho bảng E) | Thí sinh thứ tư (chỉ áp dụng cho bảng E) | Thí sinh thứ tư (chỉ áp dụng cho bảng E) | Thí sinh thứ tư (chỉ áp dụng cho bảng E)
+Họ và tên: | Họ và tên: |  |  | 
+Ngày/tháng/năm sinh: | Ngày/tháng/năm sinh: |  |  | 
+Lớp, trường: | Lớp, trường: |  |  | 
+Xã, phường, đặc khu: | Xã, phường, đặc khu: |  |  | 
+Điện thoại: | Điện thoại: |  |  | 
+Email: | Email: |  |  | 
+Size áo: | Size áo: | XS ☐  S☐  M ☐   L ☐ XL ☐  2XL ☐  3L ☐  4L ☐  5L ☐ | XS ☐  S☐  M ☐   L ☐ XL ☐  2XL ☐  3L ☐  4L ☐  5L ☐ | XS ☐  S☐  M ☐   L ☐ XL ☐  2XL ☐  3L ☐  4L ☐  5L ☐
+Thí sinh thứ năm (chỉ áp dụng cho bảng E) | Thí sinh thứ năm (chỉ áp dụng cho bảng E) | Thí sinh thứ năm (chỉ áp dụng cho bảng E) | Thí sinh thứ năm (chỉ áp dụng cho bảng E) | Thí sinh thứ năm (chỉ áp dụng cho bảng E)
+Họ và tên: | Họ và tên: |  |  | 
+Ngày/tháng/năm sinh: | Ngày/tháng/năm sinh: |  |  | 
+Lớp, trường: | Lớp, trường: |  |  | 
+Xã, phường, đặc khu: | Xã, phường, đặc khu: |  |  | 
+Điện thoại: | Điện thoại: |  |  | 
+Email: | Email: |  |  | 
+Size áo: | Size áo: | XS ☐  S☐  M ☐   L ☐ XL ☐  2XL ☐  3L ☐  4L ☐  5L ☐ | XS ☐  S☐  M ☐   L ☐ XL ☐  2XL ☐  3L ☐  4L ☐  5L ☐ | XS ☐  S☐  M ☐   L ☐ XL ☐  2XL ☐  3L ☐  4L ☐  5L ☐
+Giáo viên hoặc chuyên gia hướng dẫn 1 | Giáo viên hoặc chuyên gia hướng dẫn 1 | Giáo viên hoặc chuyên gia hướng dẫn 1 | Giáo viên hoặc chuyên gia hướng dẫn 1 | Giáo viên hoặc chuyên gia hướng dẫn 1
+Họ và tên: | Họ và tên: | Đoàn Thụy Kim Phượng | Đoàn Thụy Kim Phượng | Đoàn Thụy Kim Phượng
+Đơn vị công tác: | Đơn vị công tác: | THPT Nguyễn Công Trứ | THPT Nguyễn Công Trứ | THPT Nguyễn Công Trứ
+Chức vụ: | Chức vụ: | Giáo viên | Giáo viên | Giáo viên
+Điện thoại: | Điện thoại: | 0702468644 | 0702468644 | 0702468644
+Email: | Email: | doanthuykimphuong@gmail.com | doanthuykimphuong@gmail.com | doanthuykimphuong@gmail.com
+Giáo viên hoặc chuyên gia hướng dẫn 2 | Giáo viên hoặc chuyên gia hướng dẫn 2 | Giáo viên hoặc chuyên gia hướng dẫn 2 | Giáo viên hoặc chuyên gia hướng dẫn 2 | Giáo viên hoặc chuyên gia hướng dẫn 2
+Họ và tên: | Họ và tên: | Trần Minh Phụng | Trần Minh Phụng | Trần Minh Phụng
+Đơn vị công tác: | Đơn vị công tác: | Trường THPT Nguyễn Công Trứ | Trường THPT Nguyễn Công Trứ | Trường THPT Nguyễn Công Trứ
+Chức vụ: | Chức vụ: | Giáo viên | Giáo viên | Giáo viên
+Điện thoại: | Điện thoại: | 0356702320 | 0356702320 | 0356702320
+Email: | Email: | phungtm242@gmail.com | phungtm242@gmail.com | phungtm242@gmail.com
+ | XÁC NHẬN
+CỦA BAN GIÁM HIỆU NHÀ TRƯỜNG
+(Ký, và ghi rõ họ tên và đóng dấu) | XÁC NHẬN
+CỦA BAN GIÁM HIỆU NHÀ TRƯỜNG
+(Ký, và ghi rõ họ tên và đóng dấu) | CHỮ KÝ CỦA NHÓM TRƯỞNG
+(Ký và ghi rõ họ tên) | 

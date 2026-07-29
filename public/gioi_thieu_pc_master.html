@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giới Thiệu Dự Án PC Master Builder | HUIT Startup 2026</title>
+  <meta name="description" content="Nền tảng Giả lập Lắp ráp PC 3D/2D & Hệ thống LMS Tin Học tích hợp AI hàng đầu cho Học sinh THPT & Trường học.">
+  
+  <!-- Google Fonts & Font Awesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-white: #ffffff;
+      --bg-light: #f8fafc;
+      --bg-card: #ffffff;
+      --primary: #00d4aa;
+      --primary-dark: #00a885;
+      --accent-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --accent-pink: #ec4899;
+      --text-dark: #0f172a;
+      --text-muted: #475569;
+      --text-light: #64748b;
+      --border-color: #e2e8f0;
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --shadow-glow: 0 10px 30px rgba(0, 212, 170, 0.2);
+      --radius-lg: 20px;
+      --radius-md: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-white);
+      color: var(--text-dark);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4, h5 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Header Navbar */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 0;
+      transition: all 0.3s ease;
+    }
+
+    .nav-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .brand-logo img {
+      width: 42px;
+      height: 42px;
+      object-fit: contain;
+    }
+
+    .brand-title {
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--text-dark);
+    }
+
+    .brand-title span {
+      color: var(--primary-dark);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+      align-items: center;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 15px;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary-dark);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 99px;
+      font-weight: 700;
+      font-size: 15px;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);
+      color: #ffffff;
+      box-shadow: var(--shadow-glow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 35px rgba(0, 212, 170, 0.35);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--border-color);
+      color: var(--text-dark);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--primary-dark);
+      color: var(--primary-dark);
+      background: rgba(0, 212, 170, 0.05);
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 80px 0 60px;
+      background: radial-gradient(circle at 50% 0%, rgba(0, 212, 170, 0.08) 0%, rgba(59, 130, 246, 0.04) 50%, transparent 100%);
+      position: relative;
+    }
+
+    .badge-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border-radius: 99px;
+      background: rgba(0, 212, 170, 0.1);
+      border: 1px solid rgba(0, 212, 170, 0.25);
+      color: var(--primary-dark);
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+
+    .hero-content {
+      text-align: center;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .hero-title {
+      font-size: 52px;
+      line-height: 1.15;
+      color: var(--text-dark);
+      margin-bottom: 24px;
+    }
+
+    .hero-title span {
+      background: linear-gradient(135deg, #00b894 0%, #3b82f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      font-size: 19px;
+      color: var(--text-muted);
+      margin-bottom: 36px;
+      line-height: 1.6;
+    }
+
+    .hero-cta {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 60px;
+    }
+
+    .hero-mockup {
+      position: relative;
+      border-radius: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      background: #ffffff;
+      padding: 12px;
+    }
+
+    .hero-mockup img {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      display: block;
+    }
+
+    /* Section Header */
+    .section-header {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto 50px;
+    }
+
+    .section-subtitle {
+      color: var(--primary-dark);
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .section-title {
+      font-size: 38px;
+      color: var(--text-dark);
+      margin-bottom: 16px;
+    }
+
+    .section-desc {
+      font-size: 16px;
+      color: var(--text-muted);
+    }
+
+    /* Vision & Goals Section */
+    .vision-section {
+      padding: 90px 0;
+      background-color: var(--bg-light);
+    }
+
+    .vision-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+
+    .vision-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 36px 28px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .vision-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(0, 212, 170, 0.4);
+    }
+
+    .vision-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin-bottom: 24px;
+    }
+
+    .icon-green { background: rgba(0, 212, 170, 0.12); color: var(--primary-dark); }
+    .icon-blue { background: rgba(59, 130, 246, 0.12); color: var(--accent-blue); }
+    .icon-purple { background: rgba(139, 92, 246, 0.12); color: var(--accent-purple); }
+
+    .vision-card h3 {
+      font-size: 22px;
+      margin-bottom: 12px;
+      color: var(--text-dark);
+    }
+
+    .vision-card p {
+      color: var(--text-muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* Feature Grid Section */
+    .features-section {
+      padding: 90px 0;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+    }
+
+    .feature-item {
+      display: flex;
+      gap: 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 32px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s ease;
+    }
+
+    .feature-item:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(0, 212, 170, 0.3);
+    }
+
+    .feature-icon-box {
+      width: 54px;
+      height: 54px;
+      flex-shrink: 0;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(0, 212, 170, 0.15), rgba(59, 130, 246, 0.15));
+      color: var(--primary-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .feature-info h4 {
+      font-size: 20px;
+      margin-bottom: 8px;
+      color: var(--text-dark);
+    }
+
+    .feature-info p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Video Shorts Showcase Section */
+    .video-section {
+      padding: 90px 0;
+      background: linear-gradient(180deg, var(--bg-light) 0%, #ffffff 100%);
+    }
+
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .video-card {
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .video-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary);
+    }
+
+    .video-media-box {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%; /* 16:9 Aspect Ratio */
+      background: #0f172a;
+      overflow: hidden;
+    }
+
+    .video-media-box video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .video-card-body {
+      padding: 18px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .video-card-tag {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--primary-dark);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    .video-card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+
+    .video-card-desc {
+      font-size: 13px;
+      color: var(--text-light);
+      line-height: 1.5;
+    }
+
+    /* Stats Counter Section */
+    .stats-section {
+      padding: 70px 0;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #ffffff;
+      border-radius: 30px;
+      margin: 40px 0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 30px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-family: 'Outfit', sans-serif;
+      font-size: 46px;
+      font-weight: 900;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+
+    .stat-label {
+      font-size: 15px;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    /* Pricing Section */
+    .pricing-section {
+      padding: 90px 0;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .pricing-card {
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 40px 32px;
+      border: 2px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .pricing-card.popular {
+      border-color: var(--primary);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .popular-badge {
+      position: absolute;
+      top: -14px;
+      right: 32px;
+      background: var(--primary);
+      color: #000000;
+      font-size: 11px;
+      font-weight: 900;
+      padding: 4px 14px;
+      border-radius: 99px;
+      text-transform: uppercase;
+    }
+
+    .pricing-name {
+      font-size: 22px;
+      color: var(--text-dark);
+      margin-bottom: 12px;
+    }
+
+    .pricing-price {
+      font-size: 42px;
+      font-weight: 900;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+    }
+
+    .pricing-unit {
+      font-size: 14px;
+      color: var(--text-light);
+      margin-bottom: 24px;
+    }
+
+    .pricing-features {
+      list-style: none;
+      margin-bottom: 32px;
+    }
+
+    .pricing-features li {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 14px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pricing-features li i {
+      color: var(--primary-dark);
+    }
+
+    /* Team Section */
+    .team-section {
+      padding: 90px 0;
+      background: var(--bg-light);
+    }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+
+    .team-card {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 28px;
+      text-align: center;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .team-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin: 0 auto 16px;
+      border: 3px solid var(--primary);
+    }
+
+    .team-name {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+    }
+
+    .team-role {
+      font-size: 13px;
+      color: var(--primary-dark);
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    /* Footer */
+    .footer {
+      padding: 50px 0;
+      background: #0f172a;
+      color: #94a3b8;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .footer a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .video-grid { grid-template-columns: repeat(2, 1fr); }
+      .vision-grid { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .team-grid { grid-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .hero-title { font-size: 34px; }
+      .video-grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container nav-wrapper">
+      <a href="/builder" class="brand-logo">
+        <img src="/logo.png" alt="PC Master Logo">
+        <div class="brand-title">PC Master <span>LMS</span></div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#vision">Mục Tiêu</a></li>
+        <li><a href="#features">Tính Năng</a></li>
+        <li><a href="#video-demo">Video Demo</a></li>
+        <li><a href="#pricing">Gói Giá</a></li>
+        <li><a href="#team">Đội Ngũ</a></li>
+      </ul>
+      <div>
+        <a href="https://pc-master-lms.vercel.app/builder" target="_blank" class="btn btn-primary">
+          <i class="fa-solid fa-rocket"></i> Trải Nghiệm Live App
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container hero-content">
+      <div class="badge-tag">
+        <i class="fa-solid fa-trophy"></i> DỰ ÁN HUIT STARTUP 2026 — THPT NGUYỄN CÔNG TRỨ
+      </div>
+      <h1 class="hero-title">
+        Nền Tảng Giả Lập Lắp Ráp PC 3D/2D <span>& LMS Tin Học Tích Hợp AI</span>
+      </h1>
+      <p class="hero-desc">
+        Giải pháp chuyển đổi số toàn diện cho giáo dục Tin học phổ thông. Giúp học sinh thực hành lắp ráp linh kiện phần cứng máy tính trực quan 3D bằng cử chỉ tay qua Webcam, kết hợp AI tư vấn chống chặt chém & hỗ trợ giáo viên quản lý bài giảng.
+      </p>
+      <div class="hero-cta">
+        <a href="https://pc-master-lms.vercel.app/builder" target="_blank" class="btn btn-primary">
+          <i class="fa-solid fa-play"></i> Xem Giả Lập 3D Live
+        </a>
+        <a href="#video-demo" class="btn btn-outline">
+          <i class="fa-solid fa-film"></i> Xem Video Quay Trực Tiếp
+        </a>
+      </div>
+
+      <!-- Hero Web Showcase Mockup -->
+      <div class="hero-mockup">
+        <img src="/showcase.png" alt="PC Master Web Interface Showcase">
+      </div>
+    </div>
+  </section>
+
+  <!-- Project Vision & Goals -->
+  <section id="vision" class="vision-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle">DỰ ÁN HƯỚNG ĐẾN GÌ</span>
+        <h2 class="section-title">Sứ Mệnh & Tầm Nhìn Chiến Lược</h2>
+        <p class="section-desc">Giải quyết triệt để 3 nỗi đau lớn nhất của học sinh và nhà trường trong giảng dạy kiến thức phần cứng máy tính.</p>
+      </div>
+
+      <div class="vision-grid">
+        <div class="vision-card">
+          <div class="vision-icon icon-green">
+            <i class="fa-solid fa-microchip"></i>
+          </div>
+          <h3>Tiết Kiệm Chi Phí Lab B2B</h3>
+          <p>Thay thế phòng máy tính thực hành tốn kém hàng trăm triệu đồng bằng phần mềm giả lập 3D/2D chạy 100% trên trình duyệt Web không cần máy cấu hình mạnh.</p>
+        </div>
+
+        <div class="vision-card">
+          <div class="vision-icon icon-blue">
+            <i class="fa-solid fa-hand-pointer"></i>
+          </div>
+          <h3>Đổi Mới Tương Tác 3D VR</h3>
+          <p>Tích hợp công nghệ Hand-tracking & Face-tracking qua Webcam thường. Học sinh gắp thả linh kiện bằng ngón tay thực tế mà không cần trang bị kính VR đắt tiền.</p>
+        </div>
+
+        <div class="vision-card">
+          <div class="vision-icon icon-purple">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <h3>AI Anti-Scam & Định Hướng</h3>
+          <p>Trợ lý AI phân tích giá linh kiện thị trường, chống chặt chém tráo đổi đồ cũ, đồng thời gợi ý cấu hình PC phù hợp với ước mơ nghề nghiệp tương lai.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Core Features Showcase -->
+  <section id="features" class="features-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle">TÍNH NĂNG NỔI BẬT</span>
+        <h2 class="section-title">Công Nghệ & Trải Nghiệm Đột Phá</h2>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-item">
+          <div class="feature-icon-box">
+            <i class="fa-solid fa-cube"></i>
+          </div>
+          <div class="feature-info">
+            <h4>Giả Lập Lắp Ráp PC 3D/2D</h4>
+            <p>Mô phỏng đầy đủ Bo mạch chủ, CPU, RAM, GPU, SSD, Nguồn PSU, Tản nhiệt. Cảnh báo chính xác xung đột socket chân cắm & sai lệch công suất.</p>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon-box">
+            <i class="fa-solid fa-hand"></i>
+          </div>
+          <div class="feature-info">
+            <h4>Hand & Face Tracking Webcam</h4>
+            <p>Nhận diện 21 điểm khớp tay & hướng mắt trực tiếp qua camera máy tính. Chụm 2 ngón tay để xoay linh kiện 360 độ trong không gian Showroom 3D.</p>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon-box">
+            <i class="fa-solid fa-robot"></i>
+          </div>
+          <div class="feature-info">
+            <h4>AI Tutor & Báo Giá Linh Kiện</h4>
+            <p>Hệ thống AI kiểm tra giá bán linh kiện real-time, phát hiện giá ảo và gợi ý cấu hình theo từng ngân sách cá nhân.</p>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon-box">
+            <i class="fa-solid fa-chalkboard-user"></i>
+          </div>
+          <div class="feature-info">
+            <h4>Hệ Thống LMS Cho Giáo Viên</h4>
+            <p>Giáo viên dễ dàng tạo bài giảng, đăng bài học, quản lý danh sách lớp học và theo dõi tiến độ thi trắc nghiệm của từng học sinh.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Video Shorts Showcase -->
+  <section id="video-demo" class="video-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle">VIDEO REEL THỰC TẾ</span>
+        <h2 class="section-title">Shorts Tính Năng Quay Từ Hệ Thống</h2>
+        <p class="section-desc">Các đoạn video ghi hình thực tế trải nghiệm của người dùng trên PC Master LMS.</p>
+      </div>
+
+      <div class="video-grid">
+        <!-- Video 1 -->
+        <div class="video-card">
+          <div class="video-media-box">
+            <video controls preload="metadata">
+              <source src="/captures/demo-builder-3d.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="video-card-body">
+            <div>
+              <div class="video-card-tag">Lắp Ráp 3D</div>
+              <div class="video-card-title">Mô Phỏng Lắp Ráp PC 3D</div>
+              <div class="video-card-desc">Thực hành chọn & gắn CPU, Mainboard, RAM trực quan trong không gian 3 chiều.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Video 2 -->
+        <div class="video-card">
+          <div class="video-media-box">
+            <video controls preload="metadata">
+              <source src="/captures/demo-hand-tracking.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="video-card-body">
+            <div>
+              <div class="video-card-tag">AI Webcam</div>
+              <div class="video-card-title">Hand-Tracking 3D Cử Chỉ Tay</div>
+              <div class="video-card-desc">Điều khiển linh kiện bằng cách chụm ngón tay trước Webcam không cần chuột.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Video 3 -->
+        <div class="video-card">
+          <div class="video-media-box">
+            <video controls preload="metadata">
+              <source src="/captures/demo-ai-antiscam.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="video-card-body">
+            <div>
+              <div class="video-card-tag">Trợ Lý AI</div>
+              <div class="video-card-title">AI Anti-Scam & Gợi Ý PC</div>
+              <div class="video-card-desc">AI thẩm định giá linh kiện cũ, tư vấn cấu hình tối ưu theo túi tiền.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Video 4 -->
+        <div class="video-card">
+          <div class="video-media-box">
+            <video controls preload="metadata">
+              <source src="/captures/demo-os-install.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="video-card-body">
+            <div>
+              <div class="video-card-tag">Hệ Điều Hành</div>
+              <div class="video-card-title">Giả Lập Cài Windows 11</div>
+              <div class="video-card-desc">Tự tay phân vùng ổ cứng BIOS/UEFI và chạy quy trình cài OS ảo.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Video 5 -->
+        <div class="video-card">
+          <div class="video-media-box">
+            <video controls preload="metadata">
+              <source src="/captures/demo-lms-teacher.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="video-card-body">
+            <div>
+              <div class="video-card-tag">LMS Giáo Viên</div>
+              <div class="video-card-title">Quản Lý Lớp & Bài Giảng</div>
+              <div class="video-card-desc">Dashboard dành cho thầy cô đăng tải tài liệu và kiểm tra học sinh.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Video 6 -->
+        <div class="video-card">
+          <div class="video-media-box">
+            <video controls preload="metadata">
+              <source src="/captures/demo-career-pc.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="video-card-body">
+            <div>
+              <div class="video-card-tag">Hướng Nghề</div>
+              <div class="video-card-title">Build PC Theo Nghề Nghiệp</div>
+              <div class="video-card-desc">Gợi ý cấu hình riêng cho Đồ họa 3D, Lập trình viên, Streamer, AI Engineer.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Video 7 -->
+        <div class="video-card">
+          <div class="video-media-box">
+            <video controls preload="metadata">
+              <source src="/captures/demo-quiz-system.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="video-card-body">
+            <div>
+              <div class="video-card-tag">Đánh Giá</div>
+              <div class="video-card-title">Ngân Hàng Trắc Nghiệm</div>
+              <div class="video-card-desc">Luyện tập câu hỏi Tin học chuẩn SGK với giải thích đáp án tự động.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Video 8 -->
+        <div class="video-card">
+          <div class="video-media-box">
+            <video controls preload="metadata">
+              <source src="/captures/demo-showroom-vr.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="video-card-body">
+            <div>
+              <div class="video-card-tag">Showroom 3D</div>
+              <div class="video-card-title">Kho Linh Kiện VR Trực Quan</div>
+              <div class="video-card-desc">Xoay ngắm chi tiết từng con chip, mosfet nguồn và lá tản nhiệt đồng.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Impact & Stats Section -->
+  <div class="container">
+    <section class="stats-section">
+      <div class="stats-grid">
+        <div>
+          <div class="stat-number">76+</div>
+          <div class="stat-label">Học Sinh Thử Nghiệm</div>
+        </div>
+        <div>
+          <div class="stat-number">92%</div>
+          <div class="stat-label">Đánh Giá Tích Cực</div>
+        </div>
+        <div>
+          <div class="stat-number">20+</div>
+          <div class="stat-label">Chương Học SGK Tin Học</div>
+        </div>
+        <div>
+          <div class="stat-number">95%</div>
+          <div class="stat-label">Tiết Kiệm Chi Phí Phòng Lab</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Business Model & Pricing Section -->
+  <section id="pricing" class="pricing-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle">MÔ HÌNH KINH DOANH</span>
+        <h2 class="section-title">Giải Pháp Linh Hoạt Cho Cá Nhân & Trường Học</h2>
+      </div>
+
+      <div class="pricing-grid">
+        <!-- B2C Plan -->
+        <div class="pricing-card popular">
+          <div class="popular-badge">GÓI CÁ NHÂN (B2C)</div>
+          <h3 class="pricing-name">B2C Pro Personal</h3>
+          <div class="pricing-price">49.000đ</div>
+          <div class="pricing-unit">/ tháng / người dùng</div>
+          <ul class="pricing-features">
+            <li><i class="fa-solid fa-circle-check"></i> Mở khóa 100% khóa học 20 chương</li>
+            <li><i class="fa-solid fa-circle-check"></i> Học full bài học & slide 3D tương tác</li>
+            <li><i class="fa-solid fa-circle-check"></i> AI Tutor tư vấn chống chặt chém</li>
+            <li><i class="fa-solid fa-circle-check"></i> Lưu tiến trình & lịch sử thực hành</li>
+          </ul>
+          <a href="https://pc-master-lms.vercel.app/register" target="_blank" class="btn btn-primary" style="width: 100%; justify-content: center;">Đăng Ký Học Ngay</a>
+        </div>
+
+        <!-- B2B Plan -->
+        <div class="pricing-card">
+          <h3 class="pricing-name">B2B School Enterprise</h3>
+          <div class="pricing-price">25.000đ</div>
+          <div class="pricing-unit">bình quân / học sinh / năm</div>
+          <ul class="pricing-features">
+            <li><i class="fa-solid fa-circle-check"></i> Tất cả quyền lợi Gói Cá Nhân Pro</li>
+            <li><i class="fa-solid fa-circle-check"></i> LMS Dashboard quản lý cho Giáo viên</li>
+            <li><i class="fa-solid fa-circle-check"></i> Tiết kiệm hàng trăm triệu tiền lab thật</li>
+            <li><i class="fa-solid fa-circle-check"></i> Xuất báo cáo tiến độ & hỗ trợ 24/7</li>
+          </ul>
+          <a href="https://pc-master-lms.vercel.app/register" target="_blank" class="btn btn-outline" style="width: 100%; justify-content: center;">Liên Hệ Hợp Tác Trường</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team Section -->
+  <section id="team" class="team-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle">ĐỘI NGŨ THỰC HIỆN</span>
+        <h2 class="section-title">Nhóm Tác Giả & Cố Vấn Dự Án</h2>
+        <p class="section-desc">Đến từ THPT Nguyễn Công Trứ - Cuộc thi HUIT Startup 2026</p>
+      </div>
+
+      <div class="team-grid">
+        <div class="team-card">
+          <img src="/son.png" alt="Khánh Sơn" class="team-avatar">
+          <div class="team-name">Khánh Sơn</div>
+          <div class="team-role">Trưởng Nhóm / Dev & Pitching Speaker</div>
+          <p style="font-size: 13px; color: var(--text-muted);">Phát triển Core 3D Viewer, Hand-tracking & Thuyết trình cuộc thi.</p>
+        </div>
+
+        <div class="team-card">
+          <img src="/duc.png" alt="Quốc An / Minh Đức" class="team-avatar">
+          <div class="team-name">Quốc An & Minh Đức</div>
+          <div class="team-role">Co-Founder & Product Analyst</div>
+          <p style="font-size: 13px; color: var(--text-muted);">Phân tích tài liệu SGK Tin học, xây dựng ngân hàng đề thi & AI Advisor.</p>
+        </div>
+
+        <div class="team-card">
+          <img src="/teacher-phung.png" alt="Giáo Viên Cố Vấn" class="team-avatar">
+          <div class="team-name">Thầy Cô Cố Vấn Tin Học</div>
+          <div class="team-role">THPT Nguyễn Công Trứ</div>
+          <p style="font-size: 13px; color: var(--text-muted);">Định hướng chuyên môn sư phạm và đồng hành cùng nhóm tại HUIT Startup 2026.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p style="margin-bottom: 12px;">© 2026 <strong>PC Master Builder</strong> — Dự án tham dự Bán Kết <strong>HUIT Startup 2026</strong>.</p>
+      <p>Trường THPT Nguyễn Công Trứ | Powered by <a href="https://pc-master-lms.vercel.app" target="_blank">PC Master LMS Platform</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>
