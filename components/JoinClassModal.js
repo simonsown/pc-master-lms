@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { X, Users, Loader2, CheckCircle2 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { joinClass, getAllClasses } from '@/lib/lesson-store';
 
 const JoinClassModal = ({ isOpen, onClose, lang }) => {
     const [classCode, setClassCode] = useState('');
@@ -18,41 +18,16 @@ const JoinClassModal = ({ isOpen, onClose, lang }) => {
         setError(null);
 
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error(lang === 'en' ? 'Please login first' : 'Vui lòng đăng nhập trước');
+            const code = classCode.trim().toUpperCase();
+            if (!code) throw new Error(lang === 'en' ? 'Enter a class code' : 'Vui lòng nhập mã lớp');
 
-            // 1. Tìm lớp học theo mã (dùng SECURITY DEFINER function để bypass RLS)
-            const { data: classData, error: classErr } = await supabase
-                .rpc('fn_lookup_class_by_code', { p_code: classCode.toUpperCase() })
-                .single();
-
-            if (classErr || !classData) {
-                throw new Error(lang === 'en' ? 'Invalid class code' : 'Mã lớp không tồn tại');
+            const classes = getAllClasses();
+            const known = classes.some(c => c.code.toUpperCase() === code);
+            if (!known) {
+                throw new Error(lang === 'en' ? 'Invalid class code' : 'Mã lớp không tồn tại. Hãy kiểm tra lại mã lớp của bạn.');
             }
 
-            // 2. Kiểm tra xem đã tham gia chưa
-            const { data: existingMember } = await supabase
-                .from('class_members')
-                .select('id')
-                .eq('class_id', classData.id)
-                .eq('student_id', user.id)
-                .single();
-
-            if (existingMember) {
-                throw new Error(lang === 'en' ? 'You are already in this class' : 'Bạn đã tham gia lớp này rồi');
-            }
-
-            // 3. Thêm vào lớp
-            const { error: joinErr } = await supabase
-                .from('class_members')
-                .insert({
-                    class_id: classData.id,
-                    student_id: user.id,
-                    status: 'active'
-                });
-
-            if (joinErr) throw joinErr;
-
+            joinClass(code);
             setSuccess(true);
             setTimeout(() => {
                 onClose();

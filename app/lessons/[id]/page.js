@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState, use } from 'react';
-import { supabase } from '@/lib/supabase';
 import { 
     BookOpen, Video, FileText, Image as ImageIcon, FileSearch, Code,
     ChevronRight, Loader2, ArrowLeft, Book, Maximize2, X
@@ -10,6 +9,7 @@ import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import { getYouTubeEmbed } from '@/utils/youtube';
 import PdfViewer from '@/components/PdfViewer';
+import { getLesson } from '@/lib/lesson-store';
 
 export default function StudentLessonPage({ params }) {
     const resolvedParams = use(params);
@@ -22,17 +22,11 @@ export default function StudentLessonPage({ params }) {
     const [selectedBook, setSelectedBook] = useState(null);
 
     useEffect(() => {
-        const fetchLesson = async () => {
-            const { data: lessonData } = await supabase.from('lessons').select('*').eq('id', lessonId).single();
-            const { data: sectionData } = await supabase.from('lesson_sections').select('*').eq('lesson_id', lessonId).order('order_index', { ascending: true });
-            const { data: bookData } = await supabase.from('lesson_books').select('*').eq('lesson_id', lessonId);
-
-            setLesson(lessonData);
-            setSections(sectionData || []);
-            setBooks(bookData || []);
-            setLoading(false);
-        };
-        fetchLesson();
+        const stored = getLesson(lessonId);
+        setLesson(stored);
+        setSections(stored?.sections || []);
+        setBooks(stored?.books || []);
+        setLoading(false);
     }, [lessonId]);
 
     const getDriveEmbed = (url) => {
@@ -47,12 +41,20 @@ export default function StudentLessonPage({ params }) {
         </div>
     );
 
+    if (!lesson) return (
+        <div style={{ background: '#050a14', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8899a6', flexDirection: 'column', gap: '16px' }}>
+            <AlertIcon />
+            <p style={{ fontSize: '16px' }}>Không tìm thấy bài giảng.</p>
+            <Link href="/lessons" style={{ color: '#00f3ff', textDecoration: 'none', fontWeight: 700 }}>Quay lại danh sách</Link>
+        </div>
+    );
+
     return (
         <div style={{ background: '#050a14', minHeight: '100vh', color: '#e0e6ed', display: 'flex' }}>
             {/* Sidebar Navigation */}
             <aside style={{ width: '320px', background: '#0a0f1a', borderRight: '1px solid rgba(255,255,255,0.05)', position: 'sticky', top: 0, height: '100vh', overflowY: 'auto', padding: '32px' }}>
-                <Link href="/builder" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#8899a6', textDecoration: 'none', marginBottom: '40px', fontSize: '14px' }}>
-                    <ArrowLeft size={16} /> Quay lại trang chủ
+                <Link href="/lessons" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#8899a6', textDecoration: 'none', marginBottom: '40px', fontSize: '14px' }}>
+                    <ArrowLeft size={16} /> Quay lại danh sách
                 </Link>
                 <div style={{ marginBottom: '32px' }}>
                     <h4 style={{ color: '#4b5563', fontSize: '11px', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '1px', marginBottom: '16px' }}>Nội dung bài học</h4>
@@ -152,7 +154,13 @@ export default function StudentLessonPage({ params }) {
                                     onMouseOver={e => e.currentTarget.style.borderColor = '#00f3ff'}
                                     onMouseOut={e => e.currentTarget.style.borderColor = '#1e293b'}
                                 >
-                                    <img src={book.cover_image_url} style={{ width: '100%', aspectRatio: '3/4', objectFit: 'cover', borderRadius: '8px', marginBottom: '16px' }} />
+                                    {book.cover_image_url ? (
+                                        <img src={book.cover_image_url} style={{ width: '100%', aspectRatio: '3/4', objectFit: 'cover', borderRadius: '8px', marginBottom: '16px' }} />
+                                    ) : (
+                                        <div style={{ width: '100%', aspectRatio: '3/4', borderRadius: '8px', marginBottom: '16px', background: '#0a0f1a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4b5563' }}>
+                                            <Book size={32} />
+                                        </div>
+                                    )}
                                     <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 700, textAlign: 'center' }}>{book.title}</h4>
                                 </div>
                             ))}
@@ -169,10 +177,26 @@ export default function StudentLessonPage({ params }) {
                         <button onClick={() => setSelectedBook(null)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><X size={28}/></button>
                     </div>
                     <div style={{ flex: 1, overflow: 'auto' }}>
-                        <PdfViewer url={selectedBook.drive_embed_url} title={selectedBook.title} />
+                        {selectedBook.drive_embed_url ? (
+                            <PdfViewer url={selectedBook.drive_embed_url} title={selectedBook.title} />
+                        ) : (
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#8899a6' }}>
+                                Chưa có file PDF cho sách này.
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
         </div>
+    );
+}
+
+function AlertIcon() {
+    return (
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
     );
 }

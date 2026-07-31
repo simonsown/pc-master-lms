@@ -1,18 +1,18 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { BookOpen, Play, FileText, Lock, ArrowLeft, Zap, Crown, X, CheckCircle, ChevronRight, Search, Clock, Sparkles } from 'lucide-react';
+import { BookOpen, Play, FileText, Lock, ArrowLeft, Crown, X, CheckCircle, ChevronRight, Search, Clock, Sparkles, KeyRound } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { SUBSCRIPTION_PLANS, SUBSCRIPTION_KEY, isVip, getSubscription, activatePlan, redeemCode } from '@/lib/subscription-store';
 
 const PCourseViewer = dynamic(() => import('./PCourseViewer'), { ssr: false });
 const SlideViewer = dynamic(() => import('./SlideViewer'), { ssr: false });
 
 const FREE_LIMITS = { course: 3, video: 2, slide: 1 };
-const UNLOCK_KEY = 'pcm_unlocked_pro';
 
 function isUnlocked() {
   if (typeof window === 'undefined') return false;
-  try { return localStorage.getItem(UNLOCK_KEY) === 'true'; } catch { return false; }
+  try { return isVip(); } catch { return false; }
 }
 
 const VIDEO_LESSONS = [
@@ -254,28 +254,35 @@ const CATEGORIES = [
 
 /* ────────── PRICING MODAL ────────── */
 function PricingModal({ onClose, onUnlock }) {
-  const plans = [
-    {
-      id: 'personal',
-      icon: '👤',
-      name: 'Cá Nhân (B2C)',
-      price: '49.000đ',
-      unit: '/ tháng',
-      color: '#00d4aa',
-      highlight: true,
-      features: ['Toàn bộ khóa học (20 chương)', 'Học full bài học & slide 3D tương tác', 'AI Tutor tư vấn chống chặt chém', 'Lưu tiến trình học cá nhân'],
-    },
-    {
-      id: 'school',
-      icon: '🏫',
-      name: 'Trường Học (B2B)',
-      price: '25.000đ',
-      unit: '/ học sinh / năm',
-      color: '#6366f1',
-      highlight: false,
-      features: ['Tất cả quyền lợi Cá nhân Pro', 'LMS Dashboard cho Giáo viên', 'Tiết kiệm hàng trăm triệu tiền lab', 'Báo cáo tiến độ & hỗ trợ 24/7'],
-    },
-  ];
+  const plans = SUBSCRIPTION_PLANS;
+  const [code, setCode] = useState('');
+  const [codeError, setCodeError] = useState('');
+  const [codeOk, setCodeOk] = useState(false);
+  const [activeSub, setActiveSub] = useState(null);
+  const [toast, setToast] = useState('');
+
+  useEffect(() => {
+    setActiveSub(getSubscription());
+  }, []);
+
+  const showToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(''), 2500);
+  };
+
+  const handleRedeem = () => {
+    setCodeError('');
+    const res = redeemCode(code);
+    if (res.ok) {
+      setCodeOk(true);
+      setActiveSub(res.sub);
+      try { localStorage.setItem(SUBSCRIPTION_KEY, JSON.stringify(res.sub)); } catch {}
+      onUnlock?.();
+      showToast('Kích hoạt thành công bằng mã giáo viên!');
+    } else {
+      setCodeError(res.message);
+    }
+  };
 
   return (
     <div
@@ -308,7 +315,7 @@ function PricingModal({ onClose, onUnlock }) {
           color: 'var(--text-muted)',
         }}><X size={16} /></button>
 
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: '8px',
             padding: '6px 14px', borderRadius: '99px',
@@ -326,66 +333,132 @@ function PricingModal({ onClose, onUnlock }) {
           </p>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
-          {plans.map(plan => (
-            <div key={plan.id} style={{
-              border: `1.5px solid ${plan.highlight ? plan.color : 'var(--border-default)'}`,
-              borderRadius: '14px',
-              padding: '20px',
-              background: plan.highlight ? `${plan.color}08` : 'var(--bg-elevated)',
-              position: 'relative',
-            }}>
-              {plan.highlight && (
-                <div style={{
-                  position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)',
-                  background: plan.color, color: '#fff',
-                  fontSize: '11px', fontWeight: 700, padding: '2px 12px', borderRadius: '99px',
-                }}>PHỔ BIẾN NHẤT</div>
-              )}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ fontSize: '22px' }}>{plan.icon}</span>
-                  <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>{plan.name}</span>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <span style={{ fontSize: '20px', fontWeight: 800, color: plan.color }}>{plan.price}</span>
-                  <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block' }}>{plan.unit}</span>
-                </div>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                {plan.features.map((f, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <CheckCircle size={13} style={{ color: plan.color, flexShrink: 0 }} />
-                    <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{f}</span>
-                  </div>
-                ))}
-              </div>
+        {/* Code entry */}
+        {!codeOk && !activeSub && (
+          <div style={{
+            marginBottom: '20px', padding: '14px 16px',
+            borderRadius: '12px', border: '1px dashed var(--border-strong)',
+            background: 'var(--bg-elevated)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <KeyRound size={14} style={{ color: 'var(--brand-primary)' }} />
+              <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                Có mã kích hoạt từ giáo viên? Nhập tại đây
+              </span>
             </div>
-          ))}
-        </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <input
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleRedeem(); }}
+                placeholder="Nhập mã kích hoạt..."
+                style={{
+                  flex: 1, padding: '10px 14px', borderRadius: '8px',
+                  background: 'var(--bg-base)', border: `1px solid ${codeError ? '#ef4444' : 'var(--border-default)'}`,
+                  color: 'var(--text-primary)', fontSize: '13px', outline: 'none', fontFamily: 'inherit',
+                  textTransform: 'uppercase',
+                }}
+              />
+              <button
+                onClick={handleRedeem}
+                style={{
+                  padding: '10px 18px', borderRadius: '8px', border: 'none',
+                  background: 'linear-gradient(135deg, var(--brand-primary), #6366f1)',
+                  color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Kích hoạt
+              </button>
+            </div>
+            {codeError && <p style={{ color: '#ef4444', fontSize: '11px', margin: '8px 0 0', fontWeight: 500 }}>{codeError}</p>}
+          </div>
+        )}
 
-        <button
-          onClick={() => {
-            try { localStorage.setItem(UNLOCK_KEY, 'true'); } catch {}
-            onUnlock?.();
-            onClose();
-          }}
-          style={{
-            width: '100%', padding: '14px',
-            background: 'linear-gradient(135deg, var(--brand-primary), #6366f1)',
-            color: '#fff', border: 'none', borderRadius: '12px',
-            fontSize: '14px', fontWeight: 700, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-            fontFamily: 'inherit',
-            boxShadow: '0 4px 16px rgba(0,212,170,0.3)',
-          }}
-        >
-          <Zap size={16} />
-          ⚡ TỰ ĐỘNG KÍCH HOẠT MIỄN PHÍ 0Đ
-        </button>
-        <p style={{ textAlign: 'center', fontSize: '11px', color: 'var(--text-muted)', marginTop: '10px', marginBottom: 0 }}>
-          Demo — Bấm để mở khóa toàn bộ nội dung ngay lập tức
-        </p>
+        {activeSub ? (
+          <div style={{ textAlign: 'center', padding: '20px', marginBottom: '20px', borderRadius: '14px', border: '1px solid rgba(0,212,170,0.3)', background: 'rgba(0,212,170,0.06)' }}>
+            <CheckCircle size={40} color="var(--brand-primary)" style={{ margin: '0 auto 12px' }} />
+            <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)' }}>
+              Đã kích hoạt: {activeSub.planName}
+            </div>
+            {activeSub.expiresAt && (
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '6px' }}>
+                Hạn dùng: {new Date(activeSub.expiresAt).toLocaleDateString('vi-VN')}
+              </div>
+            )}
+            <button onClick={onClose} style={{
+              marginTop: '14px', padding: '10px 24px', borderRadius: '10px', border: 'none',
+              background: 'var(--brand-primary)', color: '#000', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+            }}>
+              Bắt đầu học ngay
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
+            {plans.map(plan => (
+              <div key={plan.id} style={{
+                border: `1.5px solid ${plan.highlight ? plan.color : 'var(--border-default)'}`,
+                borderRadius: '14px',
+                padding: '20px',
+                background: plan.highlight ? `${plan.color}08` : 'var(--bg-elevated)',
+                position: 'relative',
+              }}>
+                {plan.highlight && (
+                  <div style={{
+                    position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)',
+                    background: plan.color, color: '#fff',
+                    fontSize: '11px', fontWeight: 700, padding: '2px 12px', borderRadius: '99px',
+                  }}>PHỔ BIẾN NHẤT</div>
+                )}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '22px' }}>{plan.id === 'student' ? '👨‍🎓' : plan.id === 'personal' ? '👤' : '🏫'}</span>
+                    <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>{plan.name}</span>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{ fontSize: '20px', fontWeight: 800, color: plan.color }}>{plan.priceLabel}</span>
+                    <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block' }}>{plan.unit}</span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '12px' }}>
+                  {plan.features.map((f, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <CheckCircle size={13} style={{ color: plan.color, flexShrink: 0 }} />
+                      <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{f}</span>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => {
+                    const sub = activatePlan(plan.id, plan.id === 'school' ? 12 : 1);
+                    setActiveSub(sub);
+                    try { localStorage.setItem(SUBSCRIPTION_KEY, JSON.stringify(sub)); } catch {}
+                    onUnlock?.();
+                    showToast('Kích hoạt gói ' + plan.name + ' thành công!');
+                  }}
+                  style={{
+                    width: '100%', padding: '10px', borderRadius: '10px', border: 'none',
+                    background: plan.highlight ? 'linear-gradient(135deg, var(--brand-primary), #6366f1)' : 'var(--bg-base)',
+                    color: plan.highlight ? '#fff' : 'var(--text-primary)',
+                    fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                  }}
+                >
+                  Đăng ký {plan.priceLabel}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {toast && (
+          <div style={{
+            textAlign: 'center', padding: '10px 14px', borderRadius: '10px',
+            background: 'rgba(0,212,170,0.1)', border: '1px solid rgba(0,212,170,0.3)',
+            color: 'var(--brand-primary)', fontSize: '12px', fontWeight: 700, marginBottom: '10px',
+          }}>
+            {toast}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -654,8 +727,17 @@ export default function LearningHub({ lang = 'vn', onBack }) {
   const [tab, setTab] = useState('menu'); // 'menu' | 'course' | 'video' | 'slide'
   const [unlocked, setUnlocked] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
+  const [subscription, setSubscription] = useState(null);
 
-  useEffect(() => { setUnlocked(isUnlocked()); }, []);
+  useEffect(() => {
+    setUnlocked(isUnlocked());
+    setSubscription(getSubscription());
+  }, []);
+
+  const handleUnlock = () => {
+    setUnlocked(true);
+    setSubscription(getSubscription());
+  };
 
   const tabs = [
     {
@@ -691,7 +773,7 @@ export default function LearningHub({ lang = 'vn', onBack }) {
         {showPricing && (
           <PricingModal
             onClose={() => setShowPricing(false)}
-            onUnlock={() => setUnlocked(true)}
+            onUnlock={handleUnlock}
           />
         )}
         <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 0 }}>
@@ -725,7 +807,7 @@ export default function LearningHub({ lang = 'vn', onBack }) {
         {showPricing && (
           <PricingModal
             onClose={() => setShowPricing(false)}
-            onUnlock={() => setUnlocked(true)}
+            onUnlock={handleUnlock}
           />
         )}
         <div style={{ width: '100%' }}>
@@ -754,7 +836,7 @@ export default function LearningHub({ lang = 'vn', onBack }) {
         {showPricing && (
           <PricingModal
             onClose={() => setShowPricing(false)}
-            onUnlock={() => setUnlocked(true)}
+            onUnlock={handleUnlock}
           />
         )}
         <div style={{ width: '100%' }}>
@@ -813,13 +895,28 @@ export default function LearningHub({ lang = 'vn', onBack }) {
 
           {/* Unlock status badge */}
           {unlocked ? (
-            <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: '6px',
-              padding: '5px 12px', borderRadius: '99px',
-              background: 'rgba(0,212,170,0.1)', border: '1px solid rgba(0,212,170,0.2)',
-            }}>
-              <CheckCircle size={13} style={{ color: 'var(--brand-primary)' }} />
-              <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--brand-primary)' }}>Đã mở khóa toàn bộ</span>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: '6px',
+                padding: '5px 12px', borderRadius: '99px',
+                background: 'rgba(0,212,170,0.1)', border: '1px solid rgba(0,212,170,0.2)',
+              }}>
+                <CheckCircle size={13} style={{ color: 'var(--brand-primary)' }} />
+                <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--brand-primary)' }}>
+                  {subscription?.planName || 'Đã mở khóa toàn bộ'}
+                </span>
+              </div>
+              {subscription?.expiresAt && (
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '6px',
+                  padding: '5px 12px', borderRadius: '99px',
+                  background: 'var(--bg-elevated)', border: '1px solid var(--border-default)',
+                }}>
+                  <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)' }}>
+                    Hạn: {new Date(subscription.expiresAt).toLocaleDateString('vi-VN')}
+                  </span>
+                </div>
+              )}
             </div>
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -914,7 +1011,7 @@ export default function LearningHub({ lang = 'vn', onBack }) {
                 🚀 Mở khóa toàn bộ nội dung
               </div>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                Từ <span style={{ fontWeight: 700, color: 'var(--brand-primary)' }}>55.000đ/tháng</span> • Trường học chỉ <span style={{ fontWeight: 700, color: '#6366f1' }}>32.000đ/học sinh</span>
+                Từ <span style={{ fontWeight: 700, color: 'var(--brand-primary)' }}>39.000đ/tháng</span> • Trường học chỉ <span style={{ fontWeight: 700, color: '#6366f1' }}>49.000đ/học sinh</span> • Học sinh <span style={{ fontWeight: 700, color: '#06b6d4' }}>20.000đ/tháng</span>
               </div>
             </div>
             <button

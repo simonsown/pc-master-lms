@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useEffect, useState, use, useCallback, useRef } from 'react';
-import { supabase } from '@/lib/supabase';
-import { Save, Trash2, Video, FileText, Image as ImageIcon, FileSearch, Code, Loader2, ArrowLeft, GripVertical, Eye, EyeOff, Upload, PlusCircle, CheckCircle, AlertCircle, AlertTriangle } from 'lucide-react';
+import { Save, Trash2, Video, FileText, Image as ImageIcon, FileSearch, Code, Loader2, ArrowLeft, GripVertical, Eye, EyeOff, Upload, PlusCircle, CheckCircle, AlertCircle, AlertTriangle, Plus, X } from 'lucide-react';
 import Link from 'next/link';
 import { BackButton } from '@/components/ui/BackButton';
 import { getYouTubeEmbed, isValidYouTubeUrl, getYouTubeThumbnail } from '@/utils/youtube';
+import { getLesson, saveLesson, deleteLesson, newSection, getAllClasses, saveClass } from '@/lib/lesson-store';
 
 function SimpleMarkdown({ text }) {
     const html = (text || '')
@@ -40,21 +40,36 @@ export default function LessonEditorPage({ params }) {
     const lessonId = resolvedParams.id;
 
     const [lesson, setLesson] = useState(null);
-    const [sections, setSections] = useState([]);
-    const [books, setBooks] = useState([]);
-    const [activeSection, setActiveSection] = useState(null);
-    const [activeTab, setActiveTab] = useState('content');
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [toast, setToast] = useState(null);
     const [classes, setClasses] = useState([]);
     const [selectedClassIds, setSelectedClassIds] = useState([]);
     const [showClassPicker, setShowClassPicker] = useState(false);
+    const [activeTab, setActiveTab] = useState('content');
+    const [newClassCode, setNewClassCode] = useState('');
+    const [newClassName, setNewClassName] = useState('');
+    const [activeSectionId, setActiveSectionId] = useState(null);
     const textEditorRef = useRef(null);
+
+    const showToast = (message, type = 'success') => setToast({ message, type });
+
+    const persist = (updated) => {
+        saveLesson(updated);
+    };
+
+    useEffect(() => {
+        const stored = getLesson(lessonId);
+        if (!stored) { showToast('Không tìm thấy bài giảng!', 'error'); setLoading(false); return; }
+        setLesson(stored);
+        setSelectedClassIds(stored.classCodes || []);
+        setClasses(getAllClasses());
+        setLoading(false);
+    }, [lessonId]);
 
     const insertAtCursor = (text) => {
         const ta = textEditorRef.current;
-        if (!ta) return;
+        if (!ta || !activeSection) return;
         const start = ta.selectionStart;
         const end = ta.selectionEnd;
         const val = ta.value;
@@ -69,87 +84,79 @@ export default function LessonEditorPage({ params }) {
         });
     };
 
-    const showToast = (message, type = 'success') => setToast({ message, type });
+    const activeSection = lesson?.sections?.find(s => s.id === activeSectionId) || null;
 
-    useEffect(() => { fetchLessonData(); }, [lessonId]);
-
-    const fetchLessonData = async () => {
-        setLoading(true);
-        const { data: lessonData, error } = await supabase.from('lessons').select('*').eq('id', lessonId).single();
-        if (error || !lessonData) { showToast('Không tìm thấy bài giảng!', 'error'); setLoading(false); return; }
-        const { data: sectionData } = await supabase.from('lesson_sections').select('*').eq('lesson_id', lessonId).order('order_index', { ascending: true });
-        const { data: bookData } = await supabase.from('lesson_books').select('*').eq('lesson_id', lessonId);
-        setLesson(lessonData);
-        setSections(sectionData || []);
-        setBooks(bookData || []);
-        if (sectionData?.length > 0) setActiveSection(sectionData[0]);
-
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-            const { data: classData } = await supabase.from('classes').select('*').eq('teacher_id', user.id).order('name');
-            setClasses(classData || []);
-        }
-
-        const { data: assignmentData } = await supabase.from('lesson_class_assignments').select('class_id').eq('lesson_id', lessonId);
-        if (assignmentData) setSelectedClassIds(assignmentData.map(a => a.class_id));
-
-        setLoading(false);
-    };
-
-    const handleSaveLesson = async () => {
+    const handleSaveLesson = () => {
         setSaving(true);
-        const { error } = await supabase.from('lessons').update({
-            title: lesson.title,
-            description: lesson.description,
-            thumbnail_url: lesson.thumbnail_url,
-            is_published: lesson.is_published,
-            category: lesson.category || 'extended',
-            source_name: lesson.source_name || '',
-            source_url: lesson.source_url || ''
-        }).eq('id', lessonId);
-        if (error) { showToast('Lưu thất bại: ' + error.message, 'error'); setSaving(false); return; }
-
-        const { data: existing } = await supabase.from('lesson_class_assignments').select('class_id').eq('lesson_id', lessonId);
-        const existingIds = (existing || []).map(a => a.class_id);
-        const toRemove = existingIds.filter(id => !selectedClassIds.includes(id));
-        const toAdd = selectedClassIds.filter(id => !existingIds.includes(id));
-        if (toRemove.length > 0) {
-            await supabase.from('lesson_class_assignments').delete().eq('lesson_id', lessonId).in('class_id', toRemove);
-        }
-        if (toAdd.length > 0) {
-            await supabase.from('lesson_class_assignments').insert(toAdd.map(class_id => ({ lesson_id: lessonId, class_id })));
-        }
-
+        const updated = { ...lesson, classCodes: selectedClassIds, is_published: lesson.is_published };
+        persist(updated);
+        setLesson(updated);
         setSaving(false);
         showToast('Đã lưu bài giảng!');
     };
 
-    const addSection = async (type) => {
-        const newSection = { lesson_id: lessonId, type, content_type: type, title: `Phần ${type.toUpperCase()} mới`, content: '', order_index: sections.length };
-        const { data, error } = await supabase.from('lesson_sections').insert(newSection).select().single();
-        if (error) { showToast('Không thêm được section: ' + error.message, 'error'); return; }
-        if (data) { setSections(prev => [...prev, data]); setActiveSection(data); }
+    const togglePublish = () => {
+        const updated = { ...lesson, is_published: !lesson.is_published };
+        setLesson(updated);
+        persist(updated);
+        showToast(updated.is_published ? 'Đã xuất bản — học sinh đã thấy bài này!' : 'Đã chuyển về bản nháp', updated.is_published ? 'success' : 'error');
     };
 
-    const saveSection = async (section) => {
-        const { error } = await supabase.from('lesson_sections').update({
-            title: section.title, content: section.content
-        }).eq('id', section.id);
-        if (error) showToast('Lưu section thất bại', 'error');
+    const addSection = (type) => {
+        const section = newSection(type, lesson.sections.length);
+        const updated = { ...lesson, sections: [...lesson.sections, section] };
+        setLesson(updated);
+        persist(updated);
+        setActiveSectionId(section.id);
     };
 
-    const updateSectionLocal = (updated) => {
-        setSections(prev => prev.map(s => s.id === updated.id ? updated : s));
-        setActiveSection(updated);
+    const updateSectionLocal = (updatedSection) => {
+        const updated = { ...lesson, sections: lesson.sections.map(s => s.id === updatedSection.id ? updatedSection : s) };
+        setLesson(updated);
+        persist(updated);
     };
 
-    const deleteSection = async (id) => {
+    const saveSection = (section) => {
+        updateSectionLocal(section);
+        showToast('Đã lưu phần này!');
+    };
+
+    const deleteSection = (id) => {
         if (!confirm('Xóa phần này?')) return;
-        const { error } = await supabase.from('lesson_sections').delete().eq('id', id);
-        if (error) { showToast('Xóa thất bại', 'error'); return; }
-        const filtered = sections.filter(s => s.id !== id);
-        setSections(filtered);
-        setActiveSection(filtered[0] || null);
+        const updated = { ...lesson, sections: lesson.sections.filter(s => s.id !== id) };
+        setLesson(updated);
+        persist(updated);
+        setActiveSectionId(updated.sections[0]?.id || null);
+    };
+
+    const addBook = () => {
+        const book = { id: 'bk_' + Date.now().toString(36), title: 'Sách mới', cover_image_url: '', drive_embed_url: '', description: '' };
+        const updated = { ...lesson, books: [...(lesson.books || []), book] };
+        setLesson(updated);
+        persist(updated);
+    };
+
+    const deleteBook = (id) => {
+        const updated = { ...lesson, books: (lesson.books || []).filter(b => b.id !== id) };
+        setLesson(updated);
+        persist(updated);
+    };
+
+    const updateBook = (id, field, value) => {
+        const updated = { ...lesson, books: (lesson.books || []).map(b => b.id === id ? { ...b, [field]: value } : b) };
+        setLesson(updated);
+        persist(updated);
+    };
+
+    const addNewClass = () => {
+        const code = newClassCode.trim();
+        const name = newClassName.trim() || code;
+        if (!code) return;
+        saveClass({ code, name });
+        setClasses(getAllClasses());
+        setNewClassCode('');
+        setNewClassName('');
+        showToast('Đã thêm lớp "' + name + '"');
     };
 
     const getDriveEmbed = (url) => {
@@ -209,14 +216,14 @@ export default function LessonEditorPage({ params }) {
                         <span style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}>Tên bài giảng</span>
                         <input className="editor-header-title"
                             value={lesson.title}
-                            onChange={(e) => setLesson({ ...lesson, title: e.target.value })}
+                            onChange={(e) => { const u = { ...lesson, title: e.target.value }; setLesson(u); persist(u); }}
                             placeholder="Nhập tên bài giảng..."
                             style={{ background: 'transparent', border: 'none', borderBottom: '2px solid var(--brand-primary)', color: 'var(--text-primary)', fontSize: '18px', fontWeight: 800, width: '420px', outline: 'none', paddingBottom: '4px' }}
                         />
                     </div>
                 </div>
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                    <button onClick={() => setLesson({ ...lesson, is_published: !lesson.is_published })}
+                    <button onClick={togglePublish}
                         style={{ background: lesson.is_published ? 'rgba(16,185,129,0.15)' : 'var(--bg-elevated)', color: lesson.is_published ? 'var(--brand-primary)' : 'var(--text-muted)', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontFamily: 'inherit' }}>
                         {lesson.is_published ? <Eye size={18} /> : <EyeOff size={18} />}
                         {lesson.is_published ? 'Đã xuất bản' : 'Bản nháp'}
@@ -238,16 +245,16 @@ export default function LessonEditorPage({ params }) {
                                 : <Upload size={28} color="var(--text-muted)" />}
                         </div>
                         <input placeholder="Dán URL ảnh thumbnail..." value={lesson.thumbnail_url || ''}
-                            onChange={(e) => setLesson({ ...lesson, thumbnail_url: e.target.value })}
+                            onChange={(e) => { const u = { ...lesson, thumbnail_url: e.target.value }; setLesson(u); persist(u); }}
                             style={{ width: '100%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', borderRadius: '8px', padding: '8px 12px', color: 'var(--text-primary)', fontSize: '13px', boxSizing: 'border-box' }} />
                         <textarea placeholder="Mô tả bài học..." value={lesson.description || ''}
-                            onChange={(e) => setLesson({ ...lesson, description: e.target.value })}
+                            onChange={(e) => { const u = { ...lesson, description: e.target.value }; setLesson(u); persist(u); }}
                             style={{ width: '100%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', borderRadius: '8px', padding: '8px 12px', color: 'var(--text-primary)', fontSize: '13px', boxSizing: 'border-box', marginTop: '8px', height: '72px', resize: 'none' }} />
 
                         <div style={{ marginTop: '14px' }}>
                             <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>Đăng vào mục</p>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                                <button onClick={() => setLesson({ ...lesson, category: 'textbook' })} style={{
+                                <button onClick={() => { const u = { ...lesson, category: 'textbook' }; setLesson(u); persist(u); }} style={{
                                     padding: '10px 8px', borderRadius: '10px', border: `2px solid ${(lesson.category || 'extended') === 'textbook' ? 'var(--accent-blue)' : 'var(--border-default)'}`,
                                     background: (lesson.category || 'extended') === 'textbook' ? 'rgba(59,130,246,0.15)' : 'transparent',
                                     color: (lesson.category || 'extended') === 'textbook' ? 'var(--accent-blue)' : 'var(--text-muted)',
@@ -255,7 +262,7 @@ export default function LessonEditorPage({ params }) {
                                 }}>
                                     Sách Giáo Khoa
                                 </button>
-                                <button onClick={() => setLesson({ ...lesson, category: 'extended' })} style={{
+                                <button onClick={() => { const u = { ...lesson, category: 'extended' }; setLesson(u); persist(u); }} style={{
                                     padding: '10px 8px', borderRadius: '10px', border: `2px solid ${(lesson.category || 'extended') === 'extended' ? 'var(--accent-amber)' : 'var(--border-default)'}`,
                                     background: (lesson.category || 'extended') === 'extended' ? 'rgba(245,158,11,0.15)' : 'transparent',
                                     color: (lesson.category || 'extended') === 'extended' ? 'var(--accent-amber)' : 'var(--text-muted)',
@@ -272,13 +279,13 @@ export default function LessonEditorPage({ params }) {
                                 <div>
                                     <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Tên nguồn (VD: Wikipedia)</label>
                                     <input placeholder="Nhập tên nguồn..." value={lesson.source_name || ''}
-                                        onChange={(e) => setLesson({ ...lesson, source_name: e.target.value })}
+                                        onChange={(e) => { const u = { ...lesson, source_name: e.target.value }; setLesson(u); persist(u); }}
                                         style={{ width: '100%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', borderRadius: '8px', padding: '8px 12px', color: 'var(--text-primary)', fontSize: '13px', boxSizing: 'border-box' }} />
                                 </div>
                                 <div>
                                     <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Link nguồn (URL)</label>
                                     <input placeholder="https://..." value={lesson.source_url || ''}
-                                        onChange={(e) => setLesson({ ...lesson, source_url: e.target.value })}
+                                        onChange={(e) => { const u = { ...lesson, source_url: e.target.value }; setLesson(u); persist(u); }}
                                         style={{ width: '100%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', borderRadius: '8px', padding: '8px 12px', color: 'var(--text-primary)', fontSize: '13px', boxSizing: 'border-box' }} />
                                 </div>
                             </div>
@@ -294,30 +301,47 @@ export default function LessonEditorPage({ params }) {
                                 </button>
                             </div>
                             {showClassPicker && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '180px', overflowY: 'auto' }}>
-                                    {classes.length === 0 ? (
-                                        <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Chưa có lớp học nào.</p>
-                                    ) : classes.map(cls => (
-                                        <label key={cls.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', cursor: 'pointer', background: selectedClassIds.includes(cls.id) ? 'rgba(59,130,246,0.1)' : 'transparent', transition: 'background 0.2s', fontSize: '13px', color: 'var(--text-primary)', fontWeight: 500 }}>
-                                            <input type="checkbox" checked={selectedClassIds.includes(cls.id)}
-                                                onChange={(e) => {
-                                                    if (e.target.checked) setSelectedClassIds(prev => [...prev, cls.id]);
-                                                    else setSelectedClassIds(prev => prev.filter(id => id !== cls.id));
-                                                }}
-                                                style={{ accentColor: 'var(--accent-blue)', width: '16px', height: '16px', cursor: 'pointer' }} />
-                                            <span>{cls.name}</span>
-                                            <span style={{ marginLeft: 'auto', fontSize: '10px', color: 'var(--text-muted)', background: 'var(--bg-base)', padding: '2px 6px', borderRadius: '4px' }}>{cls.grade}</span>
-                                        </label>
-                                    ))}
+                                <div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '160px', overflowY: 'auto' }}>
+                                        {classes.length === 0 ? (
+                                            <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Chưa có lớp học nào. Tạo lớp bên dưới.</p>
+                                        ) : classes.map(cls => (
+                                            <label key={cls.code} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', cursor: 'pointer', background: selectedClassIds.includes(cls.code) ? 'rgba(59,130,246,0.1)' : 'transparent', transition: 'background 0.2s', fontSize: '13px', color: 'var(--text-primary)', fontWeight: 500 }}>
+                                                <input type="checkbox" checked={selectedClassIds.includes(cls.code)}
+                                                    onChange={(e) => {
+                                                        if (e.target.checked) setSelectedClassIds(prev => [...prev, cls.code]);
+                                                        else setSelectedClassIds(prev => prev.filter(id => id !== cls.code));
+                                                    }}
+                                                    style={{ accentColor: 'var(--accent-blue)', width: '16px', height: '16px', cursor: 'pointer' }} />
+                                                <span>{cls.name}</span>
+                                                <span style={{ marginLeft: 'auto', fontSize: '10px', color: 'var(--text-muted)', background: 'var(--bg-base)', padding: '2px 6px', borderRadius: '4px', fontFamily: 'monospace' }}>{cls.code}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                    <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px dashed var(--border-default)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                        <div style={{ display: 'flex', gap: '6px' }}>
+                                            <input placeholder="Mã lớp (VD: 10A1)" value={newClassCode} onChange={e => setNewClassCode(e.target.value)}
+                                                style={{ flex: 1, background: 'var(--bg-base)', border: '1px solid var(--border-default)', borderRadius: '8px', padding: '7px 10px', color: 'var(--text-primary)', fontSize: '12px', boxSizing: 'border-box' }} />
+                                            <input placeholder="Tên lớp (VD: 10A1)" value={newClassName} onChange={e => setNewClassName(e.target.value)}
+                                                style={{ flex: 1, background: 'var(--bg-base)', border: '1px solid var(--border-default)', borderRadius: '8px', padding: '7px 10px', color: 'var(--text-primary)', fontSize: '12px', boxSizing: 'border-box' }} />
+                                            <button onClick={addNewClass}
+                                                style={{ background: 'var(--brand-primary)', color: '#fff', border: 'none', borderRadius: '8px', padding: '0 12px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                                                <Plus size={16} />
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             )}
                             {!showClassPicker && selectedClassIds.length > 0 && (
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                                    {classes.filter(c => selectedClassIds.includes(c.id)).map(cls => (
-                                        <span key={cls.id} style={{ fontSize: '11px', padding: '3px 8px', background: 'rgba(59,130,246,0.15)', color: 'var(--accent-blue)', borderRadius: '99px', fontWeight: 600 }}>{cls.name}</span>
+                                    {classes.filter(c => selectedClassIds.includes(c.code)).map(cls => (
+                                        <span key={cls.code} style={{ fontSize: '11px', padding: '3px 8px', background: 'rgba(59,130,246,0.15)', color: 'var(--accent-blue)', borderRadius: '99px', fontWeight: 600 }}>{cls.name}</span>
                                     ))}
                                 </div>
                             )}
+                            <p style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '8px' }}>
+                                Học sinh nhập đúng <strong>mã lớp</strong> này trong màn "Bài Giảng Từ Giáo Viên" để xem bài.
+                            </p>
                         </div>
 
                     <div style={{ display: 'flex', borderBottom: '1px solid var(--border-default)' }}>
@@ -334,11 +358,11 @@ export default function LessonEditorPage({ params }) {
                     <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
                         {activeTab === 'content' ? (
                             <>
-                                {sections.length === 0 && <p style={{ color: 'var(--text-muted)', fontSize: '13px', textAlign: 'center', padding: '20px 0' }}>Chưa có nội dung. Thêm phần đầu tiên bên dưới.</p>}
+                                {lesson.sections.length === 0 && <p style={{ color: 'var(--text-muted)', fontSize: '13px', textAlign: 'center', padding: '20px 0' }}>Chưa có nội dung. Thêm phần đầu tiên bên dưới.</p>}
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                    {sections.map(s => (
-                                        <div key={s.id} onClick={() => { if (activeSection && activeSection.id !== s.id) saveSection(activeSection); setActiveSection(s); }}
-                                            style={{ padding: '10px 14px', borderRadius: '10px', background: activeSection?.id === s.id ? 'rgba(var(--brand-primary-rgb),0.1)' : 'transparent', border: activeSection?.id === s.id ? '1px solid var(--brand-primary)' : '1px solid transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', transition: 'all 0.2s' }}>
+                                    {lesson.sections.map(s => (
+                                        <div key={s.id} onClick={() => { setActiveSectionId(s.id); }}
+                                            style={{ padding: '10px 14px', borderRadius: '10px', background: activeSectionId === s.id ? 'rgba(var(--brand-primary-rgb),0.1)' : 'transparent', border: activeSectionId === s.id ? '1px solid var(--brand-primary)' : '1px solid transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', transition: 'all 0.2s' }}>
                                             <GripVertical size={14} color="var(--text-muted)" />
                                             <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand-primary)', flexShrink: 0 }}>
                                                 {s.type === 'video' && <Video size={14} />}
@@ -347,7 +371,7 @@ export default function LessonEditorPage({ params }) {
                                                 {s.type === 'pdf' && <FileSearch size={14} />}{s.type === 'embed' && <Code size={14} />}
                                             </div>
                                             <div style={{ flex: 1, overflow: 'hidden' }}>
-                                                <p style={{ margin: 0, fontSize: '13px', fontWeight: 600, color: activeSection?.id === s.id ? 'var(--text-primary)' : 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.title}</p>
+                                                <p style={{ margin: 0, fontSize: '13px', fontWeight: 600, color: activeSectionId === s.id ? 'var(--text-primary)' : 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.title}</p>
                                                 <p style={{ margin: 0, fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>{s.type}</p>
                                             </div>
                                         </div>
@@ -363,19 +387,21 @@ export default function LessonEditorPage({ params }) {
                             </>
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                {books.map(book => (
+                                {(lesson.books || []).map(book => (
                                     <div key={book.id} style={{ padding: '12px', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', borderRadius: '10px', display: 'flex', gap: '10px' }}>
                                         <img src={book.cover_image_url} style={{ width: '36px', height: '52px', borderRadius: '4px', objectFit: 'cover' }} onError={e => e.target.style.display = 'none'} />
                                         <div style={{ flex: 1 }}>
-                                            <p style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>{book.title}</p>
-                                            <button onClick={async () => { await supabase.from('lesson_books').delete().eq('id', book.id); setBooks(books.filter(b => b.id !== book.id)); }} style={{ background: 'none', border: 'none', color: 'var(--danger)', fontSize: '11px', cursor: 'pointer', padding: 0, marginTop: '4px', fontFamily: 'inherit' }}>Xóa</button>
+                                            <input value={book.title} onChange={e => updateBook(book.id, 'title', e.target.value)}
+                                                style={{ width: '100%', background: 'var(--bg-base)', border: '1px solid var(--border-default)', borderRadius: '6px', padding: '5px 8px', color: 'var(--text-primary)', fontSize: '12px', marginBottom: '4px', boxSizing: 'border-box' }} />
+                                            <input placeholder="URL ảnh bìa" value={book.cover_image_url} onChange={e => updateBook(book.id, 'cover_image_url', e.target.value)}
+                                                style={{ width: '100%', background: 'var(--bg-base)', border: '1px solid var(--border-default)', borderRadius: '6px', padding: '5px 8px', color: 'var(--text-primary)', fontSize: '11px', marginBottom: '4px', boxSizing: 'border-box' }} />
+                                            <input placeholder="URL Google Drive PDF" value={book.drive_embed_url} onChange={e => updateBook(book.id, 'drive_embed_url', e.target.value)}
+                                                style={{ width: '100%', background: 'var(--bg-base)', border: '1px solid var(--border-default)', borderRadius: '6px', padding: '5px 8px', color: 'var(--text-primary)', fontSize: '11px', boxSizing: 'border-box' }} />
+                                            <button onClick={() => deleteBook(book.id)} style={{ background: 'none', border: 'none', color: 'var(--danger)', fontSize: '11px', cursor: 'pointer', padding: 0, marginTop: '4px', fontFamily: 'inherit' }}>Xóa</button>
                                         </div>
                                     </div>
                                 ))}
-                                <button onClick={async () => {
-                                    const { data } = await supabase.from('lesson_books').insert({ lesson_id: lessonId, title: 'Sách mới', cover_image_url: '', drive_embed_url: '', description: '' }).select().single();
-                                    if (data) setBooks([...books, data]);
-                                }} style={{ width: '100%', padding: '12px', background: 'rgba(var(--brand-primary-rgb),0.08)', color: 'var(--brand-primary)', border: '1px dashed rgba(var(--brand-primary-rgb),0.4)', borderRadius: '10px', fontWeight: 700, cursor: 'pointer', fontSize: '14px', fontFamily: 'inherit' }}>
+                                <button onClick={addBook} style={{ width: '100%', padding: '12px', background: 'rgba(var(--brand-primary-rgb),0.08)', color: 'var(--brand-primary)', border: '1px dashed rgba(var(--brand-primary-rgb),0.4)', borderRadius: '10px', fontWeight: 700, cursor: 'pointer', fontSize: '14px', fontFamily: 'inherit' }}>
                                     + Thêm sách mới
                                 </button>
                             </div>

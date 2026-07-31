@@ -31,10 +31,12 @@ import BuilderLab from '@/components/builder/BuilderLab';
 import CollaborationStatus from '@/components/builder/CollaborationStatus';
 import VoiceController from '@/components/VoiceController';
 import HandTracker from '@/components/HandTracker';
-import {} from 'lucide-react';
+import { useIsMobile } from '@/hooks/useIsMobile';
+
 
 function Home(props) {
   const { state: realtimeState } = useRealtime();
+  const isMobile = useIsMobile();
   const [hoveredComponent, setHoveredComponent] = useState(null);
   const [lang, setLang] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -317,7 +319,7 @@ function Home(props) {
       
       {isDemo && (
         <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999,
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999, paddingLeft: isMobile ? '56px' : '0',
           background: 'linear-gradient(90deg, #6366f1, #00d2a0)',
           color: 'white', padding: '8px 16px', textAlign: 'center',
           fontSize: '14px', fontWeight: 600, display: 'flex', 
@@ -386,7 +388,7 @@ function Home(props) {
                 padding: ['course','market','learning_hub'].includes(appMode) ? '0 16px 24px' : '24px',
                 overflow: 'auto'
             }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
                   <button
                     onClick={() => setAppMode('menu')}
                     style={{
@@ -414,7 +416,7 @@ function Home(props) {
                 <div style={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, alignItems: 'center', justifyContent: ['course','market','learning_hub'].includes(appMode) ? 'flex-start' : 'center', overflow: 'auto' }}>
                     <div style={{ width: '100%', maxWidth: ['course','market','learning_hub'].includes(appMode) ? '100%' : '1400px', position: 'relative', height: ['course','market'].includes(appMode) ? '100%' : 'auto', padding: ['course','market','learning_hub'].includes(appMode) ? '0' : '0' }}>
                         {appMode === 'assembly' ? (
-                            <div style={{ display: 'flex', gap: '16px', width: '100%', height: '100%' }}>
+                            <div style={{ display: 'flex', gap: '16px', width: '100%', height: '100%', flexDirection: isMobile ? 'column' : 'row' }}>
                                 <PartPickerSidebar
                                     lang={lang}
                                     onSelect={handlePartSelect}
@@ -434,8 +436,12 @@ function Home(props) {
                                 />
                                 {/* Checklist + Debug */}
                                 <div className="glass-panel" style={{
-                                    position: 'absolute', top: '50px', right: '2%', padding: '1rem',
-                                    minWidth: 'min(200px, 25vw)', pointerEvents: 'none', zIndex: 10
+                                    position: isMobile ? 'relative' : 'absolute',
+                                    top: isMobile ? 'auto' : '50px',
+                                    right: isMobile ? 'auto' : '2%',
+                                    marginTop: isMobile ? '16px' : '0',
+                                    padding: '1rem',
+                                    minWidth: isMobile ? '100%' : 'min(200px, 25vw)', pointerEvents: 'none', zIndex: 10
                                 }}>
                                     <h3 style={{ margin: '0 0 10px 0', fontSize: '13px', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '1px' }}>
                                         {lang === 'en' ? 'Checklist' : 'Checklist'}
@@ -487,7 +493,7 @@ function Home(props) {
                             </div>
                             {/* Camera preview on the right side */}
                             <div style={{
-                                width: '160px', flexShrink: 0, borderRadius: '12px', overflow: 'hidden',
+                                width: isMobile ? 'min(160px, calc(100vw - 2rem))' : '160px', flexShrink: 0, borderRadius: '12px', overflow: 'hidden',
                                 border: `1px solid ${cameraEnabled ? 'rgba(0,212,170,0.3)' : 'rgba(255,80,80,0.3)'}`,
                                 boxShadow: cameraEnabled ? '0 0 20px rgba(0,212,170,0.2)' : 'none',
                                 cursor: 'pointer', transition: 'opacity 0.15s', height: 'fit-content',
@@ -539,7 +545,7 @@ function Home(props) {
                                 />
                                 </div>
                                 <div style={{
-                                    width: '160px', flexShrink: 0, borderRadius: '12px', overflow: 'hidden',
+                                    width: isMobile ? 'min(160px, calc(100vw - 2rem))' : '160px', flexShrink: 0, borderRadius: '12px', overflow: 'hidden',
                                     border: `1px solid ${cameraEnabled ? 'rgba(0,212,170,0.3)' : 'rgba(255,80,80,0.3)'}`,
                                     boxShadow: cameraEnabled ? '0 0 20px rgba(0,212,170,0.2)' : 'none',
                                     cursor: 'pointer', height: 'fit-content',

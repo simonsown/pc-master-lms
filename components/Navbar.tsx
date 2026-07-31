@@ -51,7 +51,7 @@ export default function Navbar() {
   
   const studentMenu = [
     { name: 'Trang chủ', path: '/student', icon: <Home size={18} /> },
-    { name: 'Học tập & Bài giảng', path: '/learning', icon: <BookOpen size={18} /> },
+    { name: 'Thực hành Lắp ráp', path: '/builder', icon: <BookOpen size={18} /> },
     { name: 'Kỳ thi', path: '/exams', icon: <FileText size={18} /> },
     { name: 'Xếp hạng', path: '/leaderboard', icon: <Trophy size={18} /> },
   ]

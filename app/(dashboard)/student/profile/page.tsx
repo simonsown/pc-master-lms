@@ -94,7 +94,7 @@ export default function StudentProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-24 flex flex-col items-center justify-center gap-2" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
+      <div className="min-h-screen pt-4 sm:pt-24 flex flex-col items-center justify-center gap-2" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
         <RefreshCw size={28} className="animate-spin" style={{ color: 'var(--brand-primary)' }} />
         <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Đang tải hồ sơ cá nhân...</span>
       </div>
@@ -102,7 +102,7 @@ export default function StudentProfilePage() {
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-12 px-4 sm:px-6 relative overflow-hidden" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
+    <div className="min-h-screen pt-4 pb-12 px-4 sm:px-6 sm:pt-24 relative overflow-hidden" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
       <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] pointer-events-none" />
       <div className="absolute top-1/4 left-1/10 w-[500px] h-[500px] rounded-full filter blur-[100px] pointer-events-none" style={{ background: 'color-mix(in srgb, var(--brand-primary) 5%, transparent)' }} />
       <div className="absolute bottom-1/4 right-1/10 w-[500px] h-[500px] rounded-full filter blur-[100px] pointer-events-none" style={{ background: 'color-mix(in srgb, var(--accent-blue) 5%, transparent)' }} />

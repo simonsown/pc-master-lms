@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { rotateBuildItem, daySeed, getCatalogCounts, formatDayVN } from '@/lib/career-catalog';
+import { getPriceInfo } from '@/lib/price-search';
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
@@ -357,6 +359,60 @@ export async function POST(request: NextRequest) {
         build: enrich(macResult.build || []),
       } : null;
     }
+
+    // Xoay linh kiện hằng ngày từ catalog 1000+ mỗi loại
+    const seed = daySeed();
+    const applyRotation = (items: BuildItem[]) => {
+      const rotated = items.map((item: BuildItem) => {
+        const alt = rotateBuildItem(item, seed);
+        if (!alt) return { ...item, avgPrice: item.price, rotation: 'local' };
+        return {
+          id: alt.id,
+          name: alt.name,
+          type: alt.type,
+          price: alt.price,
+          reason: `${item.reason} (luân phiên hằng ngày từ catalog)`,
+          image: getComponentImage(alt.type),
+          altId: alt.rotationKey,
+        };
+      });
+      return rotated;
+    };
+    response.build = applyRotation(response.build);
+    if (response.macBuild?.build) response.macBuild.build = response.macBuild.build.map((item: BuildItem) => ({
+      ...item, image: getComponentImage(item.type),
+    }));
+
+    // Tra giá trung bình thật (Google Search) cho từng linh kiện, fallback nếu thiếu key
+    const enrichPrices = async (items: BuildItem[]) => {
+      const enriched = [];
+      for (const item of items) {
+        if (item.type === 'CPU' || item.type === 'GPU' || item.type === 'RAM' || item.type === 'Mainboard' || item.type === 'Storage' || item.type === 'PSU' || item.type === 'Cooler' || item.type === 'Case' || item.type === 'Monitor') {
+          try {
+            const info = await getPriceInfo(item.name, item.price);
+            enriched.push({ ...item, avgPrice: info.avg, priceSources: info.sources, priceCount: info.count, priceLive: info.live });
+          } catch {
+            enriched.push({ ...item, avgPrice: item.price });
+          }
+        } else {
+          enriched.push(item);
+        }
+      }
+      return enriched;
+    };
+    const [pcWithPrices] = await Promise.all([
+      enrichPrices(response.build || []),
+    ]);
+    response.build = pcWithPrices;
+
+    const pcTotal = (response.build || []).reduce((s: number, i: any) => s + (i.avgPrice || i.price || 0), 0);
+    response.totalPrice = pcTotal || response.totalPrice;
+    response.rotation = {
+      date: new Date().toISOString().slice(0, 10),
+      dateLabel: formatDayVN(),
+      counts: getCatalogCounts(),
+      note: 'Cấu hình xoay vòng hằng ngày từ kho linh kiện 1000+ mỗi loại.',
+    };
 
     // Try n8n enrichment — if unavailable, response stays unchanged
     const enriched = await enrichWithN8n(response, careerName, customCondition, n8n_demo === true || n8n_demo === '1')

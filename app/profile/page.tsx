@@ -194,6 +194,48 @@ export default function ProfilePage() {
     }
   }, [])
 
+  // Realtime profile: lắng nghe thay đổi hồ sơ (edit, đổi avatar, tab khác/thiết bị khác)
+  useEffect(() => {
+    if (!profile?.id) return
+    let channel: any = null
+
+    const applyProfile = (next: any) => {
+      if (!next) return
+      setProfile((prev: any) => ({ ...(prev || {}), ...next }))
+      if (next.full_name !== undefined) setFullName(next.full_name || '')
+      if (next.bio !== undefined) setBio(next.bio || '')
+      if (next.school !== undefined) setSchool(next.school || '')
+      if (next.grade !== undefined) setGrade(next.grade || '')
+    }
+
+    // 1) Supabase Realtime (nếu bảng profiles đã bật publication)
+    channel = supabase
+      .channel(`profile-live-${profile.id}`)
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'profiles',
+        filter: `id=eq.${profile.id}`
+      }, (payload) => {
+        applyProfile(payload.new)
+      })
+      .subscribe()
+
+    // 2) Đồng bộ giữa các tab cùng trình duyệt
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'pc_profile_realtime' && e.newValue) {
+        try { applyProfile(JSON.parse(e.newValue)) } catch {}
+      }
+    }
+    window.addEventListener('storage', onStorage)
+
+    return () => {
+      supabase.removeChannel(channel)
+      window.removeEventListener('storage', onStorage)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.id])
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -248,7 +290,9 @@ export default function ProfilePage() {
 
       if (dbError) throw dbError
 
-      setProfile({ ...profile, avatar_url: publicUrl })
+      const next = { ...profile, avatar_url: publicUrl }
+      setProfile(next)
+      localStorage.setItem('pc_profile_realtime', JSON.stringify(next))
       toast.success('Cập nhật ảnh đại diện thành công!')
     } catch (err: any) {
       toast.error(err.message || 'Lỗi khi tải ảnh lên.')
@@ -266,7 +310,9 @@ export default function ProfilePage() {
         school,
         grade
       })
-      setProfile({ ...profile, full_name: fullName, bio, school, grade })
+      const next = { ...profile, full_name: fullName, bio, school, grade }
+      setProfile(next)
+      localStorage.setItem('pc_profile_realtime', JSON.stringify(next))
       setEditMode(false)
       toast.success('Đã lưu thông tin cá nhân!')
     } catch (err: any) {

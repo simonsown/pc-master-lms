@@ -103,7 +103,11 @@ export default function StudentCertificatesPage() {
     setLoading(false)
   }, [])
 
-  useEffect(() => { loadData() }, [])
+  useEffect(() => {
+    loadData().then(() => {
+      autoCheckAndIssue()
+    })
+  }, [])
 
   useEffect(() => {
     const sub = supabase

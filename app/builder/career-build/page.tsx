@@ -25,15 +25,16 @@ interface BuildResult {
   career: string; explanation: string; build: BuildItem[]; totalPrice: number; tips: string;
   isMac?: boolean; model?: string; macBuild?: { model?: string; build: BuildItem[]; totalPrice: number; tips: string; explanation: string };
   n8nEnriched?: boolean; n8nTips?: string;
+  rotation?: { date: string; dateLabel: string; counts: Record<string, number>; note: string };
 }
 
 const TYPE_COLORS: Record<string, string> = {
   CPU: '#ef4444', GPU: '#8b5cf6', RAM: '#06b6d4', Storage: '#f59e0b',
-  PSU: '#10b981', Cooler: '#3b82f6', Mainboard: '#ec4899', Case: '#64748b',
+  PSU: '#10b981', Cooler: '#3b82f6', Mainboard: '#ec4899', Case: '#64748b', Monitor: '#14b8a6',
 };
 
 const TYPE_ICONS: Record<string, string> = {
-  CPU: '⚡', GPU: '🎮', RAM: '💾', Storage: '💿', PSU: '🔌', Cooler: '🌬️', Mainboard: '🔧', Case: '🖥️',
+  CPU: '⚡', GPU: '🎮', RAM: '💾', Storage: '💿', PSU: '🔌', Cooler: '🌬️', Mainboard: '🔧', Case: '🖥️', Monitor: '🖥️',
 };
 
 export default function CareerBuildPage() {
@@ -45,23 +46,7 @@ export default function CareerBuildPage() {
   const [error, setError] = useState('');
   const [animPhase, setAnimPhase] = useState(0);
   const [showMac, setShowMac] = useState(false);
-  const [substituting, setSubstituting] = useState<string | null>(null);
-  const [replacedItems, setReplacedItems] = useState<BuildItem[]>([]);
   const resultRef = useRef<HTMLDivElement>(null);
-
-  const substitutePart = (item: BuildItem) => {
-    const substitutes: Record<string, BuildItem> = {
-      'CPU': { id: 'alt-cpu', name: `[Thay thế] ${item.name.replace(/i5|i3|R5|Ryzen 5/, 'i7').replace(/i7|Ryzen 7/, 'i9')}`, type: item.type, price: Math.round(item.price * 1.4), reason: 'Phiên bản cao hơn, tương thích socket' },
-      'GPU': { id: 'alt-gpu', name: `[Thay thế] ${item.name.replace(/RTX 3060|RTX 4060/, 'RTX 4070').replace(/RTX 4070/, 'RX 7800 XT')}`, type: item.type, price: Math.round(item.price * 1.35), reason: 'Tương đương hoặc cao hơn, cùng phân khúc' },
-      'RAM': { id: 'alt-ram', name: `[Thay thế] ${item.name.replace(/16GB/, '32GB').replace(/32GB/, '64GB')}`, type: item.type, price: Math.round(item.price * 1.8), reason: 'Dung lượng cao hơn, cùng chuẩn DDR' },
-      'Storage': { id: 'alt-storage', name: item.name.includes('NVMe') ? `[Thay thế] ${item.name.replace(/NVMe/, 'SATA SSD')}` : `[Thay thế] ${item.name.replace(/SATA/, 'NVMe')}`, type: item.type, price: item.price, reason: 'Tương đương, chuẩn giao tiếp khác' },
-      'PSU': { id: 'alt-psu', name: `[Thay thế] ${item.name.replace(/\d+W/, (m) => String(parseInt(m) + 150) + 'W')}`, type: item.type, price: Math.round(item.price * 1.2), reason: 'Công suất cao hơn, cùng chuẩn' },
-    };
-    const sub = substitutes[item.type] || { ...item, id: 'alt-' + item.id, name: '[Thay thế] ' + item.name, reason: 'Linh kiện thay thế tương thích' };
-    setReplacedItems(prev => [...prev, { ...item, name: item.name, price: sub.price }]);
-    setSubstituting(item.id);
-    setTimeout(() => setSubstituting(null), 2000);
-  };
 
   useEffect(() => {
     if (result && animPhase > 0 && resultRef.current) {
@@ -124,9 +109,8 @@ export default function CareerBuildPage() {
   const hasBoth = result?.macBuild && pcItems.length > 0;
 
   const activeItems = showMac ? macItems : pcItems;
-  const replacedTotal = replacedItems.reduce((s, r) => s + r.price, 0);
   const originalTotal = showMac ? (result?.macBuild?.totalPrice || 0) : (result?.totalPrice || 0);
-  const activeTotal = replacedItems.length > 0 ? replacedTotal : originalTotal;
+  const activeTotal = activeItems.reduce((s, item) => s + ((item as any).avgPrice || item.price || 0), 0);
   const activeTips = showMac ? (result?.macBuild?.tips || '') : (result?.tips || '');
   const activeModel = showMac ? (result?.macBuild?.model || '') : '';
   const activeExplanation = showMac ? (result?.macBuild?.explanation || '') : (result?.explanation || '');
@@ -342,12 +326,13 @@ export default function CareerBuildPage() {
             {/* Components list - 2 cột */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginBottom: '16px' }}>
               {activeItems.map((item, i) => {
-                const replaced = replacedItems.find(r => r.id === item.id)
+                const avgPrice = (item as any).avgPrice || item.price
+                const sources: any[] = (item as any).priceSources || []
                 return (
                 <div key={i} style={{
                   display: 'flex', flexDirection: 'column', gap: '8px',
                   padding: '14px', borderRadius: '12px',
-                  background: 'var(--bg-surface)', border: substituting === item.id ? '1px solid var(--brand-primary)' : '1px solid var(--border-default)',
+                  background: 'var(--bg-surface)', border: '1px solid var(--border-default)',
                   animation: animPhase >= 3 + i ? 'fadeSlideUp 0.35s ease-out' : 'none',
                   opacity: animPhase >= 3 + i ? 1 : 0,
                   transition: 'all 0.25s',
@@ -367,7 +352,7 @@ export default function CareerBuildPage() {
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '13px', lineHeight: '1.3' }}>
-                        {replaced ? <><span style={{ color: 'var(--brand-primary)' }}>↻ </span>{item.name}</> : item.name}
+                        {item.name}
                         <span style={{ fontSize: '10px', color: TYPE_COLORS[item.type] || '#64748b', fontWeight: 700, marginLeft: '6px', padding: '1px 6px', borderRadius: '3px', background: `${TYPE_COLORS[item.type] || '#64748b'}15` }}>
                           {item.type}
                         </span>
@@ -378,11 +363,20 @@ export default function CareerBuildPage() {
                     </div>
                   </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      {item.price > 0 && (
-                        <div style={{ fontSize: '15px', fontWeight: 800, color: replaced ? 'var(--brand-primary)' : 'var(--text-primary)' }}>
-                          {replaced ? `${formatPrice(replaced.price)}` : formatPrice(item.price)}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                      {avgPrice > 0 && (
+                        <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)' }}>
+                          {formatPrice(avgPrice)}
                         </div>
+                      )}
+                      {sources.length > 0 && (
+                        <span style={{
+                          fontSize: '9px', fontWeight: 600, padding: '1px 6px', borderRadius: '4px',
+                          background: 'rgba(0,212,170,0.1)', color: '#00d4aa',
+                          whiteSpace: 'nowrap',
+                        }}>
+                          TB {sources.length} cửa hàng
+                        </span>
                       )}
                       {(item as any).shop && result.n8nEnriched && (
                         <a href={(item as any).link || '#'} target="_blank" rel="noopener noreferrer"
@@ -395,21 +389,62 @@ export default function CareerBuildPage() {
                         </a>
                       )}
                     </div>
-                    <button onClick={() => substitutePart(item)}
-                      style={{
-                        padding: '5px 10px', borderRadius: '6px', border: '1px solid rgba(0,212,170,0.3)',
-                        background: 'rgba(0,212,170,0.1)', color: 'var(--brand-primary)',
-                        cursor: 'pointer', fontSize: '10px', fontWeight: 700, fontFamily: 'inherit',
-                        transition: 'all 0.2s', whiteSpace: 'nowrap',
-                      }}
-                      onMouseOver={e => { e.currentTarget.style.background = 'rgba(0,212,170,0.2)'; e.currentTarget.style.borderColor = 'var(--brand-primary)' }}
-                      onMouseOut={e => { e.currentTarget.style.background = 'rgba(0,212,170,0.1)'; e.currentTarget.style.borderColor = 'rgba(0,212,170,0.3)' }}>
-                      ↔ Thay thế
-                    </button>
                   </div>
+                  {sources.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '2px' }}>
+                      {sources.slice(0, 4).map((s, si) => (
+                        <a key={si} href={s.url} target="_blank" rel="noopener noreferrer"
+                          style={{
+                            fontSize: '9px', fontWeight: 600, padding: '1px 6px', borderRadius: '4px',
+                            background: 'color-mix(in srgb, var(--bg-elevated) 70%, transparent)',
+                            border: '1px solid var(--border-default)', color: 'var(--text-muted)',
+                            textDecoration: 'none', whiteSpace: 'nowrap',
+                          }}>
+                          {s.shop}
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )})}
             </div>
+
+            {/* Rotation + Live price notice */}
+            {animPhase >= 1 && result.rotation && (
+              <div style={{
+                display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px',
+                animation: 'fadeSlideUp 0.4s ease-out',
+              }}>
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: '6px',
+                  padding: '6px 12px', borderRadius: '20px',
+                  background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)',
+                  fontSize: '11px', fontWeight: 600, color: '#818cf8',
+                }}>
+                  🔄 Cấu hình xoay vòng · {result.rotation.dateLabel}
+                </div>
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: '6px',
+                  padding: '6px 12px', borderRadius: '20px',
+                  background: result.rotation.counts ? 'rgba(0,212,170,0.08)' : 'transparent',
+                  border: result.rotation.counts ? '1px solid rgba(0,212,170,0.2)' : '1px solid var(--border-default)',
+                  fontSize: '11px', fontWeight: 600, color: result.rotation.counts ? '#00d4aa' : 'var(--text-muted)',
+                }}>
+                  📦 {result.rotation.counts ? `${result.rotation.counts.CPU}+ linh kiện/loại` : 'Catalog 1000+ mỗi loại'}
+                </div>
+                {!result.n8nEnriched && (
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                    padding: '6px 12px', borderRadius: '20px',
+                    background: (result.build || []).some((b: any) => b.priceLive) ? 'rgba(0,212,170,0.08)' : 'color-mix(in srgb, var(--bg-elevated) 70%, transparent)',
+                    border: '1px solid var(--border-default)',
+                    fontSize: '11px', fontWeight: 600, color: (result.build || []).some((b: any) => b.priceLive) ? '#00d4aa' : 'var(--text-muted)',
+                  }}>
+                    {(result.build || []).some((b: any) => b.priceLive) ? '💹 Giá tra cứu Google thật' : '💹 Giá tham khảo thị trường'}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Total + Tips + Build now */}
             {animPhase >= 3 + activeItems.length - 1 && (

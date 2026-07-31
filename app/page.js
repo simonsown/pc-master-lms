@@ -55,10 +55,7 @@ export default function LandingPage() {
               Về chúng tôi
             </Link>
             <Link href="/builder" style={{ color: 'var(--text-muted)', textDecoration: 'none', padding: '8px 16px', borderRadius: '8px', transition: 'all 0.2s' }}>
-              Thực hành
-            </Link>
-            <Link href="/learning" style={{ color: 'var(--text-muted)', textDecoration: 'none', padding: '8px 16px', borderRadius: '8px', transition: 'all 0.2s' }}>
-              Học tập
+              Thực hành Lắp ráp
             </Link>
           </div>
         </div>
@@ -354,7 +351,7 @@ export default function LandingPage() {
                   opacity: activeFaq === i ? 1 : 0,
                   padding: activeFaq === i ? '0 24px 20px' : '0 24px',
                 }}>
-                  <div style={{ borderTop: '1px solid var(--border-default)', paddingTop: '16px', color: 'var(--text-muted)', fontSize: '14px', lineHeight: 1.7 }}>
+                  <div style={{ borderTop: '1px solid var(--border-default)', paddingTop: '16px', color: 'var(--text-muted)', fontSize: '13px', lineHeight: 1.7, wordBreak: 'break-word' }}>
                     {faq.a}
                   </div>
                 </div>

@@ -6,64 +6,38 @@ import { Plus, BookOpen, Edit, Trash2, Eye, EyeOff, Loader2, ArrowLeft, ImageIco
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import AuthButton from '@/components/AuthButton'
-import { deleteLessonAction } from '@/app/actions/lessons'
+import { getAllLessons, createLesson, deleteLesson, getClassNames } from '@/lib/lesson-store'
 
 export default function TeacherLessonsPage() {
   const router = useRouter()
   const [lessons, setLessons] = useState([])
   const [loading, setLoading] = useState(true)
-  const [currentUser, setCurrentUser] = useState(null)
 
-  useEffect(() => { fetchLessons() }, [])
-
-  const fetchLessons = async () => {
-    setLoading(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { window.location.href = '/login'; return }
-    setCurrentUser(user)
-    const { data: lessonsData } = await supabase
-      .from('lessons')
-      .select('*, lesson_sections(count)')
-      .eq('teacher_id', user.id)
-      .order('created_at', { ascending: false })
-    if (lessonsData) {
-      const lessonIds = lessonsData.map(l => l.id)
-      const { data: assignments } = await supabase
-        .from('lesson_class_assignments')
-        .select('lesson_id, class_id')
-        .in('lesson_id', lessonIds)
-      const { data: allClasses } = await supabase
-        .from('classes')
-        .select('id, name')
-        .eq('teacher_id', user.id)
-      const classMap = Object.fromEntries((allClasses || []).map(c => [c.id, c.name]))
-      const assignmentMap = {}
-      ;(assignments || []).forEach(a => {
-        if (!assignmentMap[a.lesson_id]) assignmentMap[a.lesson_id] = []
-        if (classMap[a.class_id]) assignmentMap[a.lesson_id].push(classMap[a.class_id])
-      })
-      setLessons(lessonsData.map(l => ({ ...l, classNames: assignmentMap[l.id] || [] })))
+  useEffect(() => {
+    const check = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { window.location.href = '/login'; return }
+      setLessons(getAllLessons().map(l => ({ ...l, classNames: getClassNames(l.classCodes || []) })))
+      setLoading(false)
     }
-    setLoading(false)
+    check()
+  }, [])
+
+  const refresh = () => {
+    setLessons(getAllLessons().map(l => ({ ...l, classNames: getClassNames(l.classCodes || []) })))
   }
 
   const createNewLesson = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { alert('Phiên đăng nhập hết hạn!'); window.location.href = '/login'; return }
-    const { data, error } = await supabase.from('lessons').insert({
-      teacher_id: user.id, title: 'Bài giảng mới', description: '', is_published: false
-    }).select().single()
-    if (error) { alert('Lỗi: ' + error.message); return }
-    if (data) router.push(`/teacher/lessons/${data.id}`)
+    const lesson = createLesson()
+    router.push(`/teacher/lessons/${lesson.id}`)
   }
 
-  const deleteLesson = async (id) => {
+  const handleDelete = (id) => {
     if (!confirm('Xóa bài giảng này? Học sinh sẽ không còn thấy bài này nữa.')) return
-    const result = await deleteLessonAction(id)
-    if (result?.error) {
-      alert('Lỗi: ' + result.error)
-    }
-    fetchLessons()
+    deleteLesson(id)
+    refresh()
   }
 
   if (loading) return (
@@ -83,9 +57,14 @@ export default function TeacherLessonsPage() {
           }}>
             <ArrowLeft size={20} />
           </Link>
-          <h1 style={{ fontSize: '26px', fontWeight: 800, margin: 0 }}>
-            Quản lý <span style={{ color: 'var(--brand-primary)' }}>Bài Giảng</span>
-          </h1>
+          <div>
+            <h1 style={{ fontSize: '26px', fontWeight: 800, margin: 0 }}>
+              Quản lý <span style={{ color: 'var(--brand-primary)' }}>Bài Giảng</span>
+            </h1>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 0' }}>
+              Bài giảng được lưu trên trình duyệt này — học sinh trong lớp đã chọn sẽ thấy bài khi bạn xuất bản.
+            </p>
+          </div>
         </div>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <button onClick={createNewLesson} className="lms-btn lms-btn-green">
@@ -134,16 +113,20 @@ export default function TeacherLessonsPage() {
                   <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: '0 0 16px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: '1.5' }}>
                     {lesson.description || 'Chưa có mô tả'}
                   </p>
-                  {lesson.classNames?.length > 0 && (
+                  {lesson.classNames?.length > 0 ? (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '12px' }}>
                       {lesson.classNames.map((name, i) => (
                         <span key={i} style={{ fontSize: '10px', padding: '2px 8px', background: 'rgba(59,130,246,0.12)', color: 'var(--accent-blue)', borderRadius: '99px', fontWeight: 600 }}>{name}</span>
                       ))}
                     </div>
+                  ) : (
+                    <p style={{ fontSize: '11px', color: 'var(--warning)', margin: '0 0 12px', fontWeight: 600 }}>
+                      Chưa gán lớp — học sinh sẽ không thấy bài này
+                    </p>
                   )}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 500 }}>
-                      {lesson.lesson_sections?.[0]?.count || 0} mục
+                      {lesson.sections?.length || 0} mục
                     </span>
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <Link href={`/teacher/lessons/${lesson.id}`}>
@@ -155,7 +138,7 @@ export default function TeacherLessonsPage() {
                           <Edit size={14} /> Sửa
                         </button>
                       </Link>
-                      <button onClick={() => deleteLesson(lesson.id)} style={{
+                      <button onClick={() => handleDelete(lesson.id)} style={{
                         padding: '7px 10px', borderRadius: '8px', border: 'none', cursor: 'pointer',
                         background: 'rgba(244,106,106,0.1)', color: 'var(--danger)', fontFamily: 'inherit'
                       }}>

@@ -13,17 +13,13 @@ export async function login(formData: FormData) {
     return { error: 'Vui lòng nhập đầy đủ email và mật khẩu' }
   }
 
-  // Admin login via Supabase Auth
+  // Admin login — mật khẩu admin là 123 (đổi qua ADMIN_PASSWORD env nếu cần)
   if (email === 'admin') {
-    const adminEmail = process.env.ADMIN_EMAIL || 'admin@pcmaster.com'
-    const { error: adminError } = await supabase.auth.signInWithPassword({
-      email: adminEmail,
-      password: password,
-    })
-    if (adminError) {
+    const adminPassword = process.env.ADMIN_PASSWORD || '123'
+    if (password !== adminPassword) {
       return { error: 'Mật khẩu Admin không chính xác. Vui lòng thử lại!' }
     }
-    return { success: true, redirectUrl: '/admin' }
+    return { success: true, redirectUrl: '/admin', isAdmin: true }
   }
 
   // 1. Đăng nhập bằng Supabase Auth
@@ -299,7 +295,7 @@ export async function completeOAuthRegistration(formData: FormData) {
   }
 
   const role = (formData.get('role') as string) || 'student'
-  const fullName = (formData.get('full_name') as string) || user.user_metadata?.full_name || user.email?.split('@')[0] || ''
+  const fullName = (formData.get('full_name') as string) || user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || ''
   const schoolCode = formData.get('school_code') as string
   const schoolName = formData.get('school_name') as string
   const classCode = formData.get('class_code') as string

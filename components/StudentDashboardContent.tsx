@@ -47,9 +47,8 @@ export default function StudentDashboardContent({ onClose }: { onClose: () => vo
   const navItems = [
     { href: '/student/dashboard', label: 'Bảng điều khiển', icon: LayoutDashboard },
     ...(hasClass ? [{ href: '/student/classes', label: 'Lớp học của tôi', icon: Users }] : []),
-    { href: '/student/lessons', label: 'Bài giảng', icon: BookOpen },
-
-    { href: '/builder', label: 'Thực hành lắp ráp', icon: Cpu },
+    { href: '/builder', label: 'Thực hành Lắp ráp', icon: Cpu },
+    { href: '/student/certificates', label: 'Chứng chỉ của tôi', icon: GraduationCap },
     { href: '/student/history', label: 'Lịch sử học tập', icon: History },
   ]
 

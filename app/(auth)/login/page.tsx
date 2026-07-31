@@ -31,6 +31,8 @@ export default function LoginPage() {
       if (res?.error) {
         setAdminError('Mật khẩu admin không chính xác')
       } else if (res?.success && res.redirectUrl) {
+        localStorage.setItem('admin_auth', 'true')
+        localStorage.setItem('admin_login_time', String(Date.now()))
         router.push(res.redirectUrl)
       }
     } catch {
@@ -45,9 +47,9 @@ export default function LoginPage() {
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
-    const redirectTo = process.env.NEXT_PUBLIC_SITE_URL
-      ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`
-      : `${window.location.origin}/auth/callback`
+    const redirectTo = typeof window !== 'undefined'
+      ? `${window.location.origin}/auth/callback`
+      : (process.env.NEXT_PUBLIC_SITE_URL ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback` : 'http://localhost:3000/auth/callback')
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {

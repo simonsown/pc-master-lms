@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { BookOpen, Cpu, ShoppingCart, Users, BrainCircuit, Award, Globe, Sparkles, Menu, Webcam, X, Sun, Moon, FileText, MessageSquare, User, ArrowRight, History, Trophy, CheckCircle2, Flame, Zap } from 'lucide-react';
+import { BookOpen, Cpu, ShoppingCart, Users, BrainCircuit, Award, Globe, Sparkles, Menu, Webcam, X, Sun, Moon, FileText, MessageSquare, User, ArrowRight, History, Trophy, CheckCircle2, Flame, Zap, GraduationCap } from 'lucide-react';
 import JoinClassModal from './JoinClassModal';
 import { useRealtime } from '@/lib/realtime-provider';
 

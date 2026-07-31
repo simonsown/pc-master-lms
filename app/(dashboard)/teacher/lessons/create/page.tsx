@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Loader2, ChevronRight, BookOpen, FileText, Video, Image as ImageIcon, Link2, Code, Eye, Plus, Trash2, GripVertical, Upload, FileSearch } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import { createLesson, saveLesson } from '@/lib/lesson-store'
 import { getYouTubeThumbnail, isValidYouTubeUrl } from '@/utils/youtube'
 
 type SectionInput = {
@@ -49,44 +49,20 @@ export default function CreateLessonPage() {
     setLoading(true)
     setError(null)
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setError('Bạn chưa đăng nhập'); setLoading(false); return }
-
-    const { data: lesson, error: lessonError } = await supabase
-      .from('lessons')
-      .insert({
-        teacher_id: user.id,
-        title: title.trim(),
-        description: description.trim(),
-        thumbnail_url: thumbnailUrl.trim() || null,
-        subject,
-        category,
-        estimated_minutes: estimatedMinutes,
-        is_published: false,
-      })
-      .select()
-      .single()
-
-    if (lessonError || !lesson) {
-      setError(lessonError?.message || 'Không thể tạo bài giảng')
-      setLoading(false)
-      return
-    }
-
-    if (sections.length > 0) {
-      const { error: sectionsError } = await supabase.from('lesson_sections').insert(
-        sections.map((s, idx) => ({
-          lesson_id: lesson.id,
-          title: s.title || `Mục ${idx + 1}`,
-          type: s.type,
-          content_type: s.type,
-          content: s.content,
-          order_index: idx,
-        }))
-      )
-      if (sectionsError) console.error('Sections error:', sectionsError)
-    }
-
+    const lesson = createLesson(title.trim())
+    lesson.description = description.trim()
+    lesson.thumbnail_url = thumbnailUrl.trim()
+    lesson.subject = subject
+    lesson.category = category
+    lesson.estimated_minutes = estimatedMinutes
+    lesson.sections = sections.map((s, idx) => ({
+      id: s.id,
+      title: s.title || `Mục ${idx + 1}`,
+      type: s.type,
+      content: s.content,
+      order_index: idx,
+    }))
+    saveLesson(lesson)
     setLoading(false)
     router.push(`/teacher/lessons/${lesson.id}?created=true`)
   }
