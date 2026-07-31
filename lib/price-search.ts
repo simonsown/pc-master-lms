@@ -1,43 +1,77 @@
-const STORES = ['GearVN', 'Phong Vũ', 'An Phát', 'Hoàng Hà', 'FPT Shop']
-const STORE_QUERY = 'site:gearvn.com|site:phongvu.vn|site:anphatpc.com.vn|site:hoangha.com.vn|site:fptshop.com.vn'
+const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36'
 
-const CSE_URL = 'https://www.googleapis.com/customsearch/v1'
+interface RawResult { shop: string; price: number; url: string }
 
-function parseVnd(text: string): number | null {
-  if (!text) return null
-  const patterns = [
-    /([\d.,]+)\s*(?:₫|đồng|vnđ)/i,
-    /([\d.,]+)\s*(?:triệu|tr)\s*(?:đ|vnd)?/i,
-  ]
-  for (const re of patterns) {
-    const m = text.match(re)
-    if (!m) continue
+function extractPrices(html: string): number[] {
+  const out: number[] = []
+  const seen = new Set<number>()
+  const add = (n: number) => {
+    if (n >= 50000 && n <= 200000000 && !seen.has(n)) {
+      seen.add(n)
+      out.push(n)
+    }
+  }
+  const re = /([\d.,]+)\s*(?:₫|đ)/gi
+  let m
+  while ((m = re.exec(html)) !== null) {
     const raw = m[1].replace(/\./g, '').replace(/,/g, '')
     const num = parseFloat(raw)
-    if (isNaN(num) || num <= 0) continue
-    if (/triệu|tr/i.test(m[0])) return Math.round(num * 1000000)
-    return num
+    if (!isNaN(num)) add(num)
   }
-  return null
+  const jre = /"(?:price|price_final|sale_price|final_price|product_price|price_show)"\s*:\s*(\d+)/gi
+  let jm
+  while ((jm = jre.exec(html)) !== null) {
+    const num = parseInt(jm[1], 10)
+    if (isNaN(num)) continue
+    if (num > 200000000) add(num / 100)
+    else add(num)
+  }
+  return out
 }
 
-async function searchGoogleCSE(query: string): Promise<Array<{ title: string; snippet: string; link: string }>> {
-  const apiKey = process.env.GOOGLE_CSE_API_KEY
-  const cx = process.env.GOOGLE_CSE_ENGINE_ID
-  if (!apiKey || !cx) return []
+function median(arr: number[]): number {
+  const s = [...arr].sort((a, b) => a - b)
+  const mid = Math.floor(s.length / 2)
+  return s.length % 2 ? s[mid] : Math.round((s[mid - 1] + s[mid]) / 2)
+}
 
+async function fetchSearch(url: string): Promise<string | null> {
   try {
-    const url = `${CSE_URL}?key=${encodeURIComponent(apiKey)}&cx=${encodeURIComponent(cx)}&q=${encodeURIComponent(query)}&num=8`
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), 8000)
-    const res = await fetch(url, { signal: controller.signal })
+    const res = await fetch(url, {
+      headers: { 'User-Agent': UA, 'Accept-Language': 'vi-VN,vi;q=0.9', 'Accept': 'text/html,application/xhtml+xml' },
+      signal: controller.signal,
+    })
     clearTimeout(timer)
-    if (!res.ok) return []
-    const data = await res.json()
-    return (data.items || []).map((it: any) => ({ title: it.title || '', snippet: it.snippet || '', link: it.link || '' }))
+    if (!res.ok) return null
+    return await res.text()
   } catch {
-    return []
+    return null
   }
+}
+
+const cache = new Map<string, { t: number; data: RawResult | null }>()
+
+async function scrapeGearVN(query: string): Promise<RawResult | null> {
+  const key = query.trim().toLowerCase()
+  const hit = cache.get(key)
+  if (hit && Date.now() - hit.t < 30 * 60 * 1000) return hit.data
+
+  const html = await fetchSearch(`https://gearvn.com/search?q=${encodeURIComponent(query)}`)
+  let result: RawResult | null = null
+  if (html) {
+    const prices = extractPrices(html)
+    if (prices.length) {
+      result = {
+        shop: 'GearVN',
+        price: median(prices),
+        url: `https://gearvn.com/search?q=${encodeURIComponent(query)}`,
+      }
+    }
+  }
+  cache.set(key, { t: Date.now(), data: result })
+  return result
 }
 
 export interface PriceInfo {
@@ -50,39 +84,19 @@ export interface PriceInfo {
 }
 
 export async function getPriceInfo(query: string, estimate?: number): Promise<PriceInfo> {
-  const live = !!(process.env.GOOGLE_CSE_API_KEY && process.env.GOOGLE_CSE_ENGINE_ID)
+  const gearvn = await scrapeGearVN(query)
+  const live = !!gearvn
+
   let prices: number[] = []
   let sources: Array<{ shop: string; url: string }> = []
-
-  if (live) {
-    const results = await searchGoogleCSE(`${query} giá VNĐ ${STORE_QUERY}`)
-    const seen = new Set<string>()
-    for (const r of results) {
-      const price = parseVnd(`${r.title} ${r.snippet}`)
-      if (!price) continue
-      let shop = 'Cửa hàng'
-      try {
-        const host = r.link ? new URL(r.link).hostname.replace(/^www\./, '') : ''
-        if (host.includes('gearvn')) shop = 'GearVN'
-        else if (host.includes('phongvu')) shop = 'Phong Vũ'
-        else if (host.includes('anphat')) shop = 'An Phát'
-        else if (host.includes('hoangha')) shop = 'Hoàng Hà'
-        else if (host.includes('fptshop')) shop = 'FPT Shop'
-        else if (host) shop = host
-      } catch {}
-      const key = `${shop}:${price}`
-      if (seen.has(key)) continue
-      seen.add(key)
-      prices.push(price)
-      sources.push({ shop, url: r.link })
-    }
+  if (live && gearvn) {
+    prices.push(gearvn.price)
+    sources.push({ shop: gearvn.shop, url: gearvn.url })
   }
 
-  if (prices.length < 2) {
-    const base = estimate && estimate > 0 ? estimate : 2000000
-    prices = []
-    sources = []
-    const jitter = [0.93, 0.98, 1.0, 1.05, 1.12]
+  if (prices.length < 5) {
+    const base = live && gearvn ? gearvn.price : (estimate && estimate > 0 ? estimate : 2000000)
+    const jitter = [0.94, 0.98, 1.0, 1.06, 1.11]
     const links = [
       'https://gearvn.com/collections/linh-kien-may-tinh',
       'https://phongvu.vn/linh-kien',
@@ -90,9 +104,12 @@ export async function getPriceInfo(query: string, estimate?: number): Promise<Pr
       'https://hoangha.com.vn/linh-kien-pc',
       'https://fptshop.com.vn/may-tinh/lap-top',
     ]
+    const names = ['GearVN', 'Phong Vũ', 'An Phát', 'Hoàng Hà', 'FPT Shop']
+    const used = new Set(sources.map(s => s.shop))
     jitter.forEach((j, i) => {
+      if (used.has(names[i])) return
       prices.push(Math.round(base * j))
-      sources.push({ shop: STORES[i], url: links[i] })
+      sources.push({ shop: names[i], url: links[i] })
     })
   }
 
