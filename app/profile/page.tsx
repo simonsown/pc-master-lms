@@ -487,7 +487,7 @@ export default function ProfilePage() {
               style={{ overflow: 'hidden', marginBottom: '32px' }}
             >
               <EditProfileForm
-                key={profile.updated_at || profile.id}
+                key={profile.id}
                 profile={profile}
                 onSaved={(data) => {
                   const next = { ...profile, ...data }

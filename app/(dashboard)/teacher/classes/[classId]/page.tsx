@@ -2,12 +2,13 @@
 
 import React, { useEffect, useState, use } from 'react';
 import { supabase } from '@/lib/supabase';
-import { 
+import {
   Users, ClipboardList, Plus, Loader2, ArrowLeft, 
-  Settings, UserPlus, Info, Calendar, BookOpen, Bell, Send, Megaphone
+  Settings, UserPlus, Info, Calendar, BookOpen, Bell, Send, Megaphone, ScanFace
 } from 'lucide-react';
 import Link from 'next/link';
 import AssignmentCard from '@/components/classes/AssignmentCard';
+import FaceAttendance from '@/components/attendance/FaceAttendance';
 
 export default function ClassDetailsPage({ params }: { params: Promise<{ classId: string }> }) {
   const resolvedParams = use(params);
@@ -17,7 +18,7 @@ export default function ClassDetailsPage({ params }: { params: Promise<{ classId
   const [assignments, setAssignments] = useState<any[]>([]);
   const [members, setMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'assignments' | 'students'>('assignments');
+  const [activeTab, setActiveTab] = useState<'assignments' | 'students' | 'attendance'>('assignments');
 
   // Settings Modal states
   const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -239,6 +240,18 @@ export default function ClassDetailsPage({ params }: { params: Promise<{ classId
         >
           <Users size={20} /> Danh sách lớp ({members.length})
         </button>
+        <button 
+          onClick={() => setActiveTab('attendance')}
+          style={{ 
+            padding: '12px 0', background: 'none', border: 'none', 
+            borderBottom: activeTab === 'attendance' ? '2px solid #00f3ff' : '2px solid transparent',
+            color: activeTab === 'attendance' ? '#00f3ff' : '#8899a6',
+            fontSize: '16px', fontWeight: 700, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: '8px'
+          }}
+        >
+          <ScanFace size={20} /> Điểm danh
+        </button>
       </div>
 
       {activeTab === 'assignments' ? (
@@ -265,7 +278,7 @@ export default function ClassDetailsPage({ params }: { params: Promise<{ classId
             ))
           )}
         </div>
-      ) : (
+      ) : activeTab === 'students' ? (
         <div style={{ background: 'rgba(12, 20, 36, 0.8)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
@@ -299,6 +312,8 @@ export default function ClassDetailsPage({ params }: { params: Promise<{ classId
             </tbody>
           </table>
         </div>
+      ) : (
+        <FaceAttendance classId={classId} members={members} />
       )}
 
       {/* Send Notification Modal */}
