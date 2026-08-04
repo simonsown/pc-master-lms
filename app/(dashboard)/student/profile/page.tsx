@@ -195,7 +195,10 @@ export default function StudentProfilePage() {
                   </div>
                   <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--brand-primary)' }} />
                 </div>
-                <ProfileForm profile={profile} />
+                <ProfileForm
+                  profile={profile}
+                  onSaved={(data) => setProfile((prev: any) => ({ ...(prev || {}), ...data }))}
+                />
               </div>
             )}
 

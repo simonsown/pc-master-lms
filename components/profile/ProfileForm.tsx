@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react'
 import { updateProfile } from '@/actions/profile'
-import { toast } from 'react-hot-toast'
+import { useAutoSave } from '@/hooks/useAutoSave'
+import { AutoSaveBadge } from '@/components/profile/AutoSaveBadge'
 
 interface Props {
   profile: {
@@ -12,35 +13,40 @@ interface Props {
     grade?: string
     email: string
   }
+  onSaved?: (data: { full_name: string, bio: string, school: string, grade: string }) => void
 }
 
-export function ProfileForm({ profile }: Props) {
+export function ProfileForm({ profile, onSaved }: Props) {
   const [fullName, setFullName] = useState(profile.full_name || '')
   const [bio, setBio] = useState(profile.bio || '')
   const [school, setSchool] = useState(profile.school || '')
   const [grade, setGrade] = useState(profile.grade || '')
-  const [saving, setSaving] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
-    try {
-      await updateProfile({
-        full_name: fullName,
-        bio: bio.slice(0, 200),
-        school,
-        grade
-      })
-      toast.success('Đã lưu thông tin cá nhân!')
-    } catch (err: any) {
-      toast.error('Lỗi khi lưu thông tin.')
-    } finally {
-      setSaving(false)
-    }
-  }
+  const draft = JSON.stringify({
+    full_name: fullName,
+    bio: bio.slice(0, 200),
+    school,
+    grade
+  })
+
+  const { status, flush } = useAutoSave<string>({
+    values: draft,
+    onSave: async (snapshot) => {
+      const data = JSON.parse(snapshot)
+      await updateProfile(data)
+      onSaved?.(data)
+    },
+  })
+
+  const inputStyle = {
+    width: '100%',
+    background: 'color-mix(in srgb, var(--bg-elevated) 50%, transparent)',
+    border: '1px solid var(--border-default)',
+    color: 'var(--text-primary)',
+  } as const
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form className="space-y-4" onBlur={() => flush()}>
       <div>
         <label className="block text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>Email tài khoản</label>
         <input
@@ -48,7 +54,7 @@ export function ProfileForm({ profile }: Props) {
           disabled
           value={profile.email}
           className="w-full rounded-xl px-4 py-3 text-xs focus:outline-none cursor-not-allowed"
-          style={{ background: 'color-mix(in srgb, var(--bg-elevated) 30%, transparent)', border: '1px solid var(--border-default)', color: 'var(--text-muted)' }}
+          style={{ ...inputStyle, color: 'var(--text-muted)' }}
         />
       </div>
 
@@ -60,9 +66,10 @@ export function ProfileForm({ profile }: Props) {
             required
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
+            onBlur={() => flush()}
             placeholder="VD: Nguyễn Văn A"
             className="w-full rounded-xl px-4 py-3 text-xs focus:outline-none transition-colors"
-            style={{ background: 'color-mix(in srgb, var(--bg-elevated) 50%, transparent)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
+            style={inputStyle}
           />
         </div>
 
@@ -72,9 +79,10 @@ export function ProfileForm({ profile }: Props) {
             type="text"
             value={grade}
             onChange={(e) => setGrade(e.target.value)}
+            onBlur={() => flush()}
             placeholder="VD: 10A1, 11B2..."
             className="w-full rounded-xl px-4 py-3 text-xs focus:outline-none transition-colors"
-            style={{ background: 'color-mix(in srgb, var(--bg-elevated) 50%, transparent)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
+            style={inputStyle}
           />
         </div>
       </div>
@@ -85,9 +93,10 @@ export function ProfileForm({ profile }: Props) {
           type="text"
           value={school}
           onChange={(e) => setSchool(e.target.value)}
+          onBlur={() => flush()}
           placeholder="Tên trường THPT..."
           className="w-full rounded-xl px-4 py-3 text-xs focus:outline-none transition-colors"
-          style={{ background: 'color-mix(in srgb, var(--bg-elevated) 50%, transparent)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
+          style={inputStyle}
         />
       </div>
 
@@ -101,20 +110,19 @@ export function ProfileForm({ profile }: Props) {
           value={bio}
           maxLength={200}
           onChange={(e) => setBio(e.target.value)}
+          onBlur={() => flush()}
           placeholder="Một vài dòng giới thiệu về bản thân..."
           className="w-full rounded-xl px-4 py-3 text-xs focus:outline-none transition-colors resize-none"
-          style={{ background: 'color-mix(in srgb, var(--bg-elevated) 50%, transparent)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
+          style={inputStyle}
         />
       </div>
 
-      <button
-        type="submit"
-        disabled={saving}
-        className="w-full py-3 font-bold text-xs rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50"
-        style={{ background: 'var(--brand-primary)', color: 'var(--bg-base)' }}
-      >
-        {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
-      </button>
+      <div className="flex items-center justify-between pt-1" style={{ borderTop: '1px solid var(--border-default)' }}>
+        <AutoSaveBadge status={status} />
+        <span className="text-[10px] font-medium" style={{ color: 'var(--text-muted)' }}>
+          Thay đổi được lưu tự động khi bạn gõ
+        </span>
+      </div>
     </form>
   )
 }

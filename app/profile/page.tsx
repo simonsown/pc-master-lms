@@ -11,6 +11,8 @@ import { updateProfile } from '@/app/actions/profile'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { useAutoSave } from '@/hooks/useAutoSave'
+import { AutoSaveBadge } from '@/components/profile/AutoSaveBadge'
 
 function ExamsTabContent({ userId, supabase: sb }) {
   const [exams, setExams] = useState([]);
@@ -167,6 +169,98 @@ function ActivityTabContent({ userId, supabase: sb }) {
   );
 }
 
+function EditProfileForm({ profile, onSaved, onClose }: { profile: any, onSaved: (data: any) => void, onClose: () => void }) {
+  const [fullName, setFullName] = useState(profile.full_name || '')
+  const [bio, setBio] = useState(profile.bio || '')
+  const [school, setSchool] = useState(profile.school || '')
+  const [grade, setGrade] = useState(profile.grade || '')
+  const isMobile = useIsMobile()
+
+  const draft = JSON.stringify({ full_name: fullName, bio: bio.slice(0, 200), school, grade })
+  const { status: saveStatus, flush } = useAutoSave<string>({
+    values: draft,
+    onSave: async (snapshot) => {
+      const data = JSON.parse(snapshot)
+      await updateProfile(data)
+      onSaved(data)
+    },
+  })
+
+  const inputStyle = {
+    width: '100%', padding: '12px 16px', borderRadius: '12px', background: 'var(--bg-base)',
+    border: '1px solid var(--border-default)', color: 'var(--text-primary)', fontSize: '14px', outline: 'none'
+  } as const
+
+  return (
+    <div style={{ background: 'var(--bg-surface)', borderRadius: '16px', border: '1px solid var(--border-default)', padding: isMobile ? '16px' : '24px' }}>
+      <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <User size={20} style={{ color: 'var(--brand-primary)' }} />
+        Chỉnh sửa thông tin
+      </h3>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '600px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '16px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', color: 'var(--text-muted)' }}>Họ và tên</label>
+            <input
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              onBlur={() => flush()}
+              style={inputStyle}
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', color: 'var(--text-muted)' }}>Lớp</label>
+            <input
+              type="text"
+              value={grade}
+              onChange={(e) => setGrade(e.target.value)}
+              onBlur={() => flush()}
+              placeholder="VD: 10A1"
+              style={inputStyle}
+            />
+          </div>
+        </div>
+        <div>
+          <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', color: 'var(--text-muted)' }}>Trường học</label>
+          <input
+            type="text"
+            value={school}
+            onChange={(e) => setSchool(e.target.value)}
+            onBlur={() => flush()}
+            placeholder="Tên trường..."
+            style={inputStyle}
+          />
+        </div>
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-muted)' }}>Tiểu sử ngắn</label>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{bio.length}/200</span>
+          </div>
+          <textarea
+            rows={3}
+            value={bio}
+            maxLength={200}
+            onChange={(e) => setBio(e.target.value)}
+            onBlur={() => flush()}
+            placeholder="Một vài dòng giới thiệu..."
+            style={{ ...inputStyle, resize: 'none' }}
+          />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', paddingTop: '8px' }}>
+          <AutoSaveBadge status={saveStatus} />
+          <button
+            onClick={onClose}
+            style={{ padding: '10px 24px', background: 'transparent', border: '1px solid var(--border-default)', color: 'var(--text-muted)', borderRadius: '12px', fontWeight: 500, cursor: 'pointer', fontSize: '14px' }}
+          >
+            Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -179,11 +273,6 @@ export default function ProfilePage() {
   )
 
   const [editMode, setEditMode] = useState(false)
-  const [fullName, setFullName] = useState('')
-  const [bio, setBio] = useState('')
-  const [school, setSchool] = useState('')
-  const [grade, setGrade] = useState('')
-  const [saving, setSaving] = useState(false)
   const isMobile = useIsMobile()
 
   useEffect(() => {
@@ -202,10 +291,6 @@ export default function ProfilePage() {
     const applyProfile = (next: any) => {
       if (!next) return
       setProfile((prev: any) => ({ ...(prev || {}), ...next }))
-      if (next.full_name !== undefined) setFullName(next.full_name || '')
-      if (next.bio !== undefined) setBio(next.bio || '')
-      if (next.school !== undefined) setSchool(next.school || '')
-      if (next.grade !== undefined) setGrade(next.grade || '')
     }
 
     // 1) Supabase Realtime (nếu bảng profiles đã bật publication)
@@ -241,12 +326,6 @@ export default function ProfilePage() {
       try {
         const data = await getProfile()
         setProfile(data)
-        if (data) {
-          setFullName(data.full_name || '')
-          setBio(data.bio || '')
-          setSchool(data.school || '')
-          setGrade(data.grade || '')
-        }
       } catch (error) {
         console.error(error)
       } finally {
@@ -298,27 +377,6 @@ export default function ProfilePage() {
       toast.error(err.message || 'Lỗi khi tải ảnh lên.')
     } finally {
       setUploading(false)
-    }
-  }
-
-  const handleSaveProfile = async () => {
-    setSaving(true)
-    try {
-      await updateProfile({
-        full_name: fullName,
-        bio: bio.slice(0, 200),
-        school,
-        grade
-      })
-      const next = { ...profile, full_name: fullName, bio, school, grade }
-      setProfile(next)
-      localStorage.setItem('pc_profile_realtime', JSON.stringify(next))
-      setEditMode(false)
-      toast.success('Đã lưu thông tin cá nhân!')
-    } catch (err: any) {
-      toast.error('Lỗi khi lưu thông tin.')
-    } finally {
-      setSaving(false)
     }
   }
 
@@ -421,81 +479,23 @@ export default function ProfilePage() {
 
         {/* Edit Mode */}
         <AnimatePresence>
-          {editMode && (
+          {editMode && profile && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               style={{ overflow: 'hidden', marginBottom: '32px' }}
             >
-              <div style={{ background: 'var(--bg-surface)', borderRadius: '16px', border: '1px solid var(--border-default)', padding: isMobile ? '16px' : '24px' }}>
-                <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <User size={20} style={{ color: 'var(--brand-primary)' }} />
-                  Chỉnh sửa thông tin
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '600px' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '16px' }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', color: 'var(--text-muted)' }}>Họ và tên</label>
-                      <input
-                        type="text"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', background: 'var(--bg-base)', border: '1px solid var(--border-default)', color: 'var(--text-primary)', fontSize: '14px', outline: 'none' }}
-                      />
-                    </div>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', color: 'var(--text-muted)' }}>Lớp</label>
-                      <input
-                        type="text"
-                        value={grade}
-                        onChange={(e) => setGrade(e.target.value)}
-                        placeholder="VD: 10A1"
-                        style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', background: 'var(--bg-base)', border: '1px solid var(--border-default)', color: 'var(--text-primary)', fontSize: '14px', outline: 'none' }}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', color: 'var(--text-muted)' }}>Trường học</label>
-                    <input
-                      type="text"
-                      value={school}
-                      onChange={(e) => setSchool(e.target.value)}
-                      placeholder="Tên trường..."
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', background: 'var(--bg-base)', border: '1px solid var(--border-default)', color: 'var(--text-primary)', fontSize: '14px', outline: 'none' }}
-                    />
-                  </div>
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-muted)' }}>Tiểu sử ngắn</label>
-                      <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{bio.length}/200</span>
-                    </div>
-                    <textarea
-                      rows={3}
-                      value={bio}
-                      maxLength={200}
-                      onChange={(e) => setBio(e.target.value)}
-                      placeholder="Một vài dòng giới thiệu..."
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', background: 'var(--bg-base)', border: '1px solid var(--border-default)', color: 'var(--text-primary)', fontSize: '14px', outline: 'none', resize: 'none' }}
-                    />
-                  </div>
-                  <div style={{ display: 'flex', gap: '12px', paddingTop: '8px' }}>
-                    <button
-                      onClick={handleSaveProfile}
-                      disabled={saving}
-                      style={{ padding: '12px 24px', background: 'var(--brand-primary)', color: 'var(--bg-base)', borderRadius: '12px', fontWeight: 700, border: 'none', cursor: saving ? 'not-allowed' : 'pointer', fontSize: '14px', opacity: saving ? 0.6 : 1 }}
-                    >
-                      {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
-                    </button>
-                    <button
-                      onClick={() => setEditMode(false)}
-                      style={{ padding: '12px 24px', background: 'transparent', border: '1px solid var(--border-default)', color: 'var(--text-muted)', borderRadius: '12px', fontWeight: 500, cursor: 'pointer', fontSize: '14px' }}
-                    >
-                      Hủy
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <EditProfileForm
+                key={profile.updated_at || profile.id}
+                profile={profile}
+                onSaved={(data) => {
+                  const next = { ...profile, ...data }
+                  setProfile(next)
+                  localStorage.setItem('pc_profile_realtime', JSON.stringify(next))
+                }}
+                onClose={() => setEditMode(false)}
+              />
             </motion.div>
           )}
         </AnimatePresence>
