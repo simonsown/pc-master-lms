@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, RotateCw, Maximize2 } from 'lucide-react';
+import { X, RotateCw, Maximize2, Layers, Box } from 'lucide-react';
 
 const VRShowroom = dynamic(() => import('@/components/VRShowroom/VRShowroom'), { ssr: false });
+const PCExplodedViewer = dynamic(() => import('@/components/PCExplodedViewer'), { ssr: false });
 
 function useAudio() {
   const ctxRef = useRef(null);
@@ -39,6 +40,7 @@ export default function ShowroomPage() {
   const [focusId, setFocusId] = useState(null);
   const [progress, setProgress] = useState(0);
   const [fadeOut, setFadeOut] = useState(false);
+  const [mode, setMode] = useState<'showroom' | 'exploded'>('exploded'); // Default to 3D Exploded Viewer
   const audio = useAudio();
 
   useEffect(() => {
@@ -50,7 +52,7 @@ export default function ShowroomPage() {
         return p + Math.random() * 15;
       });
     }, 200);
-    return () => { mounted = false; clearInterval(timer); };
+    return () => { mounted = false; };
   }, []);
 
   const handleStart = async () => {
@@ -66,7 +68,7 @@ export default function ShowroomPage() {
     }, 300);
   };
 
-  const handleComponentFocus = useCallback((id) => {
+  const handleComponentFocus = useCallback((id: string | null) => {
     setFocusId(id);
   }, []);
 
@@ -99,7 +101,7 @@ export default function ShowroomPage() {
               PC MASTER BUILDER
             </h1>
             <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', marginBottom: 32 }}>
-              PHÒNG TRIỂN LÃM LINH KIỆN 3D
+              PHÒNG TRIỂN LÃM & BÓC TÁCH LINH KIỆN 3D
             </p>
             <div style={{ width: 280, height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2, marginBottom: 8, overflow: 'hidden' }}>
               <motion.div
@@ -123,7 +125,7 @@ export default function ShowroomPage() {
                   boxShadow: '0 0 30px rgba(99,102,241,0.3)',
                 }}
               >
-                🚀 VÀO PHÒNG TRIỂN LÃM
+                🚀 KHÁM PHÁ LINH KIỆN 3D
               </motion.button>
             )}
             {fadeOut && (
@@ -141,10 +143,38 @@ export default function ShowroomPage() {
 
       {loaded && (
         <>
-          <VRShowroom onFocus={handleComponentFocus} focusId={focusId} />
+          {/* Top Floating View Mode Switcher */}
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] flex items-center gap-1 bg-slate-900/90 backdrop-blur-md p-1.5 rounded-2xl border border-slate-800 shadow-2xl">
+            <button
+              onClick={() => setMode('exploded')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                mode === 'exploded'
+                  ? 'bg-gradient-to-r from-indigo-600 to-emerald-500 text-white shadow-lg shadow-indigo-500/25'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Layers className="w-4 h-4" /> Bóc Tách Linh Kiện 3D
+            </button>
+            <button
+              onClick={() => setMode('showroom')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                mode === 'showroom'
+                  ? 'bg-gradient-to-r from-indigo-600 to-emerald-500 text-white shadow-lg shadow-indigo-500/25'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Box className="w-4 h-4" /> Triển Lãm Showroom 3D
+            </button>
+          </div>
+
+          {mode === 'exploded' ? (
+            <PCExplodedViewer />
+          ) : (
+            <VRShowroom onFocus={handleComponentFocus} focusId={focusId} />
+          )}
 
           <AnimatePresence>
-            {focusId && (
+            {mode === 'showroom' && focusId && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -208,3 +238,4 @@ export default function ShowroomPage() {
     </div>
   );
 }
+

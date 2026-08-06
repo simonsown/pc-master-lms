@@ -22,13 +22,20 @@ Dựa trên bảng điểm chính thức của HUIT IEC (Bảng Học Sinh), đ�
     *   Nêu tên 2 giáo viên hướng dẫn chuyên môn Tin học: **Thầy Trần Minh Phụng** và **Cô Đoàn Thụy Kim Phượng** từ THPT Nguyễn Công Trứ để bảo chứng cho tính sư phạm và học thuật của sản phẩm.
 
 ### 3. Hiệu quả kinh tế & tác động xã hội (20 điểm) — *Đánh mạnh tính Thực tiễn*
-*   **Tiêu chí:** Lợi ích thực tế cho xã hội, gắn với 17 mục tiêu phát triển bền vững (SDGs) của UN, tính khả thi.
+*   **Tiêu chí:** Lợi ích thực tế cho xã hội, gắn với các mục tiêu phát triển bền vững (SDGs) của UN, tính khả thi.
 *   **Chiến lược:**
     *   **Thực tế xã hội:** Chi phí mua linh kiện PC thật cho 1 phòng thực hành Tin học 40 máy là khoảng **600 - 800 triệu VND**, kèm rủi ro hỏng hóc phần cứng do tháo lắp sai là cực kỳ cao. PC Master Builder giải quyết bài toán này với chi phí **0 đồng** trên trình duyệt web.
-    *   **Liên kết 3 Mục tiêu SDGs của Liên Hợp Quốc:**
-        1.  **SDG 4 (Giáo dục chất lượng):** Bình đẳng hóa cơ hội học phần cứng máy tính cho học sinh vùng sâu vùng xa, thiếu thốn thiết bị vật lý.
-        2.  **SDG 9 (Công nghiệp, Sáng tạo & Hạ tầng):** Ứng dụng Computer Vision (MediaPipe) và Generative AI (Gemini) vào trường phổ thông.
-        3.  **SDG 12 (Tiêu dùng & Sản xuất có trách nhiệm):** Giảm thiểu rác thải điện tử (E-waste) phát sinh từ linh kiện hỏng khi học sinh thực hành lỗi.
+    *   **Đóng góp toàn diện vào 10 Mục tiêu SDGs của Liên Hợp Quốc:**
+        1.  **SDG 4 (Giáo dục chất lượng):** Chuẩn hóa kiến thức 3D bám sát SGK Tin học 10 GDPT 2018; xóa bỏ "học chay".
+        2.  **SDG 9 (Công nghiệp, Sáng tạo & Hạ tầng):** Tiên phong ứng dụng WebGL 3D, Computer Vision (MediaPipe) và Cloud Serverless.
+        3.  **SDG 12 (Tiêu dùng & Sản xuất có trách nhiệm):** Giảm 100% rác thải điện tử (E-waste) khi thực hành sai; AI Tra giá mua sắm thông minh.
+        4.  **SDG 8 (Việc làm tốt & Tăng trưởng kinh tế):** Tích hợp Career Build định hướng nhân lực chất lượng cao ngành Vi mạch - Bán dẫn.
+        5.  **SDG 10 (Giảm bất bình đẳng):** Thu hẹp khoảng cách công nghệ số cho học sinh vùng sâu vùng xa thiếu ngân sách phòng lab.
+        6.  **SDG 13 (Hành động về khí hậu):** Giảm dấu chân Carbon từ việc sản xuất, vận chuyển linh kiện thử nghiệm.
+        7.  **SDG 5 (Bình đẳng giới trong STEM):** Khuyến khích nữ sinh THPT tự tin tham gia học tập kỹ thuật phần cứng PC.
+        8.  **SDG 17 (Hợp tác vì các mục tiêu):** Liên kết 4 bên: Trường ĐH HUIT + Trường THPT + Đại lý Bán lẻ + Nền tảng EdTech.
+        9.  **SDG 3 (Sức khỏe & Cuộc sống tốt):** An toàn 100%, loại bỏ nguy cơ giật điện, cháy nổ, tổn thương do kim loại sắc nhọn.
+        10. **SDG 11 (Thành phố & Cộng đồng bền vững):** Đóng góp vào mô hình "Trường học thông minh" và "Cộng đồng tri thức số".
 
 ### 4. Thị trường tiềm năng (10 điểm) — *Khả năng Nhân rộng*
 *   **Tiêu chí:** Phân khúc khách hàng, lợi thế cạnh tranh, khả năng tăng trưởng.
@@ -84,7 +91,7 @@ Dựa trên bảng điểm chính thức của HUIT IEC (Bảng Học Sinh), đ�
 > **Mẹo:** Đánh mạnh vào SDGs và bài toán tài chính thực tế để lấy điểm BGK.
 
 *   "Về **Thị trường tiềm năng**, dự án hướng tới hơn **3.000 trường THPT** và **hàng triệu học sinh cấp 3** trên cả nước. Lợi thế cạnh tranh tuyệt đối của PC Master Builder là tính gọn nhẹ, miễn phí và tính sư phạm cao, điều mà các tựa game thương mại không có được.
-*   Đặc biệt, dự án đóng góp thiết thực vào 3 Mục tiêu Phát triển Bền vững của Liên Hợp Quốc: **SDG 4** về Giáo dục chất lượng, **SDG 9** về Công nghệ sáng tạo và **SDG 12** về Tiêu dùng có trách nhiệm thông qua việc cắt giảm tối đa rác thải công nghệ. Với mô hình Cloud linh hoạt, chúng em có thể dễ dàng nhân rộng ra toàn quốc mà không cần đầu tư thêm bất kỳ hạ tầng vật lý đắt đỏ nào."
+*   Đặc biệt, dự án tự hào phụng sự **10 Mục tiêu Phát triển Bền vững (UN SDGs)** của Liên Hợp Quốc: Nổi bật là **SDG 4** (Giáo dục chất lượng 3D), **SDG 9** (Công nghệ sáng tạo AI/WebGL), **SDG 12** (Cắt giảm 100% rác thải điện tử E-waste), **SDG 8** (Định hướng nhân lực Vi mạch - Bán dẫn) và **SDG 10** (Xóa bỏ khoảng cách công nghệ số cho học sinh vùng xa). Với mô hình Cloud linh hoạt, chúng em có thể dễ dàng nhân rộng ra toàn quốc mà không cần đầu tư thêm bất kỳ hạ tầng vật lý đắt đỏ nào."
 
 ### Slide 6: Kết luận & Kêu gọi (4:30 - 5:00) - 30 giây
 > **Mẹo:** Kết thúc mạnh mẽ, tự tin, mở đầu phần Q&A ấn tượng.
