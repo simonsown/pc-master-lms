@@ -1,23 +1,33 @@
 'use client';
 
-import React, { useState, useRef, useMemo, useEffect, useCallback, Suspense } from 'react';
+import React, { useState, useRef, useMemo, useEffect, useCallback, Suspense, Component } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, RoundedBox, Html, Float } from '@react-three/drei';
+import { OrbitControls, RoundedBox, Float, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Layers, Maximize2, RotateCw, Play, Pause, RefreshCw, Eye, Info,
-  Cpu, HardDrive, Zap, ShieldAlert, CheckCircle2, ChevronRight, Sparkles, X, ArrowLeft
+  Cpu, HardDrive, Zap, ShieldAlert, CheckCircle2, ChevronRight, Sparkles, X, ArrowLeft, Box
 } from 'lucide-react';
 
-// Types for components
+// Error boundary for loading 3D GLB models safely
+class ModelLoadBoundary extends Component<{ children: React.ReactNode; fallback: React.ReactNode }> {
+  state = { ok: true };
+  static getDerivedStateFromError() { return { ok: false }; }
+  render() { return this.state.ok ? this.props.children : this.props.fallback; }
+}
+
+// Data definition for PC Components & GLB File mappings
 export interface PCComponentData {
   id: string;
   name: string;
   category: string;
   color: string;
+  glbFile?: string;
+  glbScale?: number | [number, number, number];
+  glbRotation?: [number, number, number];
   basePos: [number, number, number];
-  explodeDir: [number, number, number]; // Direction vector * distance
+  explodeDir: [number, number, number];
   specs: { [key: string]: string };
   description: string;
   role: string;
@@ -30,8 +40,8 @@ export const PC_PARTS_DATA: Record<string, PCComponentData> = {
     name: 'Mặt Kính Cường Lực (Side Glass)',
     category: 'Vỏ Case',
     color: '#88ccff',
-    basePos: [-1.3, 0.2, 0],
-    explodeDir: [-2.2, 0, 0],
+    basePos: [-1.4, 0.2, 0],
+    explodeDir: [-2.5, 0, 0],
     specs: {
       'Loại': 'Kính cường lực 4mm',
       'Tính năng': 'Chống xước, truyền sáng 92%',
@@ -43,11 +53,14 @@ export const PC_PARTS_DATA: Record<string, PCComponentData> = {
   },
   case_frame: {
     id: 'case_frame',
-    name: 'Khung Vỏ Case (ATX Mid Tower)',
+    name: 'Khung Vỏ Case Gaming ATX',
     category: 'Vỏ Case',
     color: '#3a4a6c',
-    basePos: [0, 0, 0],
-    explodeDir: [0, -0.2, 0],
+    glbFile: '/models/gaming_desktop_pc_blend_file.glb',
+    glbScale: 0.12,
+    glbRotation: [0, Math.PI / 2, 0],
+    basePos: [0, -0.3, 0],
+    explodeDir: [0, -0.3, 0],
     specs: {
       'Chuẩn Main': 'ATX / Micro-ATX / Mini-ITX',
       'Chất liệu': 'Thép SPCC 0.8mm',
@@ -59,11 +72,14 @@ export const PC_PARTS_DATA: Record<string, PCComponentData> = {
   },
   motherboard: {
     id: 'motherboard',
-    name: 'Bo Mạch Chủ (MSI B550 Gaming Plus)',
+    name: 'Bo Mạch Chủ MSI B550 Gaming Plus',
     category: 'Mainboard',
     color: '#8b5cf6',
+    glbFile: '/models/msi_b550_gaming_plus.glb',
+    glbScale: 0.16,
+    glbRotation: [0, 0, 0],
     basePos: [0, 0.2, -0.3],
-    explodeDir: [0, 0, -1.2],
+    explodeDir: [0, 0, -1.4],
     specs: {
       'Socket': 'AMD AM4',
       'Chipset': 'B550 High-Performance',
@@ -72,15 +88,18 @@ export const PC_PARTS_DATA: Record<string, PCComponentData> = {
     },
     description: 'Trái tim kết nối tất cả linh kiện PC với nhau, cung cấp năng lượng và truyền dữ liệu tốc độ cao.',
     role: 'Định tuyến tín hiệu giữa CPU, RAM, GPU và ổ cứng.',
-    disassemblySteps: ['Rút hết dây nguồn 24-pin & 8-pin CPU', 'Tháo 9 ốc ốc bắt Standoff trên khung case']
+    disassemblySteps: ['Rút hết dây nguồn 24-pin & 8-pin CPU', 'Tháo 9 ốc bắt Standoff trên khung case']
   },
   cpu: {
     id: 'cpu',
-    name: 'Bộ Vi Xử Lý (AMD Ryzen 7 5700X3D)',
+    name: 'Bộ Vi Xử Lý AMD Ryzen 7 5700X3D',
     category: 'CPU',
     color: '#00d4aa',
-    basePos: [0, 0.35, -0.15],
-    explodeDir: [-0.6, 1.4, 0.5],
+    glbFile: '/models/amd_ryzen_7_5700x3d.glb',
+    glbScale: 0.18,
+    glbRotation: [0, 0, 0],
+    basePos: [0, 0.45, -0.15],
+    explodeDir: [-0.8, 1.6, 0.5],
     specs: {
       'Số nhân/luồng': '8 Nhân / 16 Luồng',
       'Xung nhịp': '3.0 GHz - 4.1 GHz',
@@ -93,27 +112,30 @@ export const PC_PARTS_DATA: Record<string, PCComponentData> = {
   },
   cooler: {
     id: 'cooler',
-    name: 'Tản Nhiệt Khí RGB (Dual Heatpipe Air Cooler)',
+    name: 'Tản Nhiệt Khí RGB Dual Heatpipe',
     category: 'Tản nhiệt',
     color: '#00aaff',
-    basePos: [0, 0.7, -0.15],
-    explodeDir: [0, 2.2, 0.2],
+    basePos: [0, 0.85, -0.15],
+    explodeDir: [0, 2.3, 0.2],
     specs: {
       'Ống đồng': '4x Heatpipe 6mm tiếp xúc trực tiếp',
       'Quạt': '120mm PWM Silent Fan',
       'LED': 'Addressable RGB 5V 3-Pin'
     },
     description: 'Hấp thụ nhiệt lượng tỏa ra từ IHS của CPU và giải nhiệt qua lá nhôm cùng quạt gió.',
-    role: 'Giữ CPU hoạt động mát mẻ dưới 75°C, tránh nghẽn xung nhiệt (Thermal Throttling).',
+    role: 'Giữ CPU hoạt động mát mẻ dưới 75°C, tránh nghẽn xung nhiệt.',
     disassemblySteps: ['Rút dây quạt CPU_FAN', 'Vặn nới lỏng 2 ốc ngoàm giữ ngàm tản', 'Xoay nhẹ khối tản để ngắt keo tản nhiệt']
   },
   ram: {
     id: 'ram',
-    name: 'Bộ Nhớ Trong (Corsair Dominator RGB 32GB)',
+    name: 'Bộ Nhớ RAM Corsair Dominator RGB 32GB',
     category: 'RAM',
     color: '#6366f1',
-    basePos: [-0.55, 0.4, -0.05],
-    explodeDir: [-1.8, 1.0, 0.4],
+    glbFile: '/models/corsair_dominator_rgb_ram.glb',
+    glbScale: 0.16,
+    glbRotation: [0, 0, 0],
+    basePos: [-0.55, 0.45, -0.05],
+    explodeDir: [-1.9, 1.1, 0.4],
     specs: {
       'Dung lượng': '32GB (2x16GB Dual Channel)',
       'Chuẩn/Tốc độ': 'DDR4 3600MHz CL18',
@@ -125,11 +147,14 @@ export const PC_PARTS_DATA: Record<string, PCComponentData> = {
   },
   gpu: {
     id: 'gpu',
-    name: 'Card Đồ Họa (ASUS ROG RTX 4090 24GB)',
+    name: 'Card Đồ Họa ASUS ROG RTX 4090 24GB',
     category: 'GPU',
     color: '#ef4444',
-    basePos: [0.1, 0.1, 0.2],
-    explodeDir: [2.2, 0.4, 0.8],
+    glbFile: '/models/asus_rog_geforce_rtx_4090_v2.0.glb',
+    glbScale: 0.14,
+    glbRotation: [0, Math.PI / 2, 0],
+    basePos: [0.1, 0.1, 0.25],
+    explodeDir: [2.3, 0.5, 0.9],
     specs: {
       'Bộ nhớ VRAM': '24GB GDDR6X 384-bit',
       'Nhân CUDA': '16,384 Cores',
@@ -141,11 +166,11 @@ export const PC_PARTS_DATA: Record<string, PCComponentData> = {
   },
   ssd: {
     id: 'ssd',
-    name: 'Ổ Cứng NVMe M.2 SSD (Kingston NV2 1TB)',
+    name: 'Ổ Cứng NVMe M.2 SSD 1TB',
     category: 'SSD',
     color: '#22c55e',
     basePos: [0.35, 0.25, -0.3],
-    explodeDir: [1.6, 0.8, -0.8],
+    explodeDir: [1.7, 0.8, -0.8],
     specs: {
       'Chuẩn kết nối': 'PCIe Gen4 x4 NVMe M.2 2280',
       'Tốc độ Đọc/Ghi': '3500 MB/s / 2100 MB/s',
@@ -157,27 +182,27 @@ export const PC_PARTS_DATA: Record<string, PCComponentData> = {
   },
   psu: {
     id: 'psu',
-    name: 'Nguồn Máy Tính (Corsair RM850x 850W Gold)',
+    name: 'Nguồn Máy Tính Corsair 850W Gold',
     category: 'PSU',
     color: '#f59e0b',
-    basePos: [0, -0.5, 0],
-    explodeDir: [0, -1.8, -0.8],
+    basePos: [0, -0.55, 0],
+    explodeDir: [0, -1.9, -0.8],
     specs: {
       'Công suất': '850W Continuous Power',
       'Chứng nhận': '80 PLUS Gold (Hiệu suất 90%)',
       'Dạng dây': 'Full Modular (Dây rời 100%)'
     },
-    description: 'Chuyển đổi dòng điện xoay chiều AC 220V thành các dòng điện một chiều DC 12V, 5V, 3.3V cấp cho linh kiện.',
+    description: 'Chuyển đổi dòng điện xoay chiều AC 220V thành các dòng điện một chiều DC cấp cho linh kiện.',
     role: 'Trái tim năng lượng ổn định, bảo vệ quá áp/quá tải cho toàn hệ thống.',
     disassemblySteps: ['Tháo 4 ốc vít đằng sau vỏ case', 'Kéo cục nguồn ra khỏi khoang PSU shroud']
   },
   fans: {
     id: 'fans',
-    name: 'Bộ Quạt Tản Nhiệt Case RGB (3x 120mm Fans)',
+    name: 'Bộ Quạt Tản Nhiệt Case RGB (3x 120mm)',
     category: 'Quạt Case',
     color: '#ec4899',
     basePos: [0.7, 0.2, 1.0],
-    explodeDir: [0, 0.5, 2.0],
+    explodeDir: [0, 0.5, 2.2],
     specs: {
       'Kích thước': '120mm x 120mm x 25mm',
       'Tốc độ quay': '800 - 1800 RPM (PWM control)',
@@ -189,88 +214,84 @@ export const PC_PARTS_DATA: Record<string, PCComponentData> = {
   }
 };
 
-/* ================= 3D MESH MODELS ================= */
+/* ===== GLB Model Loader Component with Fallback ===== */
+function GlbModelInner({
+  file,
+  scale = 0.1,
+  rotation = [0, 0, 0],
+  isSelected = false,
+}: {
+  file: string;
+  scale?: number | [number, number, number];
+  rotation?: [number, number, number];
+  isSelected?: boolean;
+}) {
+  const { scene } = useGLTF(file);
+  const clonedScene = useMemo(() => {
+    const clone = scene.clone(true);
+    clone.traverse((c) => {
+      if (c instanceof THREE.Mesh) {
+        c.castShadow = true;
+        c.receiveShadow = true;
+        if (isSelected && c.material) {
+          c.material = c.material.clone();
+          if (c.material.emissive) {
+            c.material.emissive.setHex(0x00ffcc);
+            c.material.emissiveIntensity = 0.4;
+          }
+        }
+      }
+    });
+    return clone;
+  }, [scene, isSelected]);
 
-function GlassMesh({ explodeFactor, isSelected, onClick }: { explodeFactor: number; isSelected: boolean; onClick: () => void }) {
-  const data = PC_PARTS_DATA.glass;
+  return <primitive object={clonedScene} scale={scale} rotation={rotation} />;
+}
+
+function SafeGLBModel({
+  file,
+  scale = 0.1,
+  rotation = [0, 0, 0],
+  isSelected = false,
+  fallback,
+}: {
+  file: string;
+  scale?: number | [number, number, number];
+  rotation?: [number, number, number];
+  isSelected?: boolean;
+  fallback: React.ReactNode;
+}) {
+  return (
+    <ModelLoadBoundary fallback={fallback}>
+      <Suspense fallback={fallback}>
+        <GlbModelInner file={file} scale={scale} rotation={rotation} isSelected={isSelected} />
+      </Suspense>
+    </ModelLoadBoundary>
+  );
+}
+
+/* ================= COMPONENT WRAPPERS WITH EXPLODE LERP ================= */
+
+function Component3DWrapper({
+  partId,
+  explodeFactor,
+  isSelected,
+  onClick,
+  proceduralFallback,
+}: {
+  partId: string;
+  explodeFactor: number;
+  isSelected: boolean;
+  onClick: () => void;
+  proceduralFallback: React.ReactNode;
+}) {
+  const data = PC_PARTS_DATA[partId];
+  const groupRef = useRef<THREE.Group>(null);
+
   const targetX = data.basePos[0] + data.explodeDir[0] * explodeFactor;
   const targetY = data.basePos[1] + data.explodeDir[1] * explodeFactor;
   const targetZ = data.basePos[2] + data.explodeDir[2] * explodeFactor;
 
-  const meshRef = useRef<THREE.Group>(null);
-  useFrame(() => {
-    if (!meshRef.current) return;
-    meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, targetX, 0.1);
-    meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, targetY, 0.1);
-    meshRef.current.position.z = THREE.MathUtils.lerp(meshRef.current.position.z, targetZ, 0.1);
-  });
-
-  return (
-    <group ref={meshRef} position={data.basePos} onClick={(e) => { e.stopPropagation(); onClick(); }}>
-      <mesh>
-        <planeGeometry args={[2.0, 1.3]} />
-        <meshPhysicalMaterial
-          color={isSelected ? '#00ffff' : '#88ccff'}
-          metalness={0.2}
-          roughness={0.05}
-          transparent
-          opacity={isSelected ? 0.4 : 0.2}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
-      {/* Rubber screw mounts at 4 corners */}
-      {[[-0.95, 0.6], [0.95, 0.6], [-0.95, -0.6], [0.95, -0.6]].map(([x, y], i) => (
-        <mesh key={i} position={[x, y, 0]}>
-          <cylinderGeometry args={[0.04, 0.04, 0.03, 12]} />
-          <meshStandardMaterial color="#222" roughness={0.8} />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-function CaseFrameMesh({ explodeFactor, isSelected, onClick }: { explodeFactor: number; isSelected: boolean; onClick: () => void }) {
-  const data = PC_PARTS_DATA.case_frame;
-  const targetY = data.basePos[1] + data.explodeDir[1] * explodeFactor;
-  const groupRef = useRef<THREE.Group>(null);
-
-  useFrame(() => {
-    if (groupRef.current) groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, 0.1);
-  });
-
-  return (
-    <group ref={groupRef} position={data.basePos} onClick={(e) => { e.stopPropagation(); onClick(); }}>
-      {/* Outer Chassis */}
-      <mesh position={[0, 0, 0]}>
-        <boxGeometry args={[2.6, 1.4, 2.0]} />
-        <meshPhysicalMaterial
-          color={isSelected ? '#4a5a8c' : '#2a3a5c'}
-          metalness={0.7}
-          roughness={0.3}
-          wireframe={false}
-        />
-      </mesh>
-      {/* Backplate */}
-      <mesh position={[0, 0, -0.99]}>
-        <planeGeometry args={[2.55, 1.35]} />
-        <meshStandardMaterial color="#1a2a4a" metalness={0.6} roughness={0.4} />
-      </mesh>
-      {/* PSU Shroud Plate */}
-      <mesh position={[0, -0.35, 0]}>
-        <boxGeometry args={[2.55, 0.02, 1.95]} />
-        <meshStandardMaterial color="#1e2d4a" metalness={0.5} roughness={0.5} />
-      </mesh>
-    </group>
-  );
-}
-
-function MotherboardMesh({ explodeFactor, isSelected, onClick }: { explodeFactor: number; isSelected: boolean; onClick: () => void }) {
-  const data = PC_PARTS_DATA.motherboard;
-  const targetX = data.basePos[0] + data.explodeDir[0] * explodeFactor;
-  const targetY = data.basePos[1] + data.explodeDir[1] * explodeFactor;
-  const targetZ = data.basePos[2] + data.explodeDir[2] * explodeFactor;
-
-  const groupRef = useRef<THREE.Group>(null);
   useFrame(() => {
     if (!groupRef.current) return;
     groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.1);
@@ -280,304 +301,127 @@ function MotherboardMesh({ explodeFactor, isSelected, onClick }: { explodeFactor
 
   return (
     <group ref={groupRef} position={data.basePos} onClick={(e) => { e.stopPropagation(); onClick(); }}>
-      {/* PCB Board */}
+      {data.glbFile ? (
+        <SafeGLBModel
+          file={data.glbFile}
+          scale={data.glbScale || 0.1}
+          rotation={data.glbRotation || [0, 0, 0]}
+          isSelected={isSelected}
+          fallback={proceduralFallback}
+        />
+      ) : (
+        proceduralFallback
+      )}
+    </group>
+  );
+}
+
+/* ================= PROCEDURAL FALLBACK MESHES ================= */
+
+function GlassFallback({ isSelected }: { isSelected: boolean }) {
+  return (
+    <mesh>
+      <planeGeometry args={[2.0, 1.3]} />
+      <meshPhysicalMaterial
+        color={isSelected ? '#00ffff' : '#88ccff'}
+        metalness={0.2}
+        roughness={0.05}
+        transparent
+        opacity={isSelected ? 0.4 : 0.2}
+        side={THREE.DoubleSide}
+      />
+    </mesh>
+  );
+}
+
+function CaseFallback({ isSelected }: { isSelected: boolean }) {
+  return (
+    <group>
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[2.6, 1.4, 2.0]} />
+        <meshPhysicalMaterial color={isSelected ? '#4a5a8c' : '#2a3a5c'} metalness={0.7} roughness={0.3} />
+      </mesh>
+    </group>
+  );
+}
+
+function MotherboardFallback({ isSelected }: { isSelected: boolean }) {
+  return (
+    <group>
       <RoundedBox args={[1.8, 1.1, 0.04]} radius={0.01}>
         <meshPhysicalMaterial color={isSelected ? '#a78bfa' : '#1e3a29'} roughness={0.8} metalness={0.2} />
       </RoundedBox>
-      {/* VRM Heatsinks */}
-      <mesh position={[-0.4, 0.35, 0.04]}>
-        <boxGeometry args={[0.7, 0.2, 0.06]} />
-        <meshStandardMaterial color="#334455" metalness={0.8} roughness={0.2} />
-      </mesh>
-      {/* Socket Frame */}
-      <mesh position={[0, 0.15, 0.03]}>
-        <boxGeometry args={[0.45, 0.45, 0.02]} />
-        <meshStandardMaterial color="#888" metalness={0.7} roughness={0.3} />
-      </mesh>
-      {/* DIMM Slots */}
-      {[-0.55, -0.48, -0.41, -0.34].map((x, i) => (
-        <mesh key={i} position={[x, 0.2, 0.03]}>
-          <boxGeometry args={[0.04, 0.65, 0.03]} />
-          <meshStandardMaterial color={i % 2 === 0 ? '#111' : '#333'} />
-        </mesh>
-      ))}
-      {/* PCIe x16 Slot */}
-      <mesh position={[0.1, -0.15, 0.03]}>
-        <boxGeometry args={[1.2, 0.06, 0.04]} />
-        <meshStandardMaterial color="#111" />
-      </mesh>
-      {/* Chipset Heatsink */}
-      <mesh position={[0.5, -0.3, 0.04]}>
-        <boxGeometry args={[0.35, 0.35, 0.05]} />
-        <meshStandardMaterial color="#223344" metalness={0.9} roughness={0.2} />
-      </mesh>
     </group>
   );
 }
 
-function CPUMesh({ explodeFactor, isSelected, onClick }: { explodeFactor: number; isSelected: boolean; onClick: () => void }) {
-  const data = PC_PARTS_DATA.cpu;
-  const targetX = data.basePos[0] + data.explodeDir[0] * explodeFactor;
-  const targetY = data.basePos[1] + data.explodeDir[1] * explodeFactor;
-  const targetZ = data.basePos[2] + data.explodeDir[2] * explodeFactor;
-
-  const groupRef = useRef<THREE.Group>(null);
-  useFrame(() => {
-    if (!groupRef.current) return;
-    groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.1);
-    groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, 0.1);
-    groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, targetZ, 0.1);
-  });
-
+function CPUFallback({ isSelected }: { isSelected: boolean }) {
   return (
-    <group ref={groupRef} position={data.basePos} onClick={(e) => { e.stopPropagation(); onClick(); }}>
-      {/* Substrate */}
+    <mesh>
+      <boxGeometry args={[0.38, 0.38, 0.05]} />
+      <meshPhysicalMaterial color={isSelected ? '#00ffcc' : '#d0d0d0'} metalness={0.9} roughness={0.2} />
+    </mesh>
+  );
+}
+
+function CoolerFallback({ isSelected }: { isSelected: boolean }) {
+  return (
+    <mesh position={[0, 0, 0.2]}>
+      <boxGeometry args={[0.45, 0.45, 0.3]} />
+      <meshPhysicalMaterial color={isSelected ? '#38bdf8' : '#cbd5e1'} metalness={0.8} roughness={0.2} />
+    </mesh>
+  );
+}
+
+function RAMFallback({ isSelected }: { isSelected: boolean }) {
+  return (
+    <group>
       <mesh position={[0, 0, 0]}>
-        <boxGeometry args={[0.38, 0.38, 0.03]} />
-        <meshStandardMaterial color="#1a2a1a" roughness={0.9} />
+        <boxGeometry args={[0.03, 0.6, 0.06]} />
+        <meshPhysicalMaterial color={isSelected ? '#818cf8' : '#222'} metalness={0.5} roughness={0.4} />
       </mesh>
-      {/* IHS Heatspreader */}
-      <mesh position={[0, 0, 0.025]}>
-        <boxGeometry args={[0.32, 0.32, 0.02]} />
-        <meshPhysicalMaterial
-          color={isSelected ? '#00ffcc' : '#d0d0d0'}
-          metalness={0.9}
-          roughness={0.2}
-          emissive={isSelected ? '#00ffcc' : '#000000'}
-          emissiveIntensity={isSelected ? 0.3 : 0}
-        />
+      <mesh position={[0.14, 0, 0]}>
+        <boxGeometry args={[0.03, 0.6, 0.06]} />
+        <meshPhysicalMaterial color={isSelected ? '#818cf8' : '#222'} metalness={0.5} roughness={0.4} />
       </mesh>
     </group>
   );
 }
 
-function CoolerMesh({ explodeFactor, isSelected, onClick }: { explodeFactor: number; isSelected: boolean; onClick: () => void }) {
-  const data = PC_PARTS_DATA.cooler;
-  const targetX = data.basePos[0] + data.explodeDir[0] * explodeFactor;
-  const targetY = data.basePos[1] + data.explodeDir[1] * explodeFactor;
-  const targetZ = data.basePos[2] + data.explodeDir[2] * explodeFactor;
-
-  const groupRef = useRef<THREE.Group>(null);
-  const fanRef = useRef<THREE.Group>(null);
-
-  useFrame((_, dt) => {
-    if (groupRef.current) {
-      groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.1);
-      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, 0.1);
-      groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, targetZ, 0.1);
-    }
-    if (fanRef.current) fanRef.current.rotation.z += dt * 8;
-  });
-
+function GPUFallback({ isSelected }: { isSelected: boolean }) {
   return (
-    <group ref={groupRef} position={data.basePos} onClick={(e) => { e.stopPropagation(); onClick(); }}>
-      {/* Fin Tower */}
-      <mesh position={[0, 0, 0.2]}>
-        <boxGeometry args={[0.45, 0.45, 0.3]} />
-        <meshPhysicalMaterial color={isSelected ? '#38bdf8' : '#cbd5e1'} metalness={0.8} roughness={0.2} />
-      </mesh>
-      {/* Heatpipes */}
-      {[-0.12, 0.12].map((x, i) => (
-        <mesh key={i} position={[x, 0, 0]}>
-          <cylinderGeometry args={[0.02, 0.02, 0.4, 8]} />
-          <meshStandardMaterial color="#b87333" metalness={0.9} roughness={0.2} />
-        </mesh>
-      ))}
-      {/* RGB Fan */}
-      <group ref={fanRef} position={[0, 0, 0.38]}>
-        <mesh>
-          <cylinderGeometry args={[0.18, 0.18, 0.04, 16]} />
-          <meshPhysicalMaterial color="#00aaff" emissive="#00aaff" emissiveIntensity={0.6} transparent opacity={0.8} />
-        </mesh>
-      </group>
-    </group>
+    <RoundedBox args={[1.3, 0.35, 0.4]} radius={0.02}>
+      <meshPhysicalMaterial color={isSelected ? '#f87171' : '#1e1e2d'} metalness={0.8} roughness={0.2} />
+    </RoundedBox>
   );
 }
 
-function RAMMesh({ explodeFactor, isSelected, onClick }: { explodeFactor: number; isSelected: boolean; onClick: () => void }) {
-  const data = PC_PARTS_DATA.ram;
-  const targetX = data.basePos[0] + data.explodeDir[0] * explodeFactor;
-  const targetY = data.basePos[1] + data.explodeDir[1] * explodeFactor;
-  const targetZ = data.basePos[2] + data.explodeDir[2] * explodeFactor;
-
-  const groupRef = useRef<THREE.Group>(null);
-  useFrame(() => {
-    if (!groupRef.current) return;
-    groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.1);
-    groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, 0.1);
-    groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, targetZ, 0.1);
-  });
-
+function SSDFallback({ isSelected }: { isSelected: boolean }) {
   return (
-    <group ref={groupRef} position={data.basePos} onClick={(e) => { e.stopPropagation(); onClick(); }}>
-      {/* Stick 1 */}
-      <group position={[0, 0, 0]}>
-        <mesh>
-          <boxGeometry args={[0.03, 0.6, 0.06]} />
-          <meshPhysicalMaterial color={isSelected ? '#818cf8' : '#222'} metalness={0.5} roughness={0.4} />
-        </mesh>
-        <mesh position={[0, 0.28, 0]}>
-          <boxGeometry args={[0.035, 0.06, 0.065]} />
-          <meshPhysicalMaterial color="#6366f1" emissive="#6366f1" emissiveIntensity={0.8} />
-        </mesh>
-      </group>
-      {/* Stick 2 */}
-      <group position={[0.14, 0, 0]}>
-        <mesh>
-          <boxGeometry args={[0.03, 0.6, 0.06]} />
-          <meshPhysicalMaterial color={isSelected ? '#818cf8' : '#222'} metalness={0.5} roughness={0.4} />
-        </mesh>
-        <mesh position={[0, 0.28, 0]}>
-          <boxGeometry args={[0.035, 0.06, 0.065]} />
-          <meshPhysicalMaterial color="#6366f1" emissive="#6366f1" emissiveIntensity={0.8} />
-        </mesh>
-      </group>
-    </group>
+    <mesh>
+      <boxGeometry args={[0.4, 0.02, 0.12]} />
+      <meshPhysicalMaterial color={isSelected ? '#4ade80' : '#111'} roughness={0.7} />
+    </mesh>
   );
 }
 
-function GPUMesh({ explodeFactor, isSelected, onClick }: { explodeFactor: number; isSelected: boolean; onClick: () => void }) {
-  const data = PC_PARTS_DATA.gpu;
-  const targetX = data.basePos[0] + data.explodeDir[0] * explodeFactor;
-  const targetY = data.basePos[1] + data.explodeDir[1] * explodeFactor;
-  const targetZ = data.basePos[2] + data.explodeDir[2] * explodeFactor;
-
-  const groupRef = useRef<THREE.Group>(null);
-  const fanRef = useRef<THREE.Group>(null);
-
-  useFrame((_, dt) => {
-    if (groupRef.current) {
-      groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.1);
-      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, 0.1);
-      groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, targetZ, 0.1);
-    }
-    if (fanRef.current) fanRef.current.rotation.y += dt * 6;
-  });
-
+function PSUFallback({ isSelected }: { isSelected: boolean }) {
   return (
-    <group ref={groupRef} position={data.basePos} onClick={(e) => { e.stopPropagation(); onClick(); }}>
-      {/* Main GPU Shroud */}
-      <RoundedBox args={[1.3, 0.35, 0.4]} radius={0.02}>
-        <meshPhysicalMaterial color={isSelected ? '#f87171' : '#1e1e2d'} metalness={0.8} roughness={0.2} />
-      </RoundedBox>
-
-      {/* Tri Fans */}
-      <group ref={fanRef}>
-        {[-0.4, 0, 0.4].map((x, i) => (
-          <mesh key={i} position={[x, -0.18, 0]} rotation={[Math.PI / 2, 0, 0]}>
-            <cylinderGeometry args={[0.13, 0.13, 0.02, 12]} />
-            <meshStandardMaterial color="#333" />
-          </mesh>
-        ))}
-      </group>
-
-      {/* RGB Stripe */}
-      <mesh position={[0, 0.18, 0]}>
-        <boxGeometry args={[1.2, 0.02, 0.05]} />
-        <meshPhysicalMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={1} />
-      </mesh>
-
-      {/* PCIe Gold Fingers */}
-      <mesh position={[0, -0.2, -0.15]}>
-        <boxGeometry args={[0.9, 0.04, 0.02]} />
-        <meshStandardMaterial color="#d4a017" metalness={0.9} roughness={0.1} />
-      </mesh>
-    </group>
+    <mesh>
+      <boxGeometry args={[1.0, 0.5, 0.8]} />
+      <meshPhysicalMaterial color={isSelected ? '#fbbf24' : '#1a1a1a'} metalness={0.6} roughness={0.4} />
+    </mesh>
   );
 }
 
-function SSDMesh({ explodeFactor, isSelected, onClick }: { explodeFactor: number; isSelected: boolean; onClick: () => void }) {
-  const data = PC_PARTS_DATA.ssd;
-  const targetX = data.basePos[0] + data.explodeDir[0] * explodeFactor;
-  const targetY = data.basePos[1] + data.explodeDir[1] * explodeFactor;
-  const targetZ = data.basePos[2] + data.explodeDir[2] * explodeFactor;
-
-  const groupRef = useRef<THREE.Group>(null);
-  useFrame(() => {
-    if (!groupRef.current) return;
-    groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.1);
-    groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, 0.1);
-    groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, targetZ, 0.1);
-  });
-
+function FansFallback({ isSelected }: { isSelected: boolean }) {
   return (
-    <group ref={groupRef} position={data.basePos} onClick={(e) => { e.stopPropagation(); onClick(); }}>
-      <mesh>
-        <boxGeometry args={[0.4, 0.02, 0.12]} />
-        <meshPhysicalMaterial color={isSelected ? '#4ade80' : '#111'} roughness={0.7} />
-      </mesh>
-      {/* Flash Chips */}
-      {[-0.1, 0.1].map((x, i) => (
-        <mesh key={i} position={[x, 0.02, 0]}>
-          <boxGeometry args={[0.08, 0.01, 0.09]} />
-          <meshStandardMaterial color="#222" />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-function PSUMesh({ explodeFactor, isSelected, onClick }: { explodeFactor: number; isSelected: boolean; onClick: () => void }) {
-  const data = PC_PARTS_DATA.psu;
-  const targetX = data.basePos[0] + data.explodeDir[0] * explodeFactor;
-  const targetY = data.basePos[1] + data.explodeDir[1] * explodeFactor;
-  const targetZ = data.basePos[2] + data.explodeDir[2] * explodeFactor;
-
-  const groupRef = useRef<THREE.Group>(null);
-  useFrame(() => {
-    if (!groupRef.current) return;
-    groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.1);
-    groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, 0.1);
-    groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, targetZ, 0.1);
-  });
-
-  return (
-    <group ref={groupRef} position={data.basePos} onClick={(e) => { e.stopPropagation(); onClick(); }}>
-      <mesh>
-        <boxGeometry args={[1.0, 0.5, 0.8]} />
-        <meshPhysicalMaterial color={isSelected ? '#fbbf24' : '#1a1a1a'} metalness={0.6} roughness={0.4} />
-      </mesh>
-      {/* Fan Grill */}
-      <mesh position={[0, 0.26, 0]}>
-        <cylinderGeometry args={[0.22, 0.22, 0.01, 16]} />
-        <meshStandardMaterial color="#333" metalness={0.8} />
-      </mesh>
-      {/* Modular Socket connectors */}
-      <mesh position={[0.51, 0, 0]}>
-        <boxGeometry args={[0.02, 0.35, 0.5]} />
-        <meshStandardMaterial color="#000" />
-      </mesh>
-    </group>
-  );
-}
-
-function FansMesh({ explodeFactor, isSelected, onClick }: { explodeFactor: number; isSelected: boolean; onClick: () => void }) {
-  const data = PC_PARTS_DATA.fans;
-  const targetX = data.basePos[0] + data.explodeDir[0] * explodeFactor;
-  const targetY = data.basePos[1] + data.explodeDir[1] * explodeFactor;
-  const targetZ = data.basePos[2] + data.explodeDir[2] * explodeFactor;
-
-  const groupRef = useRef<THREE.Group>(null);
-  const fanRef = useRef<THREE.Group>(null);
-
-  useFrame((_, dt) => {
-    if (groupRef.current) {
-      groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.1);
-      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, 0.1);
-      groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, targetZ, 0.1);
-    }
-    if (fanRef.current) fanRef.current.rotation.z += dt * 5;
-  });
-
-  return (
-    <group ref={groupRef} position={data.basePos} onClick={(e) => { e.stopPropagation(); onClick(); }}>
+    <group>
       {[-0.4, 0, 0.4].map((y, i) => (
-        <group key={i} position={[0, y, 0]} ref={i === 1 ? fanRef : null}>
-          <mesh>
-            <cylinderGeometry args={[0.22, 0.22, 0.04, 16]} />
-            <meshPhysicalMaterial color="#ec4899" emissive="#ec4899" emissiveIntensity={0.6} transparent opacity={0.85} />
-          </mesh>
-        </group>
+        <mesh key={i} position={[0, y, 0]}>
+          <cylinderGeometry args={[0.22, 0.22, 0.04, 16]} />
+          <meshPhysicalMaterial color="#ec4899" emissive="#ec4899" emissiveIntensity={0.6} transparent opacity={0.85} />
+        </mesh>
       ))}
     </group>
   );
@@ -595,27 +439,27 @@ function Scene3D({
 }) {
   return (
     <>
-      <ambientLight intensity={1.2} />
-      <directionalLight position={[5, 10, 7]} intensity={1.5} castShadow />
-      <directionalLight position={[-5, 8, -5]} intensity={0.6} color="#93c5fd" />
-      <pointLight position={[0, 2, 0]} intensity={0.5} color="#00ffcc" />
+      <ambientLight intensity={1.5} />
+      <directionalLight position={[6, 12, 8]} intensity={1.8} castShadow />
+      <directionalLight position={[-6, 10, -6]} intensity={0.8} color="#93c5fd" />
+      <pointLight position={[0, 2, 0]} intensity={0.8} color="#00ffcc" />
 
-      {/* PC Component Meshes */}
-      <GlassMesh explodeFactor={explodeFactor} isSelected={selectedId === 'glass'} onClick={() => onSelectComponent('glass')} />
-      <CaseFrameMesh explodeFactor={explodeFactor} isSelected={selectedId === 'case_frame'} onClick={() => onSelectComponent('case_frame')} />
-      <MotherboardMesh explodeFactor={explodeFactor} isSelected={selectedId === 'motherboard'} onClick={() => onSelectComponent('motherboard')} />
-      <CPUMesh explodeFactor={explodeFactor} isSelected={selectedId === 'cpu'} onClick={() => onSelectComponent('cpu')} />
-      <CoolerMesh explodeFactor={explodeFactor} isSelected={selectedId === 'cooler'} onClick={() => onSelectComponent('cooler')} />
-      <RAMMesh explodeFactor={explodeFactor} isSelected={selectedId === 'ram'} onClick={() => onSelectComponent('ram')} />
-      <GPUMesh explodeFactor={explodeFactor} isSelected={selectedId === 'gpu'} onClick={() => onSelectComponent('gpu')} />
-      <SSDMesh explodeFactor={explodeFactor} isSelected={selectedId === 'ssd'} onClick={() => onSelectComponent('ssd')} />
-      <PSUMesh explodeFactor={explodeFactor} isSelected={selectedId === 'psu'} onClick={() => onSelectComponent('psu')} />
-      <FansMesh explodeFactor={explodeFactor} isSelected={selectedId === 'fans'} onClick={() => onSelectComponent('fans')} />
+      {/* 3D Component Meshes loaded from GLBs */}
+      <Component3DWrapper partId="glass" explodeFactor={explodeFactor} isSelected={selectedId === 'glass'} onClick={() => onSelectComponent('glass')} proceduralFallback={<GlassFallback isSelected={selectedId === 'glass'} />} />
+      <Component3DWrapper partId="case_frame" explodeFactor={explodeFactor} isSelected={selectedId === 'case_frame'} onClick={() => onSelectComponent('case_frame')} proceduralFallback={<CaseFallback isSelected={selectedId === 'case_frame'} />} />
+      <Component3DWrapper partId="motherboard" explodeFactor={explodeFactor} isSelected={selectedId === 'motherboard'} onClick={() => onSelectComponent('motherboard')} proceduralFallback={<MotherboardFallback isSelected={selectedId === 'motherboard'} />} />
+      <Component3DWrapper partId="cpu" explodeFactor={explodeFactor} isSelected={selectedId === 'cpu'} onClick={() => onSelectComponent('cpu')} proceduralFallback={<CPUFallback isSelected={selectedId === 'cpu'} />} />
+      <Component3DWrapper partId="cooler" explodeFactor={explodeFactor} isSelected={selectedId === 'cooler'} onClick={() => onSelectComponent('cooler')} proceduralFallback={<CoolerFallback isSelected={selectedId === 'cooler'} />} />
+      <Component3DWrapper partId="ram" explodeFactor={explodeFactor} isSelected={selectedId === 'ram'} onClick={() => onSelectComponent('ram')} proceduralFallback={<RAMFallback isSelected={selectedId === 'ram'} />} />
+      <Component3DWrapper partId="gpu" explodeFactor={explodeFactor} isSelected={selectedId === 'gpu'} onClick={() => onSelectComponent('gpu')} proceduralFallback={<GPUFallback isSelected={selectedId === 'gpu'} />} />
+      <Component3DWrapper partId="ssd" explodeFactor={explodeFactor} isSelected={selectedId === 'ssd'} onClick={() => onSelectComponent('ssd')} proceduralFallback={<SSDFallback isSelected={selectedId === 'ssd'} />} />
+      <Component3DWrapper partId="psu" explodeFactor={explodeFactor} isSelected={selectedId === 'psu'} onClick={() => onSelectComponent('psu')} proceduralFallback={<PSUFallback isSelected={selectedId === 'psu'} />} />
+      <Component3DWrapper partId="fans" explodeFactor={explodeFactor} isSelected={selectedId === 'fans'} onClick={() => onSelectComponent('fans')} proceduralFallback={<FansFallback isSelected={selectedId === 'fans'} />} />
 
       <OrbitControls
         enablePan={true}
         enableZoom={true}
-        minDistance={1.8}
+        minDistance={1.5}
         maxDistance={8.0}
         makeDefault
       />
@@ -623,27 +467,28 @@ function Scene3D({
   );
 }
 
-/* Single Component Inspector View (360 Isolation) */
+/* Single Component Inspector View (360 Isolation with GLB Rendering) */
 function ComponentInspectorCanvas({ componentId }: { componentId: string }) {
   const data = PC_PARTS_DATA[componentId];
   if (!data) return null;
 
   return (
     <Canvas camera={{ position: [0, 0.5, 2.5], fov: 45 }}>
-      <ambientLight intensity={1.5} />
-      <directionalLight position={[4, 6, 4]} intensity={1.8} />
-      <pointLight position={[0, 0, 0]} intensity={1} color={data.color} />
+      <ambientLight intensity={1.8} />
+      <directionalLight position={[4, 6, 4]} intensity={2.0} />
+      <pointLight position={[0, 0, 0]} intensity={1.2} color={data.color} />
       <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
-        {componentId === 'cpu' && <CPUMesh explodeFactor={0} isSelected={true} onClick={() => {}} />}
-        {componentId === 'gpu' && <GPUMesh explodeFactor={0} isSelected={true} onClick={() => {}} />}
-        {componentId === 'ram' && <RAMMesh explodeFactor={0} isSelected={true} onClick={() => {}} />}
-        {componentId === 'motherboard' && <MotherboardMesh explodeFactor={0} isSelected={true} onClick={() => {}} />}
-        {componentId === 'cooler' && <CoolerMesh explodeFactor={0} isSelected={true} onClick={() => {}} />}
-        {componentId === 'ssd' && <SSDMesh explodeFactor={0} isSelected={true} onClick={() => {}} />}
-        {componentId === 'psu' && <PSUMesh explodeFactor={0} isSelected={true} onClick={() => {}} />}
-        {componentId === 'fans' && <FansMesh explodeFactor={0} isSelected={true} onClick={() => {}} />}
-        {componentId === 'glass' && <GlassMesh explodeFactor={0} isSelected={true} onClick={() => {}} />}
-        {componentId === 'case_frame' && <CaseFrameMesh explodeFactor={0} isSelected={true} onClick={() => {}} />}
+        {data.glbFile ? (
+          <SafeGLBModel
+            file={data.glbFile}
+            scale={data.glbScale || 0.18}
+            rotation={data.glbRotation || [0, 0, 0]}
+            isSelected={true}
+            fallback={<GPUFallback isSelected={true} />}
+          />
+        ) : (
+          <GPUFallback isSelected={true} />
+        )}
       </Float>
       <OrbitControls autoRotate autoRotateSpeed={3} makeDefault />
     </Canvas>
@@ -651,10 +496,19 @@ function ComponentInspectorCanvas({ componentId }: { componentId: string }) {
 }
 
 export default function PCExplodedViewer() {
-  const [explodeFactor, setExplodeFactor] = useState(0.6); // default partially exploded
+  const [explodeFactor, setExplodeFactor] = useState(0.65);
   const [autoPulse, setAutoPulse] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>('gpu');
   const [inspectorMode, setInspectorMode] = useState(false);
+
+  // Preload GLB models in background
+  useEffect(() => {
+    Object.values(PC_PARTS_DATA).forEach((item) => {
+      if (item.glbFile) {
+        try { useGLTF.preload(item.glbFile); } catch {}
+      }
+    });
+  }, []);
 
   // Handle auto pulse explosion
   useEffect(() => {
@@ -682,10 +536,10 @@ export default function PCExplodedViewer() {
           </div>
           <div>
             <h1 className="text-lg font-bold tracking-wide bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent">
-              BÓC TÁCH LINH KIỆN 3D INTERACTIVE
+              BÓC TÁCH LINH KIỆN 3D GLB REALTIME
             </h1>
             <p className="text-xs text-slate-400">
-              Kéo thả thanh trượt để tự do phân tách & khám phá chi tiết linh kiện máy tính
+              Render mô hình 3D thực tế (GLB Model) & tự do phân tách chi tiết máy tính
             </p>
           </div>
         </div>
@@ -850,7 +704,7 @@ export default function PCExplodedViewer() {
                   onClick={() => setInspectorMode(true)}
                   className="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-emerald-500 hover:from-indigo-600 hover:to-emerald-600 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25 transition-all"
                 >
-                  <RotateCw className="w-4 h-4" /> Soi 3D Cận Cảnh 360° Linh Kiện Này
+                  <RotateCw className="w-4 h-4" /> Soi 3D Cận Cảnh 360° GLB Model Này
                 </button>
               </div>
             </motion.aside>
@@ -877,14 +731,14 @@ export default function PCExplodedViewer() {
                 </button>
                 <div>
                   <h2 className="text-lg font-bold text-white">{activePart.name}</h2>
-                  <p className="text-xs text-slate-400">Chế độ xoay soi 360° linh kiện bóc tách riêng lẻ</p>
+                  <p className="text-xs text-slate-400">Chế độ xoay soi 360° GLB model linh kiện thực tế</p>
                 </div>
               </div>
               <button
                 onClick={() => setInspectorMode(false)}
                 className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold"
               >
-                Quay lại sơ đồ tổng thể
+                Quay lại sơ đồ bóc tách
               </button>
             </div>
 
@@ -892,7 +746,7 @@ export default function PCExplodedViewer() {
               <ComponentInspectorCanvas componentId={selectedId} />
               <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/80 px-4 py-2 rounded-full border border-slate-800 text-xs text-slate-400 font-mono flex items-center gap-2">
                 <RotateCw className="w-3.5 h-3.5 text-emerald-400 animate-spin" />
-                Nhấp & giữ chuột trái để xoay linh kiện tự do
+                Nhấp & giữ chuột trái để xoay mô hình GLB 3D tự do
               </div>
             </div>
           </motion.div>
