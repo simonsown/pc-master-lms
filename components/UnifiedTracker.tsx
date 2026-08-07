@@ -10,7 +10,7 @@ const HAND = 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/ha
 
 const isLow = typeof navigator !== 'undefined' && (navigator as any).hardwareConcurrency <= 4;
 
-export default function UnifiedTracker() {
+export default function UnifiedTracker({ preview = true }: { preview?: boolean }) {
   const vRef = useRef<HTMLVideoElement>(null);
   const cRef = useRef<HTMLCanvasElement>(null);
 
@@ -124,6 +124,7 @@ export default function UnifiedTracker() {
       borderRadius: 12, overflow: 'hidden',
       border: '1px solid rgba(0,255,136,0.3)',
       boxShadow: '0 4px 24px rgba(0,0,0,0.6)',
+      display: preview ? 'block' : 'none',
     }}>
       <video ref={vRef} muted playsInline
         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }}
