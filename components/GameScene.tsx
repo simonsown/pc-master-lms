@@ -519,6 +519,90 @@ function Whiteboard({ position }: { position: [number, number, number] }) {
   );
 }
 
+/* ========== ANIMATED BLINKING COMPONENT SLOT INDICATOR ========== */
+function BlinkingSlotIndicator({
+  type,
+  slotId,
+  label,
+  pos,
+  color,
+  size = [0.25, 0.08, 0.25] as [number, number, number],
+}: {
+  type: ComponentType;
+  slotId: string;
+  label: string;
+  pos: [number, number, number];
+  color: string;
+  size?: [number, number, number];
+}) {
+  const matRef = useRef<THREE.MeshStandardMaterial>(null);
+  const [hovered, setHovered] = useState(false);
+  const installed = useAssemblyStore((s) => s.components.some((c) => c.slotId === slotId && c.installed));
+
+  useFrame((state) => {
+    if (!matRef.current) return;
+    const pulse = (Math.sin(state.clock.getElapsedTime() * 6) + 1) / 2;
+    matRef.current.emissiveIntensity = 0.4 + pulse * 2.2;
+    matRef.current.opacity = 0.45 + pulse * 0.45;
+  });
+
+  const handleClick = () => {
+    if (installed) return;
+    const dep = useAssemblyStore.getState().checkDependencies(slotId);
+    if (!dep.ok) {
+      alert('⚠️ Cần lắp Mainboard trước!');
+      return;
+    }
+    useAssemblyStore.getState().installComponent(slotId, `comp_${slotId}`);
+  };
+
+  if (installed) return null;
+
+  return (
+    <group position={pos}>
+      <mesh
+        onPointerOver={(e) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = 'pointer'; }}
+        onPointerOut={() => { setHovered(false); document.body.style.cursor = 'default'; }}
+        onClick={(e) => { e.stopPropagation(); handleClick(); }}
+      >
+        <boxGeometry args={size} />
+        <meshStandardMaterial
+          ref={matRef}
+          color={color}
+          emissive={color}
+          emissiveIntensity={1.2}
+          wireframe={true}
+          transparent
+          opacity={0.8}
+        />
+      </mesh>
+
+      <mesh>
+        <boxGeometry args={[size[0] * 0.9, size[1] * 0.9, size[2] * 0.9]} />
+        <meshBasicMaterial color={color} transparent opacity={hovered ? 0.5 : 0.22} />
+      </mesh>
+
+      <sprite position={[0, size[1] / 2 + 0.12, 0]} scale={[0.45, 0.15, 1]}>
+        <spriteMaterial map={(() => {
+          const c = document.createElement('canvas'); c.width = 256; c.height = 80;
+          const ctx = c.getContext('2d')!;
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+          ctx.beginPath(); (ctx as any).roundRect(0, 0, 256, 80, 10); ctx.fill();
+          ctx.strokeStyle = color; ctx.lineWidth = 4;
+          ctx.beginPath(); (ctx as any).roundRect(2, 2, 252, 76, 8); ctx.stroke();
+          ctx.fillStyle = color; ctx.font = 'bold 22px monospace';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(`⚡ ${label}`, 128, 28);
+          ctx.fillStyle = '#ffffff'; ctx.font = 'bold 16px sans-serif';
+          ctx.fillText('Nhấp để lắp', 128, 56);
+          const t = new THREE.CanvasTexture(c); t.needsUpdate = true;
+          return t;
+        })()} transparent opacity={0.95} depthTest={false} />
+      </sprite>
+    </group>
+  );
+}
+
 function PcCaseDetailed() {
   const bootStatusVal = useAssemblyStore((s) => s.bootStatus);
   const mb = useAssemblyStore((s) => s.components.some((c) => c.slotId === 'motherboard_1' && c.installed));
@@ -532,50 +616,75 @@ function PcCaseDetailed() {
   const count = (mb ? 1 : 0) + (cpu ? 1 : 0) + (cooler ? 1 : 0) + (ram ? 1 : 0) + (gpu ? 1 : 0) + (psu ? 1 : 0) + (ssd ? 1 : 0);
 
   const glowColor = bootStatusVal === 'success' ? '#00ffcc' : bootStatusVal === 'failed' ? '#ff4466' : '#4488ff';
-  const glowIntensity = bootStatusVal === 'success' ? 1 : bootStatusVal === 'failed' ? 0.6 : 0.2;
+  const glowIntensity = bootStatusVal === 'success' ? 1 : bootStatusVal === 'failed' ? 0.6 : 0.25;
 
   const installedByType = useMemo(() => ({
     motherboard: mb, cpu, cooler, ram, gpu, psu, ssd,
   }), [mb, cpu, cooler, ram, gpu, psu, ssd]);
 
-  const PARTS = useMemo(() => [
-    { type: 'motherboard' as const, pos: [0, -0.15, 0] as [number, number, number] },
-    { type: 'cpu' as const, pos: [0.3, 0.3, 0.12] as [number, number, number] },
-    { type: 'cooler' as const, pos: [0.3, 0.42, 0.12] as [number, number, number] },
-    { type: 'ram' as const, pos: [0.52, 0.27, 0.28] as [number, number, number] },
-    { type: 'gpu' as const, pos: [0.3, 0.15, -0.45] as [number, number, number] },
-    { type: 'psu' as const, pos: [0, -0.3, 0.6] as [number, number, number] },
-    { type: 'ssd' as const, pos: [0.32, 0.18, -0.25] as [number, number, number] },
+  const SLOTS = useMemo(() => [
+    { type: 'motherboard' as const, slotId: 'motherboard_1', label: 'MAINBOARD', pos: [0, -0.05, -0.1] as [number, number, number], color: '#8b5cf6', size: [1.2, 0.04, 1.0] as [number, number, number] },
+    { type: 'cpu' as const, slotId: 'cpu_1', label: 'SOCKET CPU', pos: [0.15, 0.12, 0.02] as [number, number, number], color: '#00d4aa', size: [0.22, 0.05, 0.22] as [number, number, number] },
+    { type: 'cooler' as const, slotId: 'cooler_1', label: 'TẢN NHIỆT', pos: [0.15, 0.24, 0.02] as [number, number, number], color: '#00aaff', size: [0.3, 0.12, 0.3] as [number, number, number] },
+    { type: 'ram' as const, slotId: 'ram_1', label: 'KHE RAM', pos: [0.38, 0.12, 0.1] as [number, number, number], color: '#6366f1', size: [0.1, 0.1, 0.25] as [number, number, number] },
+    { type: 'gpu' as const, slotId: 'gpu_1', label: 'CARD GRAPHICS', pos: [0.15, -0.02, -0.25] as [number, number, number], color: '#ef4444', size: [0.75, 0.1, 0.22] as [number, number, number] },
+    { type: 'psu' as const, slotId: 'psu_1', label: 'NGUỒN PSU', pos: [-0.3, -0.25, 0.35] as [number, number, number], color: '#f59e0b', size: [0.55, 0.2, 0.35] as [number, number, number] },
+    { type: 'ssd' as const, slotId: 'ssd_1', label: 'SSD NVMe', pos: [0.22, 0.02, -0.12] as [number, number, number], color: '#22c55e', size: [0.25, 0.03, 0.08] as [number, number, number] },
   ], []);
 
   return (
-    <group position={[0, 0.9, -0.3]}>
-      <RoundedBox args={[2.6, 1.3, 2.0]} radius={0.02}>
-        <meshPhysicalMaterial color="#2a3a5c" metalness={0.7} roughness={0.25} envMapIntensity={0.8} />
+    <group position={[0, 0.88, 0]}>
+      {/* PC Case Enclosure */}
+      <RoundedBox args={[1.5, 0.95, 1.2]} radius={0.02}>
+        <meshPhysicalMaterial color="#1a233a" metalness={0.75} roughness={0.25} envMapIntensity={0.8} />
       </RoundedBox>
 
-      <mesh position={[-1.305, 0, 0]}>
-        <planeGeometry args={[1.98, 1.26]} />
-        <meshPhysicalMaterial color="#88ccff" metalness={0.3} roughness={0.05} transparent opacity={0.15} side={THREE.DoubleSide} envMapIntensity={1.5} />
+      {/* Front Glass Panel */}
+      <mesh position={[0, 0, 0.605]}>
+        <planeGeometry args={[1.42, 0.88]} />
+        <meshPhysicalMaterial color="#88ccff" metalness={0.2} roughness={0.05} transparent opacity={0.18} side={THREE.DoubleSide} envMapIntensity={1.5} />
       </mesh>
 
-      <mesh position={[0, 0.04, 1.015]}>
-        <planeGeometry args={[0.35, 0.025]} />
+      {/* RGB Status LED Strip */}
+      <mesh position={[0, 0.44, 0.606]}>
+        <planeGeometry args={[1.2, 0.02]} />
         <meshPhysicalMaterial color={glowColor} transparent opacity={glowIntensity} emissive={glowColor} emissiveIntensity={glowIntensity * 3} />
       </mesh>
 
-      <pointLight position={[0, 0.3, 0.8]} intensity={glowIntensity} color={glowColor} distance={2.5} decay={0.5} />
+      <pointLight position={[0, 0.2, 0.3]} intensity={glowIntensity * 1.5} color={glowColor} distance={2.5} decay={0.5} />
 
-      <Text fontSize={0.08} color="#ffffff" anchorX="center" anchorY="middle" position={[0, 0.7, 0]}>
-        {`${count}/7`}
+      {/* Assembly Progress Header */}
+      <Text fontSize={0.07} color="#00ffcc" anchorX="center" anchorY="middle" position={[0, 0.55, 0.3]}>
+        {`HỆ THỐNG PC CASE: ${count}/7 LINH KIỆN`}
       </Text>
 
-      {PARTS.map(({ type, pos }) => {
+      {/* Base Mainboard Model when motherboard installed */}
+      {mb && (
+        <group position={[0, -0.05, -0.1]} scale={0.4}>
+          <MainboardModel />
+        </group>
+      )}
+
+      {/* Blinking Slot Highlights for Missing Components */}
+      {SLOTS.map((slot) => (
+        <BlinkingSlotIndicator
+          key={slot.slotId}
+          type={slot.type}
+          slotId={slot.slotId}
+          label={slot.label}
+          pos={slot.pos}
+          color={slot.color}
+          size={slot.size}
+        />
+      ))}
+
+      {/* Installed Component 3D Models */}
+      {SLOTS.map(({ type, pos }) => {
         const installed = installedByType[type];
-        if (!installed) return null;
+        if (!installed || type === 'motherboard') return null;
         return (
           <group key={type} position={pos}>
-            <group scale={0.35}>
+            <group scale={0.3}>
               <DetailedComponentModel type={type} />
             </group>
           </group>
@@ -1099,8 +1208,9 @@ export default function GameScene() {
           </mesh>
         </group>
 
-        {/* ===== BÀN LỚN Ở GIỮA ===== */}
+        {/* ===== BÀN LỚN Ở GIỮA VÀ CASE MÁY TÍNH NHẤP NHÁY VỊ TRÍ LINH KIỆN ===== */}
         <CentralTable position={[0, 0, 0]} />
+        <PcCaseDetailed />
 
         {/* ===== 4 BÀN HỌC SINH VỚI MONITOR + CASE NHỎ ĐỨNG BÊN PHẢI ===== */}
         <Desk position={[-3.5, 0, -3.5]} />
