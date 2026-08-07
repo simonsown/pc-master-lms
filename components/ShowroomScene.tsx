@@ -268,61 +268,102 @@ function Pedestal({ color }: { color: string }) {
   );
 }
 
-function ClickableItem({ item, onFocus }: {
-  item: typeof ITEMS[0]; onFocus: (id: string) => void;
+function ClickableItem({ item, onFocus, onDrop }: {
+  item: typeof ITEMS[0] & { currentPos?: [number,number,number] };
+  onFocus: (id: string) => void;
+  onDrop: (id: string, pos: [number,number,number]) => void;
 }) {
   const ref = useRef<THREE.Group>(null);
+  const floatRef = useRef<THREE.Group>(null);
   const pointerDownPos = useRef({ x: 0, y: 0 });
+  const isDragging = useRef(false);
+  const dragPlane = useRef(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0));
+  const { camera, gl } = useThree();
+  const pos = item.currentPos || [item.pos[0], item.pos[1], item.pos[2]] as [number,number,number];
 
   useFrame(({ clock }) => {
-    if (!ref.current) return;
-    ref.current.position.y = 0.2 + Math.sin(clock.elapsedTime * 0.6 + ITEMS.indexOf(item)) * 0.04;
+    if (!floatRef.current) return;
+    if (!isDragging.current) {
+      floatRef.current.position.y = 0.2 + Math.sin(clock.elapsedTime * 0.6 + ITEMS.indexOf(item)) * 0.04;
+    }
   });
 
-  const handlePointerDown = (e: React.PointerEvent) => {
+  const handlePointerDown = (e: any) => {
+    e.stopPropagation();
     pointerDownPos.current = { x: e.clientX, y: e.clientY };
+    isDragging.current = false;
+    gl.domElement.setPointerCapture(e.pointerId);
   };
 
-  const handlePointerUp = (e: React.PointerEvent) => {
+  const handlePointerMove = (e: any) => {
     const dx = Math.abs(e.clientX - pointerDownPos.current.x);
     const dy = Math.abs(e.clientY - pointerDownPos.current.y);
-    if (dx < 6 && dy < 6) {
-      onFocus(item.id);
+    if (dx > 5 || dy > 5) {
+      isDragging.current = true;
+      document.body.style.cursor = 'grabbing';
+
+      // Raycast onto horizontal plane at y=1.5 (lifting item up)
+      const rect = gl.domElement.getBoundingClientRect();
+      const ndc = new THREE.Vector2(
+        ((e.clientX - rect.left) / rect.width) * 2 - 1,
+        -((e.clientY - rect.top) / rect.height) * 2 + 1
+      );
+      const raycaster = new THREE.Raycaster();
+      raycaster.setFromCamera(ndc, camera);
+      dragPlane.current = new THREE.Plane(new THREE.Vector3(0, 1, 0), -1.5);
+      const target = new THREE.Vector3();
+      raycaster.ray.intersectPlane(dragPlane.current, target);
+      if (ref.current && target.length() > 0) {
+        ref.current.position.set(target.x, 1.5, target.z);
+      }
     }
   };
 
+  const handlePointerUp = (e: any) => {
+    gl.domElement.releasePointerCapture(e.pointerId);
+    document.body.style.cursor = 'default';
+    if (!isDragging.current) {
+      const dx = Math.abs(e.clientX - pointerDownPos.current.x);
+      const dy = Math.abs(e.clientY - pointerDownPos.current.y);
+      if (dx < 6 && dy < 6) { onFocus(item.id); }
+    } else if (ref.current) {
+      const p = ref.current.position;
+      onDrop(item.id, [p.x, 0, p.z]);
+    }
+    isDragging.current = false;
+  };
+
   return (
-    <group position={[item.pos[0], item.pos[1], item.pos[2]]}>
+    <group ref={ref} position={pos}>
       <Pedestal color={item.color} />
-      <group ref={ref} position={[0, 0.2, 0]}>
+      <group ref={floatRef} position={[0, 0.2, 0]}>
         <SafeGlb file={item.file} color={item.color} scale={0.1} />
       </group>
 
-      {/* 2D HTML Floating Button */}
-      <Html position={[0, 1.1, 0]} center distanceFactor={12}>
+      {/* 2D HTML Floating Label */}
+      <Html position={[0, 1.2, 0]} center distanceFactor={12}>
         <div
-          onClick={(e) => { e.stopPropagation(); onFocus(item.id); }}
           style={{
             background: 'rgba(15,23,42,0.9)', color: '#ffffff', border: `1.5px solid ${item.color}`,
             padding: '6px 12px', borderRadius: 20, fontSize: 11, fontWeight: 700,
-            cursor: 'pointer', whiteSpace: 'nowrap', boxShadow: '0 4px 14px rgba(0,0,0,0.3)',
-            display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.15s',
-            backdropFilter: 'blur(6px)',
+            whiteSpace: 'nowrap', boxShadow: '0 4px 14px rgba(0,0,0,0.3)',
+            display: 'flex', alignItems: 'center', gap: 6,
+            backdropFilter: 'blur(6px)', userSelect: 'none',
           }}
-          onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.08)'; }}
-          onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
         >
-          <span style={{ color: item.color }}>🔍</span> {item.name}
+          <span style={{ color: item.color }}>📦</span> {item.name}
+          <span style={{ color: '#64748b', fontSize: 9 }}>Kéo để di chuyển</span>
         </div>
       </Html>
 
-      {/* Invisible Click Target */}
+      {/* Drag + Click Target */}
       <mesh
         position={[0, 0.5, 0]}
         onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
-        onPointerOut={() => { document.body.style.cursor = 'default'; }}
+        onPointerOver={() => { if (!isDragging.current) document.body.style.cursor = 'grab'; }}
+        onPointerOut={() => { if (!isDragging.current) document.body.style.cursor = 'default'; }}
       >
         <boxGeometry args={[1.4, 1.4, 1.4]} />
         <meshBasicMaterial transparent opacity={0} />
@@ -484,6 +525,35 @@ function CentralDeskWithBlinkingCase({ position }: { position: [number, number, 
 }
 
 function Hall({ onFocusItem }: { onFocusItem: (id: string) => void }) {
+  // Track drag-drop positions for each item
+  const [positions, setPositions] = useState<Record<string, [number,number,number]>>({});
+
+  const handleDrop = (id: string, newPos: [number,number,number]) => {
+    // Snap to desk if dropped near center
+    const dx = Math.abs(newPos[0]);
+    const dz = Math.abs(newPos[2]);
+    if (dx < 1.8 && dz < 1.0) {
+      // Dropped onto desk — try to install
+      const slotMap: Record<string, string> = {
+        mb: 'motherboard_1', mb2: 'motherboard_1',
+        ryzen: 'cpu_1',
+        ram: 'ram_1', xpg: 'ram_1',
+        gpu: 'gpu_1',
+        pc: 'psu_1',
+        kit: 'ssd_1',
+        retro: 'cooler_1',
+      };
+      const slotId = slotMap[id];
+      if (slotId) {
+        const { installComponent, checkDependencies } = useAssemblyStore.getState();
+        if (checkDependencies(slotId)) {
+          installComponent(slotId);
+        }
+      }
+    }
+    setPositions(prev => ({ ...prev, [id]: newPos }));
+  };
+
   return (
     <group>
       <color attach="background" args={['#ffffff']} />
@@ -502,14 +572,19 @@ function Hall({ onFocusItem }: { onFocusItem: (id: string) => void }) {
         PHÒNG TRƯNG BÀY LINH KIỆN PC 3D
       </Text>
       <Text position={[0, 2.55, -11.5]} fontSize={0.22} color="#667799" font="monospace" anchorX="center" anchorY="middle">
-        Bấm vào thẻ linh kiện để xoay & xem chi tiết 3D toàn màn hình
+        Giữ & kéo linh kiện vào bàn trung tâm để lắp vào PC Case!
       </Text>
 
       {/* ===== BÀN TRUNG TÂM & CASE MÁY TÍNH VỚI VỊ TRÍ LINH KIỆN NHẤP NHÁY ===== */}
       <CentralDeskWithBlinkingCase position={[0, 0, 0]} />
 
       {ITEMS.map((item) => (
-        <ClickableItem key={item.id} item={item} onFocus={onFocusItem} />
+        <ClickableItem
+          key={item.id}
+          item={{ ...item, currentPos: positions[item.id] || [item.pos[0], item.pos[1], item.pos[2]] }}
+          onFocus={onFocusItem}
+          onDrop={handleDrop}
+        />
       ))}
     </group>
   );
