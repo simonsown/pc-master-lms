@@ -8,11 +8,11 @@ import * as THREE from 'three';
 // Tối ưu CPU theo sức máy: máy yếu = ít cỏ + bán kính nhỏ
 function pickGrassBudget() {
   const cores = typeof navigator !== 'undefined' ? (navigator as any).hardwareConcurrency || 4 : 4;
-  if (cores <= 2) return { count: 3500, radius: 22 };
-  if (cores <= 4) return { count: 6500, radius: 32 };
-  return { count: 9000, radius: 42 };
+  if (cores <= 2) return { count: 2200, radius: 18 };
+  if (cores <= 4) return { count: 4200, radius: 26 };
+  return { count: 6500, radius: 34 };
 }
-const GRASS_BUDGET = typeof window !== 'undefined' ? pickGrassBudget() : { count: 9000, radius: 42 };
+const GRASS_BUDGET = typeof window !== 'undefined' ? pickGrassBudget() : { count: 6500, radius: 34 };
 const GRASS_COUNT = GRASS_BUDGET.count;
 const FIELD_RADIUS = GRASS_BUDGET.radius;
 const GRASS_HEIGHT = 0.5; // cỏ thấp hơn

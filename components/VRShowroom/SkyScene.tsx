@@ -26,7 +26,7 @@ export function Sky() {
       />
       {/* Mặt trời */}
       <mesh position={[30, 28, -60]}>
-        <sphereGeometry args={[6, 24, 24]} />
+        <sphereGeometry args={[6, 16, 16]} />
         <meshBasicMaterial color="#fff7cc" />
       </mesh>
       <pointLight position={[30, 28, -60]} intensity={1.6} color="#fff0c0" distance={110} />
@@ -74,7 +74,7 @@ function Cloud({ seed }: { seed: number }) {
     <group ref={group} position={[x0, y, z]}>
       {puffs.map((p, i) => (
         <mesh key={i} position={p.pos as any} scale={p.scale} material={mat}>
-          <sphereGeometry args={[1, 14, 12]} />
+          <sphereGeometry args={[1, 10, 8]} />
         </mesh>
       ))}
     </group>

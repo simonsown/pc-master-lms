@@ -67,18 +67,18 @@ export default function VRShowroom() {
         <CameraEngine preview={camOn} />
         <Canvas
           camera={{ position: [0, 1.6, 3], fov: 60, near: 0.1, far: 200 }}
-          dpr={isLowEnd ? [0.5, 0.75] : [0.75, 1]}
+          dpr={isLowEnd ? [0.4, 0.6] : [0.6, 0.8]}
           gl={{
             antialias: false,
             powerPreference: 'low-power' as const,
             toneMapping: THREE.ACESFilmicToneMapping,
-            toneMappingExposure: 1.35,
+            toneMappingExposure: 1.3,
           }}
           shadows
           onCreated={({ gl }) => {
             gl.setClearColor('#bfe3ff');
             gl.shadowMap.enabled = true;
-            gl.shadowMap.type = THREE.PCFSoftShadowMap;
+            gl.shadowMap.type = THREE.BasicShadowMap;
           }}
         >
           <SceneInner />

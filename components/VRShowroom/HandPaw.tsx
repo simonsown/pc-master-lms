@@ -51,13 +51,13 @@ export default function HandPaw() {
 
       // Xây mới joint/bone nếu thiếu
       while (bonesRef.current.length < BONE_COUNT) {
-        const geo = new THREE.CylinderGeometry(0.012, 0.012, 1, 5, 1);
+        const geo = new THREE.CylinderGeometry(0.009, 0.009, 1, 5, 1);
         const m = new THREE.Mesh(geo, skin);
         g.add(m);
         bonesRef.current.push(m);
       }
       while (jointsRef.current.length < 21) {
-        const geo = new THREE.SphereGeometry(0.015, 7, 5);
+        const geo = new THREE.SphereGeometry(0.012, 7, 5);
         const m = new THREE.Mesh(geo, jointMat);
         g.add(m);
         jointsRef.current.push(m);
@@ -118,12 +118,12 @@ export default function HandPaw() {
     <group ref={root} visible={false}>
       {/* lòng bàn tay */}
       <mesh ref={palmRef} visible={false}>
-        <sphereGeometry args={[0.06, 8, 6]} />
+        <sphereGeometry args={[0.035, 8, 6]} />
         <primitive object={skin} attach="material" />
       </mesh>
       {/* cổ tay */}
       <mesh ref={wristRef} visible={false}>
-        <sphereGeometry args={[0.03, 8, 6]} />
+        <sphereGeometry args={[0.02, 8, 6]} />
         <primitive object={jointMat} attach="material" />
       </mesh>
     </group>

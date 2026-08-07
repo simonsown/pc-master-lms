@@ -6,10 +6,10 @@ import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { headPose } from './tracking-shared';
 
-const HEAD_GAIN_YAW = 2.6;    // độ nhạy quay đầu
-const HEAD_GAIN_PITCH = 1.8;
-const HEAD_GAIN_ROLL = 0.8;
-const SMOOTH = 0.1;
+const HEAD_GAIN_YAW = 2.2;    // độ nhạy quay đầu
+const HEAD_GAIN_PITCH = 1.5;
+const HEAD_GAIN_ROLL = 0.6;
+const SMOOTH = 0.18;
 
 export default function CameraRig() {
   const { camera } = useThree();

@@ -89,9 +89,9 @@ export default function CameraEngine({ preview = true }: { preview?: boolean }) 
                   // roll: độ chênh cao 2 mắt
                   const rollRaw = Math.atan2(re.y - le.y, re.x - le.x) * 4.0;
 
-                  head.yaw = smooth(head.yaw, Math.max(-1.2, Math.min(1.2, yawRaw)), 0.5);
-                  head.pitch = smooth(head.pitch, Math.max(-1.0, Math.min(1.0, pitchRaw)), 0.5);
-                  head.roll = smooth(head.roll, Math.max(-0.8, Math.min(0.8, rollRaw)), 0.5);
+                  head.yaw = smooth(head.yaw, Math.max(-1.2, Math.min(1.2, yawRaw)), 0.7);
+                  head.pitch = smooth(head.pitch, Math.max(-1.0, Math.min(1.0, pitchRaw)), 0.7);
+                  head.roll = smooth(head.roll, Math.max(-0.8, Math.min(0.8, rollRaw)), 0.7);
 
                   headPose.yaw = head.yaw;
                   headPose.pitch = head.pitch;
