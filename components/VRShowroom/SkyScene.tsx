@@ -11,25 +11,25 @@ export function Sky() {
     <>
       {/* Nền trời gradient cam/xanh khi hoàng hôn */}
       <color attach="background" args={['#bfe3ff']} />
-      <fog attach="fog" args={['#cfe8ff', 40, 120]} />
-      <hemisphereLight args={['#ffffff', '#7fb069', 0.9]} />
+      <fog attach="fog" args={['#cfe8ff', 50, 140]} />
+      <hemisphereLight args={['#ffffff', '#8fd066', 1.1]} />
       <directionalLight
         position={[20, 30, 10]}
-        intensity={1.4}
+        intensity={2.2}
         color="#fff3d6"
         castShadow
-        shadow-mapSize={[1024, 1024]}
-        shadow-camera-left={-40}
-        shadow-camera-right={40}
-        shadow-camera-top={40}
-        shadow-camera-bottom={-40}
+        shadow-mapSize={[512, 512]}
+        shadow-camera-left={-35}
+        shadow-camera-right={35}
+        shadow-camera-top={35}
+        shadow-camera-bottom={-35}
       />
       {/* Mặt trời */}
       <mesh position={[30, 28, -60]}>
         <sphereGeometry args={[6, 24, 24]} />
         <meshBasicMaterial color="#fff7cc" />
       </mesh>
-      <pointLight position={[30, 28, -60]} intensity={1.2} color="#fff0c0" distance={100} />
+      <pointLight position={[30, 28, -60]} intensity={1.6} color="#fff0c0" distance={110} />
       <Clouds />
     </>
   );

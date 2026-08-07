@@ -1,6 +1,7 @@
 'use client';
 
 // Tay giả VR: khi camera nhận diện được tay -> hiện bàn tay 3D bám theo landmarks
+// Bàn tay gắn vào KHÔNG GIAN CAMERA: xoay đầu/camera thì tay xoay theo góc nhìn (đồng bộ)
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -17,6 +18,8 @@ const BONE_PAIRS: [number, number][] = [
 ];
 const BONE_COUNT = BONE_PAIRS.length;
 const SPEED = 0.35;
+const HAND_SCALE = 0.6;   // bàn tay rộng ~0.35m
+const DEPTH = -0.85;      // cách mặt ~0.85m về phía trước (camera -Z)
 
 export default function HandPaw() {
   const root = useRef<THREE.Group>(null);
@@ -28,9 +31,9 @@ export default function HandPaw() {
   const visible = useRef(false);
 
   const skin = useMemo(() =>
-    new THREE.MeshStandardMaterial({ color: '#ffb07a', roughness: 0.6 }), []);
+    new THREE.MeshStandardMaterial({ color: '#ffc9a3', roughness: 0.55 }), []);
   const jointMat = useMemo(() =>
-    new THREE.MeshStandardMaterial({ color: '#e69259', roughness: 0.5 }), []);
+    new THREE.MeshStandardMaterial({ color: '#f0a878', roughness: 0.45 }), []);
 
   useFrame(({ camera }) => {
     const g = root.current;
@@ -42,38 +45,40 @@ export default function HandPaw() {
       visible.current = true;
 
       const lm = h.landmarks;
-      // Định vị lòng bàn tay cách camera khoảng 0.8m, phía trước
-      const fwd = new THREE.Vector3(0, 0, -0.8).applyQuaternion(camera.quaternion);
-      g.position.copy(camera.position.clone().add(fwd));
+      // Gắn toàn bộ tay vào camera -> quay góc nhìn thì tay xoay đồng bộ theo
+      g.position.copy(camera.position);
+      g.quaternion.copy(camera.quaternion);
 
       // Xây mới joint/bone nếu thiếu
       while (bonesRef.current.length < BONE_COUNT) {
         const geo = new THREE.CylinderGeometry(0.012, 0.012, 1, 5, 1);
         const m = new THREE.Mesh(geo, skin);
-        m.castShadow = true;
         g.add(m);
         bonesRef.current.push(m);
       }
       while (jointsRef.current.length < 21) {
-        const geo = new THREE.SphereGeometry(0.014, 7, 5);
+        const geo = new THREE.SphereGeometry(0.015, 7, 5);
         const m = new THREE.Mesh(geo, jointMat);
         g.add(m);
         jointsRef.current.push(m);
       }
 
-// Smooth + mô phỏng toạ độ 3D (nghiêng nhẹ cho trông 3D)
-      const h3 = 0.18;
+      // Toạ độ camera-local: +x = phải, +y = lên, -z = phía trước mặt
       const pts = new Array(21);
       for (let i = 0; i < 21; i++) {
         const r = lm[i];
-        smooth.current[i][0] += ((r[0] - 0.5) - smooth.current[i][0]) * SPEED;
-        smooth.current[i][1] += ((0.5 - r[1]) - smooth.current[i][1]) * SPEED;
-        smooth.current[i][2] += ((-r[2]) - smooth.current[i][2]) * SPEED;
+        // lật gương x theo preview, lật y (ảnh gốc hướng xuống)
+        const tx = (1 - r[0] - 0.5) * HAND_SCALE;
+        const ty = (0.5 - r[1]) * HAND_SCALE;
+        const tz = DEPTH + Math.max(-0.25, Math.min(0.15, r[2])) * 0.8;
+        smooth.current[i][0] += (tx - smooth.current[i][0]) * SPEED;
+        smooth.current[i][1] += (ty - smooth.current[i][1]) * SPEED;
+        smooth.current[i][2] += (tz - smooth.current[i][2]) * SPEED;
         pts[i] = new THREE.Vector3(
-          smooth.current[i][0] * 1.1,
-          smooth.current[i][1] * 1.1 + 0.2,
-          smooth.current[i][2] * 1.1
-        ).multiplyScalar(h3);
+          smooth.current[i][0],
+          smooth.current[i][1],
+          smooth.current[i][2]
+        );
       }
 
       for (let i = 0; i < BONE_COUNT; i++) {
@@ -91,6 +96,16 @@ export default function HandPaw() {
         jointsRef.current[i].position.copy(pts[i]);
         jointsRef.current[i].visible = true;
       }
+
+      // lòng bàn tay (khớp 9) + cổ tay (khớp 0)
+      if (palmRef.current) {
+        palmRef.current.visible = true;
+        palmRef.current.position.copy(pts[9]);
+      }
+      if (wristRef.current) {
+        wristRef.current.visible = true;
+        wristRef.current.position.copy(pts[0]);
+      }
     } else {
       if (visible.current) {
         g.visible = false;
@@ -103,12 +118,13 @@ export default function HandPaw() {
     <group ref={root} visible={false}>
       {/* lòng bàn tay */}
       <mesh ref={palmRef} visible={false}>
-        <sphereGeometry args={[0.04, 8, 6]} />
+        <sphereGeometry args={[0.06, 8, 6]} />
         <primitive object={skin} attach="material" />
       </mesh>
       {/* cổ tay */}
       <mesh ref={wristRef} visible={false}>
-        <sphereGeometry args={[0.02, 8, 6]} />
+        <sphereGeometry args={[0.03, 8, 6]} />
+        <primitive object={jointMat} attach="material" />
       </mesh>
     </group>
   );
