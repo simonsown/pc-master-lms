@@ -5,8 +5,17 @@ import { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-const GRASS_COUNT = 12000;
-const FIELD_RADIUS = 42;
+// Tối ưu CPU theo sức máy: máy yếu = ít cỏ + bán kính nhỏ
+function pickGrassBudget() {
+  const cores = typeof navigator !== 'undefined' ? (navigator as any).hardwareConcurrency || 4 : 4;
+  if (cores <= 2) return { count: 3500, radius: 22 };
+  if (cores <= 4) return { count: 6500, radius: 32 };
+  return { count: 9000, radius: 42 };
+}
+const GRASS_BUDGET = typeof window !== 'undefined' ? pickGrassBudget() : { count: 9000, radius: 42 };
+const GRASS_COUNT = GRASS_BUDGET.count;
+const FIELD_RADIUS = GRASS_BUDGET.radius;
+const GRASS_HEIGHT = 0.5; // cỏ thấp hơn
 
 // Sân cỏ nền
 export function Ground() {
@@ -21,7 +30,7 @@ export function Ground() {
 
 function makeBladeGeometry() {
   const g = new THREE.BufferGeometry();
-  const w = 0.025, h = 1.0, wMid = w * 0.7;
+  const w = 0.02, h = 1.0, wMid = w * 0.7;
   g.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
     0, 0, 0,  w, 0, 0,  wMid, h, 0,
   ]), 3));
@@ -97,7 +106,7 @@ export function GrassField() {
       base[i * 3 + 1] = 0;
       base[i * 3 + 2] = Math.sin(a) * r;
       phase[i] = Math.random() * Math.PI * 2;
-      scale[i] = 0.7 + Math.random() * 0.9;
+      scale[i] = 0.35 + Math.random() * 0.35; // cỏ thấp: 0.35-0.7
       const pick = Math.random();
       const c = pick < 0.35 ? c0 : pick < 0.7 ? c1 : (Math.random() < 0.5 ? c2 : c3);
       color[i * 3] = c.r; color[i * 3 + 1] = c.g; color[i * 3 + 2] = c.b;

@@ -20,7 +20,8 @@ export default function CameraRig() {
     const t = target.current;
     const h = headPose;
     t.yaw = h.yaw * HEAD_GAIN_YAW;
-    t.pitch = h.pitch * HEAD_GAIN_PITCH;
+    // pitch: đầu ngẩng LÊN => camera nhìn LÊN (x dương = nhìn lên), đầu cúi => nhìn xuống
+    t.pitch = -h.pitch * HEAD_GAIN_PITCH;
     t.roll = h.roll * HEAD_GAIN_ROLL;
 
     const s = SMOOTH;

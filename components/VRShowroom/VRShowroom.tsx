@@ -8,6 +8,7 @@ import CameraRig from './CameraRig';
 import { Sky } from './SkyScene';
 import { Ground, GrassField } from './GrassField';
 import { PcCase } from './PcCase';
+import HandPaw from './HandPaw';
 import UI from './UI';
 import Hud from './Hud';
 import { headPose } from './tracking-shared';
@@ -46,6 +47,7 @@ function SceneInner() {
       <Sky />
       <Ground />
       <GrassField />
+      <HandPaw />
       <CameraRig />
       <PcCase />
     </>
