@@ -545,9 +545,11 @@ function Hall({ onFocusItem }: { onFocusItem: (id: string) => void }) {
       };
       const slotId = slotMap[id];
       if (slotId) {
-        const { installComponent, checkDependencies } = useAssemblyStore.getState();
-        if (checkDependencies(slotId)) {
-          installComponent(slotId);
+        const { installComponent, checkDependencies, components } = useAssemblyStore.getState();
+        const targetComp = components.find(c => c.slotId === slotId);
+        const compId = targetComp ? targetComp.id : `comp_${slotId}`;
+        if (checkDependencies(slotId).ok) {
+          installComponent(slotId, compId);
         }
       }
     }
