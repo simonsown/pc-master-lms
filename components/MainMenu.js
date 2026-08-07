@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import NotificationBell from './NotificationBell';
+import PcSuggestModal from './PcSuggestModal';
 
 const s = {
   red: '#D32F2F',
@@ -27,6 +28,7 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
     const [user, setUser] = useState(null);
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [showPcSuggestModal, setShowPcSuggestModal] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
@@ -312,40 +314,70 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                 {/* Other Pro tools */}
                 <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: '10px' }}>
                     {[
-                        { id: '/builder/os-install', title: 'Cài Windows 11', desc: 'Mô phỏng cài đặt OS thực tế', Icon: Monitor, color: '#3b82f6' },
-                        { id: '/builder/showroom', title: 'PC Builder 3D VR', desc: 'Hand & Face Tracking 3D', Icon: Cpu, color: '#10b981' },
-                        { id: '/builder/common-mistakes', title: 'Lỗi Thường Gặp', desc: '8 lỗi build PC phổ biến', Icon: AlertTriangle, color: '#ef4444' },
-                        { id: '/builder/mac-check', title: 'Gợi Ý Máy Tính', desc: 'Tìm PC theo nhu cầu & ngân sách', Icon: Monitor, color: '#8b5cf6' },
-                        { id: '/builder/career-build', title: 'Ước Mơ & PC', desc: 'Build PC theo nghề nghiệp', Icon: Star, color: '#facc15' },
-                        { id: '/builder/3d-components', title: 'Kho Linh Kiện 3D', desc: 'Xem linh kiện 3 chiều', Icon: Box, color: '#a855f7' },
+                        { id: 'pc_suggest', title: '🖥️ Gợi Ý Máy Tính (Top 50)', desc: 'Tìm PC theo nhu cầu & công việc', Icon: Monitor, color: '#00d4aa', onClick: () => setShowPcSuggestModal(true) },
+                        { id: '/builder/os-install', title: 'Cài Windows 11', desc: 'Mô phỏng cài đặt OS thực tế', Icon: Monitor, color: '#3b82f6', href: '/builder/os-install' },
+                        { id: '/builder/showroom', title: 'PC Builder 3D VR', desc: 'Hand & Face Tracking 3D', Icon: Cpu, color: '#10b981', href: '/builder/showroom' },
+                        { id: '/builder/common-mistakes', title: 'Lỗi Thường Gặp', desc: '8 lỗi build PC phổ biến', Icon: AlertTriangle, color: '#ef4444', href: '/builder/common-mistakes' },
+                        { id: '/builder/career-build', title: 'Ước Mơ & PC', desc: 'Build PC theo nghề nghiệp', Icon: Star, color: '#facc15', href: '/builder/career-build' },
+                        { id: '/builder/3d-components', title: 'Kho Linh Kiện 3D', desc: 'Xem linh kiện 3 chiều', Icon: Box, color: '#a855f7', href: '/builder/3d-components' },
                     ].map((mode) => (
-                        <motion.a
-                            key={mode.id}
-                            href={mode.id}
-                            whileHover={{ y: -2, boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}
-                            style={{
-                                display: 'flex', alignItems: 'center', gap: '10px',
-                                padding: '14px', borderRadius: '10px',
-                                border: '1px solid var(--border-default)',
-                                background: 'var(--bg-surface)',
-                                cursor: 'pointer', textDecoration: 'none',
-                                transition: 'border-color 0.2s, box-shadow 0.2s'
-                            }}
-                            onMouseOver={e => { e.currentTarget.style.borderColor = mode.color; e.currentTarget.style.background = 'var(--bg-hover)'; }}
-                            onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.background = 'var(--bg-surface)'; }}
-                        >
-                            <div style={{
-                                width: '36px', height: '36px', borderRadius: '8px',
-                                background: `${mode.color}15`, color: mode.color,
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
-                            }}>
-                                <mode.Icon size={18} />
-                            </div>
-                            <div>
-                                <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)' }}>{mode.title}</div>
-                                <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{mode.desc}</div>
-                            </div>
-                        </motion.a>
+                        mode.onClick ? (
+                            <motion.button
+                                key={mode.id}
+                                onClick={mode.onClick}
+                                whileHover={{ y: -2, boxShadow: '0 4px 16px rgba(0,212,170,0.25)' }}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: '10px',
+                                    padding: '14px', borderRadius: '10px',
+                                    border: '1px solid rgba(0,212,170,0.4)',
+                                    background: 'linear-gradient(135deg, rgba(0,212,170,0.08) 0%, rgba(99,102,241,0.08) 100%)',
+                                    cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
+                                    transition: 'border-color 0.2s, box-shadow 0.2s'
+                                }}
+                                onMouseOver={e => { e.currentTarget.style.borderColor = mode.color; e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                                onMouseOut={e => { e.currentTarget.style.borderColor = 'rgba(0,212,170,0.4)'; e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0,212,170,0.08) 0%, rgba(99,102,241,0.08) 100%)'; }}
+                            >
+                                <div style={{
+                                    width: '36px', height: '36px', borderRadius: '8px',
+                                    background: `${mode.color}20`, color: mode.color,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                                }}>
+                                    <mode.Icon size={18} />
+                                </div>
+                                <div>
+                                    <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>{mode.title}</div>
+                                    <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{mode.desc}</div>
+                                </div>
+                            </motion.button>
+                        ) : (
+                            <motion.a
+                                key={mode.id}
+                                href={mode.href}
+                                whileHover={{ y: -2, boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: '10px',
+                                    padding: '14px', borderRadius: '10px',
+                                    border: '1px solid var(--border-default)',
+                                    background: 'var(--bg-surface)',
+                                    cursor: 'pointer', textDecoration: 'none',
+                                    transition: 'border-color 0.2s, box-shadow 0.2s'
+                                }}
+                                onMouseOver={e => { e.currentTarget.style.borderColor = mode.color; e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                                onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.background = 'var(--bg-surface)'; }}
+                            >
+                                <div style={{
+                                    width: '36px', height: '36px', borderRadius: '8px',
+                                    background: `${mode.color}15`, color: mode.color,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                                }}>
+                                    <mode.Icon size={18} />
+                                </div>
+                                <div>
+                                    <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)' }}>{mode.title}</div>
+                                    <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{mode.desc}</div>
+                                </div>
+                            </motion.a>
+                        )
                     ))}
                 </div>
             </motion.div>
@@ -360,6 +392,10 @@ const MainMenu = ({ onStart, lang, onOpenLogin }) => {
                     Bạn có thể dùng Webcam hoặc Chuột để lắp ráp. Điều chỉnh độ nhạy tracking tại menu bên trái.
                 </span>
             </motion.div>
+
+            {showPcSuggestModal && (
+                <PcSuggestModal onClose={() => setShowPcSuggestModal(false)} />
+            )}
         </div>
     );
 };

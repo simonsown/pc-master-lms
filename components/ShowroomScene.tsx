@@ -2,11 +2,12 @@
 
 import React, { Suspense, useRef, useState, useEffect, Component } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useGLTF, Text, OrbitControls, useProgress, Environment, Html } from '@react-three/drei';
+import { useGLTF, Text, OrbitControls, useProgress, Environment, Html, RoundedBox } from '@react-three/drei';
 import * as THREE from 'three';
 import { headTrackingRef } from './head-tracker-shared';
 import { handDataRef } from './hand-shared';
 import UnifiedTracker from './UnifiedTracker';
+import { useAssemblyStore } from '@/lib/useStore';
 
 const ITEMS = [
   { id: 'ryzen', file: '/models/amd_ryzen_7_5700x3d.glb', name: 'AMD Ryzen 7 5700X3D', desc: 'CPU 8 nhân/16 luồng | 3.0GHz | 100MB Cache', color: '#ff4444', pos: [-5, 0, -5] },
@@ -330,6 +331,158 @@ function ClickableItem({ item, onFocus }: {
   );
 }
 
+/* ── Central Desk & Blinking PC Case on Mainboard ── */
+function BlinkingSlotShowroom({
+  slotId,
+  label,
+  pos,
+  color,
+  size = [0.3, 0.08, 0.3] as [number, number, number],
+}: {
+  slotId: string;
+  label: string;
+  pos: [number, number, number];
+  color: string;
+  size?: [number, number, number];
+}) {
+  const matRef = useRef<THREE.MeshStandardMaterial>(null);
+  const [hovered, setHovered] = useState(false);
+  const installed = useAssemblyStore((s) => s.components.some((c) => c.slotId === slotId && c.installed));
+
+  useFrame((state) => {
+    if (!matRef.current) return;
+    const pulse = (Math.sin(state.clock.getElapsedTime() * 6) + 1) / 2;
+    matRef.current.emissiveIntensity = 0.4 + pulse * 2.2;
+    matRef.current.opacity = 0.45 + pulse * 0.45;
+  });
+
+  const handleClick = () => {
+    if (installed) return;
+    const dep = useAssemblyStore.getState().checkDependencies(slotId);
+    if (!dep.ok) {
+      alert('⚠️ Cần lắp Mainboard trước!');
+      return;
+    }
+    useAssemblyStore.getState().installComponent(slotId, `comp_${slotId}`);
+  };
+
+  if (installed) return null;
+
+  return (
+    <group position={pos}>
+      <mesh
+        onPointerOver={(e) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = 'pointer'; }}
+        onPointerOut={() => { setHovered(false); document.body.style.cursor = 'default'; }}
+        onClick={(e) => { e.stopPropagation(); handleClick(); }}
+      >
+        <boxGeometry args={size} />
+        <meshStandardMaterial
+          ref={matRef}
+          color={color}
+          emissive={color}
+          emissiveIntensity={1.2}
+          wireframe={true}
+          transparent
+          opacity={0.8}
+        />
+      </mesh>
+
+      <mesh>
+        <boxGeometry args={[size[0] * 0.9, size[1] * 0.9, size[2] * 0.9]} />
+        <meshBasicMaterial color={color} transparent opacity={hovered ? 0.5 : 0.22} />
+      </mesh>
+
+      <sprite position={[0, size[1] / 2 + 0.12, 0]} scale={[0.5, 0.16, 1]}>
+        <spriteMaterial map={(() => {
+          const c = document.createElement('canvas'); c.width = 256; c.height = 80;
+          const ctx = c.getContext('2d')!;
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+          ctx.beginPath(); (ctx as any).roundRect(0, 0, 256, 80, 10); ctx.fill();
+          ctx.strokeStyle = color; ctx.lineWidth = 4;
+          ctx.beginPath(); (ctx as any).roundRect(2, 2, 252, 76, 8); ctx.stroke();
+          ctx.fillStyle = color; ctx.font = 'bold 22px monospace';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(`⚡ ${label}`, 128, 28);
+          ctx.fillStyle = '#ffffff'; ctx.font = 'bold 16px sans-serif';
+          ctx.fillText('Nhấp để lắp', 128, 56);
+          const t = new THREE.CanvasTexture(c); t.needsUpdate = true;
+          return t;
+        })()} transparent opacity={0.95} depthTest={false} />
+      </sprite>
+    </group>
+  );
+}
+
+function CentralDeskWithBlinkingCase({ position }: { position: [number, number, number] }) {
+  const mb = useAssemblyStore((s) => s.components.some((c) => c.slotId === 'motherboard_1' && c.installed));
+  const cpu = useAssemblyStore((s) => s.components.some((c) => c.slotId === 'cpu_1' && c.installed));
+  const cooler = useAssemblyStore((s) => s.components.some((c) => c.slotId === 'cooler_1' && c.installed));
+  const ram = useAssemblyStore((s) => s.components.some((c) => c.slotId === 'ram_1' && c.installed));
+  const gpu = useAssemblyStore((s) => s.components.some((c) => c.slotId === 'gpu_1' && c.installed));
+  const psu = useAssemblyStore((s) => s.components.some((c) => c.slotId === 'psu_1' && c.installed));
+  const ssd = useAssemblyStore((s) => s.components.some((c) => c.slotId === 'ssd_1' && c.installed));
+
+  const count = (mb ? 1 : 0) + (cpu ? 1 : 0) + (cooler ? 1 : 0) + (ram ? 1 : 0) + (gpu ? 1 : 0) + (psu ? 1 : 0) + (ssd ? 1 : 0);
+
+  const SLOTS = [
+    { slotId: 'motherboard_1', label: 'MAINBOARD', pos: [0, -0.05, -0.1] as [number, number, number], color: '#8b5cf6', size: [1.2, 0.04, 1.0] as [number, number, number] },
+    { slotId: 'cpu_1', label: 'SOCKET CPU', pos: [0.15, 0.12, 0.02] as [number, number, number], color: '#00d4aa', size: [0.22, 0.05, 0.22] as [number, number, number] },
+    { slotId: 'cooler_1', label: 'TẢN NHIỆT', pos: [0.15, 0.24, 0.02] as [number, number, number], color: '#00aaff', size: [0.3, 0.12, 0.3] as [number, number, number] },
+    { slotId: 'ram_1', label: 'KHE RAM', pos: [0.38, 0.12, 0.1] as [number, number, number], color: '#6366f1', size: [0.1, 0.1, 0.25] as [number, number, number] },
+    { slotId: 'gpu_1', label: 'CARD GRAPHICS', pos: [0.15, -0.02, -0.25] as [number, number, number], color: '#ef4444', size: [0.75, 0.1, 0.22] as [number, number, number] },
+    { slotId: 'psu_1', label: 'NGUỒN PSU', pos: [-0.3, -0.25, 0.35] as [number, number, number], color: '#f59e0b', size: [0.55, 0.2, 0.35] as [number, number, number] },
+    { slotId: 'ssd_1', label: 'SSD NVMe', pos: [0.22, 0.02, -0.12] as [number, number, number], color: '#22c55e', size: [0.25, 0.03, 0.08] as [number, number, number] },
+  ];
+
+  return (
+    <group position={position}>
+      {/* Central Desk Surface */}
+      <mesh position={[0, 0.7, 0]} castShadow>
+        <boxGeometry args={[3.4, 0.05, 1.8]} />
+        <meshPhysicalMaterial color="#8B7355" roughness={0.5} metalness={0.1} />
+      </mesh>
+      
+      {/* Desk Legs */}
+      {[[-1.5, 0.35, -0.75], [-1.5, 0.35, 0.75], [1.5, 0.35, -0.75], [1.5, 0.35, 0.75]].map((p, i) => (
+        <mesh key={i} position={p as [number, number, number]}>
+          <cylinderGeometry args={[0.045, 0.05, 0.7, 12]} />
+          <meshPhysicalMaterial color="#334155" roughness={0.3} metalness={0.5} />
+        </mesh>
+      ))}
+
+      {/* PC Case Sitting on Desk */}
+      <group position={[0, 1.2, 0]}>
+        <RoundedBox args={[1.5, 0.95, 1.2]} radius={0.02}>
+          <meshPhysicalMaterial color="#1e1b4b" metalness={0.8} roughness={0.2} />
+        </RoundedBox>
+
+        {/* Front Glass Panel */}
+        <mesh position={[0, 0, 0.605]}>
+          <planeGeometry args={[1.42, 0.88]} />
+          <meshPhysicalMaterial color="#88ccff" metalness={0.2} roughness={0.05} transparent opacity={0.18} side={THREE.DoubleSide} />
+        </mesh>
+
+        {/* Progress Header 3D */}
+        <Text fontSize={0.075} color="#00ffcc" anchorX="center" anchorY="middle" position={[0, 0.56, 0.3]}>
+          {`CASE TRUNG TÂM SHOWROOM: ${count}/7 LINH KIỆN`}
+        </Text>
+
+        {/* Blinking Component Slots on Mainboard */}
+        {SLOTS.map((s) => (
+          <BlinkingSlotShowroom
+            key={s.slotId}
+            slotId={s.slotId}
+            label={s.label}
+            pos={s.pos}
+            color={s.color}
+            size={s.size}
+          />
+        ))}
+      </group>
+    </group>
+  );
+}
+
 function Hall({ onFocusItem }: { onFocusItem: (id: string) => void }) {
   return (
     <group>
@@ -351,6 +504,9 @@ function Hall({ onFocusItem }: { onFocusItem: (id: string) => void }) {
       <Text position={[0, 2.55, -11.5]} fontSize={0.22} color="#667799" font="monospace" anchorX="center" anchorY="middle">
         Bấm vào thẻ linh kiện để xoay & xem chi tiết 3D toàn màn hình
       </Text>
+
+      {/* ===== BÀN TRUNG TÂM & CASE MÁY TÍNH VỚI VỊ TRÍ LINH KIỆN NHẤP NHÁY ===== */}
+      <CentralDeskWithBlinkingCase position={[0, 0, 0]} />
 
       {ITEMS.map((item) => (
         <ClickableItem key={item.id} item={item} onFocus={onFocusItem} />
