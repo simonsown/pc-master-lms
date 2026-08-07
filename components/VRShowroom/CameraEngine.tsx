@@ -1,11 +1,8 @@
 'use client';
 
-// CameraEngine: BỘ BẮT CHUYỂN ĐỘNG MỚI HOÀN TOÀN (đầu + tay cùng 1 camera)
-// Dùng MediaPipe FaceLandmarker + HandLandmarker.
-// - Đầu   : tính yaw/pitch/roll từ hình học khuôn mặt (mũi - 2 mắt - cằm)
-// - Tay   : 21 landmark, nhận diện nắm (grab) / mở (release) / chụm (pinch) / chỉ (pointing)
-//           và xoay cổ tay (wrist roll)
-
+// CameraEngine: BỘ BẮT CHUYỂN ĐỘNG (đầu + tay) cùng 1 camera — MediaPipe
+// - ĐẦU: ước lượng yaw/pitch/roll từ hình học mặt (mũi, 2 mắt, cằm) + bộ lọc EMA
+// - TAY : 21 landmark, phân loại MỞ / NẮM / CHỤM / CHỈ + xoay cổ tay
 import { useEffect, useRef } from 'react';
 import { headPose, handState } from './tracking-shared';
 
@@ -44,10 +41,10 @@ export default function CameraEngine({ preview = true }: { preview?: boolean }) 
 
         const s = await navigator.mediaDevices.getUserMedia({
           video: {
-            width: { ideal: isLow ? 128 : 320 },
-            height: { ideal: isLow ? 96 : 240 },
+            width: { ideal: isLow ? 256 : 640 },
+            height: { ideal: isLow ? 192 : 480 },
             facingMode: 'user',
-            frameRate: { ideal: isLow ? 12 : 24 },
+            frameRate: { ideal: isLow ? 15 : 30 },
           },
         });
         if (!ok) { s.getTracks().forEach(t => t.stop()); return; }
@@ -58,37 +55,47 @@ export default function CameraEngine({ preview = true }: { preview?: boolean }) 
         await video.play();
 
         const canv = cRef.current;
-        if (canv) { canv.width = isLow ? 128 : 320; canv.height = isLow ? 96 : 240; }
+        if (canv) { canv.width = 320; canv.height = 240; }
 
-        const n = isLow ? 4 : 2;
+        // bộ lọc EMA mượt
+        const head = { yaw: 0, pitch: 0, roll: 0 };
+        let grabAcc = 0;
+        let lastWrist = 0;
+        let rot = 0;
+        const SKIP = isLow ? 2 : 1;
         let skip = 0;
-        let sp = 0, sy = 0, sr = 0;
-        // bộ lọc cho nắm tay
-        let grabFrames = 0;
+
+        const smooth = (prev: number, t: number, a = 0.4) => prev + (t - prev) * a;
 
         const loop = async () => {
           if (!ok || !video || video.readyState < 2) { requestAnimationFrame(loop); return; }
           skip++;
-          if (skip % n !== 0) { requestAnimationFrame(loop); return; }
+          if (skip % SKIP !== 0) { requestAnimationFrame(loop); return; }
           try {
             // ===== FACE =====
             if (fl) {
               const fr = await fl.detectForVideo(video, performance.now());
               if (fr.faceLandmarks?.length > 0) {
                 const lm = fr.faceLandmarks[0];
-                const nose = lm[1], le = lm[33], re = lm[263], chin = lm[152];
-                if (nose && le && re && chin) {
-                  // yaw: lệch mũi so với 2 mắt (quay đầu)
+                const nose = lm[1], le = lm[33], re = lm[263], chin = lm[152], fh = lm[10];
+                if (nose && le && re && chin && fh) {
                   const eyeCx = (le.x + re.x) / 2;
-                  const yawRaw = (nose.x - eyeCx) * 4;
-                  // pitch: lệch khoảng mũi-cằm
-                  const pitchRaw = (nose.y - 0.5) * 3;
+                  const faceW = Math.hypot(re.x - le.x, re.y - le.y) || 1e-4;
+                  // yaw: lệch mũi so với trung điểm mắt, chuẩn hoá theo bề rộng mặt
+                  const yawRaw = (nose.x - eyeCx) / faceW * 2.4;
+                  // pitch: mũi cao/thấp so với trán-và-cằm
+                  const faceMidY = (fh.y + chin.y) / 2;
+                  const pitchRaw = (nose.y - faceMidY) / faceW * 2.2;
                   // roll: độ chênh cao 2 mắt
-                  const rollRaw = (le.y - re.y) * 2.5;
-                  sy += 0.4 * (Math.max(-0.9, Math.min(0.9, yawRaw)) - sy);
-                  sp += 0.4 * (Math.max(-0.7, Math.min(0.7, pitchRaw)) - sp);
-                  sr += 0.4 * (Math.max(-0.7, Math.min(0.7, rollRaw)) - sr);
-                  headPose.yaw = sy; headPose.pitch = sp; headPose.roll = sr;
+                  const rollRaw = Math.atan2(re.y - le.y, re.x - le.x) * 4.0;
+
+                  head.yaw = smooth(head.yaw, Math.max(-1.2, Math.min(1.2, yawRaw)), 0.5);
+                  head.pitch = smooth(head.pitch, Math.max(-1.0, Math.min(1.0, pitchRaw)), 0.5);
+                  head.roll = smooth(head.roll, Math.max(-0.8, Math.min(0.8, rollRaw)), 0.5);
+
+                  headPose.yaw = head.yaw;
+                  headPose.pitch = head.pitch;
+                  headPose.roll = head.roll;
                   headPose.x = (nose.x - 0.5) * 2;
                   headPose.active = true;
                   headPose.detected = true;
@@ -106,59 +113,61 @@ export default function CameraEngine({ preview = true }: { preview?: boolean }) 
                 handState.landmarks = hand.map((p: any) => [p.x, p.y, p.z]);
                 handState.active = true;
 
-                // Trung bình khoảng cách đầu ngón tới lòng bàn tay → nắm?
                 const palm = hand[9];
-                const tips = [hand[8], hand[12], hand[16], hand[20]];
-                let grip = 0;
-                for (const t of tips) {
-                  grip += Math.hypot(t.x - palm.x, t.y - palm.y, t.z - palm.z);
-                }
-                grip /= 4;
-                // grab khi toàn bộ ngón cuc lại gần lòng bàn tay
-                const grabNow = grip < 0.16;
-                grabFrames += ((grabNow ? 1 : 0) - grabFrames) * 0.4;
-                handState.grab = grabFrames > 0.55;
-                // release khi năm ngón tay duỗi dài (lòng bàn tay mở)
-                let stretch = 0;
-                for (const t of [hand[8], hand[12], hand[16], hand[20]]) {
-                  stretch += Math.hypot(t.x - palm.x, t.y - palm.y, t.z - palm.z);
-                }
-                handState.release = stretch > 0.45;
+                const idxTip = hand[8], midTip = hand[12], ringTip = hand[16], pinTip = hand[20];
+                const thumb = hand[4];
+                // độ co gập: trung bình khoảng cách đầu ngón -> lòng bàn tay
+                const reach = [idxTip, midTip, ringTip, pinTip]
+                  .reduce((s, t) => s + Math.hypot(t.x - palm.x, t.y - palm.y, t.z - palm.z), 0) / 4;
 
-                const thumb = hand[4], index = hand[8];
-                const pinchD = Math.hypot(thumb.x - index.x, thumb.y - index.y, thumb.z - index.z);
-                handState.pinch = pinchD < 0.055;
+                // MỞ: ngón duỗi dài; NẮM: ngón cụp gần lòng
+                const isOpen = reach > 0.20;
+                const isFist = reach < 0.115;
 
-                // pointing
-                const tip = hand[8], pip = hand[6], mTip = hand[12], mPip = hand[10];
-                handState.pointing = tip.y < pip.y && mTip.y > mPip.y;
+                grabAcc += ((isFist ? 1 : isOpen ? -1 : 0) - grabAcc) * 0.35;
+                handState.grab = grabAcc > 0.6;
+                handState.release = isOpen;
 
-                // wrist angle (xác định → dùng chênh lệch để xoay vật)
-                const wrist0 = hand[0], middle = hand[9];
-                const wAngle = Math.atan2(middle.y - wrist0.y, middle.x - wrist0.x);
-                let dA = wAngle - handState.wristAngle;
+                // CHỤM ngón cái + trỏ
+                const pinchD = Math.hypot(thumb.x - idxTip.x, thumb.y - idxTip.y, thumb.z - idxTip.z);
+                handState.pinch = pinchD < 0.05;
+
+                // CHỈ tay (ngón trỏ duỗi, các ngón khác co)
+                const mitt = hand[10], ringPip = hand[14], pinPip = hand[18];
+                const idxStretch = Math.hypot(idxTip.x - hand[5].x, idxTip.y - hand[5].y, idxTip.z - hand[5].z);
+                const othersFold = [mitt, ringPip, pinPip].every(p =>
+                  Math.hypot(p.x - palm.x, p.y - palm.y, p.z - palm.z) < 0.09);
+                handState.pointing = idxStretch > 0.18 && othersFold;
+
+                // vị trí lòng bàn tay (NDC, lật gương)
+                handState.x = 1 - (palm.x - 0.5) * 2;
+                handState.y = -(palm.y - 0.5) * 2;
+
+                // xoay cổ tay: góc vector cổ tay -> giữa bàn tay
+                const wrist = hand[0];
+                const ang = Math.atan2(palm.y - wrist.y, palm.x - wrist.x);
+                let dA = ang - lastWrist;
                 if (dA > Math.PI) dA -= Math.PI * 2;
                 if (dA < -Math.PI) dA += Math.PI * 2;
-                handState.rotSpeed = dA;
-                handState.wristAngle = wAngle;
-                handState.roll = handState.rotSpeed * 3;
-
-                handState.x = 1 - (palm.x - 0.5) * 2; // lật gương
-                handState.y = -(palm.y - 0.5) * 2;
+                if (Math.abs(dA) > 0.5) dA = 0; // nhảy nhảt
+                rot = smooth(rot, dA, 0.5);
+                lastWrist = ang;
+                handState.rotSpeed = rot;
+                handState.roll = rot * 2.5;
+                handState.wristAngle = ang;
               } else {
                 handState.active = false;
                 handState.grab = false; handState.release = false;
                 handState.pinch = false; handState.pointing = false;
                 handState.landmarks = null;
+                grabAcc = 0;
               }
             }
 
-            // preview vẽ
+            // preview
             if (canv) {
               const ctx = canv.getContext('2d');
-              if (ctx) {
-                ctx.drawImage(video, 0, 0, canv.width, canv.height);
-              }
+              if (ctx) ctx.drawImage(video, 0, 0, canv.width, canv.height);
             }
           } catch {}
           requestAnimationFrame(loop);
@@ -172,11 +181,12 @@ export default function CameraEngine({ preview = true }: { preview?: boolean }) 
   return (
     <div style={{
       position: 'fixed', bottom: 16, left: 16, zIndex: 9999,
-      width: isLow ? 150 : 220, height: isLow ? 112 : 165,
+      width: isLow ? 160 : 220, height: isLow ? 120 : 165,
       borderRadius: 12, overflow: 'hidden',
       border: '1px solid rgba(56,224,120,0.35)',
       boxShadow: '0 4px 24px rgba(0,0,0,0.6)',
       display: preview ? 'block' : 'none',
+      background: '#0f172a',
     }}>
       <video ref={vRef} muted playsInline
         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }}
@@ -189,7 +199,7 @@ export default function CameraEngine({ preview = true }: { preview?: boolean }) 
         background: 'rgba(0,0,0,0.6)', padding: '2px 6px', borderRadius: 4,
         fontSize: 8, color: '#38e078', fontFamily: 'monospace',
       }}>
-        CAM {isLow ? '128×96' : '320×240'} • {handState.grab ? '✊' : handState.pinch ? '🤏' : '✋'}
+        CAM {isLow ? '256×192' : '640×480'} {handState.grab ? '✊' : handState.pinch ? '🤏' : handState.pointing ? '☝' : '🖐'}
       </div>
     </div>
   );
